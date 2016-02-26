@@ -8,7 +8,7 @@
 
 2. Install [neo4j](http://neo4j.com/) and set the username and password as follows:
 
-```
+```bash
 username: neo4j
 password: neo4j
 ```
@@ -17,14 +17,15 @@ password: neo4j
 
 2. Use the disassembler on the required piece of bytecode:
 
-```
+```bash
 cat <Input File> | disasm >> <Output File>
 ```
 
 3. Run core.py on the disassembler output:
 
-```
+```bash
 python core.py <Output file from disassmbler>
+```
 
 4. Open [localhost:7474](http://localhost:7474) to open the dashboard.
 
@@ -33,6 +34,5 @@ python core.py <Output file from disassmbler>
 ```
 MATCH n RETURN n
 ```
-
 
 A set of sample contracts is placed in the *contracts* folder.
