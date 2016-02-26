@@ -1,0 +1,337 @@
+{
+	"children" : 
+	[
+		{
+			"attributes" : 
+			{
+				"name" : "foo"
+			},
+			"children" : 
+			[
+				{
+					"attributes" : 
+					{
+						"const" : false,
+						"name" : "foos",
+						"public" : true
+					},
+					"children" : 
+					[
+						{
+							"children" : 
+							[
+								{
+									"attributes" : 
+									{
+										"name" : "d"
+									},
+									"children" : 
+									[
+										{
+											"attributes" : 
+											{
+												"name" : "int"
+											},
+											"name" : "ElementaryTypeName"
+										}
+									],
+									"name" : "VariableDeclaration"
+								},
+								{
+									"children" : 
+									[
+										{
+											"attributes" : 
+											{
+												"name" : ""
+											},
+											"children" : 
+											[
+												{
+													"attributes" : 
+													{
+														"name" : "int"
+													},
+													"name" : "ElementaryTypeName"
+												}
+											],
+											"name" : "VariableDeclaration"
+										},
+										{
+											"children" : 
+											[
+												{
+													"children" : 
+													[
+														{
+															"attributes" : 
+															{
+																"operator" : "+=",
+																"type" : "int256"
+															},
+															"children" : 
+															[
+																{
+																	"attributes" : 
+																	{
+																		"type" : "int256",
+																		"value" : "d"
+																	},
+																	"name" : "Identifier"
+																},
+																{
+																	"attributes" : 
+																	{
+																		"string" : "null",
+																		"type" : "int_const 3",
+																		"value" : "3"
+																	},
+																	"name" : "Literal"
+																}
+															],
+															"name" : "Assignment"
+														}
+													],
+													"name" : "ExpressionStatement"
+												},
+												{
+													"children" : 
+													[
+														{
+															"children" : 
+															[
+																{
+																	"attributes" : 
+																	{
+																		"operator" : "+",
+																		"type" : "int256"
+																	},
+																	"children" : 
+																	[
+																		{
+																			"attributes" : 
+																			{
+																				"type" : "int256",
+																				"value" : "d"
+																			},
+																			"name" : "Identifier"
+																		},
+																		{
+																			"attributes" : 
+																			{
+																				"string" : "null",
+																				"type" : "int_const 999",
+																				"value" : "999"
+																			},
+																			"name" : "Literal"
+																		}
+																	],
+																	"name" : "BinaryOperation"
+																}
+															],
+															"name" : "TupleExpression"
+														}
+													],
+													"name" : "Return"
+												}
+											],
+											"name" : "Block"
+										}
+									],
+									"name" : "ParameterList"
+								},
+								{
+									"attributes" : 
+									{
+										"const" : false,
+										"name" : "bar",
+										"public" : true
+									},
+									"children" : 
+									[
+										{
+											"children" : 
+											[
+												{
+													"attributes" : 
+													{
+														"name" : "d"
+													},
+													"children" : 
+													[
+														{
+															"attributes" : 
+															{
+																"name" : "int"
+															},
+															"name" : "ElementaryTypeName"
+														}
+													],
+													"name" : "VariableDeclaration"
+												},
+												{
+													"children" : 
+													[
+														{
+															"attributes" : 
+															{
+																"name" : ""
+															},
+															"children" : 
+															[
+																{
+																	"attributes" : 
+																	{
+																		"name" : "int"
+																	},
+																	"name" : "ElementaryTypeName"
+																}
+															],
+															"name" : "VariableDeclaration"
+														},
+														{
+															"children" : 
+															[
+																{
+																	"children" : 
+																	[
+																		{
+																			"children" : 
+																			[
+																				{
+																					"attributes" : 
+																					{
+																						"operator" : "*",
+																						"type" : "int256"
+																					},
+																					"children" : 
+																					[
+																						{
+																							"attributes" : 
+																							{
+																								"type" : "int256",
+																								"value" : "d"
+																							},
+																							"name" : "Identifier"
+																						},
+																						{
+																							"attributes" : 
+																							{
+																								"string" : "null",
+																								"type" : "int_const 100",
+																								"value" : "100"
+																							},
+																							"name" : "Literal"
+																						}
+																					],
+																					"name" : "BinaryOperation"
+																				}
+																			],
+																			"name" : "TupleExpression"
+																		}
+																	],
+																	"name" : "Return"
+																}
+															],
+															"name" : "Block"
+														}
+													],
+													"name" : "ParameterList"
+												},
+												{
+													"attributes" : 
+													{
+														"const" : false,
+														"name" : "bar2",
+														"public" : true
+													},
+													"children" : 
+													[
+														{
+															"children" : 
+															[
+																{
+																	"attributes" : 
+																	{
+																		"name" : "b"
+																	},
+																	"children" : 
+																	[
+																		{
+																			"attributes" : 
+																			{
+																				"name" : "int"
+																			},
+																			"name" : "ElementaryTypeName"
+																		}
+																	],
+																	"name" : "VariableDeclaration"
+																},
+																{
+																	"children" : [],
+																	"name" : "ParameterList"
+																},
+																{
+																	"children" : 
+																	[
+																		{
+																			"children" : 
+																			[
+																				{
+																					"attributes" : 
+																					{
+																						"operator" : "=",
+																						"type" : "int256"
+																					},
+																					"children" : 
+																					[
+																						{
+																							"attributes" : 
+																							{
+																								"type" : "int256",
+																								"value" : "b"
+																							},
+																							"name" : "Identifier"
+																						},
+																						{
+																							"attributes" : 
+																							{
+																								"string" : "null",
+																								"type" : "int_const 10",
+																								"value" : "10"
+																							},
+																							"name" : "Literal"
+																						}
+																					],
+																					"name" : "Assignment"
+																				}
+																			],
+																			"name" : "ExpressionStatement"
+																		}
+																	],
+																	"name" : "Block"
+																}
+															],
+															"name" : "ParameterList"
+														}
+													],
+													"name" : "Function"
+												}
+											],
+											"name" : "ParameterList"
+										}
+									],
+									"name" : "Function"
+								}
+							],
+							"name" : "ParameterList"
+						}
+					],
+					"name" : "Function"
+				}
+			],
+			"name" : "Contract"
+		}
+	],
+	"name" : "root"
+}

@@ -1,0 +1,1143 @@
+Syntax trees:
+
+
+======= 05_greeter.sol =======
+ContractDefinition "Greeter"
+   Source: "contract Greeter         // The contract definition. A constructor of the same name will be automatically called on contract creation. \n{\n    address creator;     // At first, an empty \"address\"-type variable of the name \"owner\". Will be set in the constructor.\n    string greeting;     // At first, an empty \"string\"-type variable of the name \"greeting\". Will be set in constructor and can be changed.\n\n    function Greeter(string _greeting) public   // The constructor. It accepts a string input and saves it to the contract's \"greeting\" variable.\n    {\n        creator = msg.sender;\n        greeting = _greeting;\n    }\n\n    function greet() constant returns (string)          \n    {\n        return greeting;\n    }\n    \n    function getBlockNumber() constant returns (uint) // this doesn't have anything to do with the act of greeting\n    {\t\t\t\t\t\t\t\t\t\t\t\t\t// just demonstrating return of some global variable\n        return block.number;\n    }\n    \n    function setGreeting(string _newgreeting) \n    {\n        greeting = _newgreeting;\n    }\n    \n     /**********\n     Standard kill() function to recover funds \n     **********/\n    \n    function kill()\n    { \n        if (msg.sender == creator)\n            suicide(creator);  // kills this contract and sends remaining funds back to creator\n    }\n\n}"
+  VariableDeclaration "creator"
+     Type: address
+     Gas costs: 0
+     Source: "address creator"
+    ElementaryTypeName address
+       Source: "address"
+  VariableDeclaration "greeting"
+     Type: string storage ref
+     Gas costs: 0
+     Source: "string greeting"
+    ElementaryTypeName string
+       Source: "string"
+  FunctionDefinition "Greeter" - public
+     Source: "function Greeter(string _greeting) public   // The constructor. It accepts a string input and saves it to the contract's \"greeting\" variable.\n    {\n        creator = msg.sender;\n        greeting = _greeting;\n    }"
+    ParameterList
+       Gas costs: 0
+       Source: "(string _greeting)"
+      VariableDeclaration "_greeting"
+         Type: string memory
+         Source: "string _greeting"
+        ElementaryTypeName string
+           Source: "string"
+    ParameterList
+       Gas costs: 0
+       Source: ""
+    Block
+       Source: "{\n        creator = msg.sender;\n        greeting = _greeting;\n    }"
+      ExpressionStatement
+         Gas costs: 0
+         Source: "creator = msg.sender"
+        Assignment using operator =
+           Type: address
+           Source: "creator = msg.sender"
+          Identifier creator
+             Type: address
+             Source: "creator"
+          MemberAccess to member sender
+             Type: address
+             Source: "msg.sender"
+            Identifier msg
+               Type: msg
+               Source: "msg"
+      ExpressionStatement
+         Gas costs: 0
+         Source: "greeting = _greeting"
+        Assignment using operator =
+           Type: string storage ref
+           Source: "greeting = _greeting"
+          Identifier greeting
+             Type: string storage ref
+             Source: "greeting"
+          Identifier _greeting
+             Type: string memory
+             Source: "_greeting"
+  FunctionDefinition "greet" - public - const
+     Source: "function greet() constant returns (string)          \n    {\n        return greeting;\n    }"
+    ParameterList
+       Gas costs: 0
+       Source: "()"
+    ParameterList
+       Gas costs: 56
+       Source: "(string)"
+      VariableDeclaration ""
+         Type: string memory
+         Source: "string"
+        ElementaryTypeName string
+           Source: "string"
+    Block
+       Source: "{\n        return greeting;\n    }"
+      Return
+         Gas costs: [???]
+         Source: "return greeting"
+        Identifier greeting
+           Type: string storage ref
+           Source: "greeting"
+  FunctionDefinition "getBlockNumber" - public - const
+     Source: "function getBlockNumber() constant returns (uint) // this doesn't have anything to do with the act of greeting\n    {\t\t\t\t\t\t\t\t\t\t\t\t\t// just demonstrating return of some global variable\n        return block.number;\n    }"
+    ParameterList
+       Gas costs: 0
+       Source: "()"
+    ParameterList
+       Gas costs: 3
+       Source: "(uint)"
+      VariableDeclaration ""
+         Type: uint256
+         Source: "uint"
+        ElementaryTypeName uint
+           Source: "uint"
+    Block
+       Source: "{\t\t\t\t\t\t\t\t\t\t\t\t\t// just demonstrating return of some global variable\n        return block.number;\n    }"
+      Return
+         Gas costs: 7
+         Source: "return block.number"
+        MemberAccess to member number
+           Type: uint256
+           Source: "block.number"
+          Identifier block
+             Type: block
+             Source: "block"
+  FunctionDefinition "setGreeting" - public
+     Source: "function setGreeting(string _newgreeting) \n    {\n        greeting = _newgreeting;\n    }"
+    ParameterList
+       Gas costs: 0
+       Source: "(string _newgreeting)"
+      VariableDeclaration "_newgreeting"
+         Type: string memory
+         Source: "string _newgreeting"
+        ElementaryTypeName string
+           Source: "string"
+    ParameterList
+       Gas costs: 0
+       Source: ""
+    Block
+       Source: "{\n        greeting = _newgreeting;\n    }"
+      ExpressionStatement
+         Gas costs: [???]
+         Source: "greeting = _newgreeting"
+        Assignment using operator =
+           Type: string storage ref
+           Source: "greeting = _newgreeting"
+          Identifier greeting
+             Type: string storage ref
+             Source: "greeting"
+          Identifier _newgreeting
+             Type: string memory
+             Source: "_newgreeting"
+  FunctionDefinition "kill" - public
+     Source: "function kill()\n    { \n        if (msg.sender == creator)\n            suicide(creator);  // kills this contract and sends remaining funds back to creator\n    }"
+    ParameterList
+       Gas costs: 0
+       Source: "()"
+    ParameterList
+       Gas costs: 0
+       Source: ""
+    Block
+       Source: "{ \n        if (msg.sender == creator)\n            suicide(creator);  // kills this contract and sends remaining funds back to creator\n    }"
+      IfStatement
+         Source: "if (msg.sender == creator)\n            suicide(creator)"
+        BinaryOperation using operator ==
+           Type: bool
+           Gas costs: 106
+           Source: "msg.sender == creator"
+          MemberAccess to member sender
+             Type: address
+             Source: "msg.sender"
+            Identifier msg
+               Type: msg
+               Source: "msg"
+          Identifier creator
+             Type: address
+             Source: "creator"
+        ExpressionStatement
+           Gas costs: 95
+           Source: "suicide(creator)"
+          FunctionCall
+             Type: tuple()
+             Source: "suicide(creator)"
+            Identifier suicide
+               Type: function (address) returns ()
+               Source: "suicide"
+            Identifier creator
+               Type: address
+               Source: "creator"
+JSON AST:
+
+
+======= 05_greeter.sol =======
+{
+	"children" : 
+	[
+		{
+			"attributes" : 
+			{
+				"name" : "Greeter"
+			},
+			"children" : 
+			[
+				{
+					"attributes" : 
+					{
+						"name" : "creator"
+					},
+					"children" : 
+					[
+						{
+							"attributes" : 
+							{
+								"name" : "address"
+							},
+							"name" : "ElementaryTypeName"
+						},
+						{
+							"attributes" : 
+							{
+								"name" : "greeting"
+							},
+							"children" : 
+							[
+								{
+									"attributes" : 
+									{
+										"name" : "string"
+									},
+									"name" : "ElementaryTypeName"
+								},
+								{
+									"attributes" : 
+									{
+										"const" : false,
+										"name" : "Greeter",
+										"public" : true
+									},
+									"children" : 
+									[
+										{
+											"children" : 
+											[
+												{
+													"attributes" : 
+													{
+														"name" : "_greeting"
+													},
+													"children" : 
+													[
+														{
+															"attributes" : 
+															{
+																"name" : "string"
+															},
+															"name" : "ElementaryTypeName"
+														}
+													],
+													"name" : "VariableDeclaration"
+												},
+												{
+													"children" : [],
+													"name" : "ParameterList"
+												},
+												{
+													"children" : 
+													[
+														{
+															"children" : 
+															[
+																{
+																	"attributes" : 
+																	{
+																		"operator" : "=",
+																		"type" : "address"
+																	},
+																	"children" : 
+																	[
+																		{
+																			"attributes" : 
+																			{
+																				"type" : "address",
+																				"value" : "creator"
+																			},
+																			"name" : "Identifier"
+																		},
+																		{
+																			"attributes" : 
+																			{
+																				"member_name" : "sender",
+																				"type" : "address"
+																			},
+																			"children" : 
+																			[
+																				{
+																					"attributes" : 
+																					{
+																						"type" : "msg",
+																						"value" : "msg"
+																					},
+																					"name" : "Identifier"
+																				}
+																			],
+																			"name" : "MemberAccess"
+																		}
+																	],
+																	"name" : "Assignment"
+																}
+															],
+															"name" : "ExpressionStatement"
+														},
+														{
+															"children" : 
+															[
+																{
+																	"attributes" : 
+																	{
+																		"operator" : "=",
+																		"type" : "string storage ref"
+																	},
+																	"children" : 
+																	[
+																		{
+																			"attributes" : 
+																			{
+																				"type" : "string storage ref",
+																				"value" : "greeting"
+																			},
+																			"name" : "Identifier"
+																		},
+																		{
+																			"attributes" : 
+																			{
+																				"type" : "string memory",
+																				"value" : "_greeting"
+																			},
+																			"name" : "Identifier"
+																		}
+																	],
+																	"name" : "Assignment"
+																}
+															],
+															"name" : "ExpressionStatement"
+														}
+													],
+													"name" : "Block"
+												}
+											],
+											"name" : "ParameterList"
+										},
+										{
+											"attributes" : 
+											{
+												"const" : true,
+												"name" : "greet",
+												"public" : true
+											},
+											"children" : 
+											[
+												{
+													"children" : [],
+													"name" : "ParameterList"
+												},
+												{
+													"children" : 
+													[
+														{
+															"attributes" : 
+															{
+																"name" : ""
+															},
+															"children" : 
+															[
+																{
+																	"attributes" : 
+																	{
+																		"name" : "string"
+																	},
+																	"name" : "ElementaryTypeName"
+																}
+															],
+															"name" : "VariableDeclaration"
+														},
+														{
+															"children" : 
+															[
+																{
+																	"children" : 
+																	[
+																		{
+																			"attributes" : 
+																			{
+																				"type" : "string storage ref",
+																				"value" : "greeting"
+																			},
+																			"name" : "Identifier"
+																		}
+																	],
+																	"name" : "Return"
+																}
+															],
+															"name" : "Block"
+														}
+													],
+													"name" : "ParameterList"
+												},
+												{
+													"attributes" : 
+													{
+														"const" : true,
+														"name" : "getBlockNumber",
+														"public" : true
+													},
+													"children" : 
+													[
+														{
+															"children" : [],
+															"name" : "ParameterList"
+														},
+														{
+															"children" : 
+															[
+																{
+																	"attributes" : 
+																	{
+																		"name" : ""
+																	},
+																	"children" : 
+																	[
+																		{
+																			"attributes" : 
+																			{
+																				"name" : "uint"
+																			},
+																			"name" : "ElementaryTypeName"
+																		}
+																	],
+																	"name" : "VariableDeclaration"
+																},
+																{
+																	"children" : 
+																	[
+																		{
+																			"children" : 
+																			[
+																				{
+																					"attributes" : 
+																					{
+																						"member_name" : "number",
+																						"type" : "uint256"
+																					},
+																					"children" : 
+																					[
+																						{
+																							"attributes" : 
+																							{
+																								"type" : "block",
+																								"value" : "block"
+																							},
+																							"name" : "Identifier"
+																						}
+																					],
+																					"name" : "MemberAccess"
+																				}
+																			],
+																			"name" : "Return"
+																		}
+																	],
+																	"name" : "Block"
+																}
+															],
+															"name" : "ParameterList"
+														},
+														{
+															"attributes" : 
+															{
+																"const" : false,
+																"name" : "setGreeting",
+																"public" : true
+															},
+															"children" : 
+															[
+																{
+																	"children" : 
+																	[
+																		{
+																			"attributes" : 
+																			{
+																				"name" : "_newgreeting"
+																			},
+																			"children" : 
+																			[
+																				{
+																					"attributes" : 
+																					{
+																						"name" : "string"
+																					},
+																					"name" : "ElementaryTypeName"
+																				}
+																			],
+																			"name" : "VariableDeclaration"
+																		},
+																		{
+																			"children" : [],
+																			"name" : "ParameterList"
+																		},
+																		{
+																			"children" : 
+																			[
+																				{
+																					"children" : 
+																					[
+																						{
+																							"attributes" : 
+																							{
+																								"operator" : "=",
+																								"type" : "string storage ref"
+																							},
+																							"children" : 
+																							[
+																								{
+																									"attributes" : 
+																									{
+																										"type" : "string storage ref",
+																										"value" : "greeting"
+																									},
+																									"name" : "Identifier"
+																								},
+																								{
+																									"attributes" : 
+																									{
+																										"type" : "string memory",
+																										"value" : "_newgreeting"
+																									},
+																									"name" : "Identifier"
+																								}
+																							],
+																							"name" : "Assignment"
+																						}
+																					],
+																					"name" : "ExpressionStatement"
+																				}
+																			],
+																			"name" : "Block"
+																		}
+																	],
+																	"name" : "ParameterList"
+																},
+																{
+																	"attributes" : 
+																	{
+																		"const" : false,
+																		"name" : "kill",
+																		"public" : true
+																	},
+																	"children" : 
+																	[
+																		{
+																			"children" : [],
+																			"name" : "ParameterList"
+																		},
+																		{
+																			"children" : [],
+																			"name" : "ParameterList"
+																		},
+																		{
+																			"children" : 
+																			[
+																				{
+																					"children" : 
+																					[
+																						{
+																							"attributes" : 
+																							{
+																								"operator" : "==",
+																								"type" : "bool"
+																							},
+																							"children" : 
+																							[
+																								{
+																									"attributes" : 
+																									{
+																										"member_name" : "sender",
+																										"type" : "address"
+																									},
+																									"children" : 
+																									[
+																										{
+																											"attributes" : 
+																											{
+																												"type" : "msg",
+																												"value" : "msg"
+																											},
+																											"name" : "Identifier"
+																										}
+																									],
+																									"name" : "MemberAccess"
+																								},
+																								{
+																									"attributes" : 
+																									{
+																										"type" : "address",
+																										"value" : "creator"
+																									},
+																									"name" : "Identifier"
+																								}
+																							],
+																							"name" : "BinaryOperation"
+																						},
+																						{
+																							"children" : 
+																							[
+																								{
+																									"attributes" : 
+																									{
+																										"type" : "tuple()",
+																										"type_conversion" : "0"
+																									},
+																									"children" : 
+																									[
+																										{
+																											"attributes" : 
+																											{
+																												"type" : "function (address) returns ()",
+																												"value" : "suicide"
+																											},
+																											"name" : "Identifier"
+																										},
+																										{
+																											"attributes" : 
+																											{
+																												"type" : "address",
+																												"value" : "creator"
+																											},
+																											"name" : "Identifier"
+																										}
+																									],
+																									"name" : "FunctionCall"
+																								}
+																							],
+																							"name" : "ExpressionStatement"
+																						}
+																					],
+																					"name" : "IfStatement"
+																				}
+																			],
+																			"name" : "Block"
+																		}
+																	],
+																	"name" : "Function"
+																}
+															],
+															"name" : "Function"
+														}
+													],
+													"name" : "Function"
+												}
+											],
+											"name" : "Function"
+										}
+									],
+									"name" : "Function"
+								}
+							],
+							"name" : "VariableDeclaration"
+						}
+					],
+					"name" : "VariableDeclaration"
+				}
+			],
+			"name" : "Contract"
+		}
+	],
+	"name" : "root"
+}
+======= Greeter =======
+JSON AST:
+
+
+======= 05_greeter.sol =======
+{
+	"children" : 
+	[
+		{
+			"attributes" : 
+			{
+				"name" : "Greeter"
+			},
+			"children" : 
+			[
+				{
+					"attributes" : 
+					{
+						"name" : "creator"
+					},
+					"children" : 
+					[
+						{
+							"attributes" : 
+							{
+								"name" : "address"
+							},
+							"name" : "ElementaryTypeName"
+						},
+						{
+							"attributes" : 
+							{
+								"name" : "greeting"
+							},
+							"children" : 
+							[
+								{
+									"attributes" : 
+									{
+										"name" : "string"
+									},
+									"name" : "ElementaryTypeName"
+								},
+								{
+									"attributes" : 
+									{
+										"const" : false,
+										"name" : "Greeter",
+										"public" : true
+									},
+									"children" : 
+									[
+										{
+											"children" : 
+											[
+												{
+													"attributes" : 
+													{
+														"name" : "_greeting"
+													},
+													"children" : 
+													[
+														{
+															"attributes" : 
+															{
+																"name" : "string"
+															},
+															"name" : "ElementaryTypeName"
+														}
+													],
+													"name" : "VariableDeclaration"
+												},
+												{
+													"children" : [],
+													"name" : "ParameterList"
+												},
+												{
+													"children" : 
+													[
+														{
+															"children" : 
+															[
+																{
+																	"attributes" : 
+																	{
+																		"operator" : "=",
+																		"type" : "address"
+																	},
+																	"children" : 
+																	[
+																		{
+																			"attributes" : 
+																			{
+																				"type" : "address",
+																				"value" : "creator"
+																			},
+																			"name" : "Identifier"
+																		},
+																		{
+																			"attributes" : 
+																			{
+																				"member_name" : "sender",
+																				"type" : "address"
+																			},
+																			"children" : 
+																			[
+																				{
+																					"attributes" : 
+																					{
+																						"type" : "msg",
+																						"value" : "msg"
+																					},
+																					"name" : "Identifier"
+																				}
+																			],
+																			"name" : "MemberAccess"
+																		}
+																	],
+																	"name" : "Assignment"
+																}
+															],
+															"name" : "ExpressionStatement"
+														},
+														{
+															"children" : 
+															[
+																{
+																	"attributes" : 
+																	{
+																		"operator" : "=",
+																		"type" : "string storage ref"
+																	},
+																	"children" : 
+																	[
+																		{
+																			"attributes" : 
+																			{
+																				"type" : "string storage ref",
+																				"value" : "greeting"
+																			},
+																			"name" : "Identifier"
+																		},
+																		{
+																			"attributes" : 
+																			{
+																				"type" : "string memory",
+																				"value" : "_greeting"
+																			},
+																			"name" : "Identifier"
+																		}
+																	],
+																	"name" : "Assignment"
+																}
+															],
+															"name" : "ExpressionStatement"
+														}
+													],
+													"name" : "Block"
+												}
+											],
+											"name" : "ParameterList"
+										},
+										{
+											"attributes" : 
+											{
+												"const" : true,
+												"name" : "greet",
+												"public" : true
+											},
+											"children" : 
+											[
+												{
+													"children" : [],
+													"name" : "ParameterList"
+												},
+												{
+													"children" : 
+													[
+														{
+															"attributes" : 
+															{
+																"name" : ""
+															},
+															"children" : 
+															[
+																{
+																	"attributes" : 
+																	{
+																		"name" : "string"
+																	},
+																	"name" : "ElementaryTypeName"
+																}
+															],
+															"name" : "VariableDeclaration"
+														},
+														{
+															"children" : 
+															[
+																{
+																	"children" : 
+																	[
+																		{
+																			"attributes" : 
+																			{
+																				"type" : "string storage ref",
+																				"value" : "greeting"
+																			},
+																			"name" : "Identifier"
+																		}
+																	],
+																	"name" : "Return"
+																}
+															],
+															"name" : "Block"
+														}
+													],
+													"name" : "ParameterList"
+												},
+												{
+													"attributes" : 
+													{
+														"const" : true,
+														"name" : "getBlockNumber",
+														"public" : true
+													},
+													"children" : 
+													[
+														{
+															"children" : [],
+															"name" : "ParameterList"
+														},
+														{
+															"children" : 
+															[
+																{
+																	"attributes" : 
+																	{
+																		"name" : ""
+																	},
+																	"children" : 
+																	[
+																		{
+																			"attributes" : 
+																			{
+																				"name" : "uint"
+																			},
+																			"name" : "ElementaryTypeName"
+																		}
+																	],
+																	"name" : "VariableDeclaration"
+																},
+																{
+																	"children" : 
+																	[
+																		{
+																			"children" : 
+																			[
+																				{
+																					"attributes" : 
+																					{
+																						"member_name" : "number",
+																						"type" : "uint256"
+																					},
+																					"children" : 
+																					[
+																						{
+																							"attributes" : 
+																							{
+																								"type" : "block",
+																								"value" : "block"
+																							},
+																							"name" : "Identifier"
+																						}
+																					],
+																					"name" : "MemberAccess"
+																				}
+																			],
+																			"name" : "Return"
+																		}
+																	],
+																	"name" : "Block"
+																}
+															],
+															"name" : "ParameterList"
+														},
+														{
+															"attributes" : 
+															{
+																"const" : false,
+																"name" : "setGreeting",
+																"public" : true
+															},
+															"children" : 
+															[
+																{
+																	"children" : 
+																	[
+																		{
+																			"attributes" : 
+																			{
+																				"name" : "_newgreeting"
+																			},
+																			"children" : 
+																			[
+																				{
+																					"attributes" : 
+																					{
+																						"name" : "string"
+																					},
+																					"name" : "ElementaryTypeName"
+																				}
+																			],
+																			"name" : "VariableDeclaration"
+																		},
+																		{
+																			"children" : [],
+																			"name" : "ParameterList"
+																		},
+																		{
+																			"children" : 
+																			[
+																				{
+																					"children" : 
+																					[
+																						{
+																							"attributes" : 
+																							{
+																								"operator" : "=",
+																								"type" : "string storage ref"
+																							},
+																							"children" : 
+																							[
+																								{
+																									"attributes" : 
+																									{
+																										"type" : "string storage ref",
+																										"value" : "greeting"
+																									},
+																									"name" : "Identifier"
+																								},
+																								{
+																									"attributes" : 
+																									{
+																										"type" : "string memory",
+																										"value" : "_newgreeting"
+																									},
+																									"name" : "Identifier"
+																								}
+																							],
+																							"name" : "Assignment"
+																						}
+																					],
+																					"name" : "ExpressionStatement"
+																				}
+																			],
+																			"name" : "Block"
+																		}
+																	],
+																	"name" : "ParameterList"
+																},
+																{
+																	"attributes" : 
+																	{
+																		"const" : false,
+																		"name" : "kill",
+																		"public" : true
+																	},
+																	"children" : 
+																	[
+																		{
+																			"children" : [],
+																			"name" : "ParameterList"
+																		},
+																		{
+																			"children" : [],
+																			"name" : "ParameterList"
+																		},
+																		{
+																			"children" : 
+																			[
+																				{
+																					"children" : 
+																					[
+																						{
+																							"attributes" : 
+																							{
+																								"operator" : "==",
+																								"type" : "bool"
+																							},
+																							"children" : 
+																							[
+																								{
+																									"attributes" : 
+																									{
+																										"member_name" : "sender",
+																										"type" : "address"
+																									},
+																									"children" : 
+																									[
+																										{
+																											"attributes" : 
+																											{
+																												"type" : "msg",
+																												"value" : "msg"
+																											},
+																											"name" : "Identifier"
+																										}
+																									],
+																									"name" : "MemberAccess"
+																								},
+																								{
+																									"attributes" : 
+																									{
+																										"type" : "address",
+																										"value" : "creator"
+																									},
+																									"name" : "Identifier"
+																								}
+																							],
+																							"name" : "BinaryOperation"
+																						},
+																						{
+																							"children" : 
+																							[
+																								{
+																									"attributes" : 
+																									{
+																										"type" : "tuple()",
+																										"type_conversion" : "0"
+																									},
+																									"children" : 
+																									[
+																										{
+																											"attributes" : 
+																											{
+																												"type" : "function (address) returns ()",
+																												"value" : "suicide"
+																											},
+																											"name" : "Identifier"
+																										},
+																										{
+																											"attributes" : 
+																											{
+																												"type" : "address",
+																												"value" : "creator"
+																											},
+																											"name" : "Identifier"
+																										}
+																									],
+																									"name" : "FunctionCall"
+																								}
+																							],
+																							"name" : "ExpressionStatement"
+																						}
+																					],
+																					"name" : "IfStatement"
+																				}
+																			],
+																			"name" : "Block"
+																		}
+																	],
+																	"name" : "Function"
+																}
+															],
+															"name" : "Function"
+														}
+													],
+													"name" : "Function"
+												}
+											],
+											"name" : "Function"
+										}
+									],
+									"name" : "Function"
+								}
+							],
+							"name" : "VariableDeclaration"
+						}
+					],
+					"name" : "VariableDeclaration"
+				}
+			],
+			"name" : "Contract"
+		}
+	],
+	"name" : "root"
+}
+======= Greeter =======
