@@ -15,21 +15,21 @@ password: neo4j
 
 ### How to use
 
-2. Use the disassembler on the required piece of bytecode:
+* Use the disassembler on the required piece of bytecode:
 
 ```bash
 cat <Input File> | disasm >> <Output File>
 ```
 
-3. Run core.py on the disassembler output:
+* Run core.py on the disassembler output:
 
 ```bash
 python core.py <Output file from disassmbler>
 ```
 
-4. Open [localhost:7474](http://localhost:7474) to open the dashboard.
+* Open [localhost:7474](http://localhost:7474) to open the dashboard.
 
-5. Run the following command to view the results:
+* Run the following command to view the results:
 
 ```
 MATCH n RETURN n
