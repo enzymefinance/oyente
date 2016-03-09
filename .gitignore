@@ -1,0 +1,5 @@
+*.pyc
+tmp/*
+tests/*
+.DS_Store
+.idea/

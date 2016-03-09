@@ -1,14 +1,10 @@
 contract foo {
-	function foos(int d) returns (int) {
-  		d += 3;
-    	return (d+999);
+	function foos() returns (int) {
+		 return bar(256) + 9;
 	}
 
 	function bar(int d) returns (int) {
-    	return (d*100);
+    		 return 1;
 	}
-
-	function bar2(int b) {
-		b = 10;
-	}
+	
 }
