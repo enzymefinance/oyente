@@ -194,13 +194,11 @@ def add_easy_jumps():
 
 
 def execute():
-    sorted_addresses = sorted(vertices.keys())
     # executing, starting from beginning
-    for address in sorted_addresses:
-        stack = []
-        mem = {}
-        visited = set([])
-        execute_block(address, stack, visited, mem)
+    stack = []
+    mem = {}
+    visited = set([])
+    execute_block(0, stack, visited, mem)
 
 
 def print_state(block_address, stack, mem):
