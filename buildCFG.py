@@ -5,7 +5,7 @@ from neo4jrestclient.client import GraphDatabase
 from basicblock import BasicBlock
 
 
-db = GraphDatabase("http://localhost:7474", username="neo4j", password="1.66Planck")
+db = GraphDatabase("http://localhost:7474", username="neo4j", password="neo4j")
 
 labels = db.labels.create("JumpDests")
 label_dict = {}  # capturing the address of the first statement of each basic block
