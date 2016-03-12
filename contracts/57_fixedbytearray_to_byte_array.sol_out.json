@@ -1,0 +1,3070 @@
+
+======= Bytes4ToByteArrayWithLength4 =======
+EVM assembly:
+{
+	".code" : 
+	[
+		{
+			"begin" : 661,
+			"end" : 2755,
+			"name" : "PUSH",
+			"value" : "60"
+		},
+		{
+			"begin" : 661,
+			"end" : 2755,
+			"name" : "PUSH",
+			"value" : "40"
+		},
+		{
+			"begin" : 661,
+			"end" : 2755,
+			"name" : "MSTORE"
+		},
+		{
+			"begin" : 828,
+			"end" : 829,
+			"name" : "PUSH",
+			"value" : "0"
+		},
+		{
+			"begin" : 815,
+			"end" : 829,
+			"name" : "PUSH",
+			"value" : "1"
+		},
+		{
+			"begin" : 815,
+			"end" : 829,
+			"name" : "SSTORE"
+		},
+		{
+			"begin" : 835,
+			"end" : 846,
+			"name" : "PUSH",
+			"value" : "2"
+		},
+		{
+			"begin" : 835,
+			"end" : 846,
+			"name" : "DUP1"
+		},
+		{
+			"begin" : 835,
+			"end" : 846,
+			"name" : "SLOAD"
+		},
+		{
+			"begin" : -1,
+			"end" : -1,
+			"name" : "PUSH",
+			"value" : "FFFFFFFF"
+		},
+		{
+			"begin" : -1,
+			"end" : -1,
+			"name" : "NOT"
+		},
+		{
+			"begin" : 886,
+			"end" : 897,
+			"name" : "AND"
+		},
+		{
+			"begin" : 886,
+			"end" : 897,
+			"name" : "SWAP1"
+		},
+		{
+			"begin" : 886,
+			"end" : 897,
+			"name" : "SSTORE"
+		},
+		{
+			"begin" : 828,
+			"end" : 829,
+			"name" : "PUSH",
+			"value" : "0"
+		},
+		{
+			"begin" : 778,
+			"end" : 798,
+			"name" : "DUP1"
+		},
+		{
+			"begin" : 778,
+			"end" : 798,
+			"name" : "SLOAD"
+		},
+		{
+			"begin" : -1,
+			"end" : -1,
+			"name" : "PUSH",
+			"value" : "1"
+		},
+		{
+			"begin" : -1,
+			"end" : -1,
+			"name" : "PUSH",
+			"value" : "A0"
+		},
+		{
+			"begin" : -1,
+			"end" : -1,
+			"name" : "PUSH",
+			"value" : "2"
+		},
+		{
+			"begin" : -1,
+			"end" : -1,
+			"name" : "EXP"
+		},
+		{
+			"begin" : -1,
+			"end" : -1,
+			"name" : "SUB"
+		},
+		{
+			"begin" : -1,
+			"end" : -1,
+			"name" : "NOT"
+		},
+		{
+			"begin" : 778,
+			"end" : 798,
+			"name" : "AND"
+		},
+		{
+			"begin" : 788,
+			"end" : 798,
+			"name" : "CALLER"
+		},
+		{
+			"begin" : 778,
+			"end" : 798,
+			"name" : "OR"
+		},
+		{
+			"begin" : 778,
+			"end" : 798,
+			"name" : "SWAP1"
+		},
+		{
+			"begin" : 778,
+			"end" : 798,
+			"name" : "SSTORE"
+		},
+		{
+			"begin" : 661,
+			"end" : 2755,
+			"name" : "PUSH #[$]",
+			"value" : "0000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"begin" : 661,
+			"end" : 2755,
+			"name" : "DUP1"
+		},
+		{
+			"begin" : 661,
+			"end" : 2755,
+			"name" : "PUSH [$]",
+			"value" : "0000000000000000000000000000000000000000000000000000000000000000"
+		},
+		{
+			"begin" : 661,
+			"end" : 2755,
+			"name" : "PUSH",
+			"value" : "0"
+		},
+		{
+			"begin" : 661,
+			"end" : 2755,
+			"name" : "CODECOPY"
+		},
+		{
+			"begin" : 661,
+			"end" : 2755,
+			"name" : "PUSH",
+			"value" : "0"
+		},
+		{
+			"begin" : 661,
+			"end" : 2755,
+			"name" : "RETURN"
+		}
+	],
+	".data" : 
+	{
+		"0" : 
+		{
+			".code" : 
+			[
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH",
+					"value" : "60"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH",
+					"value" : "40"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "MSTORE"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "CALLDATASIZE"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "ISZERO"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH [tag]",
+					"value" : "1"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "JUMPI"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "E0"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "EXP"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH",
+					"value" : "0"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "CALLDATALOAD"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "DIV"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH",
+					"value" : "3178D05"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "DUP2"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "EQ"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH [tag]",
+					"value" : "2"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "JUMPI"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH",
+					"value" : "39246290"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "EQ"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH [tag]",
+					"value" : "3"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "JUMPI"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH",
+					"value" : "3F4E5AB9"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "EQ"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH [tag]",
+					"value" : "4"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "JUMPI"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH",
+					"value" : "41C0E1B5"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "EQ"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH [tag]",
+					"value" : "5"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "JUMPI"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH",
+					"value" : "6B590248"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "EQ"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH [tag]",
+					"value" : "6"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "JUMPI"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH",
+					"value" : "849A7CB7"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "EQ"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH [tag]",
+					"value" : "7"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "JUMPI"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH",
+					"value" : "84A80C6B"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "EQ"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH [tag]",
+					"value" : "8"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "JUMPI"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH",
+					"value" : "98B00EE0"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "EQ"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH [tag]",
+					"value" : "9"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "JUMPI"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "tag",
+					"value" : "1"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "STOP"
+				},
+				{
+					"begin" : 2422,
+					"end" : 2496,
+					"name" : "tag",
+					"value" : "2"
+				},
+				{
+					"begin" : 2422,
+					"end" : 2496,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 2167,
+					"end" : 2241,
+					"name" : "PUSH [tag]",
+					"value" : "10"
+				},
+				{
+					"begin" : 2232,
+					"end" : 2234,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : 2232,
+					"end" : 2234,
+					"name" : "SLOAD"
+				},
+				{
+					"begin" : 1255,
+					"end" : 1287,
+					"name" : "PUSH",
+					"value" : "1000000"
+				},
+				{
+					"begin" : 2487,
+					"end" : 2489,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2487,
+					"end" : 2489,
+					"name" : "DIV"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "F8"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "EXP"
+				},
+				{
+					"begin" : 2487,
+					"end" : 2489,
+					"name" : "MUL"
+				},
+				{
+					"begin" : 1922,
+					"end" : 2002,
+					"name" : "tag",
+					"value" : "36"
+				},
+				{
+					"begin" : 1922,
+					"end" : 2002,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 1922,
+					"end" : 2002,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1922,
+					"end" : 2002,
+					"name" : "JUMP",
+					"value" : "[out]"
+				},
+				{
+					"begin" : 2337,
+					"end" : 2411,
+					"name" : "tag",
+					"value" : "3"
+				},
+				{
+					"begin" : 2337,
+					"end" : 2411,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 2167,
+					"end" : 2241,
+					"name" : "PUSH [tag]",
+					"value" : "10"
+				},
+				{
+					"begin" : 2232,
+					"end" : 2234,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : 2232,
+					"end" : 2234,
+					"name" : "SLOAD"
+				},
+				{
+					"begin" : 1794,
+					"end" : 1810,
+					"name" : "PUSH",
+					"value" : "10000"
+				},
+				{
+					"begin" : 2402,
+					"end" : 2404,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2402,
+					"end" : 2404,
+					"name" : "DIV"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "F8"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "EXP"
+				},
+				{
+					"begin" : 2402,
+					"end" : 2404,
+					"name" : "MUL"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "PUSH [tag]",
+					"value" : "36"
+				},
+				{
+					"begin" : 2395,
+					"end" : 2404,
+					"name" : "JUMP"
+				},
+				{
+					"begin" : 2252,
+					"end" : 2326,
+					"name" : "tag",
+					"value" : "4"
+				},
+				{
+					"begin" : 2252,
+					"end" : 2326,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 2167,
+					"end" : 2241,
+					"name" : "PUSH [tag]",
+					"value" : "10"
+				},
+				{
+					"begin" : 2232,
+					"end" : 2234,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : 2232,
+					"end" : 2234,
+					"name" : "SLOAD"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "PUSH",
+					"value" : "100"
+				},
+				{
+					"begin" : 2317,
+					"end" : 2319,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2317,
+					"end" : 2319,
+					"name" : "DIV"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "F8"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "EXP"
+				},
+				{
+					"begin" : 2317,
+					"end" : 2319,
+					"name" : "MUL"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "PUSH [tag]",
+					"value" : "36"
+				},
+				{
+					"begin" : 2310,
+					"end" : 2319,
+					"name" : "JUMP"
+				},
+				{
+					"begin" : 2588,
+					"end" : 2753,
+					"name" : "tag",
+					"value" : "5"
+				},
+				{
+					"begin" : 2588,
+					"end" : 2753,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH [tag]",
+					"value" : "1"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH",
+					"value" : "0"
+				},
+				{
+					"begin" : 2632,
+					"end" : 2639,
+					"name" : "SLOAD"
+				},
+				{
+					"begin" : 2618,
+					"end" : 2628,
+					"name" : "CALLER"
+				},
+				{
+					"begin" : 2632,
+					"end" : 2639,
+					"name" : "PUSH",
+					"value" : "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+				},
+				{
+					"begin" : 2618,
+					"end" : 2639,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2618,
+					"end" : 2639,
+					"name" : "DUP2"
+				},
+				{
+					"begin" : 2618,
+					"end" : 2639,
+					"name" : "AND"
+				},
+				{
+					"begin" : 2632,
+					"end" : 2639,
+					"name" : "SWAP2"
+				},
+				{
+					"begin" : 2632,
+					"end" : 2639,
+					"name" : "AND"
+				},
+				{
+					"begin" : 2618,
+					"end" : 2639,
+					"name" : "EQ"
+				},
+				{
+					"begin" : 2614,
+					"end" : 2747,
+					"name" : "ISZERO"
+				},
+				{
+					"begin" : 2614,
+					"end" : 2747,
+					"name" : "PUSH [tag]",
+					"value" : "46"
+				},
+				{
+					"begin" : 2614,
+					"end" : 2747,
+					"name" : "JUMPI"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH",
+					"value" : "0"
+				},
+				{
+					"begin" : 2632,
+					"end" : 2639,
+					"name" : "SLOAD"
+				},
+				{
+					"begin" : 2632,
+					"end" : 2639,
+					"name" : "PUSH",
+					"value" : "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+				},
+				{
+					"begin" : 2632,
+					"end" : 2639,
+					"name" : "AND"
+				},
+				{
+					"begin" : 2655,
+					"end" : 2671,
+					"name" : "SUICIDE"
+				},
+				{
+					"begin" : 1922,
+					"end" : 2002,
+					"name" : "tag",
+					"value" : "6"
+				},
+				{
+					"begin" : 1922,
+					"end" : 2002,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 2167,
+					"end" : 2241,
+					"name" : "PUSH [tag]",
+					"value" : "10"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "1"
+				},
+				{
+					"begin" : 1990,
+					"end" : 1995,
+					"name" : "SLOAD"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "PUSH [tag]",
+					"value" : "36"
+				},
+				{
+					"begin" : 1983,
+					"end" : 1995,
+					"name" : "JUMP"
+				},
+				{
+					"begin" : 928,
+					"end" : 1912,
+					"name" : "tag",
+					"value" : "7"
+				},
+				{
+					"begin" : 928,
+					"end" : 1912,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH [tag]",
+					"value" : "1"
+				},
+				{
+					"begin" : 2012,
+					"end" : 2105,
+					"name" : "PUSH",
+					"value" : "4"
+				},
+				{
+					"begin" : 928,
+					"end" : 1912,
+					"name" : "CALLDATALOAD"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "E0"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "EXP"
+				},
+				{
+					"begin" : 999,
+					"end" : 1007,
+					"name" : "DUP2"
+				},
+				{
+					"begin" : 999,
+					"end" : 1007,
+					"name" : "DIV"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH",
+					"value" : "0"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 2012,
+					"end" : 2105,
+					"name" : "PUSH",
+					"value" : "4"
+				},
+				{
+					"begin" : 1202,
+					"end" : 1906,
+					"name" : "tag",
+					"value" : "27"
+				},
+				{
+					"begin" : 1202,
+					"end" : 1906,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 1212,
+					"end" : 1220,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 1208,
+					"end" : 1209,
+					"name" : "DUP7"
+				},
+				{
+					"begin" : 1208,
+					"end" : 1220,
+					"name" : "LT"
+				},
+				{
+					"begin" : 1202,
+					"end" : 1906,
+					"name" : "ISZERO"
+				},
+				{
+					"begin" : 1202,
+					"end" : 1906,
+					"name" : "PUSH [tag]",
+					"value" : "28"
+				},
+				{
+					"begin" : 1202,
+					"end" : 1906,
+					"name" : "JUMPI"
+				},
+				{
+					"begin" : 2232,
+					"end" : 2234,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : 1282,
+					"end" : 1285,
+					"name" : "DUP7"
+				},
+				{
+					"begin" : 1282,
+					"end" : 1285,
+					"name" : "DUP2"
+				},
+				{
+					"begin" : 1282,
+					"end" : 1285,
+					"name" : "MUL"
+				},
+				{
+					"begin" : 1263,
+					"end" : 1273,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1263,
+					"end" : 1273,
+					"name" : "DUP3"
+				},
+				{
+					"begin" : 1263,
+					"end" : 1273,
+					"name" : "MUL"
+				},
+				{
+					"begin" : 1262,
+					"end" : 1286,
+					"name" : "SUB"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "1"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "NOT"
+				},
+				{
+					"begin" : 1262,
+					"end" : 1286,
+					"name" : "ADD"
+				},
+				{
+					"begin" : 1255,
+					"end" : 1257,
+					"name" : "PUSH",
+					"value" : "10"
+				},
+				{
+					"begin" : 1255,
+					"end" : 1287,
+					"name" : "EXP"
+				},
+				{
+					"begin" : 1309,
+					"end" : 1325,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 1309,
+					"end" : 1325,
+					"name" : "DUP9"
+				},
+				{
+					"begin" : 1309,
+					"end" : 1325,
+					"name" : "MOD"
+				},
+				{
+					"begin" : 1358,
+					"end" : 1374,
+					"name" : "SWAP6"
+				},
+				{
+					"begin" : 1358,
+					"end" : 1374,
+					"name" : "DUP9"
+				},
+				{
+					"begin" : 1358,
+					"end" : 1374,
+					"name" : "SUB"
+				},
+				{
+					"begin" : 1357,
+					"end" : 1382,
+					"name" : "DUP7"
+				},
+				{
+					"begin" : 1357,
+					"end" : 1382,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1357,
+					"end" : 1382,
+					"name" : "SUB"
+				},
+				{
+					"begin" : 1405,
+					"end" : 1430,
+					"name" : "DUP2"
+				},
+				{
+					"begin" : 1405,
+					"end" : 1430,
+					"name" : "DUP2"
+				},
+				{
+					"begin" : 1405,
+					"end" : 1430,
+					"name" : "DIV"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "1"
+				},
+				{
+					"begin" : 1397,
+					"end" : 1430,
+					"name" : "DUP2"
+				},
+				{
+					"begin" : 1397,
+					"end" : 1430,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1397,
+					"end" : 1430,
+					"name" : "SSTORE"
+				},
+				{
+					"begin" : 1455,
+					"end" : 1467,
+					"name" : "DUP8"
+				},
+				{
+					"begin" : 1455,
+					"end" : 1467,
+					"name" : "DUP11"
+				},
+				{
+					"begin" : 1455,
+					"end" : 1467,
+					"name" : "SUB"
+				},
+				{
+					"begin" : 1455,
+					"end" : 1467,
+					"name" : "SWAP8"
+				},
+				{
+					"begin" : 1309,
+					"end" : 1325,
+					"name" : "SWAP7"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "POP"
+				},
+				{
+					"begin" : 1255,
+					"end" : 1287,
+					"name" : "SWAP2"
+				},
+				{
+					"begin" : 1255,
+					"end" : 1287,
+					"name" : "SWAP5"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "POP"
+				},
+				{
+					"begin" : 1357,
+					"end" : 1382,
+					"name" : "SWAP3"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "POP"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "F8"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "EXP"
+				},
+				{
+					"begin" : 1497,
+					"end" : 1508,
+					"name" : "MUL"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "3"
+				},
+				{
+					"begin" : 1892,
+					"end" : 1895,
+					"name" : "DUP8"
+				},
+				{
+					"begin" : 2012,
+					"end" : 2105,
+					"name" : "PUSH",
+					"value" : "4"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1494,
+					"name" : "DUP2"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1494,
+					"name" : "LT"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1494,
+					"name" : "ISZERO"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1494,
+					"name" : "PUSH [ErrorTag]"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1494,
+					"name" : "JUMPI"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "20"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1494,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1494,
+					"name" : "DUP3"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1494,
+					"name" : "DIV"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1494,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1494,
+					"name" : "SWAP3"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1494,
+					"name" : "ADD"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1494,
+					"name" : "SWAP2"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1494,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1494,
+					"name" : "MOD"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1508,
+					"name" : "PUSH",
+					"value" : "100"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1508,
+					"name" : "EXP"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1508,
+					"name" : "DUP2"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1508,
+					"name" : "SLOAD"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1508,
+					"name" : "DUP2"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1508,
+					"name" : "PUSH",
+					"value" : "FF"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1508,
+					"name" : "MUL"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1508,
+					"name" : "NOT"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1508,
+					"name" : "AND"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1508,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1508,
+					"name" : "DUP4"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "F8"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "EXP"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1508,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1508,
+					"name" : "DIV"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1508,
+					"name" : "MUL"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1508,
+					"name" : "OR"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1508,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1508,
+					"name" : "SSTORE"
+				},
+				{
+					"begin" : 1481,
+					"end" : 1508,
+					"name" : "POP"
+				},
+				{
+					"begin" : 1646,
+					"end" : 1647,
+					"name" : "DUP6"
+				},
+				{
+					"begin" : 1651,
+					"end" : 1652,
+					"name" : "PUSH",
+					"value" : "0"
+				},
+				{
+					"begin" : 1646,
+					"end" : 1652,
+					"name" : "EQ"
+				},
+				{
+					"begin" : 1643,
+					"end" : 1861,
+					"name" : "ISZERO"
+				},
+				{
+					"begin" : 1643,
+					"end" : 1861,
+					"name" : "PUSH [tag]",
+					"value" : "30"
+				},
+				{
+					"begin" : 1643,
+					"end" : 1861,
+					"name" : "JUMPI"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "1"
+				},
+				{
+					"begin" : 1680,
+					"end" : 1685,
+					"name" : "SLOAD"
+				},
+				{
+					"begin" : 2232,
+					"end" : 2234,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SLOAD"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "FF"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "NOT"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "AND"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "F8"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "EXP"
+				},
+				{
+					"begin" : 1675,
+					"end" : 1686,
+					"name" : "SWAP3"
+				},
+				{
+					"begin" : 1675,
+					"end" : 1686,
+					"name" : "DUP4"
+				},
+				{
+					"begin" : 1675,
+					"end" : 1686,
+					"name" : "MUL"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SWAP3"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SWAP3"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "DIV"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SWAP2"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SWAP2"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "OR"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SSTORE"
+				},
+				{
+					"begin" : 1643,
+					"end" : 1861,
+					"name" : "PUSH [tag]",
+					"value" : "35"
+				},
+				{
+					"begin" : 1643,
+					"end" : 1861,
+					"name" : "JUMP"
+				},
+				{
+					"begin" : 2167,
+					"end" : 2241,
+					"name" : "tag",
+					"value" : "8"
+				},
+				{
+					"begin" : 2167,
+					"end" : 2241,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 2167,
+					"end" : 2241,
+					"name" : "PUSH [tag]",
+					"value" : "10"
+				},
+				{
+					"begin" : 2232,
+					"end" : 2234,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : 2232,
+					"end" : 2234,
+					"name" : "SLOAD"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "F8"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "EXP"
+				},
+				{
+					"begin" : 2232,
+					"end" : 2234,
+					"name" : "MUL"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "PUSH [tag]",
+					"value" : "36"
+				},
+				{
+					"begin" : 2225,
+					"end" : 2234,
+					"name" : "JUMP"
+				},
+				{
+					"begin" : 2012,
+					"end" : 2105,
+					"name" : "tag",
+					"value" : "9"
+				},
+				{
+					"begin" : 2012,
+					"end" : 2105,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 2012,
+					"end" : 2105,
+					"name" : "PUSH [tag]",
+					"value" : "24"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "80"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "40"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "MLOAD"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "DUP2"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "ADD"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "40"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "MSTORE"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "4"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "tag",
+					"value" : "37"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "0"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "DUP2"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "MSTORE"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "20"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "ADD"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "1"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "SUB"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "DUP2"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH [tag]",
+					"value" : "37"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "JUMPI"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "POP"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "POP"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH",
+					"value" : "40"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "MLOAD"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "80"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "DUP2"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "ADD"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "SWAP2"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "DUP3"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "MSTORE"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "3"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "4"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "DUP3"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH",
+					"value" : "0"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "DUP6"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "tag",
+					"value" : "40"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "DUP3"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "SLOAD"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "PUSH",
+					"value" : "100"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "DUP4"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "EXP"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "DIV"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "F8"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "EXP"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "MUL"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "DUP2"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "MSTORE"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "20"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "1"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "SWAP3"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "DUP4"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "ADD"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "DUP2"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "DUP2"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "DIV"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "SWAP5"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "DUP6"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "ADD"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "SWAP5"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "SWAP4"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "SUB"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "SWAP3"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "MUL"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "SWAP2"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "ADD"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "DUP5"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "GT"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "PUSH [tag]",
+					"value" : "40"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "JUMPI"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "POP"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "POP"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "POP"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "POP"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "POP"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "POP"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "POP"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "PUSH [tag]",
+					"value" : "36"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "JUMP"
+				},
+				{
+					"begin" : 2422,
+					"end" : 2496,
+					"name" : "tag",
+					"value" : "10"
+				},
+				{
+					"begin" : 2422,
+					"end" : 2496,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH",
+					"value" : "40"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "MLOAD"
+				},
+				{
+					"begin" : 2422,
+					"end" : 2496,
+					"name" : "SWAP2"
+				},
+				{
+					"begin" : 2422,
+					"end" : 2496,
+					"name" : "DUP3"
+				},
+				{
+					"begin" : 2422,
+					"end" : 2496,
+					"name" : "MSTORE"
+				},
+				{
+					"begin" : 2422,
+					"end" : 2496,
+					"name" : "MLOAD"
+				},
+				{
+					"begin" : 2422,
+					"end" : 2496,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2422,
+					"end" : 2496,
+					"name" : "DUP2"
+				},
+				{
+					"begin" : 2422,
+					"end" : 2496,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2422,
+					"end" : 2496,
+					"name" : "SUB"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "20"
+				},
+				{
+					"begin" : 2422,
+					"end" : 2496,
+					"name" : "ADD"
+				},
+				{
+					"begin" : 2422,
+					"end" : 2496,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 2422,
+					"end" : 2496,
+					"name" : "RETURN"
+				},
+				{
+					"begin" : 2012,
+					"end" : 2105,
+					"name" : "tag",
+					"value" : "24"
+				},
+				{
+					"begin" : 2012,
+					"end" : 2105,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH",
+					"value" : "40"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "MLOAD"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "DUP3"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "80"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "DUP4"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "DUP2"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "DUP5"
+				},
+				{
+					"begin" : 661,
+					"end" : 2755,
+					"name" : "PUSH",
+					"value" : "0"
+				},
+				{
+					"begin" : 2012,
+					"end" : 2105,
+					"name" : "PUSH",
+					"value" : "4"
+				},
+				{
+					"begin" : 2012,
+					"end" : 2105,
+					"name" : "PUSH",
+					"value" : "3F"
+				},
+				{
+					"begin" : 2012,
+					"end" : 2105,
+					"name" : "CALL"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "POP"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "SWAP4"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "POP"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "POP"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "POP"
+				},
+				{
+					"begin" : 2012,
+					"end" : 2105,
+					"name" : "RETURN"
+				},
+				{
+					"begin" : 1202,
+					"end" : 1906,
+					"name" : "tag",
+					"value" : "28"
+				},
+				{
+					"begin" : 1202,
+					"end" : 1906,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 928,
+					"end" : 1912,
+					"name" : "POP"
+				},
+				{
+					"begin" : 928,
+					"end" : 1912,
+					"name" : "POP"
+				},
+				{
+					"begin" : 928,
+					"end" : 1912,
+					"name" : "POP"
+				},
+				{
+					"begin" : 928,
+					"end" : 1912,
+					"name" : "POP"
+				},
+				{
+					"begin" : 928,
+					"end" : 1912,
+					"name" : "POP"
+				},
+				{
+					"begin" : 928,
+					"end" : 1912,
+					"name" : "POP"
+				},
+				{
+					"begin" : 928,
+					"end" : 1912,
+					"name" : "POP"
+				},
+				{
+					"begin" : 928,
+					"end" : 1912,
+					"name" : "POP"
+				},
+				{
+					"begin" : 928,
+					"end" : 1912,
+					"name" : "JUMP",
+					"value" : "[out]"
+				},
+				{
+					"begin" : 1643,
+					"end" : 1861,
+					"name" : "tag",
+					"value" : "30"
+				},
+				{
+					"begin" : 1643,
+					"end" : 1861,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 1708,
+					"end" : 1709,
+					"name" : "DUP6"
+				},
+				{
+					"begin" : 1713,
+					"end" : 1714,
+					"name" : "PUSH",
+					"value" : "1"
+				},
+				{
+					"begin" : 1708,
+					"end" : 1714,
+					"name" : "EQ"
+				},
+				{
+					"begin" : 1705,
+					"end" : 1861,
+					"name" : "ISZERO"
+				},
+				{
+					"begin" : 1705,
+					"end" : 1861,
+					"name" : "PUSH [tag]",
+					"value" : "32"
+				},
+				{
+					"begin" : 1705,
+					"end" : 1861,
+					"name" : "JUMPI"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "1"
+				},
+				{
+					"begin" : 1680,
+					"end" : 1685,
+					"name" : "SLOAD"
+				},
+				{
+					"begin" : 2232,
+					"end" : 2234,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SLOAD"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "FF00"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "NOT"
+				},
+				{
+					"begin" : 1732,
+					"end" : 1748,
+					"name" : "AND"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "F8"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "EXP"
+				},
+				{
+					"begin" : 1675,
+					"end" : 1686,
+					"name" : "SWAP3"
+				},
+				{
+					"begin" : 1675,
+					"end" : 1686,
+					"name" : "DUP4"
+				},
+				{
+					"begin" : 1675,
+					"end" : 1686,
+					"name" : "MUL"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SWAP3"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SWAP3"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "DIV"
+				},
+				{
+					"begin" : 2081,
+					"end" : 2098,
+					"name" : "PUSH",
+					"value" : "100"
+				},
+				{
+					"begin" : 1732,
+					"end" : 1748,
+					"name" : "MUL"
+				},
+				{
+					"begin" : 1732,
+					"end" : 1748,
+					"name" : "SWAP2"
+				},
+				{
+					"begin" : 1732,
+					"end" : 1748,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1732,
+					"end" : 1748,
+					"name" : "SWAP2"
+				},
+				{
+					"begin" : 1732,
+					"end" : 1748,
+					"name" : "OR"
+				},
+				{
+					"begin" : 1732,
+					"end" : 1748,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1732,
+					"end" : 1748,
+					"name" : "SSTORE"
+				},
+				{
+					"begin" : 1643,
+					"end" : 1861,
+					"name" : "PUSH [tag]",
+					"value" : "35"
+				},
+				{
+					"begin" : 1705,
+					"end" : 1861,
+					"name" : "JUMP"
+				},
+				{
+					"begin" : 1705,
+					"end" : 1861,
+					"name" : "tag",
+					"value" : "32"
+				},
+				{
+					"begin" : 1705,
+					"end" : 1861,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 1770,
+					"end" : 1771,
+					"name" : "DUP6"
+				},
+				{
+					"begin" : 1775,
+					"end" : 1776,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : 1770,
+					"end" : 1776,
+					"name" : "EQ"
+				},
+				{
+					"begin" : 1767,
+					"end" : 1861,
+					"name" : "ISZERO"
+				},
+				{
+					"begin" : 1767,
+					"end" : 1861,
+					"name" : "PUSH [tag]",
+					"value" : "34"
+				},
+				{
+					"begin" : 1767,
+					"end" : 1861,
+					"name" : "JUMPI"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "1"
+				},
+				{
+					"begin" : 1680,
+					"end" : 1685,
+					"name" : "SLOAD"
+				},
+				{
+					"begin" : 2232,
+					"end" : 2234,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SLOAD"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "FF0000"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "NOT"
+				},
+				{
+					"begin" : 1794,
+					"end" : 1810,
+					"name" : "AND"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "F8"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "EXP"
+				},
+				{
+					"begin" : 1675,
+					"end" : 1686,
+					"name" : "SWAP3"
+				},
+				{
+					"begin" : 1675,
+					"end" : 1686,
+					"name" : "DUP4"
+				},
+				{
+					"begin" : 1675,
+					"end" : 1686,
+					"name" : "MUL"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SWAP3"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SWAP3"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "DIV"
+				},
+				{
+					"begin" : 1794,
+					"end" : 1810,
+					"name" : "PUSH",
+					"value" : "10000"
+				},
+				{
+					"begin" : 1794,
+					"end" : 1810,
+					"name" : "MUL"
+				},
+				{
+					"begin" : 1794,
+					"end" : 1810,
+					"name" : "SWAP2"
+				},
+				{
+					"begin" : 1794,
+					"end" : 1810,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1794,
+					"end" : 1810,
+					"name" : "SWAP2"
+				},
+				{
+					"begin" : 1794,
+					"end" : 1810,
+					"name" : "OR"
+				},
+				{
+					"begin" : 1794,
+					"end" : 1810,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1794,
+					"end" : 1810,
+					"name" : "SSTORE"
+				},
+				{
+					"begin" : 1643,
+					"end" : 1861,
+					"name" : "PUSH [tag]",
+					"value" : "35"
+				},
+				{
+					"begin" : 1767,
+					"end" : 1861,
+					"name" : "JUMP"
+				},
+				{
+					"begin" : 1767,
+					"end" : 1861,
+					"name" : "tag",
+					"value" : "34"
+				},
+				{
+					"begin" : 1767,
+					"end" : 1861,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "1"
+				},
+				{
+					"begin" : 1680,
+					"end" : 1685,
+					"name" : "SLOAD"
+				},
+				{
+					"begin" : 2232,
+					"end" : 2234,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "DUP1"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SLOAD"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "FF000000"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "NOT"
+				},
+				{
+					"begin" : 1845,
+					"end" : 1861,
+					"name" : "AND"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "F8"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "PUSH",
+					"value" : "2"
+				},
+				{
+					"begin" : -1,
+					"end" : -1,
+					"name" : "EXP"
+				},
+				{
+					"begin" : 1675,
+					"end" : 1686,
+					"name" : "SWAP3"
+				},
+				{
+					"begin" : 1675,
+					"end" : 1686,
+					"name" : "DUP4"
+				},
+				{
+					"begin" : 1675,
+					"end" : 1686,
+					"name" : "MUL"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SWAP3"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "SWAP3"
+				},
+				{
+					"begin" : 1670,
+					"end" : 1686,
+					"name" : "DIV"
+				},
+				{
+					"begin" : 1255,
+					"end" : 1287,
+					"name" : "PUSH",
+					"value" : "1000000"
+				},
+				{
+					"begin" : 1845,
+					"end" : 1861,
+					"name" : "MUL"
+				},
+				{
+					"begin" : 1845,
+					"end" : 1861,
+					"name" : "SWAP2"
+				},
+				{
+					"begin" : 1845,
+					"end" : 1861,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1845,
+					"end" : 1861,
+					"name" : "SWAP2"
+				},
+				{
+					"begin" : 1845,
+					"end" : 1861,
+					"name" : "OR"
+				},
+				{
+					"begin" : 1845,
+					"end" : 1861,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1845,
+					"end" : 1861,
+					"name" : "SSTORE"
+				},
+				{
+					"begin" : 1767,
+					"end" : 1861,
+					"name" : "tag",
+					"value" : "35"
+				},
+				{
+					"begin" : 1767,
+					"end" : 1861,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 2062,
+					"end" : 2069,
+					"name" : "PUSH",
+					"value" : "1"
+				},
+				{
+					"begin" : 1892,
+					"end" : 1895,
+					"name" : "SWAP6"
+				},
+				{
+					"begin" : 1892,
+					"end" : 1895,
+					"name" : "SWAP1"
+				},
+				{
+					"begin" : 1892,
+					"end" : 1895,
+					"name" : "SWAP6"
+				},
+				{
+					"begin" : 1892,
+					"end" : 1895,
+					"name" : "ADD"
+				},
+				{
+					"begin" : 1892,
+					"end" : 1895,
+					"name" : "SWAP5"
+				},
+				{
+					"begin" : 1202,
+					"end" : 1906,
+					"name" : "PUSH [tag]",
+					"value" : "27"
+				},
+				{
+					"begin" : 1202,
+					"end" : 1906,
+					"name" : "JUMP"
+				},
+				{
+					"begin" : 2614,
+					"end" : 2747,
+					"name" : "tag",
+					"value" : "46"
+				},
+				{
+					"begin" : 2614,
+					"end" : 2747,
+					"name" : "JUMPDEST"
+				},
+				{
+					"begin" : 2588,
+					"end" : 2753,
+					"name" : "JUMP",
+					"value" : "[out]"
+				}
+			]
+		}
+	}
+}

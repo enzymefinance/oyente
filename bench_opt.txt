@@ -1,0 +1,6 @@
+contracts/05_greeter.sol_out.json, 2
+contracts/08_basiciterator.sol_out.json, 2
+contracts/10_creator_balance_checker.sol_out.json, 0
+contracts/15_basic_info_getter.sol_out.json, 1
+contracts/20_value_incrementer.sol_out.json, 0
+contracts/21_value_incrementer2.sol_out.json, 2

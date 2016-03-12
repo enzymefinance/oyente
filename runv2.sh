@@ -7,7 +7,7 @@ then
     echo "for example, run as: ./run foo.sol foo"
     exit 1
 fi
-echo "Compiling (using the --bin-runtime flag)..."
+echo "Compiling..."
 solc "$1" --asm-json > "$2"
 echo "Running v2..."
 python v2.py "$1" "$2"

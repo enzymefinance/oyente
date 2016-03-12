@@ -8,11 +8,16 @@ from neo4jrestclient.client import GraphDatabase
 
 # source_file = "contracts/35_coin_flipper.sol"
 # json_filename = "test2.txt"
-
-gdb = GraphDatabase("http://localhost:7474", username="neo4j", password="neo4j")
+neo4j_map = False
+ 
+gdb = GraphDatabase("http://localhost:7474", username="neo4j", password="1.66Planck")
 gdb.query("MATCH (n) DETACH DELETE n")
 suicide_node = gdb.nodes.create(text="SUICIDE")
 out_node = gdb.nodes.create(text="OUT")
+
+benchmark = True
+benchmark_file = "benchmark.txt"
+missed_jump_counter = 0
 
 term_instructions = ["JUMP", "SUICIDE", "RETURN", "STOP"]
 jump_instructions = ["JUMP", "JUMPI"]
@@ -65,6 +70,7 @@ def connect_sourcelines(inode, source_lines, start, end):
 def create_tags(cb, tag_label, source_lines):
     global out_node
     global suicide_node
+    global missed_jump_counter
     tags = {}
     last_i = {}
     last_t = gdb.nodes.create(text="0", start=0)
@@ -92,6 +98,9 @@ def create_tags(cb, tag_label, source_lines):
                     last_t.relationships.create("jumps out", out_node)
                 elif "name" in last_i and last_i["name"] == "PUSH [tag]":
                     jumps.append((last_t['text'],last_i['value'],instruction['name']))
+                else:
+                    missed_jump_counter+=1
+
             elif instruction['name'] == "SUICIDE":
                 if "begin" in instruction and "end" in instruction:
                     connect_sourcelines(suicide_node, source_lines, instruction['begin'], instruction['end'])
@@ -102,7 +111,8 @@ def create_tags(cb, tag_label, source_lines):
         last_i = instruction
     if last_t != None:
         last_t['end'] = ino-1
-    map_jumps(tags, jumps)
+    if(neo4j_map is True):
+        map_jumps(tags, jumps)
     return tags
 
 def map_jumps(tags, jumps):
@@ -119,8 +129,8 @@ def process_cb(cb, source_lines):
 
 
 def main():
-    if len(sys.argv) < 3:
-        print "Usage: python v2.py <source file> <json_file>"
+    if len(sys.argv) < 4:
+        print "Usage: python v2.py <source file> <json_file> <bench_file>"
         return
     print "Running..."
     raw_file = open(sys.argv[2],'r')
@@ -129,7 +139,10 @@ def main():
     load_codeblocks(raw_json)
     cb = load_codeblocks.cb_list
     source_lines = load_source(sys.argv[1])
-    process_cb(cb[1], source_lines)
+    for i in xrange(0, len(cb)):
+        process_cb(cb[i], source_lines)
+    with open(sys.argv[3], "a") as bfile:
+        bfile.write("%s, %d\n" % (sys.argv[2], missed_jump_counter))
 
 if __name__ == '__main__':
     main()
