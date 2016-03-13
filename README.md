@@ -10,7 +10,7 @@
 
 ```bash
 username: neo4j
-password: [TAKE OUT FROM THE PROGRAM]
+password: neo4j
 ```
 
 ### How to use
@@ -22,6 +22,14 @@ Simply run
 ```
 
 in which `<input_file>` is a solidity file and `<contract_name>` is the name of the smart contract you are going to analyse. Each solidty file may contain several contracts.
+
+#### V2
+
+V2 implements streamlining operations along with source code tagging. To execute, just run
+
+```bash
+./runv2.sh <input_file> <output_file>
+```
 
 #### Bash script in detail
 * Compile using the `--bin-runtime` flag
