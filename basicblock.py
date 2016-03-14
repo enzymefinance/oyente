@@ -3,6 +3,7 @@ class BasicBlock:
         self.start = start_address
         self.end = end_address
         self.instructions = []  # each instruction is a string
+        self.jump_target = 0
 
     def get_start_address(self):
         return self.start
@@ -21,6 +22,27 @@ class BasicBlock:
 
     def get_block_type(self):
         return self.type
+
+    def set_falls_to(self, address):
+        self.falls_to = address
+
+    def get_falls_to(self):
+        return self.falls_to
+
+    def set_jump_target(self, address):
+        if isinstance(address, (int, long)):
+            self.jump_target = address
+        else:
+            self.jump_target = -1
+
+    def get_jump_target(self):
+        return self.jump_target
+
+    def set_branch_expression(self, branch):
+        self.branch_expression = branch
+
+    def get_branch_expression(self):
+        return self.branch_expression
 
     def display(self):
         print "================"
