@@ -185,7 +185,7 @@ def get_ins_cost(opcode):
         return GCOST["Gcreate"]
     elif opcode in ("CALL", "CALLCODE"):
         return GCOST["Gcall"]
-    elif opcode in ["LOG0", "LOG1", "LOG2", "LOG3", "LOG4"]:
+    elif opcode in ("LOG0", "LOG1", "LOG2", "LOG3", "LOG4"):
         num_topics = int(opcode[3:])
         return GCOST["Glog"] + num_topics * GCOST["Glogtopic"]
     elif opcode == "EXTCODECOPY":

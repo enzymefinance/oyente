@@ -4,18 +4,22 @@ import sys
 import tokenize
 from tokenize import NUMBER, NAME, NEWLINE
 from basicblock import BasicBlock
+from analysis import *
 
+count_unresolved_jumps = 0
 
-gen = Generator()
+gen = Generator()  # to generate names for symbolic variables
 
 end_ins_dict = {}  # capturing the last statement of each basic block
-instructions = {}
-jump_type = {}
+instructions = {}  # capturing all the instructions, keys are corresponding addresses
+jump_type = {}  # capturing the "jump type" of each basic block
 vertices = {}
 edges = {}
 
+# Z3 solver
 solver = Solver()
 
+# uninterpreted functions for bit-wise operations
 function_not = Function('not', IntSort(), IntSort())
 function_and = Function('and', IntSort(), IntSort(), IntSort())
 function_or = Function('or', IntSort(), IntSort(), IntSort())
@@ -45,6 +49,9 @@ def print_cfg():
     print str(edges)
 
 
+# 1. Parse the disassembled file
+# 2. Then identify each basic block (i.e. one-in, one-out)
+# 3. Store them in vertices
 def collect_vertices(tokens):
     current_ins_address = 0
     last_ins_address = 0
@@ -144,9 +151,8 @@ def construct_bb():
 
 
 def construct_edges():
-    # for ease of debugging
-    add_falls_to()
-    full_sym_exec()
+    add_falls_to()  # these edges are static
+    full_sym_exec()  # these edges might be dynamic
 
 
 def add_falls_to():
@@ -165,39 +171,46 @@ def full_sym_exec():
     svars = []
     visited = []
     mem = {}
-    sym_exec_block(0, visited, stack, mem, svars)
+    analysis = init_analysis()
+    sym_exec_block(0, visited, stack, mem, svars, analysis)
 
 
 # Symbolically executing a block from the start address
-def sym_exec_block(start, visited, stack, mem, svars):
+def sym_exec_block(start, visited, stack, mem, svars, analysis):
     if start < 0:
         print "WARNING: UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH"
         return
     block_ins = vertices[start].get_instructions()
     for instr in block_ins:
-        sym_exec_ins(start, instr, stack, mem, svars)
+        sym_exec_ins(start, instr, stack, mem, svars, analysis)
     visited.append(start)
     if jump_type[start] == "terminal":
         print "TERMINATING A PATH ..."
-    elif jump_type[start] == "unconditional":
+        display_analysis(analysis)
+        raw_input("Press Enter to continue...\n")
+    elif jump_type[start] == "unconditional":  # executing "JUMP"
         successor = vertices[start].get_jump_target()
         stack1 = list(stack)
         mem1 = dict(mem)
         visited1 = list(visited)
         svars1 = list(svars)
-        sym_exec_block(successor, visited1, stack1, mem1, svars1)
-    elif jump_type[start] == "falls_to":
+        analysis1 = dict(analysis)
+        sym_exec_block(successor, visited1, stack1, mem1, svars1, analysis1)
+    elif jump_type[start] == "falls_to":  # just follow to the next basic block
         successor = vertices[start].get_falls_to()
         stack1 = list(stack)
         mem1 = dict(mem)
         visited1 = list(visited)
         svars1 = list(svars)
-        sym_exec_block(successor, visited1, stack1, mem1, svars1)
-    elif jump_type[start] == "conditional":
-
+        analysis1 = dict(analysis)
+        sym_exec_block(successor, visited1, stack1, mem1, svars1, analysis1)
+    elif jump_type[start] == "conditional":  # executing "JUMPI"
+        '''
+        A choice point, we proceed with depth first search
+        '''
         branch_expression = simplify(vertices[start].get_branch_expression())
         print "Branch expression: " + str(branch_expression)
-        raw_input("Press Enter to continue...\n")
+        #raw_input("Press Enter to continue...\n")
 
         solver.push()  # SET A BOUNDARY FOR SOLVER
         solver.add(branch_expression)
@@ -211,18 +224,22 @@ def sym_exec_block(start, visited, stack, mem, svars):
             mem1 = dict(mem)
             visited1 = list(visited)
             svars1 = list(svars)
-            sym_exec_block(left_branch, visited1, stack1, mem1, svars1)
+            analysis1 = dict(analysis)
+            sym_exec_block(left_branch, visited1, stack1, mem1, svars1, analysis1)
 
         solver.pop()  # POP SOLVER CONTEXT
 
-        solver.push()
+        solver.push()  # SET A BOUNDARY FOR SOLVER
         negated_branch_expression = simplify(Not(branch_expression))
         solver.add(negated_branch_expression)
 
         print "Branch expression: " + str(negated_branch_expression)
-        raw_input("Press Enter to continue...\n")
+        #raw_input("Press Enter to continue...\n")
 
-        if solver.check() == unsat:   # CAN BE OPTIMIZED
+        if solver.check() == unsat:
+            # Note that this check can be optimized. I.e. if the previous check succeeds,
+            # no need to check for the negated condition, but we can immediately go into
+            # the else branch
             print "INFEASIBLE PATH DETECTED"
             raw_input("Press Enter to continue...\n")
         else:
@@ -231,37 +248,26 @@ def sym_exec_block(start, visited, stack, mem, svars):
             mem1 = dict(mem)
             visited1 = list(visited)
             svars1 = list(svars)
-            sym_exec_block(right_branch, visited1, stack1, mem1, svars1)
+            analysis1 = dict(analysis)
+            sym_exec_block(right_branch, visited1, stack1, mem1, svars1, analysis1)
 
         solver.pop()  # POP SOLVER CONTEXT
     else:
         raise Exception('Unknown Jump-Type')
 
 
-# evaluating an instruction
-def sym_exec_ins(start, instr, stack, mem, svars):
+# Symbolically executing an instruction
+def sym_exec_ins(start, instr, stack, mem, svars, analysis):
     instr_parts = str.split(instr, ' ')
-    if instr_parts[0].startswith('PUSH', 0):  # this is a push instruction
-        pushed_value = int(instr_parts[1], 16)
-        stack.insert(0, pushed_value)
-    elif instr_parts[0] == "MSTORE":
-        if len(stack) > 1:
-            stored_address = stack.pop(0)
-            stored_value = stack.pop(0)
-            if isinstance(stored_address, (int, long)):
-                mem[stored_address] = stored_value  # note that the stored_value could be unknown
-            else:
-                mem.clear()  # very conservative
-        else:
-            raise ValueError('STACK underflow')
-    elif instr_parts[0] == "EXP":
-        if len(stack) > 1:
-            base = stack.pop(0)
-            exponent = stack.pop(0)
-            computed = base ** exponent
-            stack.insert(0, computed)
-        else:
-            raise ValueError('STACK underflow')
+    update_analysis(analysis, instr_parts[0], stack, mem)
+    print "DEBUG INFO: "
+    print "EXECUTING: " + instr
+
+    #
+    #  0s: Stop and Arithmetic Operations
+    #
+    if instr_parts[0] == "STOP":
+        return
     elif instr_parts[0] == "ADD":
         if len(stack) > 1:
             first = stack.pop(0)
@@ -298,8 +304,155 @@ def sym_exec_ins(start, instr, stack, mem, svars):
         if len(stack) > 1:
             first = stack.pop(0)
             second = stack.pop(0)
-            computed = first % second
+            if isinstance(second, (int, long)):
+                if second == 0:
+                    computed = 0
+                else:
+                    computed = first % second
+            else:
+                solver.push()
+                solver.add(Not(second == 0))
+                if solver.check() == unsat:
+                    # it is provable that second is indeed equal to zero
+                    computed = 0
+                else:
+                    computed = first % second
+                solver.pop()
             stack.insert(0, computed)
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[0] == "SMOD":
+        if len(stack) > 1:
+            first = stack.pop(0)
+            second = stack.pop(0)
+            if isinstance(second, (int, long)):
+                if second == 0:
+                    computed = 0
+                else:
+                    computed = first % second  # This is not yet faithful
+            else:
+                solver.push()
+                solver.add(Not(second == 0))
+                if solver.check() == unsat:
+                    # it is provable that second is indeed equal to zero
+                    computed = 0
+                else:
+                    computed = first % second  # This is not yet faithful
+                solver.pop()
+            stack.insert(0, computed)
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[0] == "ADDMOD":
+        if len(stack) > 2:
+            first = stack.pop(0)
+            second = stack.pop(0)
+            third = stack.pop(0)
+            if isinstance(third, (int, long)):
+                if third == 0:
+                    computed = 0
+                else:
+                    computed = (first + second) % third
+            else:
+                solver.push()
+                solver.add(Not(third == 0))
+                if solver.check() == unsat:
+                    # it is provable that second is indeed equal to zero
+                    computed = 0
+                else:
+                    computed = (first + second) % third
+                solver.pop()
+            stack.insert(0, computed)
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[0] == "MULMOD":
+        if len(stack) > 2:
+            first = stack.pop(0)
+            second = stack.pop(0)
+            third = stack.pop(0)
+            if isinstance(third, (int, long)):
+                if third == 0:
+                    computed = 0
+                else:
+                    computed = (first * second) % third
+            else:
+                solver.push()
+                solver.add(Not(third == 0))
+                if solver.check() == unsat:
+                    # it is provable that second is indeed equal to zero
+                    computed = 0
+                else:
+                    computed = (first * second) % third
+                solver.pop()
+            stack.insert(0, computed)
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[0] == "EXP":
+        if len(stack) > 1:
+            base = stack.pop(0)
+            exponent = stack.pop(0)
+            computed = base ** exponent
+            stack.insert(0, computed)
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[0] == "SIGNEXTEND":
+        raise ValueError('SIGNEXTEND is not yet handled')
+    #
+    #  10s: Comparison and Bitwise Logic Operations
+    #
+    elif instr_parts[0] == "LT":
+        if len(stack) > 1:
+            first = stack.pop(0)
+            second = stack.pop(0)
+            if isinstance(first, (int, long)) and isinstance(second, (int, long)):
+                if first < second:
+                    stack.insert(0, 1)
+                else:
+                    stack.insert(0, 0)
+            else:
+                sym_expression = (first < second)
+                stack.insert(0, sym_expression)
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[0] == "GT":
+        if len(stack) > 1:
+            first = stack.pop(0)
+            second = stack.pop(0)
+            if isinstance(first, (int, long)) and isinstance(second, (int, long)):
+                if first > second:
+                    stack.insert(0, 1)
+                else:
+                    stack.insert(0, 0)
+            else:
+                sym_expression = (first > second)
+                stack.insert(0, sym_expression)
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[0] == "SLT":  # Not fully faithful to signed comparison
+        if len(stack) > 1:
+            first = stack.pop(0)
+            second = stack.pop(0)
+            if isinstance(first, (int, long)) and isinstance(second, (int, long)):
+                if first < second:
+                    stack.insert(0, 1)
+                else:
+                    stack.insert(0, 0)
+            else:
+                sym_expression = (first < second)
+                stack.insert(0, sym_expression)
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[0] == "SGT":  # Not fully faithful to signed comparison
+        if len(stack) > 1:
+            first = stack.pop(0)
+            second = stack.pop(0)
+            if isinstance(first, (int, long)) and isinstance(second, (int, long)):
+                if first > second:
+                    stack.insert(0, 1)
+                else:
+                    stack.insert(0, 0)
+            else:
+                sym_expression = (first > second)
+                stack.insert(0, sym_expression)
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "EQ":
@@ -316,21 +469,10 @@ def sym_exec_ins(start, instr, stack, mem, svars):
                 stack.insert(0, sym_expression)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "SGT":
-        if len(stack) > 1:
-            first = stack.pop(0)
-            second = stack.pop(0)
-            if isinstance(first, (int, long)) and isinstance(second, (int, long)):
-                if first > second:
-                    stack.insert(0, 1)
-                else:
-                    stack.insert(0, 0)
-            else:
-                sym_expression = (first > second)
-                stack.insert(0, sym_expression)
-        else:
-            raise ValueError('STACK underflow')
     elif instr_parts[0] == "ISZERO":
+        # Tricky: this instruction works on both boolean and integer,
+        # when we have a symbolic expression, type error might occur
+        # Currently handled by try and catch
         if len(stack) > 0:
             first = stack.pop(0)
             if isinstance(first, (int, long)):
@@ -339,18 +481,10 @@ def sym_exec_ins(start, instr, stack, mem, svars):
                 else:
                     stack.insert(0, 0)
             else:
-                sym_expression = Not(first)
-                stack.insert(0, sym_expression)
-        else:
-            raise ValueError('STACK underflow')
-    elif instr_parts[0] == "NOT":
-        if len(stack) > 0:
-            first = stack.pop(0)
-            if isinstance(first, (int, long)):
-                complement = -1 - first
-                stack.insert(0, complement)
-            else:
-                sym_expression = function_not(first)
+                try:
+                    sym_expression = (first == 0)
+                except Z3Exception:
+                    sym_expression = Not(first)
                 stack.insert(0, sym_expression)
         else:
             raise ValueError('STACK underflow')
@@ -390,6 +524,40 @@ def sym_exec_ins(start, instr, stack, mem, svars):
                 stack.insert(0, sym_expression)
         else:
             raise ValueError('STACK underflow')
+    elif instr_parts[0] == "NOT":
+        if len(stack) > 0:
+            first = stack.pop(0)
+            if isinstance(first, (int, long)):
+                complement = -1 - first
+                stack.insert(0, complement)
+            else:
+                sym_expression = function_not(first)
+                stack.insert(0, sym_expression)
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[0] == "BYTE":
+        raise ValueError('BYTE is not yet handled')
+    #
+    # 20s: SHA3
+    #
+    elif instr_parts[0] == "SHA3":
+        raise ValueError('SHA3 is not yet handled')
+    #
+    # 30s: Environment Information
+    #
+    elif instr_parts[0].startswith('PUSH', 0):  # this is a push instruction
+        pushed_value = int(instr_parts[1], 16)
+        stack.insert(0, pushed_value)
+    elif instr_parts[0] == "MSTORE":
+        if len(stack) > 1:
+            stored_address = stack.pop(0)
+            stored_value = stack.pop(0)
+            if isinstance(stored_address, (int, long)):
+                mem[stored_address] = stored_value  # note that the stored_value could be unknown
+            else:
+                mem.clear()  # very conservative
+        else:
+            raise ValueError('STACK underflow')
     elif instr_parts[0] == "JUMPDEST":
         pass
     elif instr_parts[0] == "CALLDATALOAD":  # from input data from environment
@@ -401,6 +569,11 @@ def sym_exec_ins(start, instr, stack, mem, svars):
             stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
+    elif instr_parts[0] == "CALLDATASIZE":  # from input data from environment
+        new_var_name = gen.gen_data_size()
+        svars.append(new_var_name)
+        new_var = Int(new_var_name)
+        stack.insert(0, new_var)
     elif instr_parts[0].startswith("DUP", 0):
         position = int(instr_parts[0][3:], 10) - 1
         if len(stack) > position:
@@ -466,8 +639,6 @@ def sym_exec_ins(start, instr, stack, mem, svars):
             pass
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "STOP":
-        return
     elif instr_parts[0] == "SUICIDE":
         # TODO
         return
@@ -475,8 +646,7 @@ def sym_exec_ins(start, instr, stack, mem, svars):
         print "UNKNOWN INSTRUCTION: " + instr_parts[0]
         raise Exception('UNKNOWN INSTRUCTION')
 
-    print "DEBUG INFO: "
-    print "EXECUTED: " + instr
+
     print_state(start, stack, mem)
 
 
