@@ -1,0 +1,10 @@
+05_greeter.sol //setGreeting() and greet()
+20_value_incrementer.sol // getIteration() and increment()
+21_value_incrementer2.sol
+22_value_incrementer2.sol
+25_msg_examiner.sol
+45_ping.sol && 45_pong.sol
+46_ping_via_send.sol & 46_pong_via_send.sol
+57_fixedbytearray_to_byte_array.sol
+60_array_receiver_and_returner.sol
+puzzle.sol

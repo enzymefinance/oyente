@@ -16,6 +16,9 @@ class Generator:
         self.countdata = max(position + 1, self.countdata)
         return "Id_" + str(position)
 
+    def gen_data_size(self):
+        return "Id_size"
+
     def gen_mem_var(self, address):
         return "mem_" + str(address)
 
