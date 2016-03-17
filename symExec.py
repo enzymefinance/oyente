@@ -171,18 +171,19 @@ def full_sym_exec():
     svars = []
     visited = []
     mem = {}
+    owner_mem = {}
     analysis = init_analysis()
-    sym_exec_block(0, visited, stack, mem, svars, analysis)
+    sym_exec_block(0, visited, stack, mem, owner_mem, svars, analysis)
 
 
 # Symbolically executing a block from the start address
-def sym_exec_block(start, visited, stack, mem, svars, analysis):
+def sym_exec_block(start, visited, stack, mem, owner_mem, svars, analysis):
     if start < 0:
         print "WARNING: UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH"
         return
     block_ins = vertices[start].get_instructions()
     for instr in block_ins:
-        sym_exec_ins(start, instr, stack, mem, svars, analysis)
+        sym_exec_ins(start, instr, stack, mem, owner_mem, svars, analysis)
     visited.append(start)
     if jump_type[start] == "terminal":
         print "TERMINATING A PATH ..."
@@ -192,18 +193,20 @@ def sym_exec_block(start, visited, stack, mem, svars, analysis):
         successor = vertices[start].get_jump_target()
         stack1 = list(stack)
         mem1 = dict(mem)
+        owner_mem1 = dict(owner_mem)
         visited1 = list(visited)
         svars1 = list(svars)
         analysis1 = dict(analysis)
-        sym_exec_block(successor, visited1, stack1, mem1, svars1, analysis1)
+        sym_exec_block(successor, visited1, stack1, mem1, owner_mem1, svars1, analysis1)
     elif jump_type[start] == "falls_to":  # just follow to the next basic block
         successor = vertices[start].get_falls_to()
         stack1 = list(stack)
         mem1 = dict(mem)
+        owner_mem1 = dict(owner_mem)
         visited1 = list(visited)
         svars1 = list(svars)
         analysis1 = dict(analysis)
-        sym_exec_block(successor, visited1, stack1, mem1, svars1, analysis1)
+        sym_exec_block(successor, visited1, stack1, mem1, owner_mem1, svars1, analysis1)
     elif jump_type[start] == "conditional":  # executing "JUMPI"
         '''
         A choice point, we proceed with depth first search
@@ -222,10 +225,11 @@ def sym_exec_block(start, visited, stack, mem, svars, analysis):
             left_branch = vertices[start].get_jump_target()
             stack1 = list(stack)
             mem1 = dict(mem)
+            owner_mem1 = dict(owner_mem)
             visited1 = list(visited)
             svars1 = list(svars)
             analysis1 = dict(analysis)
-            sym_exec_block(left_branch, visited1, stack1, mem1, svars1, analysis1)
+            sym_exec_block(left_branch, visited1, stack1, mem1, owner_mem1, svars1, analysis1)
 
         solver.pop()  # POP SOLVER CONTEXT
 
@@ -246,10 +250,11 @@ def sym_exec_block(start, visited, stack, mem, svars, analysis):
             right_branch = vertices[start].get_falls_to()
             stack1 = list(stack)
             mem1 = dict(mem)
+            owner_mem1 = dict(owner_mem)
             visited1 = list(visited)
             svars1 = list(svars)
             analysis1 = dict(analysis)
-            sym_exec_block(right_branch, visited1, stack1, mem1, svars1, analysis1)
+            sym_exec_block(right_branch, visited1, stack1, mem1, owner_mem1, svars1, analysis1)
 
         solver.pop()  # POP SOLVER CONTEXT
     else:
@@ -257,9 +262,14 @@ def sym_exec_block(start, visited, stack, mem, svars, analysis):
 
 
 # Symbolically executing an instruction
-def sym_exec_ins(start, instr, stack, mem, svars, analysis):
+def sym_exec_ins(start, instr, stack, mem, owner_mem, svars, analysis):
     instr_parts = str.split(instr, ' ')
-    update_analysis(analysis, instr_parts[0], stack, mem)
+
+    # collecting the analysis result by calling this skeletal function
+    # this should be done before symbolically executing the instruction,
+    # since SE will modify the stack and mem
+    update_analysis(analysis, instr_parts[0], stack, mem, owner_mem)
+
     print "DEBUG INFO: "
     print "EXECUTING: " + instr
 
@@ -545,21 +555,17 @@ def sym_exec_ins(start, instr, stack, mem, svars, analysis):
     #
     # 30s: Environment Information
     #
-    elif instr_parts[0].startswith('PUSH', 0):  # this is a push instruction
-        pushed_value = int(instr_parts[1], 16)
-        stack.insert(0, pushed_value)
-    elif instr_parts[0] == "MSTORE":
-        if len(stack) > 1:
-            stored_address = stack.pop(0)
-            stored_value = stack.pop(0)
-            if isinstance(stored_address, (int, long)):
-                mem[stored_address] = stored_value  # note that the stored_value could be unknown
-            else:
-                mem.clear()  # very conservative
-        else:
-            raise ValueError('STACK underflow')
-    elif instr_parts[0] == "JUMPDEST":
-        pass
+    elif instr_parts[0] == "ADDRESS":  # get address of currently executing account
+        new_var_name = "Ia"
+        svars.append(new_var_name)
+        new_var = Int(new_var_name)
+        stack.insert(0, new_var)
+    elif instr_parts[0] == "CALLER":  # get address of the account
+        # that is directly responsible for this execution
+        new_var_name = "Is"
+        svars.append(new_var_name)
+        new_var = Int(new_var_name)
+        stack.insert(0, new_var)
     elif instr_parts[0] == "CALLDATALOAD":  # from input data from environment
         if len(stack) > 0:
             position = stack.pop(0)
@@ -574,19 +580,111 @@ def sym_exec_ins(start, instr, stack, mem, svars, analysis):
         svars.append(new_var_name)
         new_var = Int(new_var_name)
         stack.insert(0, new_var)
-    elif instr_parts[0].startswith("DUP", 0):
-        position = int(instr_parts[0][3:], 10) - 1
-        if len(stack) > position:
-            duplicate = stack[position]
-            stack.insert(0, duplicate)
+    #
+    #  40s: Block Information
+    #
+    elif instr_parts[0] == "BLOCKHASH":  # information from block header
+        if len(stack) > 0:
+            stack.pop(0)
+            new_var_name = "IH_blockhash"
+            svars.append(new_var_name)
+            new_var = Int(new_var_name)
+            stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0].startswith("SWAP", 0):
-        position = int(instr_parts[0][4:], 10)
-        if len(stack) > position:
-            temp = stack[position]
-            stack[position] = stack[0]
-            stack[0] = temp
+    elif instr_parts[0] == "COINBASE":  # information from block header
+        new_var_name = "IH_c"
+        svars.append(new_var_name)
+        new_var = Int(new_var_name)
+        stack.insert(0, new_var)
+    elif instr_parts[0] == "TIMESTAMP":  # information from block header
+        new_var_name = "IH_s"
+        svars.append(new_var_name)
+        new_var = Int(new_var_name)
+        stack.insert(0, new_var)
+    elif instr_parts[0] == "NUMBER":  # information from block header
+        new_var_name = "IH_i"
+        svars.append(new_var_name)
+        new_var = Int(new_var_name)
+        stack.insert(0, new_var)
+    elif instr_parts[0] == "DIFFICULTY":  # information from block header
+        new_var_name = "IH_d"
+        svars.append(new_var_name)
+        new_var = Int(new_var_name)
+        stack.insert(0, new_var)
+    elif instr_parts[0] == "GASLIMIT":  # information from block header
+        new_var_name = "IH_l"
+        svars.append(new_var_name)
+        new_var = Int(new_var_name)
+        stack.insert(0, new_var)
+    #
+    #  50s: Stack, Memory, Storage, and Flow Information
+    #
+    elif instr_parts[0] == "POP":
+        if len(stack) > 0:
+            stack.pop(0)
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[0] == "MLOAD":
+        if len(stack) > 0:
+            address = stack.pop(0)
+            if isinstance(address, (int, long)) and address in mem:
+                value = mem[address]
+                stack.insert(0, value)
+            else:
+                new_var_name = gen.gen_mem_var(address)
+                svars.append(new_var_name)
+                new_var = Int(new_var_name)
+                stack.insert(0, new_var)
+                mem[address] = new_var
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[0] == "MSTORE":
+        if len(stack) > 1:
+            stored_address = stack.pop(0)
+            stored_value = stack.pop(0)
+            if isinstance(stored_address, (int, long)):
+                mem[stored_address] = stored_value  # note that the stored_value could be unknown
+            else:
+                mem.clear()  # very conservative
+                mem[stored_address] = stored_value
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[0] == "MSTORE8":
+        if len(stack) > 1:
+            stored_address = stack.pop(0)
+            temp = stack.pop(0)
+            stored_value = temp % 256  # get the least byte
+            if isinstance(stored_address, (int, long)):
+                mem[stored_address] = stored_value  # note that the stored_value could be unknown
+            else:
+                mem.clear()  # very conservative
+                mem[stored_address] = stored_value
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[0] == "SLOAD":
+        if len(stack) > 0:
+            address = stack.pop(0)
+            if isinstance(address, (int, long)) and address in owner_mem:
+                value = owner_mem[address]
+                stack.insert(0, value)
+            else:
+                new_var_name = gen.gen_owner_store_var(address)
+                svars.append(new_var_name)
+                new_var = Int(new_var_name)
+                stack.insert(0, new_var)
+                owner_mem[address] = new_var
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[0] == "SSTORE":
+        if len(stack) > 1:
+            stored_address = stack.pop(0)
+            stored_value = stack.pop(0)
+            if isinstance(stored_address, (int, long)):
+                owner_mem[stored_address] = stored_value  # note that the stored_value could be unknown
+            else:
+                owner_mem.clear()  # very conservative
+                owner_mem[stored_address] = stored_value
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "JUMP":
@@ -614,23 +712,60 @@ def sym_exec_ins(start, instr, stack, mem, svars, analysis):
                 edges[start].append(target_address)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "POP":
-        if len(stack) > 0:
-            stack.pop(0)
+    elif instr_parts[0] == "PC":
+        # this is not hard, but tedious. Let's skip it for now
+        raise Exception('Must implement PC now')
+    elif instr_parts[0] == "MSIZE":
+        raise Exception('Must implement MSIZE now')
+    elif instr_parts[0] == "GAS":
+        # In general, we do not have this precisely. It depends on both
+        # the initial gas and the amount has been depleted
+        raise Exception('Must implement GAS now')
+    elif instr_parts[0] == "JUMPDEST":
+        # Literally do nothing
+        pass
+    #
+    #  60s & 70s: Push Operations
+    #
+    elif instr_parts[0].startswith('PUSH', 0):  # this is a push instruction
+        pushed_value = int(instr_parts[1], 16)
+        stack.insert(0, pushed_value)
+    #
+    #  80s: Duplication Operations
+    #
+    elif instr_parts[0].startswith("DUP", 0):
+        position = int(instr_parts[0][3:], 10) - 1
+        if len(stack) > position:
+            duplicate = stack[position]
+            stack.insert(0, duplicate)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "MLOAD":
-        if len(stack) > 0:
-            address = stack.pop(0)
-            if isinstance(address, (int, long)) and address in mem:
-                value = mem[address]
-                stack.insert(0, value)
-            else:
-                new_var_name = gen.gen_mem_var(address)
-                svars.append(new_var_name)
-                new_var = Int(new_var_name)
-                stack.insert(0, new_var)
-                mem[address] = new_var
+
+    #
+    #  90s: Swap Operations
+    #
+    elif instr_parts[0].startswith("SWAP", 0):
+        position = int(instr_parts[0][4:], 10)
+        if len(stack) > position:
+            temp = stack[position]
+            stack[position] = stack[0]
+            stack[0] = temp
+        else:
+            raise ValueError('STACK underflow')
+
+    #
+    #  a0s: Logging Operations
+    #
+    elif instr_parts[0] in ("LOG0", "LOG1", "LOG2", "LOG3", "LOG4"):
+        # We do not simulate these logging operations
+        num_of_pops = 2 + int(instr_parts[0][3:])
+        while num_of_pops > 0:
+            stack.pop(0)
+            num_of_pops -= 1
+
+    #
+    #  f0s: System Operations
+    #
     elif instr_parts[0] == "RETURN":
         if len(stack) > 1:
             stack.pop(0)
@@ -640,20 +775,22 @@ def sym_exec_ins(start, instr, stack, mem, svars, analysis):
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "SUICIDE":
+        stack.pop(0)
         # TODO
         return
+
     else:
         print "UNKNOWN INSTRUCTION: " + instr_parts[0]
         raise Exception('UNKNOWN INSTRUCTION')
 
+    print_state(start, stack, mem, owner_mem)
 
-    print_state(start, stack, mem)
 
-
-def print_state(block_address, stack, mem):
+def print_state(block_address, stack, mem, owner_mem):
     print "Address: %d" % block_address
     print str(stack)
     print str(mem)
+    print str(owner_mem)
 
 
 main()
