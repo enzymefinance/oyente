@@ -5,6 +5,7 @@ import tokenize
 from tokenize import NUMBER, NAME, NEWLINE
 from basicblock import BasicBlock
 from analysis import *
+import copy
 
 count_unresolved_jumps = 0
 
@@ -30,17 +31,18 @@ def main():
     if len(sys.argv) != 2:
         print "Usage: python core.py <disassembled file>"
         return
-    build_cfg()
+    build_cfg_and_analyze()
     print_cfg()
 
 
-def build_cfg():
+def build_cfg_and_analyze():
     with open(sys.argv[1], 'r') as disasm_file:
         disasm_file.readline()  # Remove first line
         tokens = tokenize.generate_tokens(disasm_file.readline)
         collect_vertices(tokens)
         construct_bb()
-        construct_edges()
+        construct_static_edges()
+        full_sym_exec()  # jump targets are constructed on the fly
 
 
 def print_cfg():
@@ -150,9 +152,8 @@ def construct_bb():
         edges[key] = []
 
 
-def construct_edges():
+def construct_static_edges():
     add_falls_to()  # these edges are static
-    full_sym_exec()  # these edges might be dynamic
 
 
 def add_falls_to():
@@ -165,26 +166,75 @@ def add_falls_to():
             vertices[key].set_falls_to(target)
 
 
+def get_init_global_state(path_conditions_and_vars):
+    global_state = { "balance" : {} }
+    for new_var_name in ("Iv", "Is", "Ia"):
+        if new_var_name not in path_conditions_and_vars:
+            new_var = Int(new_var_name)
+            path_conditions_and_vars[new_var_name] = new_var
+
+    init_is = Int("init_Is")
+    init_ia = Int("init_Ia")
+    deposited_value = path_conditions_and_vars["Iv"]
+
+    constraint = (deposited_value >= 0)
+    path_conditions_and_vars["path_condition"].append(constraint)
+    constraint = (init_is >= deposited_value)
+    path_conditions_and_vars["path_condition"].append(constraint)
+    constraint = (init_ia >= 0)
+    path_conditions_and_vars["path_condition"].append(constraint)
+
+    # update the balances of the "caller" and "callee"
+
+    global_state["balance"]["Is"] = (init_is - deposited_value)
+    global_state["balance"]["Ia"] = (init_ia + deposited_value)
+
+    # the state of the current current contract
+    global_state["Ia"] = {}
+
+    return global_state
+
+
 def full_sym_exec():
     # executing, starting from beginning
     stack = []
-    svars = []
+    path_conditions_and_vars = {"path_condition" : []}
     visited = []
     mem = {}
-    owner_mem = {}
+    global_state = get_init_global_state(path_conditions_and_vars)  # this is init global state for this particular execution
     analysis = init_analysis()
-    sym_exec_block(0, visited, stack, mem, owner_mem, svars, analysis)
+    sym_exec_block(0, visited, stack, mem, global_state, path_conditions_and_vars, analysis)
+
+
+def my_copy_dict(input):
+    output = {}
+    for key in input:
+        if isinstance(input[key], list):
+            output[key] = list(input[key])
+        elif isinstance(input[key], dict):
+            output[key] = dict(input[key])
+        else:
+            output[key] = input[key]
+
+    return output
 
 
 # Symbolically executing a block from the start address
-def sym_exec_block(start, visited, stack, mem, owner_mem, svars, analysis):
+def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and_vars, analysis):
     if start < 0:
         print "WARNING: UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH"
         return
+    print "\nDEBUG: Reach block address %d \n" % start
+
+    # Execute every instruction, one at a time
     block_ins = vertices[start].get_instructions()
     for instr in block_ins:
-        sym_exec_ins(start, instr, stack, mem, owner_mem, svars, analysis)
+        sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_vars, analysis)
+
+    # Mark that this basic block in the visited blocks
     visited.append(start)
+
+    # Go to next Basic Block(s)
     if jump_type[start] == "terminal":
         print "TERMINATING A PATH ..."
         display_analysis(analysis)
@@ -193,20 +243,20 @@ def sym_exec_block(start, visited, stack, mem, owner_mem, svars, analysis):
         successor = vertices[start].get_jump_target()
         stack1 = list(stack)
         mem1 = dict(mem)
-        owner_mem1 = dict(owner_mem)
+        global_state1 = my_copy_dict(global_state)
         visited1 = list(visited)
-        svars1 = list(svars)
+        path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
         analysis1 = dict(analysis)
-        sym_exec_block(successor, visited1, stack1, mem1, owner_mem1, svars1, analysis1)
+        sym_exec_block(successor, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
     elif jump_type[start] == "falls_to":  # just follow to the next basic block
         successor = vertices[start].get_falls_to()
         stack1 = list(stack)
         mem1 = dict(mem)
-        owner_mem1 = dict(owner_mem)
+        global_state1 = my_copy_dict(global_state)
         visited1 = list(visited)
-        svars1 = list(svars)
+        path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
         analysis1 = dict(analysis)
-        sym_exec_block(successor, visited1, stack1, mem1, owner_mem1, svars1, analysis1)
+        sym_exec_block(successor, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
     elif jump_type[start] == "conditional":  # executing "JUMPI"
         '''
         A choice point, we proceed with depth first search
@@ -225,11 +275,12 @@ def sym_exec_block(start, visited, stack, mem, owner_mem, svars, analysis):
             left_branch = vertices[start].get_jump_target()
             stack1 = list(stack)
             mem1 = dict(mem)
-            owner_mem1 = dict(owner_mem)
+            global_state1 = my_copy_dict(global_state)
             visited1 = list(visited)
-            svars1 = list(svars)
+            path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
+            path_conditions_and_vars1["path_condition"].append(branch_expression)
             analysis1 = dict(analysis)
-            sym_exec_block(left_branch, visited1, stack1, mem1, owner_mem1, svars1, analysis1)
+            sym_exec_block(left_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
 
         solver.pop()  # POP SOLVER CONTEXT
 
@@ -237,7 +288,7 @@ def sym_exec_block(start, visited, stack, mem, owner_mem, svars, analysis):
         negated_branch_expression = simplify(Not(branch_expression))
         solver.add(negated_branch_expression)
 
-        print "Branch expression: " + str(negated_branch_expression)
+        print "Negated branch expression: " + str(negated_branch_expression)
         #raw_input("Press Enter to continue...\n")
 
         if solver.check() == unsat:
@@ -250,27 +301,29 @@ def sym_exec_block(start, visited, stack, mem, owner_mem, svars, analysis):
             right_branch = vertices[start].get_falls_to()
             stack1 = list(stack)
             mem1 = dict(mem)
-            owner_mem1 = dict(owner_mem)
+            global_state1 = my_copy_dict(global_state)
             visited1 = list(visited)
-            svars1 = list(svars)
+            path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
+            path_conditions_and_vars1["path_condition"].append(negated_branch_expression)
             analysis1 = dict(analysis)
-            sym_exec_block(right_branch, visited1, stack1, mem1, owner_mem1, svars1, analysis1)
+            sym_exec_block(right_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
 
         solver.pop()  # POP SOLVER CONTEXT
+
     else:
         raise Exception('Unknown Jump-Type')
 
 
 # Symbolically executing an instruction
-def sym_exec_ins(start, instr, stack, mem, owner_mem, svars, analysis):
+def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_vars, analysis):
     instr_parts = str.split(instr, ' ')
 
     # collecting the analysis result by calling this skeletal function
     # this should be done before symbolically executing the instruction,
     # since SE will modify the stack and mem
-    update_analysis(analysis, instr_parts[0], stack, mem, owner_mem)
+    update_analysis(analysis, instr_parts[0], stack, mem, global_state)
 
-    print "DEBUG INFO: "
+    print "=============================="
     print "EXECUTING: " + instr
 
     #
@@ -557,28 +610,48 @@ def sym_exec_ins(start, instr, stack, mem, owner_mem, svars, analysis):
     #
     elif instr_parts[0] == "ADDRESS":  # get address of currently executing account
         new_var_name = "Ia"
-        svars.append(new_var_name)
-        new_var = Int(new_var_name)
+        if new_var_name in path_conditions_and_vars:
+            new_var = path_conditions_and_vars[new_var_name]
+        else:
+            new_var = Int(new_var_name)
+            path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
     elif instr_parts[0] == "CALLER":  # get address of the account
         # that is directly responsible for this execution
         new_var_name = "Is"
-        svars.append(new_var_name)
-        new_var = Int(new_var_name)
+        if new_var_name in path_conditions_and_vars:
+            new_var = path_conditions_and_vars[new_var_name]
+        else:
+            new_var = Int(new_var_name)
+            path_conditions_and_vars[new_var_name] = new_var
+        stack.insert(0, new_var)
+    elif instr_parts[0] == "CALLVALUE":  # get value of this transaction
+        new_var_name = "Iv"
+        if new_var_name in path_conditions_and_vars:
+            new_var = path_conditions_and_vars[new_var_name]
+        else:
+            new_var = Int(new_var_name)
+            path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
     elif instr_parts[0] == "CALLDATALOAD":  # from input data from environment
         if len(stack) > 0:
             position = stack.pop(0)
             new_var_name = gen.gen_data_var(position)
-            svars.append(new_var_name)
-            new_var = Int(new_var_name)
+            if new_var_name in path_conditions_and_vars:
+                new_var = path_conditions_and_vars[new_var_name]
+            else:
+                new_var = Int(new_var_name)
+                path_conditions_and_vars[new_var_name] = new_var
             stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "CALLDATASIZE":  # from input data from environment
         new_var_name = gen.gen_data_size()
-        svars.append(new_var_name)
-        new_var = Int(new_var_name)
+        if new_var_name in path_conditions_and_vars:
+            new_var = path_conditions_and_vars[new_var_name]
+        else:
+            new_var = Int(new_var_name)
+            path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
     #
     #  40s: Block Information
@@ -587,35 +660,53 @@ def sym_exec_ins(start, instr, stack, mem, owner_mem, svars, analysis):
         if len(stack) > 0:
             stack.pop(0)
             new_var_name = "IH_blockhash"
-            svars.append(new_var_name)
-            new_var = Int(new_var_name)
+            if new_var_name in path_conditions_and_vars:
+                new_var = path_conditions_and_vars[new_var_name]
+            else:
+                new_var = Int(new_var_name)
+                path_conditions_and_vars[new_var_name] = new_var
             stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "COINBASE":  # information from block header
         new_var_name = "IH_c"
-        svars.append(new_var_name)
-        new_var = Int(new_var_name)
+        if new_var_name in path_conditions_and_vars:
+            new_var = path_conditions_and_vars[new_var_name]
+        else:
+            new_var = Int(new_var_name)
+            path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
     elif instr_parts[0] == "TIMESTAMP":  # information from block header
         new_var_name = "IH_s"
-        svars.append(new_var_name)
-        new_var = Int(new_var_name)
+        if new_var_name in path_conditions_and_vars:
+            new_var = path_conditions_and_vars[new_var_name]
+        else:
+            new_var = Int(new_var_name)
+            path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
     elif instr_parts[0] == "NUMBER":  # information from block header
         new_var_name = "IH_i"
-        svars.append(new_var_name)
-        new_var = Int(new_var_name)
+        if new_var_name in path_conditions_and_vars:
+            new_var = path_conditions_and_vars[new_var_name]
+        else:
+            new_var = Int(new_var_name)
+            path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
     elif instr_parts[0] == "DIFFICULTY":  # information from block header
         new_var_name = "IH_d"
-        svars.append(new_var_name)
-        new_var = Int(new_var_name)
+        if new_var_name in path_conditions_and_vars:
+            new_var = path_conditions_and_vars[new_var_name]
+        else:
+            new_var = Int(new_var_name)
+            path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
     elif instr_parts[0] == "GASLIMIT":  # information from block header
         new_var_name = "IH_l"
-        svars.append(new_var_name)
-        new_var = Int(new_var_name)
+        if new_var_name in path_conditions_and_vars:
+            new_var = path_conditions_and_vars[new_var_name]
+        else:
+            new_var = Int(new_var_name)
+            path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
     #
     #  50s: Stack, Memory, Storage, and Flow Information
@@ -633,8 +724,11 @@ def sym_exec_ins(start, instr, stack, mem, owner_mem, svars, analysis):
                 stack.insert(0, value)
             else:
                 new_var_name = gen.gen_mem_var(address)
-                svars.append(new_var_name)
-                new_var = Int(new_var_name)
+                if new_var_name in path_conditions_and_vars:
+                    new_var = path_conditions_and_vars[new_var_name]
+                else:
+                    new_var = Int(new_var_name)
+                    path_conditions_and_vars[new_var_name] = new_var
                 stack.insert(0, new_var)
                 mem[address] = new_var
         else:
@@ -665,15 +759,18 @@ def sym_exec_ins(start, instr, stack, mem, owner_mem, svars, analysis):
     elif instr_parts[0] == "SLOAD":
         if len(stack) > 0:
             address = stack.pop(0)
-            if isinstance(address, (int, long)) and address in owner_mem:
-                value = owner_mem[address]
+            if isinstance(address, (int, long)) and address in global_state["Ia"]:
+                value = global_state["Ia"][address]
                 stack.insert(0, value)
             else:
                 new_var_name = gen.gen_owner_store_var(address)
-                svars.append(new_var_name)
-                new_var = Int(new_var_name)
+                if new_var_name in path_conditions_and_vars:
+                    new_var = path_conditions_and_vars[new_var_name]
+                else:
+                    new_var = Int(new_var_name)
+                    path_conditions_and_vars[new_var_name] = new_var
                 stack.insert(0, new_var)
-                owner_mem[address] = new_var
+                global_state["Ia"][address] = new_var
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "SSTORE":
@@ -681,10 +778,10 @@ def sym_exec_ins(start, instr, stack, mem, owner_mem, svars, analysis):
             stored_address = stack.pop(0)
             stored_value = stack.pop(0)
             if isinstance(stored_address, (int, long)):
-                owner_mem[stored_address] = stored_value  # note that the stored_value could be unknown
+                global_state["Ia"][stored_address] = stored_value  # note that the stored_value could be unknown
             else:
-                owner_mem.clear()  # very conservative
-                owner_mem[stored_address] = stored_value
+                global_state["Ia"].clear()  # very conservative
+                global_state["Ia"][stored_address] = stored_value  # note that the stored_value could be unknown
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "JUMP":
@@ -783,14 +880,13 @@ def sym_exec_ins(start, instr, stack, mem, owner_mem, svars, analysis):
         print "UNKNOWN INSTRUCTION: " + instr_parts[0]
         raise Exception('UNKNOWN INSTRUCTION')
 
-    print_state(start, stack, mem, owner_mem)
+    print_state(start, stack, mem, global_state)
 
 
-def print_state(block_address, stack, mem, owner_mem):
-    print "Address: %d" % block_address
-    print str(stack)
-    print str(mem)
-    print str(owner_mem)
+def print_state(block_address, stack, mem, global_state):
+    print "STACK: " + str(stack)
+    print "MEM: " + str(mem)
+    print "GLOBAL STATE: " + str(global_state)
 
 
 main()
