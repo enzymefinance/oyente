@@ -1,5 +1,4 @@
 contract Puzzle{
-	address public sender;
 	address public owner;
 	bool public locked;
 	uint public reward;

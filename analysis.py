@@ -19,12 +19,15 @@ def display_analysis(analysis):
     print "Gas paid for memory usage: %d" % analysis["gas_mem"]
 
 
-def update_analysis(analysis, opcode, stack, mem):
+def update_analysis(analysis, opcode, stack, mem, global_state):
     gas_increment = get_ins_cost(opcode)
     if opcode in ("LOG0", "LOG1", "LOG2", "LOG3", "LOG4"):
         gas_increment += GCOST["Glogdata"] * stack[1]
     elif opcode == "EXP" and isinstance(stack[1], (int, long)) and stack[1] > 0:
         gas_increment += GCOST["Gexpbyte"] * (1 + floor(log(stack[1], 256)))
+    elif opcode == "SSTORE":
+        # TODO
+        pass
 
     analysis["gas"] = analysis["gas"] + gas_increment
 

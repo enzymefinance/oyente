@@ -22,6 +22,9 @@ class Generator:
     def gen_mem_var(self, address):
         return "mem_" + str(address)
 
-    def get_arbitrary_var(self):
+    def gen_arbitrary_var(self):
         self.count += 1
         return "some_var_" + str(self.count)
+
+    def gen_owner_store_var(self, position):
+        return "Ia_store_" + str(position)
