@@ -16,6 +16,7 @@ instructions = {}  # capturing all the instructions, keys are corresponding addr
 jump_type = {}  # capturing the "jump type" of each basic block
 vertices = {}
 edges = {}
+money_flow_all_paths = []
 
 # Z3 solver
 solver = Solver()
@@ -54,6 +55,13 @@ def compare_stack_unit_test(stack):
 
 def main():
     build_cfg_and_analyze()
+    print "========================="
+    print "MONEY FLOW OF ALL PATHS:"
+    i = 1
+    for flow in money_flow_all_paths:
+        print "%d. " + str(flow) % i
+        i = i + 1
+
     # print_cfg()
 
 
@@ -273,6 +281,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
     if jump_type[start] == "terminal":
         print "TERMINATING A PATH ..."
         display_analysis(analysis)
+        money_flow_all_paths.append(analysis["money_flow"])
         compare_stack_unit_test(stack)
         # print "Path condition = " + str(path_conditions_and_vars["path_condition"])
         raw_input("Press Enter to continue...\n")
@@ -1047,7 +1056,21 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "SUICIDE":
-        stack.pop(0)
+        recipient = stack.pop(0)
+        transfer_amount = global_state["balance"]["Ia"]
+        global_state["balance"]["Ia"] = 0
+        if isinstance(recipient, (int, long)):
+            new_address_name = "concrete_address_" + str(recipient)
+        else:
+            new_address_name = gen.gen_arbitrary_address_var()
+        old_balance_name = gen.gen_arbitrary_var()
+        old_balance = BitVec(old_balance_name, 256)
+        path_conditions_and_vars[old_balance_name] = old_balance
+        constraint = (old_balance >= 0)
+        solver.add(constraint)
+        path_conditions_and_vars["path_condition"].append(constraint)
+        new_balance = (old_balance + transfer_amount)
+        global_state["balance"][new_address_name] = new_balance
         # TODO
         return
 
