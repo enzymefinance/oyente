@@ -20,12 +20,6 @@ edges = {}
 # Z3 solver
 solver = Solver()
 
-# uninterpreted functions for bit-wise operations
-function_not = Function('not', IntSort(), IntSort())
-function_and = Function('and', IntSort(), IntSort(), IntSort())
-function_or = Function('or', IntSort(), IntSort(), IntSort())
-function_xor = Function('xor', IntSort(), IntSort(), IntSort())
-
 
 def main():
     if len(sys.argv) != 2:
@@ -168,20 +162,22 @@ def add_falls_to():
 
 def get_init_global_state(path_conditions_and_vars):
     global_state = { "balance" : {} }
-    for new_var_name in ("Iv", "Is", "Ia"):
+    for new_var_name in ("Is", "Ia"):
         if new_var_name not in path_conditions_and_vars:
-            new_var = Int(new_var_name)
+            new_var = BitVec(new_var_name, 256)
             path_conditions_and_vars[new_var_name] = new_var
 
-    init_is = Int("init_Is")
-    init_ia = Int("init_Ia")
-    deposited_value = path_conditions_and_vars["Iv"]
+    deposited_value = BitVec("Iv", 256)
+    path_conditions_and_vars["Iv"] = deposited_value
 
-    constraint = (deposited_value >= 0)
+    init_is = BitVec("init_Is", 256)
+    init_ia = BitVec("init_Ia", 256)
+
+    constraint = (deposited_value >= BitVecVal(0, 256))
     path_conditions_and_vars["path_condition"].append(constraint)
     constraint = (init_is >= deposited_value)
     path_conditions_and_vars["path_condition"].append(constraint)
-    constraint = (init_ia >= 0)
+    constraint = (init_ia >= BitVecVal(0, 256))
     path_conditions_and_vars["path_condition"].append(constraint)
 
     # update the balances of the "caller" and "callee"
@@ -224,10 +220,20 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
     if start < 0:
         print "WARNING: UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH"
         return
+
     print "\nDEBUG: Reach block address %d \n" % start
 
+    if start in visited:
+        print "Seeing a loop. Terminating this path ... "
+        return
+
     # Execute every instruction, one at a time
-    block_ins = vertices[start].get_instructions()
+    try:
+        block_ins = vertices[start].get_instructions()
+    except KeyError:
+        print "This path results in an exception"
+        return
+
     for instr in block_ins:
         sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_vars, analysis)
 
@@ -238,7 +244,8 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
     if jump_type[start] == "terminal":
         print "TERMINATING A PATH ..."
         display_analysis(analysis)
-        raw_input("Press Enter to continue...\n")
+        print "Path condition = " + str(path_conditions_and_vars["path_condition"])
+        #raw_input("Press Enter to continue...\n")
     elif jump_type[start] == "unconditional":  # executing "JUMP"
         successor = vertices[start].get_jump_target()
         stack1 = list(stack)
@@ -261,7 +268,8 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         '''
         A choice point, we proceed with depth first search
         '''
-        branch_expression = simplify(vertices[start].get_branch_expression())
+        branch_expression = vertices[start].get_branch_expression()
+        branch_expression = simplify(branch_expression)
         print "Branch expression: " + str(branch_expression)
         #raw_input("Press Enter to continue...\n")
 
@@ -270,7 +278,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
 
         if solver.check() == unsat:
             print "INFEASIBLE PATH DETECTED"
-            raw_input("Press Enter to continue...\n")
+            #raw_input("Press Enter to continue...\n")
         else:
             left_branch = vertices[start].get_jump_target()
             stack1 = list(stack)
@@ -296,7 +304,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
             # no need to check for the negated condition, but we can immediately go into
             # the else branch
             print "INFEASIBLE PATH DETECTED"
-            raw_input("Press Enter to continue...\n")
+            #raw_input("Press Enter to continue...\n")
         else:
             right_branch = vertices[start].get_falls_to()
             stack1 = list(stack)
@@ -335,6 +343,11 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 1:
             first = stack.pop(0)
             second = stack.pop(0)
+            # Type conversion is needed when they are mismatched
+            if isinstance(first, (int, long)) and not isinstance(second, (int, long)):
+                first = BitVecVal(first, 256)
+            elif not isinstance(first, (int, long)) and isinstance(second, (int, long)):
+                second = BitVecVal(second, 256)
             computed = first + second
             stack.insert(0, computed)
         else:
@@ -343,6 +356,10 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 1:
             first = stack.pop(0)
             second = stack.pop(0)
+            if isinstance(first, (int, long)) and not isinstance(second, (int, long)):
+                first = BitVecVal(first, 256)
+            elif not isinstance(first, (int, long)) and isinstance(second, (int, long)):
+                second = BitVecVal(second, 256)
             computed = first * second
             stack.insert(0, computed)
         else:
@@ -351,6 +368,10 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 1:
             first = stack.pop(0)
             second = stack.pop(0)
+            if isinstance(first, (int, long)) and not isinstance(second, (int, long)):
+                first = BitVecVal(first, 256)
+            elif not isinstance(first, (int, long)) and isinstance(second, (int, long)):
+                second = BitVecVal(second, 256)
             computed = first - second
             stack.insert(0, computed)
         else:
@@ -359,6 +380,10 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 1:
             first = stack.pop(0)
             second = stack.pop(0)
+            if isinstance(first, (int, long)) and not isinstance(second, (int, long)):
+                first = BitVecVal(first, 256)
+            elif not isinstance(first, (int, long)) and isinstance(second, (int, long)):
+                second = BitVecVal(second, 256)
             computed = first / second
             stack.insert(0, computed)
         else:
@@ -371,6 +396,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 if second == 0:
                     computed = 0
                 else:
+                    if not isinstance(first, (int, long)):
+                        second = BitVecVal(second, 256)  # Make second a bitvector
                     computed = first % second
             else:
                 solver.push()
@@ -379,6 +406,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     # it is provable that second is indeed equal to zero
                     computed = 0
                 else:
+                    if isinstance(first, (int, long)):
+                        first = BitVecVal(first, 256)  # Make first a bitvector
                     computed = first % second
                 solver.pop()
             stack.insert(0, computed)
@@ -392,6 +421,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 if second == 0:
                     computed = 0
                 else:
+                    if not isinstance(first, (int, long)):
+                        second = BitVecVal(second, 256)  # Make second a bitvector
                     computed = first % second  # This is not yet faithful
             else:
                 solver.push()
@@ -400,6 +431,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     # it is provable that second is indeed equal to zero
                     computed = 0
                 else:
+                    if isinstance(first, (int, long)):
+                        first = BitVecVal(first, 256)  # Make first a bitvector
                     computed = first % second  # This is not yet faithful
                 solver.pop()
             stack.insert(0, computed)
@@ -414,6 +447,13 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 if third == 0:
                     computed = 0
                 else:
+                    if not (isinstance(first, (int, long)) and isinstance(second, (int, long))):
+                        # there is one guy that is a symbolic expression
+                        third = BitVecVal(third, 256)
+                        if isinstance(first, (int, long)):
+                            first = BitVecVal(first, 256)
+                        if isinstance(second, (int, long)):
+                            second = BitVecVal(second, 256)
                     computed = (first + second) % third
             else:
                 solver.push()
@@ -422,6 +462,10 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     # it is provable that second is indeed equal to zero
                     computed = 0
                 else:
+                    if isinstance(first, (int, long)):
+                        first = BitVecVal(first, 256)
+                    if isinstance(second, (int, long)):
+                        second = BitVecVal(second, 256)
                     computed = (first + second) % third
                 solver.pop()
             stack.insert(0, computed)
@@ -436,6 +480,13 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 if third == 0:
                     computed = 0
                 else:
+                    if not (isinstance(first, (int, long)) and isinstance(second, (int, long))):
+                        # there is one guy that is a symbolic expression
+                        third = BitVecVal(third, 256)
+                        if isinstance(first, (int, long)):
+                            first = BitVecVal(first, 256)
+                        if isinstance(second, (int, long)):
+                            second = BitVecVal(second, 256)
                     computed = (first * second) % third
             else:
                 solver.push()
@@ -444,6 +495,10 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     # it is provable that second is indeed equal to zero
                     computed = 0
                 else:
+                    if isinstance(first, (int, long)):
+                        first = BitVecVal(first, 256)
+                    if isinstance(second, (int, long)):
+                        second = BitVecVal(second, 256)
                     computed = (first * second) % third
                 solver.pop()
             stack.insert(0, computed)
@@ -453,7 +508,14 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 1:
             base = stack.pop(0)
             exponent = stack.pop(0)
-            computed = base ** exponent
+            # Type conversion is needed when they are mismatched
+            if isinstance(base, (int, long)) and isinstance(exponent, (int, long)):
+                computed = base ** exponent
+            else:
+                # The computed value is unknown, this is because power is
+                # not supported in bit-vector theory
+                new_var_name = gen.gen_arbitrary_var()
+                computed = BitVec(new_var_name, 256)
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
@@ -472,7 +534,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 else:
                     stack.insert(0, 0)
             else:
-                sym_expression = (first < second)
+                sym_expression = simplify(If(ULT(first, second), BitVecVal(1, 256), BitVecVal(0, 256)))
                 stack.insert(0, sym_expression)
         else:
             raise ValueError('STACK underflow')
@@ -486,7 +548,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 else:
                     stack.insert(0, 0)
             else:
-                sym_expression = (first > second)
+                sym_expression = simplify(If(UGT(first, second), BitVecVal(1, 256), BitVecVal(0, 256)))
                 stack.insert(0, sym_expression)
         else:
             raise ValueError('STACK underflow')
@@ -500,7 +562,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 else:
                     stack.insert(0, 0)
             else:
-                sym_expression = (first < second)
+                sym_expression = simplify(If(first < second, BitVecVal(1, 256), BitVecVal(0, 256)))
                 stack.insert(0, sym_expression)
         else:
             raise ValueError('STACK underflow')
@@ -514,7 +576,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 else:
                     stack.insert(0, 0)
             else:
-                sym_expression = (first > second)
+                sym_expression = simplify(If(first > second, BitVecVal(1, 256), BitVecVal(0, 256)))
                 stack.insert(0, sym_expression)
         else:
             raise ValueError('STACK underflow')
@@ -528,7 +590,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 else:
                     stack.insert(0, 0)
             else:
-                sym_expression = (first == second)
+                sym_expression = simplify(If(first == second, BitVecVal(1, 256), BitVecVal(0, 256)))
                 stack.insert(0, sym_expression)
         else:
             raise ValueError('STACK underflow')
@@ -544,10 +606,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 else:
                     stack.insert(0, 0)
             else:
-                try:
-                    sym_expression = (first == 0)
-                except Z3Exception:
-                    sym_expression = Not(first)
+                sym_expression = If(first == 0, BitVecVal(1, 256), BitVecVal(0, 256))
                 stack.insert(0, sym_expression)
         else:
             raise ValueError('STACK underflow')
@@ -555,36 +614,28 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 1:
             first = stack.pop(0)
             second = stack.pop(0)
-            if isinstance(first, (int, long)) and isinstance(second, (int, long)):
-                computed = first & second
-                stack.insert(0, computed)
-            else:
-                sym_expression = function_and(first, second)
-                stack.insert(0, sym_expression)
+            computed = first & second
+            stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "OR":
         if len(stack) > 1:
             first = stack.pop(0)
             second = stack.pop(0)
-            if isinstance(first, (int, long)) and isinstance(second, (int, long)):
-                computed = first | second
-                stack.insert(0, computed)
-            else:
-                sym_expression = function_or(first, second)
-                stack.insert(0, sym_expression)
+
+            computed = first | second
+            stack.insert(0, computed)
+
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "XOR":
         if len(stack) > 1:
             first = stack.pop(0)
             second = stack.pop(0)
-            if isinstance(first, (int, long)) and isinstance(second, (int, long)):
-                computed = first ^ second
-                stack.insert(0, computed)
-            else:
-                sym_expression = function_xor(first, second)
-                stack.insert(0, sym_expression)
+
+            computed = first ^ second
+            stack.insert(0, computed)
+
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "NOT":
@@ -594,7 +645,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 complement = -1 - first
                 stack.insert(0, complement)
             else:
-                sym_expression = function_not(first)
+                sym_expression = (~ first)
                 stack.insert(0, sym_expression)
         else:
             raise ValueError('STACK underflow')
@@ -604,7 +655,16 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     # 20s: SHA3
     #
     elif instr_parts[0] == "SHA3":
-        raise ValueError('SHA3 is not yet handled')
+        if len(stack) > 1:
+            stack.pop(0)
+            stack.pop(0)
+            # push into the execution a fresh symbolic variable
+            new_var_name = gen.gen_arbitrary_var()
+            new_var = BitVec(new_var_name, 256)
+            path_conditions_and_vars[new_var_name] = new_var
+            stack.insert(0, new_var)
+        else:
+            raise ValueError('STACK underflow')
     #
     # 30s: Environment Information
     #
@@ -613,7 +673,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if new_var_name in path_conditions_and_vars:
             new_var = path_conditions_and_vars[new_var_name]
         else:
-            new_var = Int(new_var_name)
+            new_var = BitVec(new_var_name, 256)
             path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
     elif instr_parts[0] == "CALLER":  # get address of the account
@@ -622,7 +682,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if new_var_name in path_conditions_and_vars:
             new_var = path_conditions_and_vars[new_var_name]
         else:
-            new_var = Int(new_var_name)
+            new_var = BitVec(new_var_name, 256)
             path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
     elif instr_parts[0] == "CALLVALUE":  # get value of this transaction
@@ -630,7 +690,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if new_var_name in path_conditions_and_vars:
             new_var = path_conditions_and_vars[new_var_name]
         else:
-            new_var = Int(new_var_name)
+            new_var = BitVec(new_var_name, 256)
             path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
     elif instr_parts[0] == "CALLDATALOAD":  # from input data from environment
@@ -640,7 +700,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             if new_var_name in path_conditions_and_vars:
                 new_var = path_conditions_and_vars[new_var_name]
             else:
-                new_var = Int(new_var_name)
+                new_var = BitVec(new_var_name, 256)
                 path_conditions_and_vars[new_var_name] = new_var
             stack.insert(0, new_var)
         else:
@@ -650,9 +710,17 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if new_var_name in path_conditions_and_vars:
             new_var = path_conditions_and_vars[new_var_name]
         else:
-            new_var = Int(new_var_name)
+            new_var = BitVec(new_var_name, 256)
             path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
+    elif instr_parts[0] == "CALLDATACOPY":  # Copy input data to memory
+        # Don't know how to simulate this yet
+        if len(stack) > 2:
+            stack.pop(0)
+            stack.pop(0)
+            stack.pop(0)
+        else:
+            raise ValueError('STACK underflow')
     #
     #  40s: Block Information
     #
@@ -663,7 +731,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             if new_var_name in path_conditions_and_vars:
                 new_var = path_conditions_and_vars[new_var_name]
             else:
-                new_var = Int(new_var_name)
+                new_var = BitVec(new_var_name, 256)
                 path_conditions_and_vars[new_var_name] = new_var
             stack.insert(0, new_var)
         else:
@@ -673,7 +741,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if new_var_name in path_conditions_and_vars:
             new_var = path_conditions_and_vars[new_var_name]
         else:
-            new_var = Int(new_var_name)
+            new_var = BitVec(new_var_name, 256)
             path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
     elif instr_parts[0] == "TIMESTAMP":  # information from block header
@@ -681,7 +749,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if new_var_name in path_conditions_and_vars:
             new_var = path_conditions_and_vars[new_var_name]
         else:
-            new_var = Int(new_var_name)
+            new_var = BitVec(new_var_name, 256)
             path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
     elif instr_parts[0] == "NUMBER":  # information from block header
@@ -689,7 +757,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if new_var_name in path_conditions_and_vars:
             new_var = path_conditions_and_vars[new_var_name]
         else:
-            new_var = Int(new_var_name)
+            new_var = BitVec(new_var_name, 256)
             path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
     elif instr_parts[0] == "DIFFICULTY":  # information from block header
@@ -697,7 +765,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if new_var_name in path_conditions_and_vars:
             new_var = path_conditions_and_vars[new_var_name]
         else:
-            new_var = Int(new_var_name)
+            new_var = BitVec(new_var_name, 256)
             path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
     elif instr_parts[0] == "GASLIMIT":  # information from block header
@@ -705,7 +773,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if new_var_name in path_conditions_and_vars:
             new_var = path_conditions_and_vars[new_var_name]
         else:
-            new_var = Int(new_var_name)
+            new_var = BitVec(new_var_name, 256)
             path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
     #
@@ -727,10 +795,13 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 if new_var_name in path_conditions_and_vars:
                     new_var = path_conditions_and_vars[new_var_name]
                 else:
-                    new_var = Int(new_var_name)
+                    new_var = BitVec(new_var_name, 256)
                     path_conditions_and_vars[new_var_name] = new_var
                 stack.insert(0, new_var)
-                mem[address] = new_var
+                if isinstance(address, (int, long)):
+                    mem[address] = new_var
+                else:
+                    mem[str(address)] = new_var
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "MSTORE":
@@ -741,7 +812,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 mem[stored_address] = stored_value  # note that the stored_value could be unknown
             else:
                 mem.clear()  # very conservative
-                mem[stored_address] = stored_value
+                mem[str(stored_address)] = stored_value
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "MSTORE8":
@@ -753,7 +824,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 mem[stored_address] = stored_value  # note that the stored_value could be unknown
             else:
                 mem.clear()  # very conservative
-                mem[stored_address] = stored_value
+                mem[str(stored_address)] = stored_value
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "SLOAD":
@@ -767,10 +838,13 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 if new_var_name in path_conditions_and_vars:
                     new_var = path_conditions_and_vars[new_var_name]
                 else:
-                    new_var = Int(new_var_name)
+                    new_var = BitVec(new_var_name, 256)
                     path_conditions_and_vars[new_var_name] = new_var
                 stack.insert(0, new_var)
-                global_state["Ia"][address] = new_var
+                if isinstance(address, (int, long)):
+                    global_state["Ia"][address] = new_var
+                else:
+                    global_state["Ia"][str(address)] = new_var
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "SSTORE":
@@ -781,7 +855,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 global_state["Ia"][stored_address] = stored_value  # note that the stored_value could be unknown
             else:
                 global_state["Ia"].clear()  # very conservative
-                global_state["Ia"][stored_address] = stored_value  # note that the stored_value could be unknown
+                global_state["Ia"][str(stored_address)] = stored_value  # note that the stored_value could be unknown
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "JUMP":
@@ -798,12 +872,12 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             target_address = stack.pop(0)
             vertices[start].set_jump_target(target_address)
             flag = stack.pop(0)
-            branch_expression = False
+            branch_expression = (BitVecVal(0, 1) == BitVecVal(1, 1))
             if isinstance(flag, (int, long)):
                 if flag != 0:
                     branch_expression = True
             else:
-                branch_expression = (True == flag)
+                branch_expression = (0 != flag)
             vertices[start].set_branch_expression(branch_expression)
             if target_address not in edges[start]:
                 edges[start].append(target_address)
@@ -817,7 +891,10 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     elif instr_parts[0] == "GAS":
         # In general, we do not have this precisely. It depends on both
         # the initial gas and the amount has been depleted
-        raise Exception('Must implement GAS now')
+        new_var_name = gen.get_gas_var()
+        new_var = BitVec(new_var_name, 256)
+        path_conditions_and_vars[new_var_name] = new_var
+        stack.insert(0, new_var)
     elif instr_parts[0] == "JUMPDEST":
         # Literally do nothing
         pass
@@ -863,6 +940,61 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     #
     #  f0s: System Operations
     #
+    elif instr_parts[0] == "CALL":
+        if len(stack) > 6:
+            outgas = stack.pop(0)
+            recipient = stack.pop(0)
+            print "recipient = " + str(recipient)
+            transfer_amount = stack.pop(0)
+            start_data_input = stack.pop(0)
+            size_data_input = stack.pop(0)
+            start_data_output = stack.pop(0)
+            size_data_ouput = stack.pop(0)
+            # in the paper, it is shaky when the size of data output is
+            # min of stack[6] and the | o |
+
+            # Let us ignore the call depth
+            balance_ia = global_state["balance"]["Ia"]
+            is_enough_fund = (balance_ia < transfer_amount)
+            solver.push()
+            solver.add(is_enough_fund)
+
+            if solver.check() == unsat:
+                # this means not enough fund, thus the execution will result in exception
+                solver.pop()
+                stack.insert(0, 0)   # x = 0
+            else:
+                # the execution is possibly okay
+                stack.insert(0, 1)   # x = 1
+                solver.pop()
+                solver.add(is_enough_fund)
+                path_conditions_and_vars["path_condition"].append(is_enough_fund)
+                new_balance_ia = (balance_ia - transfer_amount)
+                global_state["balance"]["Ia"] = new_balance_ia
+                address_is = path_conditions_and_vars["Is"]
+                boolean_expression = (recipient != address_is)
+                print str(boolean_expression)
+                raw_input('Press some key to continue ...')
+                solver.push()
+                solver.add(boolean_expression)
+                if solver.check() == unsat:
+                    solver.pop()
+                    new_balance_is = (global_state["balance"]["Is"] + transfer_amount)
+                    global_state["balance"]["Is"] = new_balance_is
+                else:
+                    solver.pop()
+                    new_address_name = gen.gen_arbitrary_address_var()
+                    old_balance_name = gen.gen_arbitrary_var()
+                    old_balance = BitVec(old_balance_name, 256)
+                    path_conditions_and_vars[old_balance_name] = old_balance
+                    constraint = (old_balance >= 0)
+                    solver.add(constraint)
+                    path_conditions_and_vars["path_condition"].append(constraint)
+                    new_balance = (old_balance + transfer_amount)
+                    global_state["balance"][new_address_name] = new_balance
+
+        else:
+            raise ValueError('STACK underflow')
     elif instr_parts[0] == "RETURN":
         if len(stack) > 1:
             stack.pop(0)

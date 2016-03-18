@@ -2,6 +2,7 @@ class Generator:
     def __init__(self):
         self.countstack = 0
         self.countdata = 0
+        self.countgas = 0
         self.count = 0
 
     def gen_stack_var(self):
@@ -26,5 +27,13 @@ class Generator:
         self.count += 1
         return "some_var_" + str(self.count)
 
+    def gen_arbitrary_address_var(self):
+        self.count += 1
+        return "some_address_" + str(self.count)
+
     def gen_owner_store_var(self, position):
         return "Ia_store_" + str(position)
+
+    def get_gas_var(self):
+        self.countgas += 1
+        return "gas_" + str(self.countgas)
