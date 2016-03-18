@@ -1,620 +1,685 @@
-606060405236156100565760e060020a6000350463228cb733811461008757806341c0e1b5146100905780634fb60251146100b85780638da5cb5b14610114578063a0d7afb714610126578063cf3090121461012f575b61014360005433600160a060020a03908116911614156101455760005460a060020a900460ff161561016557610002565b6102c960015481565b61014360005433600160a060020a039081169116141561029557600054600160a060020a0316ff5b6102d3600380546020601f6002600019600185161561010002019093169290920491820181900402608090810160405260608281529291908282801561036c5780601f106103415761010080835404028352916020019161036c565b6102c9600054600160a060020a031681565b6102c960025481565b6102c960005460ff60a060020a9091041681565b005b60003611156102955760005460a060020a900460ff161561019257610002565b60008054600154600160a060020a039091169190606082818181858883f150503460015550610295915050565b60028054906000366060808383808284378201915050925050506020604051808303816000866161da5a03f1156100025750506040515110156102955760015460405133600160a060020a03169160009182818181858883f15050600380548184529093506020601f600260001960018516156101000201909316929092048201047fc2575a0e9e593c00f959f8c92f12db2869c3395a3b0502d05e2516446f71f85b9081019336935090918390106102975782800160ff198235161785555b5061026e9291505b808211156102c5576000815560010161025a565b50506000805474ff0000000000000000000000000000000000000000191660a060020a1790555b565b8280016001018555821561025257915b828111156102525782358260005055916020019190600101906102a7565b5090565b6060908152602090f35b60405180806020018281038252838181518152602001915080519060200190808383829060006004602084601f0104600f02600301f150905090810190601f1680156103335780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b820191906000526020600020905b81548152906001019060200180831161034f57829003601f168201915b50505050508156
-0      PUSH1  => 60
-2      PUSH1  => 40
-4      MSTORE
-5      CALLDATASIZE
-6      ISZERO
-7      PUSH2  => 0056
-10     JUMPI
-11     PUSH1  => e0
-13     PUSH1  => 02
-15     EXP
-16     PUSH1  => 00
-18     CALLDATALOAD
-19     DIV
-20     PUSH4  => 228cb733
-25     DUP2
-26     EQ
-27     PUSH2  => 0087
-30     JUMPI
-31     DUP1
-32     PUSH4  => 41c0e1b5
-37     EQ
-38     PUSH2  => 0090
-41     JUMPI
-42     DUP1
-43     PUSH4  => 4fb60251
-48     EQ
-49     PUSH2  => 00b8
-52     JUMPI
-53     DUP1
-54     PUSH4  => 8da5cb5b
-59     EQ
-60     PUSH2  => 0114
-63     JUMPI
-64     DUP1
-65     PUSH4  => a0d7afb7
-70     EQ
-71     PUSH2  => 0126
-74     JUMPI
-75     DUP1
-76     PUSH4  => cf309012
-81     EQ
-82     PUSH2  => 012f
-85     JUMPI
-86     JUMPDEST
-87     PUSH2  => 0143
-90     PUSH1  => 00
-92     SLOAD
-93     CALLER
-94     PUSH1  => 01
-96     PUSH1  => a0
-98     PUSH1  => 02
-100    EXP
-101    SUB
-102    SWAP1
-103    DUP2
-104    AND
-105    SWAP2
-106    AND
-107    EQ
-108    ISZERO
-109    PUSH2  => 0145
-112    JUMPI
-113    PUSH1  => 00
-115    SLOAD
-116    PUSH1  => a0
-118    PUSH1  => 02
-120    EXP
-121    SWAP1
-122    DIV
-123    PUSH1  => ff
-125    AND
-126    ISZERO
-127    PUSH2  => 0165
-130    JUMPI
-131    PUSH2  => 0002
-134    JUMP
-135    JUMPDEST
-136    PUSH2  => 02c9
-139    PUSH1  => 01
-141    SLOAD
-142    DUP2
-143    JUMP
-144    JUMPDEST
-145    PUSH2  => 0143
-148    PUSH1  => 00
-150    SLOAD
-151    CALLER
-152    PUSH1  => 01
-154    PUSH1  => a0
-156    PUSH1  => 02
-158    EXP
-159    SUB
-160    SWAP1
-161    DUP2
-162    AND
-163    SWAP2
-164    AND
-165    EQ
-166    ISZERO
-167    PUSH2  => 0295
-170    JUMPI
-171    PUSH1  => 00
-173    SLOAD
-174    PUSH1  => 01
-176    PUSH1  => a0
-178    PUSH1  => 02
-180    EXP
-181    SUB
-182    AND
-183    SUICIDE
-184    JUMPDEST
-185    PUSH2  => 02d3
-188    PUSH1  => 03
-190    DUP1
-191    SLOAD
-192    PUSH1  => 20
-194    PUSH1  => 1f
-196    PUSH1  => 02
-198    PUSH1  => 00
-200    NOT
-201    PUSH1  => 01
-203    DUP6
-204    AND
-205    ISZERO
-206    PUSH2  => 0100
-209    MUL
-210    ADD
-211    SWAP1
-212    SWAP4
-213    AND
-214    SWAP3
-215    SWAP1
-216    SWAP3
-217    DIV
-218    SWAP2
-219    DUP3
-220    ADD
-221    DUP2
-222    SWAP1
-223    DIV
-224    MUL
-225    PUSH1  => 80
-227    SWAP1
-228    DUP2
-229    ADD
-230    PUSH1  => 40
-232    MSTORE
-233    PUSH1  => 60
-235    DUP3
-236    DUP2
-237    MSTORE
-238    SWAP3
-239    SWAP2
-240    SWAP1
-241    DUP3
-242    DUP3
-243    DUP1
-244    ISZERO
-245    PUSH2  => 036c
-248    JUMPI
-249    DUP1
-250    PUSH1  => 1f
-252    LT
-253    PUSH2  => 0341
-256    JUMPI
-257    PUSH2  => 0100
-260    DUP1
-261    DUP4
-262    SLOAD
-263    DIV
-264    MUL
-265    DUP4
-266    MSTORE
-267    SWAP2
-268    PUSH1  => 20
-270    ADD
-271    SWAP2
-272    PUSH2  => 036c
-275    JUMP
-276    JUMPDEST
-277    PUSH2  => 02c9
-280    PUSH1  => 00
-282    SLOAD
-283    PUSH1  => 01
-285    PUSH1  => a0
-287    PUSH1  => 02
-289    EXP
-290    SUB
-291    AND
-292    DUP2
-293    JUMP
-294    JUMPDEST
-295    PUSH2  => 02c9
-298    PUSH1  => 02
-300    SLOAD
-301    DUP2
-302    JUMP
-303    JUMPDEST
-304    PUSH2  => 02c9
-307    PUSH1  => 00
-309    SLOAD
-310    PUSH1  => ff
-312    PUSH1  => a0
-314    PUSH1  => 02
-316    EXP
-317    SWAP1
-318    SWAP2
-319    DIV
-320    AND
-321    DUP2
-322    JUMP
-323    JUMPDEST
-324    STOP
-325    JUMPDEST
-326    PUSH1  => 00
-328    CALLDATASIZE
-329    GT
-330    ISZERO
-331    PUSH2  => 0295
-334    JUMPI
-335    PUSH1  => 00
-337    SLOAD
-338    PUSH1  => a0
-340    PUSH1  => 02
-342    EXP
-343    SWAP1
-344    DIV
-345    PUSH1  => ff
-347    AND
-348    ISZERO
-349    PUSH2  => 0192
-352    JUMPI
-353    PUSH2  => 0002
-356    JUMP
-357    JUMPDEST
-358    PUSH1  => 00
-360    DUP1
-361    SLOAD
-362    PUSH1  => 01
-364    SLOAD
-365    PUSH1  => 01
-367    PUSH1  => a0
-369    PUSH1  => 02
-371    EXP
-372    SUB
-373    SWAP1
-374    SWAP2
-375    AND
-376    SWAP2
-377    SWAP1
-378    PUSH1  => 60
-380    DUP3
-381    DUP2
-382    DUP2
-383    DUP2
-384    DUP6
-385    DUP9
-386    DUP4
-387    CALL
-388    POP
-389    POP
-390    CALLVALUE
-391    PUSH1  => 01
-393    SSTORE
-394    POP
-395    PUSH2  => 0295
-398    SWAP2
-399    POP
-400    POP
-401    JUMP
-402    JUMPDEST
-403    PUSH1  => 02
-405    DUP1
-406    SLOAD
-407    SWAP1
-408    PUSH1  => 00
-410    CALLDATASIZE
-411    PUSH1  => 60
-413    DUP1
-414    DUP4
-415    DUP4
-416    DUP1
-417    DUP3
-418    DUP5
-419    CALLDATACOPY
-420    DUP3
-421    ADD
-422    SWAP2
-423    POP
-424    POP
-425    SWAP3
-426    POP
-427    POP
-428    POP
-429    PUSH1  => 20
-431    PUSH1  => 40
-433    MLOAD
-434    DUP1
-435    DUP4
-436    SUB
-437    DUP2
-438    PUSH1  => 00
-440    DUP7
-441    PUSH2  => 61da
-444    GAS
-445    SUB
-446    CALL
-447    ISZERO
-448    PUSH2  => 0002
-451    JUMPI
-452    POP
-453    POP
-454    PUSH1  => 40
-456    MLOAD
-457    MLOAD
-458    LT
-459    ISZERO
-460    PUSH2  => 0295
-463    JUMPI
-464    PUSH1  => 01
-466    SLOAD
-467    PUSH1  => 40
-469    MLOAD
-470    CALLER
-471    PUSH1  => 01
-473    PUSH1  => a0
-475    PUSH1  => 02
-477    EXP
-478    SUB
-479    AND
-480    SWAP2
-481    PUSH1  => 00
-483    SWAP2
-484    DUP3
-485    DUP2
-486    DUP2
-487    DUP2
-488    DUP6
-489    DUP9
-490    DUP4
-491    CALL
-492    POP
-493    POP
-494    PUSH1  => 03
-496    DUP1
-497    SLOAD
-498    DUP2
-499    DUP5
-500    MSTORE
-501    SWAP1
-502    SWAP4
-503    POP
-504    PUSH1  => 20
-506    PUSH1  => 1f
-508    PUSH1  => 02
-510    PUSH1  => 00
-512    NOT
-513    PUSH1  => 01
-515    DUP6
-516    AND
-517    ISZERO
-518    PUSH2  => 0100
-521    MUL
-522    ADD
-523    SWAP1
-524    SWAP4
-525    AND
-526    SWAP3
-527    SWAP1
-528    SWAP3
-529    DIV
-530    DUP3
-531    ADD
-532    DIV
-533    PUSH32  => c2575a0e9e593c00f959f8c92f12db2869c3395a3b0502d05e2516446f71f85b
-566    SWAP1
-567    DUP2
-568    ADD
-569    SWAP4
-570    CALLDATASIZE
-571    SWAP4
-572    POP
-573    SWAP1
-574    SWAP2
-575    DUP4
-576    SWAP1
-577    LT
-578    PUSH2  => 0297
-581    JUMPI
-582    DUP3
-583    DUP1
-584    ADD
-585    PUSH1  => ff
-587    NOT
-588    DUP3
-589    CALLDATALOAD
-590    AND
-591    OR
-592    DUP6
-593    SSTORE
-594    JUMPDEST
-595    POP
-596    PUSH2  => 026e
-599    SWAP3
-600    SWAP2
-601    POP
-602    JUMPDEST
-603    DUP1
-604    DUP3
-605    GT
-606    ISZERO
-607    PUSH2  => 02c5
-610    JUMPI
-611    PUSH1  => 00
-613    DUP2
-614    SSTORE
-615    PUSH1  => 01
-617    ADD
-618    PUSH2  => 025a
-621    JUMP
-622    JUMPDEST
-623    POP
-624    POP
-625    PUSH1  => 00
-627    DUP1
-628    SLOAD
-629    PUSH21  => ff0000000000000000000000000000000000000000
-651    NOT
-652    AND
-653    PUSH1  => a0
-655    PUSH1  => 02
-657    EXP
-658    OR
-659    SWAP1
-660    SSTORE
-661    JUMPDEST
-662    JUMP
-663    JUMPDEST
-664    DUP3
-665    DUP1
-666    ADD
-667    PUSH1  => 01
-669    ADD
-670    DUP6
-671    SSTORE
-672    DUP3
-673    ISZERO
-674    PUSH2  => 0252
-677    JUMPI
-678    SWAP2
-679    JUMPDEST
-680    DUP3
-681    DUP2
-682    GT
-683    ISZERO
-684    PUSH2  => 0252
-687    JUMPI
-688    DUP3
-689    CALLDATALOAD
-690    DUP3
-691    PUSH1  => 00
-693    POP
-694    SSTORE
-695    SWAP2
-696    PUSH1  => 20
-698    ADD
-699    SWAP2
-700    SWAP1
-701    PUSH1  => 01
-703    ADD
-704    SWAP1
-705    PUSH2  => 02a7
-708    JUMP
-709    JUMPDEST
-710    POP
-711    SWAP1
-712    JUMP
-713    JUMPDEST
-714    PUSH1  => 60
-716    SWAP1
-717    DUP2
-718    MSTORE
-719    PUSH1  => 20
-721    SWAP1
-722    RETURN
-723    JUMPDEST
-724    PUSH1  => 40
-726    MLOAD
-727    DUP1
-728    DUP1
-729    PUSH1  => 20
-731    ADD
-732    DUP3
-733    DUP2
-734    SUB
-735    DUP3
-736    MSTORE
-737    DUP4
-738    DUP2
-739    DUP2
-740    MLOAD
-741    DUP2
-742    MSTORE
-743    PUSH1  => 20
-745    ADD
-746    SWAP2
-747    POP
-748    DUP1
-749    MLOAD
-750    SWAP1
-751    PUSH1  => 20
-753    ADD
-754    SWAP1
-755    DUP1
-756    DUP4
-757    DUP4
-758    DUP3
-759    SWAP1
-760    PUSH1  => 00
-762    PUSH1  => 04
-764    PUSH1  => 20
-766    DUP5
-767    PUSH1  => 1f
-769    ADD
-770    DIV
-771    PUSH1  => 0f
-773    MUL
-774    PUSH1  => 03
-776    ADD
-777    CALL
-778    POP
-779    SWAP1
-780    POP
-781    SWAP1
-782    DUP2
-783    ADD
-784    SWAP1
-785    PUSH1  => 1f
-787    AND
-788    DUP1
-789    ISZERO
-790    PUSH2  => 0333
-793    JUMPI
-794    DUP1
-795    DUP3
-796    SUB
-797    DUP1
-798    MLOAD
-799    PUSH1  => 01
-801    DUP4
-802    PUSH1  => 20
-804    SUB
-805    PUSH2  => 0100
-808    EXP
-809    SUB
-810    NOT
-811    AND
-812    DUP2
-813    MSTORE
-814    PUSH1  => 20
-816    ADD
-817    SWAP2
-818    POP
-819    JUMPDEST
-820    POP
-821    SWAP3
-822    POP
-823    POP
-824    POP
-825    PUSH1  => 40
-827    MLOAD
-828    DUP1
-829    SWAP2
-830    SUB
-831    SWAP1
-832    RETURN
-833    JUMPDEST
-834    DUP3
-835    ADD
-836    SWAP2
-837    SWAP1
-838    PUSH1  => 00
-840    MSTORE
-841    PUSH1  => 20
-843    PUSH1  => 00
-845    SHA3
-846    SWAP1
-847    JUMPDEST
-848    DUP2
-849    SLOAD
-850    DUP2
-851    MSTORE
-852    SWAP1
-853    PUSH1  => 01
-855    ADD
-856    SWAP1
-857    PUSH1  => 20
-859    ADD
-860    DUP1
-861    DUP4
-862    GT
-863    PUSH2  => 034f
-866    JUMPI
-867    DUP3
-868    SWAP1
-869    SUB
-870    PUSH1  => 1f
-872    AND
-873    DUP3
-874    ADD
-875    SWAP2
-876    JUMPDEST
-877    POP
-878    POP
-879    POP
-880    POP
-881    POP
-882    DUP2
-883    JUMP
+.code:
+  PUSH 60		contract Puzzle{...
+  PUSH 40		contract Puzzle{...
+  MSTORE			contract Puzzle{...
+  PUSH 0		owner
+  DUP1			owner = msg.sender
+  SLOAD			owner = msg.sender
+  PUSH A0		
+  PUSH 2		
+  EXP			
+  PUSH FF		
+  MUL			
+  NOT			
+  PUSH 1		
+  PUSH A0		
+  PUSH 2		
+  EXP			
+  SUB			
+  NOT			
+  SWAP1			owner = msg.sender
+  SWAP2			owner = msg.sender
+  AND			owner = msg.sender
+  CALLER			msg.sender
+  OR			owner = msg.sender
+  AND			locked = false
+  DUP2			locked = false
+  SSTORE			locked = false
+  PUSH 1		owner = msg.sender
+  SSTORE			reward = 0
+  PUSH 2B67		11111
+  PUSH 2		diff
+  SSTORE			diff = bytes32(11111)
+  PUSH #[$00000000…00000000]		contract Puzzle{...
+  DUP1			contract Puzzle{...
+  PUSH [$00000000…00000000]		contract Puzzle{...
+  PUSH 0		contract Puzzle{...
+  CODECOPY			contract Puzzle{...
+  PUSH 0		contract Puzzle{...
+  RETURN			contract Puzzle{...
+.data:
+  0: 
+  .code:
+    PUSH 60		contract Puzzle{...
+    PUSH 40		contract Puzzle{...
+    MSTORE			contract Puzzle{...
+    CALLDATASIZE			contract Puzzle{...
+    ISZERO			contract Puzzle{...
+    PUSH [tag1]		contract Puzzle{...
+    JUMPI			contract Puzzle{...
+    PUSH E0		
+    PUSH 2		
+    EXP			
+    PUSH 0		contract Puzzle{...
+    CALLDATALOAD			contract Puzzle{...
+    DIV			contract Puzzle{...
+    PUSH 228CB733		contract Puzzle{...
+    DUP2			contract Puzzle{...
+    EQ			contract Puzzle{...
+    PUSH [tag2]		contract Puzzle{...
+    JUMPI			contract Puzzle{...
+    DUP1			contract Puzzle{...
+    PUSH 41C0E1B5		contract Puzzle{...
+    EQ			contract Puzzle{...
+    PUSH [tag3]		contract Puzzle{...
+    JUMPI			contract Puzzle{...
+    DUP1			contract Puzzle{...
+    PUSH 4FB60251		contract Puzzle{...
+    EQ			contract Puzzle{...
+    PUSH [tag4]		contract Puzzle{...
+    JUMPI			contract Puzzle{...
+    DUP1			contract Puzzle{...
+    PUSH 8DA5CB5B		contract Puzzle{...
+    EQ			contract Puzzle{...
+    PUSH [tag5]		contract Puzzle{...
+    JUMPI			contract Puzzle{...
+    DUP1			contract Puzzle{...
+    PUSH A0D7AFB7		contract Puzzle{...
+    EQ			contract Puzzle{...
+    PUSH [tag6]		contract Puzzle{...
+    JUMPI			contract Puzzle{...
+    DUP1			contract Puzzle{...
+    PUSH CF309012		contract Puzzle{...
+    EQ			contract Puzzle{...
+    PUSH [tag7]		contract Puzzle{...
+    JUMPI			contract Puzzle{...
+  tag1: 
+    JUMPDEST		contract Puzzle{...
+    PUSH [tag8]		contract Puzzle{...
+    PUSH 0		contract Puzzle{...
+    SLOAD			owner
+    CALLER			msg.sender
+    PUSH 1		
+    PUSH A0		
+    PUSH 2		
+    EXP			
+    SUB			
+    SWAP1			msg.sender == owner
+    DUP2			msg.sender == owner
+    AND			msg.sender == owner
+    SWAP2			owner
+    AND			owner
+    EQ			msg.sender == owner
+    ISZERO			if (msg.sender == owner) //update reward...
+    PUSH [tag11]		if (msg.sender == owner) //update reward...
+    JUMPI			if (msg.sender == owner) //update reward...
+    PUSH 0		contract Puzzle{...
+    SLOAD			owner
+    PUSH A0		
+    PUSH 2		
+    EXP			
+    SWAP1			locked
+    DIV			locked
+    PUSH FF		locked
+    AND			locked
+    ISZERO			if (locked)...
+    PUSH [tag12]		if (locked)...
+    JUMPI			if (locked)...
+    PUSH [ErrorTag]		throw
+    JUMP			throw
+  tag2: 
+    JUMPDEST		uint public reward
+    PUSH [tag24]		bool public locked
+    PUSH 1		owner
+    SLOAD			reward
+    DUP2			bool public locked
+    JUMP	[out]		uint public reward
+  tag3: 
+    JUMPDEST		function kill() onlyowner...
+    PUSH [tag8]		contract Puzzle{...
+    PUSH 0		contract Puzzle{...
+    SLOAD			owner
+    CALLER			msg.sender
+    PUSH 1		
+    PUSH A0		
+    PUSH 2		
+    EXP			
+    SUB			
+    SWAP1			msg.sender == owner
+    DUP2			msg.sender == owner
+    AND			msg.sender == owner
+    SWAP2			owner
+    AND			owner
+    EQ			msg.sender == owner
+    ISZERO			if (msg.sender == owner) //update reward...
+    PUSH [tag16]		if (msg.sender == owner) //update reward...
+    JUMPI			if (msg.sender == owner) _
+    PUSH 0		contract Puzzle{...
+    SLOAD			owner
+    PUSH 1		
+    PUSH A0		
+    PUSH 2		
+    EXP			
+    SUB			
+    AND			owner
+    SUICIDE			suicide(owner)
+  tag4: 
+    JUMPDEST		bytes public solution
+    PUSH [tag28]		bytes public solution
+    PUSH 3		solution
+    DUP1			solution = msg.data
+    SLOAD			solution = msg.data
+    PUSH 20		sha256(msg.data)
+    PUSH 1F		solution = msg.data
+    PUSH 2		diff
+    PUSH 0		
+    NOT			
+    PUSH 1		owner
+    DUP6			solution = msg.data
+    AND			solution = msg.data
+    ISZERO			solution = msg.data
+    PUSH 100		owner
+    MUL			solution = msg.data
+    ADD			solution = msg.data
+    SWAP1			solution = msg.data
+    SWAP4			solution = msg.data
+    AND			solution = msg.data
+    SWAP3			solution = msg.data
+    SWAP1			solution = msg.data
+    SWAP3			solution = msg.data
+    DIV			solution = msg.data
+    SWAP2			solution = msg.data
+    DUP3			solution = msg.data
+    ADD			solution = msg.data
+    DUP2			solution = msg.data
+    SWAP1			solution = msg.data
+    DIV			solution = msg.data
+    MUL			bytes public solution
+    PUSH 80		uint public reward
+    SWAP1			bytes public solution
+    DUP2			bytes public solution
+    ADD			bytes public solution
+    PUSH 40		contract Puzzle{...
+    MSTORE			bytes public solution
+    PUSH 60		contract Puzzle{...
+    DUP3			bytes public solution
+    DUP2			bytes public solution
+    MSTORE			bytes public solution
+    SWAP3			contract Puzzle{...
+    SWAP2			solution
+    SWAP1			solution = msg.data
+    DUP3			solution
+    DUP3			solution = msg.data
+    DUP1			bytes public solution
+    ISZERO			bytes public solution
+    PUSH [tag37]		bytes public solution
+    JUMPI			bytes public solution
+    DUP1			bytes public solution
+    PUSH 1F		bytes public solution
+    LT			bytes public solution
+    PUSH [tag38]		bytes public solution
+    JUMPI			bytes public solution
+    PUSH 100		bytes public solution
+    DUP1			bytes public solution
+    DUP4			bytes public solution
+    SLOAD			bytes public solution
+    DIV			bytes public solution
+    MUL			bytes public solution
+    DUP4			bytes public solution
+    MSTORE			bytes public solution
+    SWAP2			bytes public solution
+    PUSH 20		bytes public solution
+    ADD			bytes public solution
+    SWAP2			bytes public solution
+    PUSH [tag37]		bytes public solution
+    JUMP			bytes public solution
+  tag5: 
+    JUMPDEST		address public owner
+    PUSH [tag24]		address public owner
+    PUSH 0		contract Puzzle{...
+    SLOAD			owner
+    PUSH 1		
+    PUSH A0		
+    PUSH 2		
+    EXP			
+    SUB			
+    AND			owner
+    DUP2			address public owner
+    JUMP	[out]		address public owner
+  tag6: 
+    JUMPDEST		bytes32 public diff
+    PUSH [tag24]		bool public locked
+    PUSH 2		diff
+    SLOAD			diff
+    DUP2			bool public locked
+    JUMP	[out]		bytes32 public diff
+  tag7: 
+    JUMPDEST		bool public locked
+    PUSH [tag24]		bool public locked
+    PUSH 0		contract Puzzle{...
+    SLOAD			owner
+    PUSH FF		locked
+    PUSH A0		
+    PUSH 2		
+    EXP			
+    SWAP1			locked
+    SWAP2			locked
+    DIV			locked
+    AND			locked
+    DUP2			bool public locked
+    JUMP	[out]		bool public locked
+  tag8: 
+    JUMPDEST		contract Puzzle{...
+    STOP			contract Puzzle{...
+  tag11: 
+    JUMPDEST		if (msg.sender == owner) //update reward...
+    PUSH 0		contract Puzzle{...
+    CALLDATASIZE			contract Puzzle{...
+    GT			msg.data.length > 0
+    ISZERO			if (msg.data.length > 0) //submit a solution...
+    PUSH [tag16]		if (msg.sender == owner) //update reward...
+    JUMPI			if (msg.data.length > 0) //submit a solution...
+    PUSH 0		contract Puzzle{...
+    SLOAD			owner
+    PUSH A0		
+    PUSH 2		
+    EXP			
+    SWAP1			locked
+    DIV			locked
+    PUSH FF		locked
+    AND			locked
+    ISZERO			if (locked)...
+    PUSH [tag15]		if (locked)...
+    JUMPI			if (locked)...
+    PUSH [ErrorTag]		throw
+    JUMP			throw
+  tag12: 
+    JUMPDEST		if (locked)...
+    PUSH 0		contract Puzzle{...
+    DUP1			owner
+    SLOAD			owner
+    PUSH 1		owner
+    SLOAD			reward
+    PUSH 1		
+    PUSH A0		
+    PUSH 2		
+    EXP			
+    SUB			
+    SWAP1			owner
+    SWAP2			owner
+    AND			owner
+    SWAP2			owner
+    SWAP1			contract Puzzle{...
+    PUSH 60		contract Puzzle{...
+    DUP3			contract Puzzle{...
+    DUP2			contract Puzzle{...
+    DUP2			contract Puzzle{...
+    DUP2			contract Puzzle{...
+    DUP6			reward
+    DUP9			owner
+    DUP4			contract Puzzle{...
+    CALL			owner.send(reward)
+    POP			
+    POP			
+    CALLVALUE			msg.value
+    PUSH 1		owner
+    SSTORE			reward = msg.value
+    POP			
+    PUSH [tag16]		if (msg.sender == owner) //update reward...
+    SWAP2			if (msg.sender == owner) //update reward...
+    POP			
+    POP			
+    JUMP			if (msg.sender == owner) //update reward...
+  tag15: 
+    JUMPDEST		if (locked)...
+    PUSH 2		diff
+    DUP1			diff
+    SLOAD			diff
+    SWAP1			diff
+    PUSH 0		contract Puzzle{...
+    CALLDATASIZE			contract Puzzle{...
+    PUSH 60		contract Puzzle{...
+    DUP1			contract Puzzle{...
+    DUP4			contract Puzzle{...
+    DUP4			contract Puzzle{...
+    DUP1			contract Puzzle{...
+    DUP3			contract Puzzle{...
+    DUP5			contract Puzzle{...
+    CALLDATACOPY			sha256(msg.data)
+    DUP3			sha256(msg.data)
+    ADD			sha256(msg.data)
+    SWAP2			sha256(msg.data)
+    POP			sha256(msg.data)
+    POP			sha256(msg.data)
+    SWAP3			sha256(msg.data)
+    POP			sha256(msg.data)
+    POP			sha256(msg.data)
+    POP			sha256(msg.data)
+    PUSH 20		sha256(msg.data)
+    PUSH 40		sha256(msg.data)
+    MLOAD			sha256(msg.data)
+    DUP1			sha256(msg.data)
+    DUP4			sha256(msg.data)
+    SUB			sha256(msg.data)
+    DUP2			sha256(msg.data)
+    PUSH 0		sha256(msg.data)
+    DUP7			sha256(msg.data)
+    PUSH 61DA		sha256(msg.data)
+    GAS			sha256(msg.data)
+    SUB			sha256(msg.data)
+    CALL			sha256(msg.data)
+    ISZERO			sha256(msg.data)
+    PUSH [ErrorTag]		sha256(msg.data)
+    JUMPI			sha256(msg.data)
+    POP			
+    POP			
+    PUSH 40		contract Puzzle{...
+    MLOAD			sha256(msg.data)
+    MLOAD			sha256(msg.data)
+    LT			sha256(msg.data) < diff
+    ISZERO			if (sha256(msg.data) < diff)...
+    PUSH [tag16]		if (msg.sender == owner) //update reward...
+    JUMPI			if (sha256(msg.data) < diff)...
+    PUSH 1		owner
+    SLOAD			reward
+    PUSH 40		contract Puzzle{...
+    MLOAD			sha256(msg.data)
+    CALLER			msg.sender
+    PUSH 1		
+    PUSH A0		
+    PUSH 2		
+    EXP			
+    SUB			
+    AND			msg.sender == owner
+    SWAP2			msg.sender == owner
+    PUSH 0		contract Puzzle{...
+    SWAP2			contract Puzzle{...
+    DUP3			contract Puzzle{...
+    DUP2			sha256(msg.data)
+    DUP2			contract Puzzle{...
+    DUP2			sha256(msg.data)
+    DUP6			reward
+    DUP9			msg.sender == owner
+    DUP4			contract Puzzle{...
+    CALL			msg.sender.send(reward)
+    POP			
+    POP			
+    PUSH 3		solution
+    DUP1			solution = msg.data
+    SLOAD			solution = msg.data
+    DUP2			solution = msg.data
+    DUP5			solution = msg.data
+    MSTORE			solution = msg.data
+    SWAP1			solution
+    SWAP4			solution
+    POP			
+    PUSH 20		sha256(msg.data)
+    PUSH 1F		solution = msg.data
+    PUSH 2		diff
+    PUSH 0		
+    NOT			
+    PUSH 1		owner
+    DUP6			solution = msg.data
+    AND			solution = msg.data
+    ISZERO			solution = msg.data
+    PUSH 100		owner
+    MUL			solution = msg.data
+    ADD			solution = msg.data
+    SWAP1			solution = msg.data
+    SWAP4			solution = msg.data
+    AND			solution = msg.data
+    SWAP3			solution = msg.data
+    SWAP1			solution = msg.data
+    SWAP3			solution = msg.data
+    DIV			solution = msg.data
+    DUP3			solution = msg.data
+    ADD			solution = msg.data
+    DIV			solution = msg.data
+    PUSH C2575A0E9E593C00F959F8C92F12DB2869C3395A3B0502D05E2516446F71F85B		solution = msg.data
+    SWAP1			solution = msg.data
+    DUP2			solution = msg.data
+    ADD			solution = msg.data
+    SWAP4			solution = msg.data
+    CALLDATASIZE			contract Puzzle{...
+    SWAP4			contract Puzzle{...
+    POP			
+    SWAP1			solution = msg.data
+    SWAP2			solution = msg.data
+    DUP4			solution = msg.data
+    SWAP1			solution = msg.data
+    LT			solution = msg.data
+    PUSH [tag18]		solution = msg.data
+    JUMPI			solution = msg.data
+    DUP3			solution = msg.data
+    DUP1			solution = msg.data
+    ADD			solution = msg.data
+    PUSH FF		
+    NOT			
+    DUP3			contract Puzzle{...
+    CALLDATALOAD			contract Puzzle{...
+    AND			solution = msg.data
+    OR			solution = msg.data
+    DUP6			solution = msg.data
+    SSTORE			solution = msg.data
+  tag20: 
+    JUMPDEST		solution = msg.data
+    POP			
+    PUSH [tag21]		solution = msg.data
+    SWAP3			solution = msg.data
+    SWAP2			solution = msg.data
+    POP			
+  tag22: 
+    JUMPDEST		solution = msg.data
+    DUP1			solution = msg.data
+    DUP3			solution = msg.data
+    GT			solution = msg.data
+    ISZERO			solution = msg.data
+    PUSH [tag23]		solution = msg.data
+    JUMPI			solution = msg.data
+    PUSH 0		contract Puzzle{...
+    DUP2			solution = msg.data
+    SSTORE			solution = msg.data
+    PUSH 1		owner
+    ADD			solution = msg.data
+    PUSH [tag22]		solution = msg.data
+    JUMP			solution = msg.data
+  tag21: 
+    JUMPDEST		solution = msg.data
+    POP			
+    POP			
+    PUSH 0		contract Puzzle{...
+    DUP1			locked = true
+    SLOAD			locked = true
+    PUSH FF0000000000000000000000000000000000000000		
+    NOT			
+    AND			locked = true
+    PUSH A0		
+    PUSH 2		
+    EXP			
+    OR			locked = true
+    SWAP1			locked = true
+    SSTORE			locked = true
+  tag16: 
+    JUMPDEST		if (sha256(msg.data) < diff)...
+    JUMP	[out]		function()...
+  tag18: 
+    JUMPDEST		solution = msg.data
+    DUP3			solution = msg.data
+    DUP1			solution = msg.data
+    ADD			solution = msg.data
+    PUSH 1		solution = msg.data
+    ADD			solution = msg.data
+    DUP6			solution = msg.data
+    SSTORE			solution = msg.data
+    DUP3			solution = msg.data
+    ISZERO			solution = msg.data
+    PUSH [tag20]		solution = msg.data
+    JUMPI			solution = msg.data
+    SWAP2			contract Puzzle{...
+  tag19: 
+    JUMPDEST		solution = msg.data
+    DUP3			solution = msg.data
+    DUP2			solution = msg.data
+    GT			solution = msg.data
+    ISZERO			solution = msg.data
+    PUSH [tag20]		solution = msg.data
+    JUMPI			solution = msg.data
+    DUP3			solution = msg.data
+    CALLDATALOAD			solution = msg.data
+    DUP3			solution = msg.data
+    PUSH 0		solution = msg.data
+    POP			solution = msg.data
+    SSTORE			solution = msg.data
+    SWAP2			solution = msg.data
+    PUSH 20		solution = msg.data
+    ADD			solution = msg.data
+    SWAP2			solution = msg.data
+    SWAP1			solution = msg.data
+    PUSH 1		solution = msg.data
+    ADD			solution = msg.data
+    SWAP1			solution = msg.data
+    PUSH [tag19]		solution = msg.data
+    JUMP			solution = msg.data
+  tag23: 
+    JUMPDEST		solution = msg.data
+    POP			solution = msg.data
+    SWAP1			solution = msg.data
+    JUMP			solution = msg.data
+  tag24: 
+    JUMPDEST		uint public reward
+    PUSH 60		contract Puzzle{...
+    SWAP1			uint public reward
+    DUP2			uint public reward
+    MSTORE			uint public reward
+    PUSH 20		sha256(msg.data)
+    SWAP1			sha256(msg.data)
+    RETURN			uint public reward
+  tag28: 
+    JUMPDEST		bytes public solution
+    PUSH 40		bytes public solution
+    MLOAD			bytes public solution
+    DUP1			bytes public solution
+    DUP1			bytes public solution
+    PUSH 20		bytes public solution
+    ADD			bytes public solution
+    DUP3			bytes public solution
+    DUP2			bytes public solution
+    SUB			bytes public solution
+    DUP3			bytes public solution
+    MSTORE			bytes public solution
+    DUP4			bytes public solution
+    DUP2			bytes public solution
+    DUP2			bytes public solution
+    MLOAD			bytes public solution
+    DUP2			bytes public solution
+    MSTORE			bytes public solution
+    PUSH 20		bytes public solution
+    ADD			bytes public solution
+    SWAP2			bytes public solution
+    POP			bytes public solution
+    DUP1			bytes public solution
+    MLOAD			bytes public solution
+    SWAP1			bytes public solution
+    PUSH 20		bytes public solution
+    ADD			bytes public solution
+    SWAP1			bytes public solution
+    DUP1			bytes public solution
+    DUP4			bytes public solution
+    DUP4			bytes public solution
+    DUP3			bytes public solution
+    SWAP1			bytes public solution
+    PUSH 0		bytes public solution
+    PUSH 4		bytes public solution
+    PUSH 20		bytes public solution
+    DUP5			bytes public solution
+    PUSH 1F		bytes public solution
+    ADD			bytes public solution
+    DIV			bytes public solution
+    PUSH F		bytes public solution
+    MUL			bytes public solution
+    PUSH 3		bytes public solution
+    ADD			bytes public solution
+    CALL			bytes public solution
+    POP			bytes public solution
+    SWAP1			bytes public solution
+    POP			bytes public solution
+    SWAP1			bytes public solution
+    DUP2			bytes public solution
+    ADD			bytes public solution
+    SWAP1			bytes public solution
+    PUSH 1F		bytes public solution
+    AND			bytes public solution
+    DUP1			bytes public solution
+    ISZERO			bytes public solution
+    PUSH [tag30]		bytes public solution
+    JUMPI			bytes public solution
+    DUP1			bytes public solution
+    DUP3			bytes public solution
+    SUB			bytes public solution
+    DUP1			bytes public solution
+    MLOAD			bytes public solution
+    PUSH 1		bytes public solution
+    DUP4			bytes public solution
+    PUSH 20		bytes public solution
+    SUB			bytes public solution
+    PUSH 100		bytes public solution
+    EXP			bytes public solution
+    SUB			bytes public solution
+    NOT			bytes public solution
+    AND			bytes public solution
+    DUP2			bytes public solution
+    MSTORE			bytes public solution
+    PUSH 20		bytes public solution
+    ADD			bytes public solution
+    SWAP2			bytes public solution
+    POP			bytes public solution
+  tag30: 
+    JUMPDEST		bytes public solution
+    POP			bytes public solution
+    SWAP3			bytes public solution
+    POP			bytes public solution
+    POP			bytes public solution
+    POP			bytes public solution
+    PUSH 40		bytes public solution
+    MLOAD			bytes public solution
+    DUP1			bytes public solution
+    SWAP2			bytes public solution
+    SUB			bytes public solution
+    SWAP1			bytes public solution
+    RETURN			bytes public solution
+  tag38: 
+    JUMPDEST		bytes public solution
+    DUP3			bytes public solution
+    ADD			bytes public solution
+    SWAP2			bytes public solution
+    SWAP1			bytes public solution
+    PUSH 0		bytes public solution
+    MSTORE			bytes public solution
+    PUSH 20		bytes public solution
+    PUSH 0		bytes public solution
+    SHA3			bytes public solution
+    SWAP1			bytes public solution
+  tag39: 
+    JUMPDEST		bytes public solution
+    DUP2			bytes public solution
+    SLOAD			bytes public solution
+    DUP2			bytes public solution
+    MSTORE			bytes public solution
+    SWAP1			bytes public solution
+    PUSH 1		bytes public solution
+    ADD			bytes public solution
+    SWAP1			bytes public solution
+    PUSH 20		bytes public solution
+    ADD			bytes public solution
+    DUP1			bytes public solution
+    DUP4			bytes public solution
+    GT			bytes public solution
+    PUSH [tag39]		bytes public solution
+    JUMPI			bytes public solution
+    DUP3			bytes public solution
+    SWAP1			bytes public solution
+    SUB			bytes public solution
+    PUSH 1F		bytes public solution
+    AND			bytes public solution
+    DUP3			bytes public solution
+    ADD			bytes public solution
+    SWAP2			bytes public solution
+  tag37: 
+    JUMPDEST		bytes public solution
+    POP			bytes public solution
+    POP			bytes public solution
+    POP			bytes public solution
+    POP			bytes public solution
+    POP			bytes public solution
+    DUP2			bytes public solution
+    JUMP	[out]		bytes public solution
