@@ -59,7 +59,7 @@ def main():
     print "MONEY FLOW OF ALL PATHS:"
     i = 1
     for flow in money_flow_all_paths:
-        print "%d. " + str(flow) % i
+        print "%d. " % i + str(flow)
         i = i + 1
 
     # print_cfg()
