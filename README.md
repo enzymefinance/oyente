@@ -74,3 +74,20 @@ DELETE n,r
 ```
 
 A set of sample contracts is placed in the *contracts* folder.
+
+
+#### Symbolic Execution (SE)
+
+Get Z3 distribution from https://github.com/Z3Prover/z3/releases
+
+Extract, then include the path to the bin directory to your $PYTHONPATH environment variable
+
+To perform SE, run
+
+```
+python symExec.py <bytecode file>
+```
+
+Currently, SE already captures and some money flows. At the end,
+the program will output them for investigation. Please refine.
+
