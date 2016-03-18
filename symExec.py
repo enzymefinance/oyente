@@ -284,7 +284,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         money_flow_all_paths.append(analysis["money_flow"])
         compare_stack_unit_test(stack)
         # print "Path condition = " + str(path_conditions_and_vars["path_condition"])
-        raw_input("Press Enter to continue...\n")
+        # raw_input("Press Enter to continue...\n")
     elif jump_type[start] == "unconditional":  # executing "JUMP"
         successor = vertices[start].get_jump_target()
         stack1 = list(stack)
@@ -292,7 +292,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         global_state1 = my_copy_dict(global_state)
         visited1 = list(visited)
         path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
-        analysis1 = dict(analysis)
+        analysis1 = my_copy_dict(analysis)
         sym_exec_block(successor, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
     elif jump_type[start] == "falls_to":  # just follow to the next basic block
         successor = vertices[start].get_falls_to()
@@ -301,7 +301,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         global_state1 = my_copy_dict(global_state)
         visited1 = list(visited)
         path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
-        analysis1 = dict(analysis)
+        analysis1 = my_copy_dict(analysis)
         sym_exec_block(successor, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
     elif jump_type[start] == "conditional":  # executing "JUMPI"
 
@@ -309,20 +309,13 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
 
         branch_expression = vertices[start].get_branch_expression()
 
-        try:
-            branch_expression = simplify(branch_expression)
-        except:
-            pass
-
         print "Branch expression: " + str(branch_expression)
-        #raw_input("Press Enter to continue...\n")
 
         solver.push()  # SET A BOUNDARY FOR SOLVER
         solver.add(branch_expression)
 
         if solver.check() == unsat:
             print "INFEASIBLE PATH DETECTED"
-            #raw_input("Press Enter to continue...\n")
         else:
             left_branch = vertices[start].get_jump_target()
             stack1 = list(stack)
@@ -331,24 +324,22 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
             visited1 = list(visited)
             path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
             path_conditions_and_vars1["path_condition"].append(branch_expression)
-            analysis1 = dict(analysis)
+            analysis1 = my_copy_dict(analysis)
             sym_exec_block(left_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
 
         solver.pop()  # POP SOLVER CONTEXT
 
         solver.push()  # SET A BOUNDARY FOR SOLVER
-        negated_branch_expression = simplify(Not(branch_expression))
+        negated_branch_expression = Not(branch_expression)
         solver.add(negated_branch_expression)
 
         print "Negated branch expression: " + str(negated_branch_expression)
-        #raw_input("Press Enter to continue...\n")
 
         if solver.check() == unsat:
             # Note that this check can be optimized. I.e. if the previous check succeeds,
             # no need to check for the negated condition, but we can immediately go into
             # the else branch
             print "INFEASIBLE PATH DETECTED"
-            #raw_input("Press Enter to continue...\n")
         else:
             right_branch = vertices[start].get_falls_to()
             stack1 = list(stack)
@@ -357,7 +348,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
             visited1 = list(visited)
             path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
             path_conditions_and_vars1["path_condition"].append(negated_branch_expression)
-            analysis1 = dict(analysis)
+            analysis1 = my_copy_dict(analysis)
             sym_exec_block(right_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
 
         solver.pop()  # POP SOLVER CONTEXT
@@ -578,7 +569,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 else:
                     stack.insert(0, 0)
             else:
-                sym_expression = simplify(If(ULT(first, second), BitVecVal(1, 256), BitVecVal(0, 256)))
+                sym_expression = If(ULT(first, second), BitVecVal(1, 256), BitVecVal(0, 256))
                 stack.insert(0, sym_expression)
         else:
             raise ValueError('STACK underflow')
@@ -592,7 +583,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 else:
                     stack.insert(0, 0)
             else:
-                sym_expression = simplify(If(UGT(first, second), BitVecVal(1, 256), BitVecVal(0, 256)))
+                sym_expression = If(UGT(first, second), BitVecVal(1, 256), BitVecVal(0, 256))
                 stack.insert(0, sym_expression)
         else:
             raise ValueError('STACK underflow')
@@ -606,7 +597,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 else:
                     stack.insert(0, 0)
             else:
-                sym_expression = simplify(If(first < second, BitVecVal(1, 256), BitVecVal(0, 256)))
+                sym_expression = If(first < second, BitVecVal(1, 256), BitVecVal(0, 256))
                 stack.insert(0, sym_expression)
         else:
             raise ValueError('STACK underflow')
@@ -620,7 +611,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 else:
                     stack.insert(0, 0)
             else:
-                sym_expression = simplify(If(first > second, BitVecVal(1, 256), BitVecVal(0, 256)))
+                sym_expression = If(first > second, BitVecVal(1, 256), BitVecVal(0, 256))
                 stack.insert(0, sym_expression)
         else:
             raise ValueError('STACK underflow')
@@ -634,7 +625,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 else:
                     stack.insert(0, 0)
             else:
-                sym_expression = simplify(If(first == second, BitVecVal(1, 256), BitVecVal(0, 256)))
+                sym_expression = If(first == second, BitVecVal(1, 256), BitVecVal(0, 256))
                 stack.insert(0, sym_expression)
         else:
             raise ValueError('STACK underflow')
@@ -650,7 +641,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 else:
                     stack.insert(0, 0)
             else:
-                sym_expression = simplify(If(first == 0, BitVecVal(1, 256), BitVecVal(0, 256)))
+                sym_expression = If(first == 0, BitVecVal(1, 256), BitVecVal(0, 256))
                 stack.insert(0, sym_expression)
         else:
             raise ValueError('STACK underflow')
@@ -1022,8 +1013,6 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 address_is = path_conditions_and_vars["Is"]
                 address_is = (address_is & CONSTANT_ONES_159)
                 boolean_expression = (recipient != address_is)
-                print str(boolean_expression)
-                raw_input('Press some key to continue ...')
                 solver.push()
                 solver.add(boolean_expression)
                 if solver.check() == unsat:

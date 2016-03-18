@@ -43,10 +43,13 @@ def update_analysis(analysis, opcode, stack, mem, global_state):
         transfer_amount = stack[2]
         if isinstance(transfer_amount, (int, long)) and transfer_amount == 0:
             return
-
+        if not isinstance(recipient, (int, long)):
+            recipient = simplify(recipient)
         analysis["money_flow"].append(("Ia", str(recipient), transfer_amount))
     elif opcode == "SUICIDE":
         recipient = stack[0]
-        analysis["money_flow"].append(("Ia", str(recipient), "remaining"))
+        if not isinstance(recipient, (int, long)):
+            recipient = simplify(recipient)
+        analysis["money_flow"].append(("Ia", str(recipient), "all_remaining"))
 
 
