@@ -20,13 +20,30 @@ edges = {}
 # Z3 solver
 solver = Solver()
 
+UNIT_TEST = 1
+
+if UNIT_TEST == 1:
+    result_file = open(sys.argv[2], 'r')
+
+
+def compare_stack_unit_test(stack):
+    try:
+        size = int(result_file.readline())
+        content = result_file.readline().strip('\n')
+        if size == len(stack) and str(stack) == content:
+            print "PASSED UNIT-TEST"
+        else:
+            print "FAILED UNIT-TEST"
+            print "Expected size %d, Resulted size %d" % (size, len(stack))
+            print "Expected content %s \nResulted content %s" % (content, str(stack))
+    except Exception as e:
+        print "FAILED UNIT-TEST"
+        print e.message
+
 
 def main():
-    if len(sys.argv) != 2:
-        print "Usage: python core.py <disassembled file>"
-        return
     build_cfg_and_analyze()
-    print_cfg()
+    # print_cfg()
 
 
 def build_cfg_and_analyze():
@@ -199,7 +216,7 @@ def full_sym_exec():
     mem = {}
     global_state = get_init_global_state(path_conditions_and_vars)  # this is init global state for this particular execution
     analysis = init_analysis()
-    sym_exec_block(0, visited, stack, mem, global_state, path_conditions_and_vars, analysis)
+    return sym_exec_block(0, visited, stack, mem, global_state, path_conditions_and_vars, analysis)
 
 
 def my_copy_dict(input):
@@ -218,21 +235,21 @@ def my_copy_dict(input):
 # Symbolically executing a block from the start address
 def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and_vars, analysis):
     if start < 0:
-        print "WARNING: UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH"
-        return
+        print "ERROR: UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH"
+        return ["ERROR"]
 
     print "\nDEBUG: Reach block address %d \n" % start
 
     if start in visited:
         print "Seeing a loop. Terminating this path ... "
-        return
+        return stack
 
     # Execute every instruction, one at a time
     try:
         block_ins = vertices[start].get_instructions()
     except KeyError:
         print "This path results in an exception"
-        return
+        return ["ERROR"]
 
     for instr in block_ins:
         sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_vars, analysis)
@@ -244,8 +261,9 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
     if jump_type[start] == "terminal":
         print "TERMINATING A PATH ..."
         display_analysis(analysis)
-        print "Path condition = " + str(path_conditions_and_vars["path_condition"])
-        #raw_input("Press Enter to continue...\n")
+        compare_stack_unit_test(stack)
+        # print "Path condition = " + str(path_conditions_and_vars["path_condition"])
+        raw_input("Press Enter to continue...\n")
     elif jump_type[start] == "unconditional":  # executing "JUMP"
         successor = vertices[start].get_jump_target()
         stack1 = list(stack)
