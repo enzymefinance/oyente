@@ -20,13 +20,24 @@ edges = {}
 # Z3 solver
 solver = Solver()
 
-UNIT_TEST = 1
+CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
+
+# Set this flag to 1 if we want to do unit test
+UNIT_TEST = 0
 
 if UNIT_TEST == 1:
-    result_file = open(sys.argv[2], 'r')
+    try:
+        result_file = open(sys.argv[2], 'r')
+    except:
+        print "Could not open result file for unit test"
+        exit()
 
 
+# A simple function to compare the end stack with the expected stack
+# configurations specified in a test file
 def compare_stack_unit_test(stack):
+    if UNIT_TEST != 1:
+        return
     try:
         size = int(result_file.readline())
         content = result_file.readline().strip('\n')
@@ -239,6 +250,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         return ["ERROR"]
 
     print "\nDEBUG: Reach block address %d \n" % start
+    print "STACK: " + str(stack)
 
     if start in visited:
         print "Seeing a loop. Terminating this path ... "
@@ -283,11 +295,16 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         analysis1 = dict(analysis)
         sym_exec_block(successor, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
     elif jump_type[start] == "conditional":  # executing "JUMPI"
-        '''
-        A choice point, we proceed with depth first search
-        '''
+
+        # A choice point, we proceed with depth first search
+
         branch_expression = vertices[start].get_branch_expression()
-        branch_expression = simplify(branch_expression)
+
+        try:
+            branch_expression = simplify(branch_expression)
+        except:
+            pass
+
         print "Branch expression: " + str(branch_expression)
         #raw_input("Press Enter to continue...\n")
 
@@ -624,7 +641,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 else:
                     stack.insert(0, 0)
             else:
-                sym_expression = If(first == 0, BitVecVal(1, 256), BitVecVal(0, 256))
+                sym_expression = simplify(If(first == 0, BitVecVal(1, 256), BitVecVal(0, 256)))
                 stack.insert(0, sym_expression)
         else:
             raise ValueError('STACK underflow')
@@ -962,7 +979,6 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 6:
             outgas = stack.pop(0)
             recipient = stack.pop(0)
-            print "recipient = " + str(recipient)
             transfer_amount = stack.pop(0)
             start_data_input = stack.pop(0)
             size_data_input = stack.pop(0)
@@ -970,6 +986,11 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             size_data_ouput = stack.pop(0)
             # in the paper, it is shaky when the size of data output is
             # min of stack[6] and the | o |
+
+            if isinstance(transfer_amount, (int, long)):
+                if transfer_amount == 0:
+                    stack.insert(0, 1)   # x = 0
+                    return
 
             # Let us ignore the call depth
             balance_ia = global_state["balance"]["Ia"]
@@ -990,6 +1011,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 new_balance_ia = (balance_ia - transfer_amount)
                 global_state["balance"]["Ia"] = new_balance_ia
                 address_is = path_conditions_and_vars["Is"]
+                address_is = (address_is & CONSTANT_ONES_159)
                 boolean_expression = (recipient != address_is)
                 print str(boolean_expression)
                 raw_input('Press some key to continue ...')
@@ -1001,7 +1023,10 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     global_state["balance"]["Is"] = new_balance_is
                 else:
                     solver.pop()
-                    new_address_name = gen.gen_arbitrary_address_var()
+                    if isinstance(recipient, (int, long)):
+                        new_address_name = "concrete_address_" + str(recipient)
+                    else:
+                        new_address_name = gen.gen_arbitrary_address_var()
                     old_balance_name = gen.gen_arbitrary_var()
                     old_balance = BitVec(old_balance_name, 256)
                     path_conditions_and_vars[old_balance_name] = old_balance
