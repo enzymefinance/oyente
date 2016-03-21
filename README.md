@@ -88,6 +88,6 @@ To perform SE, run
 python symExec.py <bytecode file>
 ```
 
-Currently, SE already captures and some money flows. At the end,
+Currently, SE already captures some money flows. At the end,
 the program will output them for investigation. Please refine.
 
