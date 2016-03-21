@@ -91,3 +91,13 @@ python symExec.py <bytecode file>
 Currently, SE already captures some money flows. At the end,
 the program will output them for investigation. Please refine.
 
+
+#### TESTING, using evm command from go-ethereum
+
+```
+evm --code [runtime-binary] --gas 10000 --price 0 --dump --debug
+```
+
+
+We can also specify the input data.
+
