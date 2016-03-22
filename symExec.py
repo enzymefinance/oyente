@@ -55,13 +55,7 @@ def compare_stack_unit_test(stack):
 
 def main():
     build_cfg_and_analyze()
-    print "========================="
-    print "MONEY FLOW OF ALL PATHS:"
-    i = 1
-    for flow in money_flow_all_paths:
-        print "%d. " % i + str(flow)
-        i = i + 1
-
+    detect_concurrency()
     # print_cfg()
 
 
@@ -73,6 +67,47 @@ def build_cfg_and_analyze():
         construct_bb()
         construct_static_edges()
         full_sym_exec()  # jump targets are constructed on the fly
+
+
+def detect_concurrency():
+
+    n = len(money_flow_all_paths)
+    for i in range(n):
+        print "Path " + str(i) + ": " + str(money_flow_all_paths[i])
+    i = 0
+    for flow in money_flow_all_paths:
+        i += 1
+        if len(flow) == 1:
+            continue  # pass all flows which do not do anything with money
+        for j in range(i, n):
+            jflow = money_flow_all_paths[j]
+            if len(jflow) == 1:
+                continue
+            if is_diff(flow, jflow):
+                print "Concurrency in path " + str(i-1) + " and path " + str(j)
+
+
+# return true if the two paths have different flows of money
+# later on we may want to return more meaningful output: e.g. if the concurrency changes
+# the amount of money or the recipient.
+def is_diff(flow1, flow2):
+    if len(flow1) != len(flow2):
+        return 1
+    n = len(flow1)
+    for i in range(n):
+        if flow1[i] == flow2[i]:
+            continue
+        tx_cd = Or(Not(flow1[i][0] == flow2[i][0]),
+                   Not(flow1[i][1] == flow2[i][1]),
+                   Not(flow1[i][2] == flow2[i][2]))
+        solver.push()
+        solver.add(tx_cd)
+
+        if solver.check() == sat:
+            solver.pop()
+            return 1
+        solver.pop()
+    return 0
 
 
 def print_cfg():
@@ -281,7 +316,8 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
     if jump_type[start] == "terminal":
         print "TERMINATING A PATH ..."
         display_analysis(analysis)
-        money_flow_all_paths.append(analysis["money_flow"])
+        if analysis["money_flow"] not in money_flow_all_paths:
+            money_flow_all_paths.append(analysis["money_flow"])
         compare_stack_unit_test(stack)
         # print "Path condition = " + str(path_conditions_and_vars["path_condition"])
         # raw_input("Press Enter to continue...\n")

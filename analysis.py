@@ -2,6 +2,7 @@ from opcodes import *
 from math import *
 from z3 import *
 
+
 # THIS IS TO DEFINE A SKELETON FOR ANALYSIS
 # FOR NEW TYPE OF ANALYSIS: add necessary details to the skeleton functions
 
@@ -13,6 +14,7 @@ def init_analysis():
         "money_flow": [("Is", "Ia", "Iv")]  # (source, destination, amount)
     }
     return analysis
+
 
 # Money flow: (source, destination, amount)
 
@@ -51,5 +53,3 @@ def update_analysis(analysis, opcode, stack, mem, global_state):
         if not isinstance(recipient, (int, long)):
             recipient = simplify(recipient)
         analysis["money_flow"].append(("Ia", str(recipient), "all_remaining"))
-
-

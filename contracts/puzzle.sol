@@ -3,9 +3,6 @@ contract Puzzle{
 	bool public locked;
 	uint public reward;
 	bytes32 public diff;
-	bytes public solution;
-
-	modifier onlyowner { if (msg.sender == owner) _ }
 
 	function Puzzle()
 	{
@@ -13,11 +10,6 @@ contract Puzzle{
 		locked = false;
 		reward = 0;
 		diff = bytes32(11111);
-	}
-
-	function kill() onlyowner
-	{
-		suicide(owner);
 	}
 
 	function()
@@ -37,7 +29,6 @@ contract Puzzle{
 				if (sha256(msg.data) < diff)
 				{
 					msg.sender.send(reward);
-					solution = msg.data;
 					locked = true;
 				}			
 			}		
