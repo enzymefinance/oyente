@@ -9,14 +9,17 @@ from z3 import *
 def init_analysis():
     analysis = {
         "gas": 0,
-        "gas_mem": 0
+        "gas_mem": 0,
+        "money_flow": [("Is", "Ia", "Iv")]  # (source, destination, amount)
     }
     return analysis
 
+# Money flow: (source, destination, amount)
 
 def display_analysis(analysis):
-    print "Gas paid for execution: %d" % analysis["gas"]
-    print "Gas paid for memory usage: %d" % analysis["gas_mem"]
+    # print "Gas paid for execution: %d" % analysis["gas"]
+    # print "Gas paid for memory usage: %d" % analysis["gas_mem"]
+    print "Money flow: " + str(analysis["money_flow"])
 
 
 def update_analysis(analysis, opcode, stack, mem, global_state):
@@ -34,3 +37,19 @@ def update_analysis(analysis, opcode, stack, mem, global_state):
     # I DON'T THINK THIS FORMULA IS CORRECT YET
     length = len(mem.keys())
     analysis["gas_mem"] = GCOST["Gmemory"] * length + (length ** 2) // 512
+
+    if opcode == "CALL":
+        recipient = stack[1]
+        transfer_amount = stack[2]
+        if isinstance(transfer_amount, (int, long)) and transfer_amount == 0:
+            return
+        if not isinstance(recipient, (int, long)):
+            recipient = simplify(recipient)
+        analysis["money_flow"].append(("Ia", str(recipient), transfer_amount))
+    elif opcode == "SUICIDE":
+        recipient = stack[0]
+        if not isinstance(recipient, (int, long)):
+            recipient = simplify(recipient)
+        analysis["money_flow"].append(("Ia", str(recipient), "all_remaining"))
+
+
