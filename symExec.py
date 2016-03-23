@@ -17,6 +17,7 @@ jump_type = {}  # capturing the "jump type" of each basic block
 vertices = {}
 edges = {}
 money_flow_all_paths = []
+data_flow_all_paths = [[], []] #store
 
 # Z3 solver
 solver = Solver()
@@ -55,7 +56,8 @@ def compare_stack_unit_test(stack):
 
 def main():
     build_cfg_and_analyze()
-    detect_concurrency()
+    detect_money_concurrency()
+    detect_data_concurrency()
     # print_cfg()
 
 
@@ -69,8 +71,23 @@ def build_cfg_and_analyze():
         full_sym_exec()  # jump targets are constructed on the fly
 
 
-def detect_concurrency():
+def detect_data_concurrency():
+    sload_flows = data_flow_all_paths[0]
+    sstore_flows = data_flow_all_paths[1]
+    # print sload_flows
+    # print sstore_flows
+    concurrency_addr = []
+    for sflow in sstore_flows:
+        for addr in sflow:
+            for lflow in sload_flows:
+                if addr in lflow:
+                    if not addr in concurrency_addr:
+                        concurrency_addr.append(addr)
+                    break
+    print "data conccureny in storage " + str(concurrency_addr)
 
+
+def detect_money_concurrency():
     n = len(money_flow_all_paths)
     for i in range(n):
         print "Path " + str(i) + ": " + str(money_flow_all_paths[i])
@@ -318,6 +335,10 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         display_analysis(analysis)
         if analysis["money_flow"] not in money_flow_all_paths:
             money_flow_all_paths.append(analysis["money_flow"])
+        if analysis["sload"] not in data_flow_all_paths[0]:
+            data_flow_all_paths[0].append(analysis["sload"])
+        if analysis["sstore"] not in data_flow_all_paths[1]:
+            data_flow_all_paths[1].append(analysis["sstore"])
         compare_stack_unit_test(stack)
         # print "Path condition = " + str(path_conditions_and_vars["path_condition"])
         # raw_input("Press Enter to continue...\n")
@@ -400,7 +421,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     # collecting the analysis result by calling this skeletal function
     # this should be done before symbolically executing the instruction,
     # since SE will modify the stack and mem
-    update_analysis(analysis, instr_parts[0], stack, mem, global_state)
+    update_analysis(analysis, instr_parts[0], stack, mem, global_state, gen)
 
     print "=============================="
     print "EXECUTING: " + instr
