@@ -17,7 +17,8 @@ jump_type = {}  # capturing the "jump type" of each basic block
 vertices = {}
 edges = {}
 money_flow_all_paths = []
-data_flow_all_paths = [[], []] #store
+data_flow_all_paths = [[], []] # store all storage addresses
+path_conditions = [] # store the path condition corresponding to each path in money_flow_all_paths
 
 # Z3 solver
 solver = Solver()
@@ -58,6 +59,7 @@ def main():
     build_cfg_and_analyze()
     detect_money_concurrency()
     detect_data_concurrency()
+    detect_data_money_concurrency()
     # print_cfg()
 
 
@@ -102,6 +104,32 @@ def detect_money_concurrency():
                 continue
             if is_diff(flow, jflow):
                 print "Concurrency in path " + str(i-1) + " and path " + str(j)
+
+
+def detect_data_money_concurrency():
+    n = len(money_flow_all_paths)
+    sstore_flows = data_flow_all_paths[1]
+    concurrency_addr = []
+    for i in range(n):
+        cond = path_conditions[i]
+        try:
+            s_temp = Solver()
+            s_temp.insert(cond)
+            s_temp.check()
+            m = s_temp.model()
+            list_vars = m.decls()
+            s_temp.reset()
+        except Exception as e:
+            print str(e)
+            continue
+        #print "Model: " + str(m)
+        for sflow in sstore_flows:
+            for addr in sflow:
+                var_name = gen.gen_owner_store_var(addr)
+                for var in m:
+                    if var.name() == var_name:
+                        concurrency_addr.append(addr)
+    print "Concurrency in data that affects money flow: " + str(set(concurrency_addr))
 
 
 # return true if the two paths have different flows of money
@@ -335,6 +363,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         display_analysis(analysis)
         if analysis["money_flow"] not in money_flow_all_paths:
             money_flow_all_paths.append(analysis["money_flow"])
+            path_conditions.append(path_conditions_and_vars["path_condition"])
         if analysis["sload"] not in data_flow_all_paths[0]:
             data_flow_all_paths[0].append(analysis["sload"])
         if analysis["sstore"] not in data_flow_all_paths[1]:
@@ -421,7 +450,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     # collecting the analysis result by calling this skeletal function
     # this should be done before symbolically executing the instruction,
     # since SE will modify the stack and mem
-    update_analysis(analysis, instr_parts[0], stack, mem, global_state, gen)
+    update_analysis(analysis, instr_parts[0], stack, mem, global_state)
 
     print "=============================="
     print "EXECUTING: " + instr

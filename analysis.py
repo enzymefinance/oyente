@@ -26,7 +26,7 @@ def display_analysis(analysis):
     print "Money flow: " + str(analysis["money_flow"])
 
 
-def update_analysis(analysis, opcode, stack, mem, global_state, gen):
+def update_analysis(analysis, opcode, stack, mem, global_state):
     gas_increment = get_ins_cost(opcode)
     if opcode in ("LOG0", "LOG1", "LOG2", "LOG3", "LOG4"):
         gas_increment += GCOST["Glogdata"] * stack[1]
