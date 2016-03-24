@@ -72,7 +72,9 @@ def build_cfg_and_analyze():
         construct_static_edges()
         full_sym_exec()  # jump targets are constructed on the fly
 
-
+# Detect if there is data concurrency in two different flows.
+# e.g. if a flow modifies a value stored in the storage address and
+# the other one reads that value in its execution
 def detect_data_concurrency():
     sload_flows = data_flow_all_paths[0]
     sstore_flows = data_flow_all_paths[1]
@@ -105,7 +107,10 @@ def detect_money_concurrency():
             if is_diff(flow, jflow):
                 print "Concurrency in path " + str(i-1) + " and path " + str(j)
 
-
+# detect if any change in a storage address will result in a different
+# flow of money. Currently I implement this detection by
+# considering if a path condition contains
+# a variable which is a storage address.
 def detect_data_money_concurrency():
     n = len(money_flow_all_paths)
     sstore_flows = data_flow_all_paths[1]
