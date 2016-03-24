@@ -4,7 +4,7 @@ contract Puzzle2{
 	uint public reward;
 	bytes32 public diff;
 
-	function Puzzle()
+	function Puzzle2()
 	{
 		owner = msg.sender;
 		locked = false;

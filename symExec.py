@@ -112,17 +112,17 @@ def detect_data_money_concurrency():
     concurrency_addr = []
     for i in range(n):
         cond = path_conditions[i]
+        # print cond
         try:
             s_temp = Solver()
             s_temp.insert(cond)
             s_temp.check()
             m = s_temp.model()
-            list_vars = m.decls()
             s_temp.reset()
         except Exception as e:
             print str(e)
             continue
-        #print "Model: " + str(m)
+        # print "Model: " + str(m)
         for sflow in sstore_flows:
             for addr in sflow:
                 var_name = gen.gen_owner_store_var(addr)
