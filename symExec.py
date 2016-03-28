@@ -1,11 +1,11 @@
 from z3 import *
 from vargenerator import *
-import sys
 import tokenize
 from tokenize import NUMBER, NAME, NEWLINE
 from basicblock import BasicBlock
 from analysis import *
 import copy
+from utils import *
 
 count_unresolved_jumps = 0
 
@@ -19,6 +19,7 @@ edges = {}
 money_flow_all_paths = []
 data_flow_all_paths = [[], []] # store all storage addresses
 path_conditions = [] # store the path condition corresponding to each path in money_flow_all_paths
+all_gs = [] # store global variables, e.g. storage, balance of all paths
 
 # Z3 solver
 solver = Solver()
@@ -72,6 +73,7 @@ def build_cfg_and_analyze():
         construct_static_edges()
         full_sym_exec()  # jump targets are constructed on the fly
 
+
 # Detect if there is data concurrency in two different flows.
 # e.g. if a flow modifies a value stored in the storage address and
 # the other one reads that value in its execution
@@ -107,6 +109,7 @@ def detect_money_concurrency():
             if is_diff(flow, jflow):
                 print "Concurrency in path " + str(i-1) + " and path " + str(j)
 
+
 # detect if any change in a storage address will result in a different
 # flow of money. Currently I implement this detection by
 # considering if a path condition contains
@@ -117,47 +120,16 @@ def detect_data_money_concurrency():
     concurrency_addr = []
     for i in range(n):
         cond = path_conditions[i]
-        # print cond
-        try:
-            s_temp = Solver()
-            s_temp.insert(cond)
-            s_temp.check()
-            m = s_temp.model()
-            s_temp.reset()
-        except Exception as e:
-            print str(e)
-            continue
-        # print "Model: " + str(m)
+        list_vars = []
+        for expr in cond:
+            list_vars += get_vars(expr)
+        set_vars = set(i.decl().name() for i in list_vars)
         for sflow in sstore_flows:
             for addr in sflow:
                 var_name = gen.gen_owner_store_var(addr)
-                for var in m:
-                    if var.name() == var_name:
-                        concurrency_addr.append(addr)
+                if var_name in set_vars:
+                    concurrency_addr.append(var_name)
     print "Concurrency in data that affects money flow: " + str(set(concurrency_addr))
-
-
-# return true if the two paths have different flows of money
-# later on we may want to return more meaningful output: e.g. if the concurrency changes
-# the amount of money or the recipient.
-def is_diff(flow1, flow2):
-    if len(flow1) != len(flow2):
-        return 1
-    n = len(flow1)
-    for i in range(n):
-        if flow1[i] == flow2[i]:
-            continue
-        tx_cd = Or(Not(flow1[i][0] == flow2[i][0]),
-                   Not(flow1[i][1] == flow2[i][1]),
-                   Not(flow1[i][2] == flow2[i][2]))
-        solver.push()
-        solver.add(tx_cd)
-
-        if solver.check() == sat:
-            solver.pop()
-            return 1
-        solver.pop()
-    return 0
 
 
 def print_cfg():
@@ -323,19 +295,6 @@ def full_sym_exec():
     return sym_exec_block(0, visited, stack, mem, global_state, path_conditions_and_vars, analysis)
 
 
-def my_copy_dict(input):
-    output = {}
-    for key in input:
-        if isinstance(input[key], list):
-            output[key] = list(input[key])
-        elif isinstance(input[key], dict):
-            output[key] = dict(input[key])
-        else:
-            output[key] = input[key]
-
-    return output
-
-
 # Symbolically executing a block from the start address
 def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and_vars, analysis):
     if start < 0:
@@ -369,6 +328,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         if analysis["money_flow"] not in money_flow_all_paths:
             money_flow_all_paths.append(analysis["money_flow"])
             path_conditions.append(path_conditions_and_vars["path_condition"])
+            all_gs.append(copy_global_values(global_state))
         if analysis["sload"] not in data_flow_all_paths[0]:
             data_flow_all_paths[0].append(analysis["sload"])
         if analysis["sstore"] not in data_flow_all_paths[1]:
