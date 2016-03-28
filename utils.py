@@ -5,6 +5,16 @@ from z3 import *
 from z3util import get_vars
 
 
+# detect if two flows are not really having race condition
+# 1. We first start with a simple check to see if a path edit some storage variable
+# which makes the other path infeasible
+# 2. We then check if two paths cannot be executed next to each other, for example they
+# are two paths yielded from this branch condition ``if (locked)"
+# 3. More checks are to come
+def is_false_positive(flow1, flow2):
+    return 0
+
+
 def is_diff(flow1, flow2):
     if len(flow1) != len(flow2):
         return 1
