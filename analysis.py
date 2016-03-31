@@ -84,20 +84,21 @@ def update_analysis(analysis, opcode, stack, mem, global_state):
 # Current path has curr_pc
 def is_feasible(prev_pc, gstate, curr_pc):
     vars_mapping = {}
-    for expr in curr_pc:
+    new_pc = list(curr_pc)
+    for expr in new_pc:
         list_vars = get_vars(expr)
         for var in list_vars:
             vars_mapping[var.decl().name()] = var
-    curr_pc += prev_pc
+    new_pc += prev_pc
     gen = Generator()
     for storage_address in gstate:
         var = gen.gen_owner_store_var(storage_address)
         if var in vars_mapping:
-            curr_pc.append(vars_mapping[var] == gstate[storage_address])
-    print "Final path condition: ", curr_pc
+            new_pc.append(vars_mapping[var] == gstate[storage_address])
+    # print "Final path condition: ", new_pc
     solver = Solver()
     solver.push()
-    solver.add(curr_pc)
+    solver.add(new_pc)
     if solver.check() == unsat:
         solver.pop()
         return False
