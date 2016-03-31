@@ -1,29 +1,25 @@
-contract Puzzle{
-	address  sender;
+contract Foo2{
 	address  owner;
-	uint reward;
-	bytes32 diff;
+    bool lock;
 
 
-	function Puzzle()
+	function Foo2()
 	{
 		owner = msg.sender;
-		reward = 0;
-		diff = bytes32(11111);
+        lock = true;
 	}
 
 	function()
 	{
-		if (msg.sender == owner) //update reward
+		if (lock)
 		{
-			owner.send(reward);
-			reward = msg.value;
+            lock = false;
+            owner.send(1);
 		}
 		else
-			if (msg.data.length > 0) //submit a solution
-			{
-				if (sha3(msg.data) < diff)
-					msg.sender.send(reward);
-			}		
+		{
+		    lock = true;
+		    msg.sender.send(1);
+		}
 	}
 }

@@ -97,6 +97,7 @@ def detect_money_concurrency():
     n = len(money_flow_all_paths)
     for i in range(n):
         print "Path " + str(i) + ": " + str(money_flow_all_paths[i])
+        print all_gs[i]
     i = 0
     for flow in money_flow_all_paths:
         i += 1
@@ -108,6 +109,11 @@ def detect_money_concurrency():
                 continue
             if is_diff(flow, jflow):
                 print "Concurrency in path " + str(i-1) + " and path " + str(j)
+                if is_false_positive(i-1, j, all_gs, path_conditions) and \
+                        is_false_positive(j, i-1, all_gs, path_conditions):
+                    print "This a false positive!"
+                else:
+                    print "Confirm!"
 
 
 # detect if any change in a storage address will result in a different
