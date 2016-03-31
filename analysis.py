@@ -120,14 +120,18 @@ def is_false_positive(i, j, all_gs, path_conditions):
     # print "Path condition " + str(j) + ": " + str(pathj)
     # print "Global state values in path " + str(i) + ": " + str(statei)
     # print "Global state values in path " + str(j) + ": " + str(statej)
-    set_of_pcs = [] # stores the set of path conditions in state i which has only global variables
+    # stores the set of path conditions in path i
+    # which has at least one variable which affects global variables
+    set_of_pcs = []
+    vars_in_storage_i = get_all_vars(statei)
+
     for expr in pathi:
-        if has_only_storage_vars(expr):
+        if has_storage_vars(expr, vars_in_storage_i):
             set_of_pcs.append(expr)
 
     # print "Set of PCs having only global vars" + str(set_of_pcs)
     # rename global variables in path i
-    set_of_pcs, statei = rename_global_vars(set_of_pcs, statei)
+    set_of_pcs, statei = rename_vars(set_of_pcs, statei)
     # print "Set of PCs after renaming global vars" + str(set_of_pcs)
     # print "Global state values in path " + str(i) + " after renaming: " + str(statei)
     if is_feasible(set_of_pcs, statei, pathj):

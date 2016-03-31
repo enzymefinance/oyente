@@ -46,19 +46,25 @@ def is_in_expr(var, expr):
     return var in set_vars
 
 
-# check if an expression has only storage variables
-def has_only_storage_vars(expr):
+# check if an expression has any storage variables
+def has_storage_vars(expr, storage_vars):
     list_vars = get_vars(expr)
-    set_vars = set(i.decl().name() for i in list_vars)
-    for var in set_vars:
-        if not var.startswith("Ia_store_"):
-            return False
-    return True
+    for var in list_vars:
+        if var in storage_vars:
+            return True
+    return False
 
 
-# rename global variables to distinguish variables in two different paths.
-# e.g. Ia_store_0 in path i becomes Ia_store_0i
-def rename_global_vars(pcs, global_states):
+def get_all_vars(list_of_exprs):
+    ret_vars = []
+    for expr in list_of_exprs:
+        ret_vars += get_vars(list_of_exprs[expr])
+    return ret_vars
+
+
+# rename variables to distinguish variables in two different paths.
+# e.g. Ia_store_0 in path i becomes Ia_store_0_old
+def rename_vars(pcs, global_states):
     ret_pcs = []
     vars_mapping = {}
     for expr in pcs:
