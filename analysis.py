@@ -71,7 +71,7 @@ def update_analysis(analysis, opcode, stack, mem, global_state):
             stored_value = stack[1]
             print "storing value " + str(stored_value) + " to address " + str(stored_address)
             if stored_address in analysis["sstore"]:
-                # recording the new value of the item in storage
+                # recording the new values of the item in storage
                 analysis["sstore"][stored_address].append(stored_value)
             else:
                 analysis["sstore"][stored_address] = [stored_value]
@@ -79,8 +79,8 @@ def update_analysis(analysis, opcode, stack, mem, global_state):
             raise ValueError('STACK underflow')
 
 
-# Check if it is possible to execute a path after another
-# Previous path has prev_pc (previous path condition) and set global state variables as in gstate
+# Check if it is possible to execute a path after a previous path
+# Previous path has prev_pc (previous path condition) and set global state variables as in gstate (only storage values)
 # Current path has curr_pc
 def is_feasible(prev_pc, gstate, curr_pc):
     vars_mapping = {}
@@ -89,10 +89,12 @@ def is_feasible(prev_pc, gstate, curr_pc):
         for var in list_vars:
             vars_mapping[var.decl().name()] = var
     curr_pc += prev_pc
-    for var in gstate:
+    gen = Generator()
+    for storage_address in gstate:
+        var = gen.gen_owner_store_var(storage_address)
         if var in vars_mapping:
-            curr_pc.append(vars_mapping[var] == gstate[var])
-    # print "Final path condition: ", curr_pc
+            curr_pc.append(vars_mapping[var] == gstate[storage_address])
+    print "Final path condition: ", curr_pc
     solver = Solver()
     solver.push()
     solver.add(curr_pc)
@@ -120,20 +122,13 @@ def is_false_positive(i, j, all_gs, path_conditions):
     # print "Path condition " + str(j) + ": " + str(pathj)
     # print "Global state values in path " + str(i) + ": " + str(statei)
     # print "Global state values in path " + str(j) + ": " + str(statej)
-    # stores the set of path conditions in path i
-    # which has at least one variable which affects global variables
-    set_of_pcs = []
-    vars_in_storage_i = get_all_vars(statei)
 
-    for expr in pathi:
-        if has_storage_vars(expr, vars_in_storage_i):
-            set_of_pcs.append(expr)
 
     # print "Set of PCs having only global vars" + str(set_of_pcs)
     # rename global variables in path i
-    set_of_pcs, statei = rename_vars(set_of_pcs, statei)
-    # print "Set of PCs after renaming global vars" + str(set_of_pcs)
-    # print "Global state values in path " + str(i) + " after renaming: " + str(statei)
+    set_of_pcs, statei = rename_vars(pathi, statei)
+    print "Set of PCs after renaming global vars" + str(set_of_pcs)
+    print "Global state values in path " + str(i) + " after renaming: " + str(statei)
     if is_feasible(set_of_pcs, statei, pathj):
         # print "Its possible to execute path ", i, " after path ", j
         return 0

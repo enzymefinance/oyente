@@ -31,11 +31,10 @@ def is_storage_var(var):
 # TODO: add balance in the future
 def copy_global_values(global_state):
     new_gstate = {}
-    gen = Generator()
 
     for var in global_state["Ia"]:
         if is_storage_var(var):
-            new_gstate[gen.gen_owner_store_var(var)] = global_state["Ia"][var]
+            new_gstate[var] = global_state["Ia"][var]
     return new_gstate
 
 
@@ -55,18 +54,20 @@ def has_storage_vars(expr, storage_vars):
     return False
 
 
-def get_all_vars(list_of_exprs):
+def get_all_vars(list_of_storage_exprs):
     ret_vars = []
-    for expr in list_of_exprs:
-        ret_vars += get_vars(list_of_exprs[expr])
+    for expr in list_of_storage_exprs:
+        ret_vars += get_vars(list_of_storage_exprs[expr])
     return ret_vars
 
 
 # rename variables to distinguish variables in two different paths.
-# e.g. Ia_store_0 in path i becomes Ia_store_0_old
+# e.g. Ia_store_0 in path i becomes Ia_store_0_old if Ia_store_0 is modified
+# else we must keep Ia_store_0 if its not modified
 def rename_vars(pcs, global_states):
     ret_pcs = []
     vars_mapping = {}
+
     for expr in pcs:
         list_vars = get_vars(expr)
         for var in list_vars:
@@ -74,29 +75,40 @@ def rename_vars(pcs, global_states):
                 expr = substitute(expr, (var, vars_mapping[var]))
                 continue
             var_name = var.decl().name()
-            if var_name in global_states:
-                # position = int(var_name.split('_')[len(var_name.split('_'))-1])
-                new_var_name = var_name + '_old'
-                new_var = BitVec(new_var_name, 256)
-                vars_mapping[var] = new_var
-                expr = substitute(expr, (var, vars_mapping[var]))
+            # check if a var is global
+            if var_name.startswith("Ia_store_"):
+                position = int(var_name.split('_')[len(var_name.split('_'))-1])
+                # if it is not modified then keep the previous name
+                if position not in global_states:
+                    continue
+            # otherwise, change the name of the variable
+            new_var_name = var_name + '_old'
+            new_var = BitVec(new_var_name, 256)
+            vars_mapping[var] = new_var
+            expr = substitute(expr, (var, vars_mapping[var]))
         ret_pcs.append(expr)
 
     ret_gs = {}
     # replace variable in storage expression
-    for storage_var in global_states:
-        expr = global_states[storage_var]
+    for storage_addr in global_states:
+        expr = global_states[storage_addr]
         list_vars = get_vars(expr)
         for var in list_vars:
             if var in vars_mapping:
                 expr = substitute(expr, (var, vars_mapping[var]))
                 continue
             var_name = var.decl().name()
-            if var_name in global_states:
-                new_var_name = var_name + '_old'
-                new_var = BitVec(new_var_name, 256)
-                vars_mapping[var] = new_var
-                expr = substitute(expr, (var, vars_mapping[var]))
-        ret_gs[storage_var] = expr
+            # check if a var is global
+            if var_name.startswith("Ia_store_"):
+                position = int(var_name.split('_')[len(var_name.split('_'))-1])
+                # if it is not modified
+                if position not in global_states:
+                    continue
+            # otherwise, change the name of the variable
+            new_var_name = var_name + '_old'
+            new_var = BitVec(new_var_name, 256)
+            vars_mapping[var] = new_var
+            expr = substitute(expr, (var, vars_mapping[var]))
+        ret_gs[storage_addr] = expr
 
     return ret_pcs, ret_gs
