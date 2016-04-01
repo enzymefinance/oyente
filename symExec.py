@@ -59,8 +59,8 @@ def compare_stack_unit_test(stack):
 def main():
     build_cfg_and_analyze()
     detect_money_concurrency()
-    detect_data_concurrency()
-    detect_data_money_concurrency()
+    # detect_data_concurrency()
+    # detect_data_money_concurrency()
     # print_cfg()
 
 
@@ -72,6 +72,35 @@ def build_cfg_and_analyze():
         construct_bb()
         construct_static_edges()
         full_sym_exec()  # jump targets are constructed on the fly
+
+
+# detect if two paths send money to different people
+def detect_money_concurrency():
+    n = len(money_flow_all_paths)
+    for i in range(n):
+        print "Path " + str(i) + ": " + str(money_flow_all_paths[i])
+        print all_gs[i]
+    i = 0
+    false_positive = []
+    concurrency_paths = []
+    for flow in money_flow_all_paths:
+        i += 1
+        if len(flow) == 1:
+            continue  # pass all flows which do not do anything with money
+        for j in range(i, n):
+            jflow = money_flow_all_paths[j]
+            if len(jflow) == 1:
+                continue
+            if is_diff(flow, jflow):
+                if is_false_positive(i-1, j, all_gs, path_conditions) and \
+                        is_false_positive(j, i-1, all_gs, path_conditions):
+                    false_positive.append([i-1, j])
+                else:
+                    concurrency_paths.append([i-1, j])
+    print "All false positive cases: ", false_positive
+    print "Concurrency in paths: ", concurrency_paths
+    return false_positive, concurrency_paths
+
 
 
 # Detect if there is data concurrency in two different flows.
@@ -91,30 +120,6 @@ def detect_data_concurrency():
                         concurrency_addr.append(addr)
                     break
     print "data conccureny in storage " + str(concurrency_addr)
-
-
-def detect_money_concurrency():
-    n = len(money_flow_all_paths)
-    for i in range(n):
-        print "Path " + str(i) + ": " + str(money_flow_all_paths[i])
-        print all_gs[i]
-    i = 0
-    for flow in money_flow_all_paths:
-        i += 1
-        if len(flow) == 1:
-            continue  # pass all flows which do not do anything with money
-        for j in range(i, n):
-            jflow = money_flow_all_paths[j]
-            if len(jflow) == 1:
-                continue
-            if is_diff(flow, jflow):
-                print "Concurrency in path " + str(i-1) + " and path " + str(j)
-                if is_false_positive(i-1, j, all_gs, path_conditions) and \
-                        is_false_positive(j, i-1, all_gs, path_conditions):
-                    print "This a false positive!"
-                else:
-                    print "Confirm!"
-
 
 # detect if any change in a storage address will result in a different
 # flow of money. Currently I implement this detection by
