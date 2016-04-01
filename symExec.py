@@ -23,6 +23,7 @@ all_gs = [] # store global variables, e.g. storage, balance of all paths
 
 # Z3 solver
 solver = Solver()
+solver.set("timeout", 600)
 
 CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 
@@ -383,6 +384,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
 
         solver.push()  # SET A BOUNDARY FOR SOLVER
         solver.add(branch_expression)
+
 
         if solver.check() == unsat:
             print "INFEASIBLE PATH DETECTED"
@@ -1104,6 +1106,41 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     new_balance = (old_balance + transfer_amount)
                     global_state["balance"][new_address_name] = new_balance
 
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[0] == "CALLCODE":
+        if len(stack) > 6:
+            outgas = stack.pop(0)
+            stack.pop(0) # this is not used as recipient
+            transfer_amount = stack.pop(0)
+            start_data_input = stack.pop(0)
+            size_data_input = stack.pop(0)
+            start_data_output = stack.pop(0)
+            size_data_ouput = stack.pop(0)
+            # in the paper, it is shaky when the size of data output is
+            # min of stack[6] and the | o |
+
+            if isinstance(transfer_amount, (int, long)):
+                if transfer_amount == 0:
+                    stack.insert(0, 1)   # x = 0
+                    return
+
+            # Let us ignore the call depth
+            balance_ia = global_state["balance"]["Ia"]
+            is_enough_fund = (balance_ia < transfer_amount)
+            solver.push()
+            solver.add(is_enough_fund)
+
+            if solver.check() == unsat:
+                # this means not enough fund, thus the execution will result in exception
+                solver.pop()
+                stack.insert(0, 0)   # x = 0
+            else:
+                # the execution is possibly okay
+                stack.insert(0, 1)   # x = 1
+                solver.pop()
+                solver.add(is_enough_fund)
+                path_conditions_and_vars["path_condition"].append(is_enough_fund)
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "RETURN":
