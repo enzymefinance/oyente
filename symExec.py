@@ -4,11 +4,11 @@ import tokenize
 from tokenize import NUMBER, NAME, NEWLINE
 from basicblock import BasicBlock
 from analysis import *
-import copy
 from utils import *
 
 count_unresolved_jumps = 0
-
+REPORT_MODE = 1
+CHECK_CONCURRENCY_FLAG = 0
 gen = Generator()  # to generate names for symbolic variables
 
 end_ins_dict = {}  # capturing the last statement of each basic block
@@ -58,7 +58,7 @@ def compare_stack_unit_test(stack):
 
 def main():
     build_cfg_and_analyze()
-    detect_money_concurrency()
+    # detect_money_concurrency()
     # detect_data_concurrency()
     # detect_data_money_concurrency()
     # print_cfg()
@@ -92,15 +92,23 @@ def detect_money_concurrency():
             if len(jflow) == 1:
                 continue
             if is_diff(flow, jflow):
-                if is_false_positive(i-1, j, all_gs, path_conditions) and \
+                concurrency_paths.append([i-1, j])
+                if CHECK_CONCURRENCY_FLAG and \
+                        is_false_positive(i-1, j, all_gs, path_conditions) and \
                         is_false_positive(j, i-1, all_gs, path_conditions):
                     false_positive.append([i-1, j])
-                else:
-                    concurrency_paths.append([i-1, j])
+
     print "All false positive cases: ", false_positive
     print "Concurrency in paths: ", concurrency_paths
-    return false_positive, concurrency_paths
-
+    if REPORT_MODE:
+        report_file = sys.argv[1] + '.report'
+        with open(report_file, 'w') as rfile:
+            rfile.write(str(n) + "\n")
+            rfile.write(str(len(false_positive)) + "\n")
+            rfile.write(str(false_positive) + "\n")
+            rfile.write(str(len(concurrency_paths)) + "\n")
+            rfile.write(str(concurrency_paths) + "\n")
+            rfile.close()
 
 
 # Detect if there is data concurrency in two different flows.
