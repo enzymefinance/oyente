@@ -1,30 +1,36 @@
 import os, sys
 import json
 import csv
+import threading
 
-# json file will contain all contracts in this format
-# {contract address: [Code, TX hash that creates the contract]}
-def load_json(filename):
-    temp_file = "stats/tmp_"
+class MyThread(threading.Thread):
+    def __init__(self, file_name):
+        threading.Thread.__init__(self)
+        self.filename = file_name
 
-    with open(filename) as json_file:
-        c = json.load(json_file)
+    def run(self):
+        # json file will contain all contracts in this format
+        # {contract address: [Code, TX hash that creates the contract]}
+        temp_file = "stats/tmp_"
 
-        # Find and write the source code to disk for disassembly
-        for contract, data in c.iteritems():
-            evm_file = temp_file + contract +".evm"
-            code_file = temp_file + contract + ".code"
-            with open(code_file, 'w') as tfile:
-                tfile.write(data[0][2:])
-                tfile.write("\n")
-                tfile.close()
+        with open(self.filename) as json_file:
+            c = json.load(json_file)
 
-            sys.stdout.write("\tRunning disassembly on contract %s...\t\r" % (contract))
-            sys.stdout.flush()
-            os.system("cat %s | disasm > %s" % (code_file, evm_file))
-            os.system("python symExec.py %s" % evm_file)
-            # os.system("rm -rf %s*" % temp_file)
-    return
+            # Find and write the source code to disk for disassembly
+            for contract, data in c.iteritems():
+                evm_file = temp_file + contract +".evm"
+                code_file = temp_file + contract + ".code"
+                with open(code_file, 'w') as tfile:
+                    tfile.write(data[0][2:])
+                    tfile.write("\n")
+                    tfile.close()
+
+                sys.stdout.write("\tRunning disassembly on contract %s...\t\r" % (contract))
+                sys.stdout.flush()
+                os.system("cat %s | disasm > %s" % (code_file, evm_file))
+                os.system("python symExec.py %s" % evm_file)
+                # os.system("rm -rf %s*" % temp_file)
+        return
 
 
 def main():
@@ -33,8 +39,12 @@ def main():
         print "Example: python check_concurrency.py contract.json"
         return
 
+    list_threads = []
     for i in xrange(1, len(sys.argv)):
-        load_json(sys.argv[i])
+        new_thread = MyThread(sys.argv[i])
+        list_threads.append(new_thread)
+    for my_thread in list_threads:
+        my_thread.start()
 
 
 def collect_stats():
