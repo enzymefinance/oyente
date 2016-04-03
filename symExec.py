@@ -6,9 +6,10 @@ from basicblock import BasicBlock
 from analysis import *
 from utils import *
 
-count_unresolved_jumps = 0
 REPORT_MODE = 1
+DEBUG_MODE = 1
 CHECK_CONCURRENCY_FLAG = 0
+count_unresolved_jumps = 0
 gen = Generator()  # to generate names for symbolic variables
 
 end_ins_dict = {}  # capturing the last statement of each basic block
@@ -37,6 +38,8 @@ if UNIT_TEST == 1:
         print "Could not open result file for unit test"
         exit()
 
+if DEBUG_MODE:
+    log_file = open(sys.argv[1] + '.log', "w")
 
 # A simple function to compare the end stack with the expected stack
 # configurations specified in a test file
@@ -59,7 +62,7 @@ def compare_stack_unit_test(stack):
 
 def main():
     build_cfg_and_analyze()
-    # detect_money_concurrency()
+    detect_money_concurrency()
     # detect_data_concurrency()
     # detect_data_money_concurrency()
     # print_cfg()
@@ -385,19 +388,21 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         solver.push()  # SET A BOUNDARY FOR SOLVER
         solver.add(branch_expression)
 
-
-        if solver.check() == unsat:
-            print "INFEASIBLE PATH DETECTED"
-        else:
-            left_branch = vertices[start].get_jump_target()
-            stack1 = list(stack)
-            mem1 = dict(mem)
-            global_state1 = my_copy_dict(global_state)
-            visited1 = list(visited)
-            path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
-            path_conditions_and_vars1["path_condition"].append(branch_expression)
-            analysis1 = my_copy_dict(analysis)
-            sym_exec_block(left_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+        try:
+            if solver.check() == unsat:
+                print "INFEASIBLE PATH DETECTED"
+            else:
+                left_branch = vertices[start].get_jump_target()
+                stack1 = list(stack)
+                mem1 = dict(mem)
+                global_state1 = my_copy_dict(global_state)
+                visited1 = list(visited)
+                path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
+                path_conditions_and_vars1["path_condition"].append(branch_expression)
+                analysis1 = my_copy_dict(analysis)
+                sym_exec_block(left_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+        except Exception as e:
+            log_file.write(str(e))
 
         solver.pop()  # POP SOLVER CONTEXT
 
@@ -407,22 +412,24 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
 
         print "Negated branch expression: " + str(negated_branch_expression)
 
-        if solver.check() == unsat:
-            # Note that this check can be optimized. I.e. if the previous check succeeds,
-            # no need to check for the negated condition, but we can immediately go into
-            # the else branch
-            print "INFEASIBLE PATH DETECTED"
-        else:
-            right_branch = vertices[start].get_falls_to()
-            stack1 = list(stack)
-            mem1 = dict(mem)
-            global_state1 = my_copy_dict(global_state)
-            visited1 = list(visited)
-            path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
-            path_conditions_and_vars1["path_condition"].append(negated_branch_expression)
-            analysis1 = my_copy_dict(analysis)
-            sym_exec_block(right_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
-
+        try:
+            if solver.check() == unsat:
+                # Note that this check can be optimized. I.e. if the previous check succeeds,
+                # no need to check for the negated condition, but we can immediately go into
+                # the else branch
+                print "INFEASIBLE PATH DETECTED"
+            else:
+                right_branch = vertices[start].get_falls_to()
+                stack1 = list(stack)
+                mem1 = dict(mem)
+                global_state1 = my_copy_dict(global_state)
+                visited1 = list(visited)
+                path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
+                path_conditions_and_vars1["path_condition"].append(negated_branch_expression)
+                analysis1 = my_copy_dict(analysis)
+                sym_exec_block(right_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+        except Exception as e:
+            log_file.write(str(e))
         solver.pop()  # POP SOLVER CONTEXT
 
     else:
