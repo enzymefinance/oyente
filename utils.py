@@ -132,3 +132,8 @@ def split_dicts(filename, nsub = 500):
             with open(filename.split(".")[0] + "_" + str(file_index) + '.json', 'w') as outfile:
                 json.dump(current_file, outfile)
                 current_file.clear()
+
+def do_split_dicts():
+    for i in range(11):
+        split_dicts("contract" + str(i) + ".json")
+        os.remove("contract" + str(i) + ".json")
