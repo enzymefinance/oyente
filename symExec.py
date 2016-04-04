@@ -1179,7 +1179,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
 
     else:
         print "UNKNOWN INSTRUCTION: " + instr_parts[0]
-        raise Exception('UNKNOWN INSTRUCTION')
+        raise Exception('UNKNOWN INSTRUCTION' + instr_parts[0])
 
     print_state(start, stack, mem, global_state)
 
