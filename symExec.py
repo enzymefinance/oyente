@@ -1,14 +1,15 @@
 from z3 import *
 from vargenerator import *
-import sys
 import tokenize
 from tokenize import NUMBER, NAME, NEWLINE
 from basicblock import BasicBlock
 from analysis import *
-import copy
+from utils import *
 
+REPORT_MODE = 1
+DEBUG_MODE = 1
+CHECK_CONCURRENCY_FLAG = 0
 count_unresolved_jumps = 0
-
 gen = Generator()  # to generate names for symbolic variables
 
 end_ins_dict = {}  # capturing the last statement of each basic block
@@ -17,9 +18,13 @@ jump_type = {}  # capturing the "jump type" of each basic block
 vertices = {}
 edges = {}
 money_flow_all_paths = []
+data_flow_all_paths = [[], []] # store all storage addresses
+path_conditions = [] # store the path condition corresponding to each path in money_flow_all_paths
+all_gs = [] # store global variables, e.g. storage, balance of all paths
 
 # Z3 solver
 solver = Solver()
+solver.set("timeout", 600)
 
 CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 
@@ -33,6 +38,8 @@ if UNIT_TEST == 1:
         print "Could not open result file for unit test"
         exit()
 
+if DEBUG_MODE:
+    log_file = open(sys.argv[1] + '.log', "w")
 
 # A simple function to compare the end stack with the expected stack
 # configurations specified in a test file
@@ -55,13 +62,9 @@ def compare_stack_unit_test(stack):
 
 def main():
     build_cfg_and_analyze()
-    print "========================="
-    print "MONEY FLOW OF ALL PATHS:"
-    i = 1
-    for flow in money_flow_all_paths:
-        print "%d. " % i + str(flow)
-        i = i + 1
-
+    detect_money_concurrency()
+    # detect_data_concurrency()
+    # detect_data_money_concurrency()
     # print_cfg()
 
 
@@ -73,6 +76,83 @@ def build_cfg_and_analyze():
         construct_bb()
         construct_static_edges()
         full_sym_exec()  # jump targets are constructed on the fly
+
+
+# detect if two paths send money to different people
+def detect_money_concurrency():
+    n = len(money_flow_all_paths)
+    for i in range(n):
+        print "Path " + str(i) + ": " + str(money_flow_all_paths[i])
+        print all_gs[i]
+    i = 0
+    false_positive = []
+    concurrency_paths = []
+    for flow in money_flow_all_paths:
+        i += 1
+        if len(flow) == 1:
+            continue  # pass all flows which do not do anything with money
+        for j in range(i, n):
+            jflow = money_flow_all_paths[j]
+            if len(jflow) == 1:
+                continue
+            if is_diff(flow, jflow):
+                concurrency_paths.append([i-1, j])
+                if CHECK_CONCURRENCY_FLAG and \
+                        is_false_positive(i-1, j, all_gs, path_conditions) and \
+                        is_false_positive(j, i-1, all_gs, path_conditions):
+                    false_positive.append([i-1, j])
+
+    print "All false positive cases: ", false_positive
+    print "Concurrency in paths: ", concurrency_paths
+    if REPORT_MODE:
+        report_file = sys.argv[1] + '.report'
+        with open(report_file, 'w') as rfile:
+            rfile.write(str(n) + "\n")
+            rfile.write(str(len(false_positive)) + "\n")
+            rfile.write(str(false_positive) + "\n")
+            rfile.write(str(len(concurrency_paths)) + "\n")
+            rfile.write(str(concurrency_paths) + "\n")
+            rfile.close()
+
+
+# Detect if there is data concurrency in two different flows.
+# e.g. if a flow modifies a value stored in the storage address and
+# the other one reads that value in its execution
+def detect_data_concurrency():
+    sload_flows = data_flow_all_paths[0]
+    sstore_flows = data_flow_all_paths[1]
+    # print sload_flows
+    # print sstore_flows
+    concurrency_addr = []
+    for sflow in sstore_flows:
+        for addr in sflow:
+            for lflow in sload_flows:
+                if addr in lflow:
+                    if not addr in concurrency_addr:
+                        concurrency_addr.append(addr)
+                    break
+    print "data conccureny in storage " + str(concurrency_addr)
+
+# detect if any change in a storage address will result in a different
+# flow of money. Currently I implement this detection by
+# considering if a path condition contains
+# a variable which is a storage address.
+def detect_data_money_concurrency():
+    n = len(money_flow_all_paths)
+    sstore_flows = data_flow_all_paths[1]
+    concurrency_addr = []
+    for i in range(n):
+        cond = path_conditions[i]
+        list_vars = []
+        for expr in cond:
+            list_vars += get_vars(expr)
+        set_vars = set(i.decl().name() for i in list_vars)
+        for sflow in sstore_flows:
+            for addr in sflow:
+                var_name = gen.gen_owner_store_var(addr)
+                if var_name in set_vars:
+                    concurrency_addr.append(var_name)
+    print "Concurrency in data that affects money flow: " + str(set(concurrency_addr))
 
 
 def print_cfg():
@@ -238,19 +318,6 @@ def full_sym_exec():
     return sym_exec_block(0, visited, stack, mem, global_state, path_conditions_and_vars, analysis)
 
 
-def my_copy_dict(input):
-    output = {}
-    for key in input:
-        if isinstance(input[key], list):
-            output[key] = list(input[key])
-        elif isinstance(input[key], dict):
-            output[key] = dict(input[key])
-        else:
-            output[key] = input[key]
-
-    return output
-
-
 # Symbolically executing a block from the start address
 def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and_vars, analysis):
     if start < 0:
@@ -281,7 +348,14 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
     if jump_type[start] == "terminal":
         print "TERMINATING A PATH ..."
         display_analysis(analysis)
-        money_flow_all_paths.append(analysis["money_flow"])
+        if analysis["money_flow"] not in money_flow_all_paths:
+            money_flow_all_paths.append(analysis["money_flow"])
+            path_conditions.append(path_conditions_and_vars["path_condition"])
+            all_gs.append(copy_global_values(global_state))
+        if analysis["sload"] not in data_flow_all_paths[0]:
+            data_flow_all_paths[0].append(analysis["sload"])
+        if analysis["sstore"] not in data_flow_all_paths[1]:
+            data_flow_all_paths[1].append(analysis["sstore"])
         compare_stack_unit_test(stack)
         # print "Path condition = " + str(path_conditions_and_vars["path_condition"])
         # raw_input("Press Enter to continue...\n")
@@ -314,18 +388,21 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         solver.push()  # SET A BOUNDARY FOR SOLVER
         solver.add(branch_expression)
 
-        if solver.check() == unsat:
-            print "INFEASIBLE PATH DETECTED"
-        else:
-            left_branch = vertices[start].get_jump_target()
-            stack1 = list(stack)
-            mem1 = dict(mem)
-            global_state1 = my_copy_dict(global_state)
-            visited1 = list(visited)
-            path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
-            path_conditions_and_vars1["path_condition"].append(branch_expression)
-            analysis1 = my_copy_dict(analysis)
-            sym_exec_block(left_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+        try:
+            if solver.check() == unsat:
+                print "INFEASIBLE PATH DETECTED"
+            else:
+                left_branch = vertices[start].get_jump_target()
+                stack1 = list(stack)
+                mem1 = dict(mem)
+                global_state1 = my_copy_dict(global_state)
+                visited1 = list(visited)
+                path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
+                path_conditions_and_vars1["path_condition"].append(branch_expression)
+                analysis1 = my_copy_dict(analysis)
+                sym_exec_block(left_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+        except Exception as e:
+            log_file.write(str(e))
 
         solver.pop()  # POP SOLVER CONTEXT
 
@@ -335,22 +412,24 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
 
         print "Negated branch expression: " + str(negated_branch_expression)
 
-        if solver.check() == unsat:
-            # Note that this check can be optimized. I.e. if the previous check succeeds,
-            # no need to check for the negated condition, but we can immediately go into
-            # the else branch
-            print "INFEASIBLE PATH DETECTED"
-        else:
-            right_branch = vertices[start].get_falls_to()
-            stack1 = list(stack)
-            mem1 = dict(mem)
-            global_state1 = my_copy_dict(global_state)
-            visited1 = list(visited)
-            path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
-            path_conditions_and_vars1["path_condition"].append(negated_branch_expression)
-            analysis1 = my_copy_dict(analysis)
-            sym_exec_block(right_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
-
+        try:
+            if solver.check() == unsat:
+                # Note that this check can be optimized. I.e. if the previous check succeeds,
+                # no need to check for the negated condition, but we can immediately go into
+                # the else branch
+                print "INFEASIBLE PATH DETECTED"
+            else:
+                right_branch = vertices[start].get_falls_to()
+                stack1 = list(stack)
+                mem1 = dict(mem)
+                global_state1 = my_copy_dict(global_state)
+                visited1 = list(visited)
+                path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
+                path_conditions_and_vars1["path_condition"].append(negated_branch_expression)
+                analysis1 = my_copy_dict(analysis)
+                sym_exec_block(right_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+        except Exception as e:
+            log_file.write(str(e))
         solver.pop()  # POP SOLVER CONTEXT
 
     else:
@@ -1036,6 +1115,41 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
 
         else:
             raise ValueError('STACK underflow')
+    elif instr_parts[0] == "CALLCODE":
+        if len(stack) > 6:
+            outgas = stack.pop(0)
+            stack.pop(0) # this is not used as recipient
+            transfer_amount = stack.pop(0)
+            start_data_input = stack.pop(0)
+            size_data_input = stack.pop(0)
+            start_data_output = stack.pop(0)
+            size_data_ouput = stack.pop(0)
+            # in the paper, it is shaky when the size of data output is
+            # min of stack[6] and the | o |
+
+            if isinstance(transfer_amount, (int, long)):
+                if transfer_amount == 0:
+                    stack.insert(0, 1)   # x = 0
+                    return
+
+            # Let us ignore the call depth
+            balance_ia = global_state["balance"]["Ia"]
+            is_enough_fund = (balance_ia < transfer_amount)
+            solver.push()
+            solver.add(is_enough_fund)
+
+            if solver.check() == unsat:
+                # this means not enough fund, thus the execution will result in exception
+                solver.pop()
+                stack.insert(0, 0)   # x = 0
+            else:
+                # the execution is possibly okay
+                stack.insert(0, 1)   # x = 1
+                solver.pop()
+                solver.add(is_enough_fund)
+                path_conditions_and_vars["path_condition"].append(is_enough_fund)
+        else:
+            raise ValueError('STACK underflow')
     elif instr_parts[0] == "RETURN":
         if len(stack) > 1:
             stack.pop(0)
@@ -1065,7 +1179,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
 
     else:
         print "UNKNOWN INSTRUCTION: " + instr_parts[0]
-        raise Exception('UNKNOWN INSTRUCTION')
+        raise Exception('UNKNOWN INSTRUCTION' + instr_parts[0])
 
     print_state(start, stack, mem, global_state)
 

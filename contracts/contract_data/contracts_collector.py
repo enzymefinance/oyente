@@ -39,20 +39,29 @@ class MyThread(threading.Thread):
                                 'params': [],
                                 'id': 4 + index * 100}
 
+        self.data_get_TX = {'jsonrpc': '2.0',
+                               'method': 'eth_getTransactionByHash',
+                               'params': [],
+                               'id': 5 + index * 100}
+
         self.data_get_TX_receipt = {'jsonrpc': '2.0',
                                'method': 'eth_getTransactionReceipt',
                                'params': [],
-                               'id': 5 + index * 100}
+                               'id': 6 + index * 100}
         self.list_address = []
         self.list_contract = {}
-        self.step = 100000
         self.index = index
 
+        self.low = index*300000
+        self.high = self.low + 300000
+        # print self.low, self.high
+
     def run(self):
-        for i in range(self.index * self.step, (self.index + 1) * self.step - 1):
+
+        for i in range(self.low, self.high):
             if (i%1000 == 0):
                 print 'Thread ' + str(self.index) + ' is processing block: ' + str(i)
-                print "Number of contracts so far: " + str(len(self.list_contract.keys()))
+                print "Number of contracts in Thread " + str(self.index) + " so far: " + str(len(self.list_contract))
             self.data_TX_count['params'] = [str(hex(i))]
             r = requests.post(url, data=json.dumps(self.data_TX_count), allow_redirects=True)
             tx_count = int(get_result(r.content), 16)
@@ -71,16 +80,23 @@ class MyThread(threading.Thread):
                     self.data_getCode['params'][0] = tx_receipt['contractAddress']
                     r = requests.post(url, data=json.dumps(self.data_getCode), allow_redirects=True)
                     code = get_result(r.content)
-                    if len(code) > 2:
-                        self.list_contract[tx_receipt['contractAddress']] = [code, tx['hash']]
 
-        with open('contract' + str(self.index) + '.json', 'w') as outfile:
+                    if len(code) > 2:
+                        self.data_get_TX['params'] = [tx['hash']]
+                        r = requests.post(url, data=json.dumps(self.data_get_TX), allow_redirects=True)
+                        tx_detail = get_result(r.content)
+                        tx_input = tx_detail['input']
+                        init_code = tx_input[:len(tx_input)-len(code)+2]
+
+                        self.list_contract[tx_receipt['contractAddress']] = [init_code, code, tx['hash']]
+
+        with open('contract_' + str(self.index) + '.json', 'w') as outfile:
             json.dump(self.list_contract, outfile)
 
 
 list_threads = []
 try:
-    for i in range(11):
+    for i in range(4):
         new_thread = MyThread(i)
         list_threads.append(new_thread)
     for my_thread in list_threads:

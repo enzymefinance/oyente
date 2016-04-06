@@ -1,10 +1,9 @@
-contract foo2{	
-	function foo() returns (int) {
-		 return bar(256) + 123123123;
+contract foo{	
+	function fo() returns (int) {
+		 return bar(256);
 	}
 
 	function bar(int d) returns (int) {
-			int f = 23223232;
-    		 return f+1;
+		return d+1;
 	}	
 }

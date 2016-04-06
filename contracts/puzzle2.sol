@@ -1,10 +1,10 @@
-contract Puzzle{
+contract Puzzle2{
 	address public owner;
 	bool public locked;
 	uint public reward;
 	bytes32 public diff;
 
-	function Puzzle()
+	function Puzzle2()
 	{
 		owner = msg.sender;
 		locked = false;
@@ -18,19 +18,19 @@ contract Puzzle{
 		{
 			if (locked)
 				throw;
-			owner.send(reward);
-			reward = msg.value;
+			if (msg.data[0] == 1)
+			    reward = reward/2;
 		}
 		else
 			if (msg.data.length > 0) //submit a solution
 			{
 				if (locked)
-					throw;				
+					throw;
 				if (sha256(msg.data) < diff)
 				{
 					msg.sender.send(reward);
 					locked = true;
-				}			
-			}		
+				}
+			}
 	}
 }

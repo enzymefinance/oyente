@@ -1,10 +1,23 @@
-contract foo {
-	function foos2() returns (int) {
-		 return bar(256);
+contract Foo3{
+	address  owner;
+    bool lock;
+
+
+	function Foo3()
+	{
+		owner = msg.sender;
+        lock = true;
 	}
 
-	function bar(int d) returns (int) {
-    		 return 1;
+	function()
+	{
+		if (lock)
+		{
+            owner.send(1);
+		}
+		else
+		{
+		    msg.sender.send(1);
+		}
 	}
-	
 }

@@ -5,7 +5,7 @@ from neo4jrestclient.client import GraphDatabase
 from basicblock import BasicBlock
 
 
-db = GraphDatabase("http://localhost:7474", username="neo4j", password="neo4j")
+db = GraphDatabase("http://localhost:7474", username="neo4j", password="1.66Planck")
 
 labels = db.labels.create("JumpDests")
 label_dict = {}  # capturing the address of the first statement of each basic block
@@ -82,7 +82,7 @@ def collect_vertices(tokens):
                 quit()
             is_new_line = False
             if is_new_block:
-                current_block = current_ins_address
+                current_block = current_ins_address #store the begining address of the a block
                 is_new_block = False
             continue
         elif tok_type == NEWLINE:
