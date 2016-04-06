@@ -60,15 +60,21 @@ def update_analysis(analysis, opcode, stack, mem, global_state):
     elif opcode == "SLOAD":
         if len(stack) > 0:
             address = stack[0]
+            if not isinstance(address, (int, long)):
+                address = str(address)
             if address not in analysis["sload"]:
                 analysis["sload"].append(address)
         else:
             raise ValueError('STACK underflow')
     elif opcode == "SSTORE":
         if len(stack) > 1:
-            print stack
             stored_address = stack[0]
             stored_value = stack[1]
+            print type(stored_address)
+            # a temporary fix, not a good one.
+            # TODO move to z3 4.4.2 in which BitVecRef is hashable
+            if not isinstance(stored_address, (int, long)):
+                stored_address = str(stored_address)
             print "storing value " + str(stored_value) + " to address " + str(stored_address)
             if stored_address in analysis["sstore"]:
                 # recording the new values of the item in storage
