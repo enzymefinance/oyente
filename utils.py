@@ -4,6 +4,7 @@
 from z3 import *
 from z3util import get_vars
 from vargenerator import Generator
+import json
 
 def my_copy_dict(input):
     output = {}
@@ -112,3 +113,27 @@ def rename_vars(pcs, global_states):
         ret_gs[storage_addr] = expr
 
     return ret_pcs, ret_gs
+
+
+#split a file into smaller files
+def split_dicts(filename, nsub = 500):
+    with open(filename) as json_file:
+        c = json.load(json_file)
+        current_file = {}
+        file_index = 1
+        for u, v in c.iteritems():
+            current_file[u] = v
+            if len(current_file) == nsub:
+                with open(filename.split(".")[0] + "_" + str(file_index) + '.json', 'w') as outfile:
+                    json.dump(current_file, outfile)
+                    file_index += 1
+                    current_file.clear()
+        if len(current_file):
+            with open(filename.split(".")[0] + "_" + str(file_index) + '.json', 'w') as outfile:
+                json.dump(current_file, outfile)
+                current_file.clear()
+
+def do_split_dicts():
+    for i in range(11):
+        split_dicts("contract" + str(i) + ".json")
+        os.remove("contract" + str(i) + ".json")

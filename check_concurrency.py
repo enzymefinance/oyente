@@ -57,10 +57,10 @@ def collect_stats():
                 # print(a_file)
                 address = a_file.split(".")[0].split("_")[1]
                 with open("stats/" + a_file, "r") as f:
-                    no_paths = f.readline()
-                    no_concurrency = f.readline()
+                    no_paths = int(f.readline())
+                    no_concurrency = int(f.readline())
                     f.readline()
-                    no_fp = f.readline()
+                    no_fp = int(f.readline())
                     a_log_file = a_file.replace ("report", "log")
                     with open("stats/" + a_log_file, "r") as lf:
                         fp.writerow([address, no_paths, no_fp, no_concurrency, lf.readlines()])
