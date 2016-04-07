@@ -636,25 +636,27 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "SIGNEXTEND":
-        index = stack.pop(0)
-        content = stack.pop(0)
-        new_var_name = gen.gen_arbitrary_var()
-        new_var = BitVec(new_var_name, 256)
-        path_conditions_and_vars[new_var_name] = new_var
-        stack.insert(0, new_var)
-        '''
-        if isinstance(index, (int, long)):
-            t = 256 - 8 * (index + 1)
-            if isinstance(content, (int, long)):
-                # TODO
-            else:
-                for i in range(0, 255):
+        if len(stack) > 1:
+            index = stack.pop(0)
+            content = stack.pop(0)
+            new_var_name = gen.gen_arbitrary_var()
+            new_var = BitVec(new_var_name, 256)
+            path_conditions_and_vars[new_var_name] = new_var
+            stack.insert(0, new_var)
+            '''
+            if isinstance(index, (int, long)):
+                t = 256 - 8 * (index + 1)
+                if isinstance(content, (int, long)):
+                    # TODO
+                else:
+                    for i in range(0, 255):
 
+            else:
+                # DON'T KNOW WHAT could be the resulting value
+                # we then create a new symbolic variable
+            '''    
         else:
-            # DON'T KNOW WHAT could be the resulting value
-            # we then create a new symbolic variable
-        '''    
-        raise ValueError('SIGNEXTEND is not yet handled')
+            raise ValueError('STACK underflow')
     #
     #  10s: Comparison and Bitwise Logic Operations
     #
