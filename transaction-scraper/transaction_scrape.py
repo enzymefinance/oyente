@@ -179,7 +179,7 @@ def save_csv(data, headers, filen):
 def run(clean=False):
     txs = get_tx_from_dir("test")
     txinfo, cinfo = get_txinfo(txs, "urls.txt", "tx_dir", clean)
-    save_csv([txinfo, cinfo], [txinfo_headers, cinfo_headers], "output2.csv")
+    save_csv([txinfo, cinfo], [txinfo_headers, cinfo_headers], "output3.csv")
     return txinfo,cinfo
 
 # def load_txfiles(dirn)
