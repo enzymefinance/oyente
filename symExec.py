@@ -5,6 +5,7 @@ from tokenize import NUMBER, NAME, NEWLINE
 from basicblock import BasicBlock
 from analysis import *
 from utils import *
+from math import *
 
 REPORT_MODE = 1
 DEBUG_MODE = 1
@@ -24,7 +25,7 @@ all_gs = [] # store global variables, e.g. storage, balance of all paths
 
 # Z3 solver
 solver = Solver()
-solver.set("timeout", 600)
+solver.set("timeout", 6000)
 
 CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 
@@ -303,6 +304,7 @@ def get_init_global_state(path_conditions_and_vars):
 
     # the state of the current current contract
     global_state["Ia"] = {}
+    global_state["miu_i"] = 0
 
     return global_state
 
@@ -634,7 +636,27 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "SIGNEXTEND":
-        raise ValueError('SIGNEXTEND is not yet handled')
+        if len(stack) > 1:
+            index = stack.pop(0)
+            content = stack.pop(0)
+            new_var_name = gen.gen_arbitrary_var()
+            new_var = BitVec(new_var_name, 256)
+            path_conditions_and_vars[new_var_name] = new_var
+            stack.insert(0, new_var)
+            '''
+            if isinstance(index, (int, long)):
+                t = 256 - 8 * (index + 1)
+                if isinstance(content, (int, long)):
+                    # TODO
+                else:
+                    for i in range(0, 255):
+
+            else:
+                # DON'T KNOW WHAT could be the resulting value
+                # we then create a new symbolic variable
+            '''    
+        else:
+            raise ValueError('STACK underflow')
     #
     #  10s: Comparison and Bitwise Logic Operations
     #
@@ -783,16 +805,41 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     # 30s: Environment Information
     #
     elif instr_parts[0] == "ADDRESS":  # get address of currently executing account
-        new_var_name = "Ia"
+        new_var_name = gen.gen_address_var()
         if new_var_name in path_conditions_and_vars:
             new_var = path_conditions_and_vars[new_var_name]
         else:
             new_var = BitVec(new_var_name, 256)
             path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
-    elif instr_parts[0] == "CALLER":  # get address of the account
+    elif instr_parts[0] == "BALANCE":
+        if len(stack) > 0:
+            address = stack.pop(0)
+            new_var_name = gen.gen_balance_var()
+            if new_var_name in path_conditions_and_vars:
+                new_var = path_conditions_and_vars[new_var_name]
+            else:
+                new_var = BitVec(new_var_name, 256)
+                path_conditions_and_vars[new_var_name] = new_var
+            if isinstance(address, (int, long)):
+                hashed_address = "concrete_address_" + address
+            else:
+                hashed_address = str(address)
+            global_state["balance"][hashed_address] = new_var
+            stack.insert(0, new_var)
+        else:
+            raise ValueError('STACK underflow')      
+    elif instr_parts[0] == "CALLER":  # get caller address
         # that is directly responsible for this execution
-        new_var_name = "Is"
+        new_var_name = gen.gen_caller_var()
+        if new_var_name in path_conditions_and_vars:
+            new_var = path_conditions_and_vars[new_var_name]
+        else:
+            new_var = BitVec(new_var_name, 256)
+            path_conditions_and_vars[new_var_name] = new_var
+        stack.insert(0, new_var)
+    elif instr_parts[0] == "ORIGIN":  # get execution origination address
+        new_var_name = gen.gen_origin_var()
         if new_var_name in path_conditions_and_vars:
             new_var = path_conditions_and_vars[new_var_name]
         else:
@@ -835,6 +882,23 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             stack.pop(0)
         else:
             raise ValueError('STACK underflow')
+    elif instr_parts[0] == "CODECOPY":  # Copy code running in current env to memory
+        # Don't know how to simulate this yet
+        # Need an example to test
+        if len(stack) > 2:
+            stack.pop(0)
+            stack.pop(0)
+            stack.pop(0)
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[0] == "GASPRICE":  # get address of currently executing account
+        new_var_name = gen.gen_gas_price_var()
+        if new_var_name in path_conditions_and_vars:
+            new_var = path_conditions_and_vars[new_var_name]
+        else:
+            new_var = BitVec(new_var_name, 256)
+            path_conditions_and_vars[new_var_name] = new_var
+        stack.insert(0, new_var)
     #
     #  40s: Block Information
     #
@@ -901,10 +965,24 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     elif instr_parts[0] == "MLOAD":
         if len(stack) > 0:
             address = stack.pop(0)
+            current_miu_i = global_state["miu_i"]
             if isinstance(address, (int, long)) and address in mem:
+                temp = ceil((address + 32) / float(32))
+                if temp > current_miu_i:
+                    current_miu_i = temp
                 value = mem[address]
                 stack.insert(0, value)
             else:
+                temp = ((address + 31) / 32) + 1
+                if isinstance(current_miu_i, (int, long)):
+                    current_miu_i = BitVecVal(current_miu_i, 256)
+                expression = current_miu_i < temp
+                solver.push()
+                solver.add(expression)
+                if solver.check() != unsat:
+                    # this means that it is possibly that current_miu_i < temp
+                    current_miu_i = If(expression,temp,current_miu_i)
+                solver.pop()
                 new_var_name = gen.gen_mem_var(address)
                 if new_var_name in path_conditions_and_vars:
                     new_var = path_conditions_and_vars[new_var_name]
@@ -916,29 +994,60 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     mem[address] = new_var
                 else:
                     mem[str(address)] = new_var
+            global_state["miu_i"] = current_miu_i
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "MSTORE":
         if len(stack) > 1:
             stored_address = stack.pop(0)
             stored_value = stack.pop(0)
+            current_miu_i = global_state["miu_i"]
             if isinstance(stored_address, (int, long)):
-                mem[stored_address] = stored_value  # note that the stored_value could be unknown
+                temp = ceil((stored_address + 32) / float(32))
+                if temp > current_miu_i:
+                    current_miu_i = temp
+                mem[stored_address] = stored_value  # note that the stored_value could be symbolic
             else:
+                temp = ((stored_address + 31) / 32) + 1
+                if isinstance(current_miu_i, (int, long)):
+                    current_miu_i = BitVecVal(current_miu_i, 256)
+                expression = current_miu_i < temp
+                solver.push()
+                solver.add(expression)
+                if solver.check() != unsat:
+                    # this means that it is possibly that current_miu_i < temp
+                    current_miu_i = If(expression,temp,current_miu_i)
+                solver.pop()
                 mem.clear()  # very conservative
                 mem[str(stored_address)] = stored_value
+            global_state["miu_i"] = current_miu_i
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "MSTORE8":
         if len(stack) > 1:
             stored_address = stack.pop(0)
-            temp = stack.pop(0)
-            stored_value = temp % 256  # get the least byte
+            temp_value = stack.pop(0)
+            stored_value = temp_value % 256  # get the least byte
+            current_miu_i = global_state["miu_i"]
             if isinstance(stored_address, (int, long)):
-                mem[stored_address] = stored_value  # note that the stored_value could be unknown
+                temp = ceil((stored_address + 1) / float(32))
+                if temp > current_miu_i:
+                    current_miu_i = temp
+                mem[stored_address] = stored_value  # note that the stored_value could be symbolic
             else:
+                temp = (stored_address / 32) + 1
+                if isinstance(current_miu_i, (int, long)):
+                    current_miu_i = BitVecVal(current_miu_i, 256)
+                expression = current_miu_i < temp
+                solver.push()
+                solver.add(expression)
+                if solver.check() != unsat:
+                    # this means that it is possibly that current_miu_i < temp
+                    current_miu_i = If(expression,temp,current_miu_i)
+                solver.pop()
                 mem.clear()  # very conservative
                 mem[str(stored_address)] = stored_value
+            global_state["miu_i"] = current_miu_i
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "SLOAD":
@@ -1001,11 +1110,14 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         # this is not hard, but tedious. Let's skip it for now
         raise Exception('Must implement PC now')
     elif instr_parts[0] == "MSIZE":
-        raise Exception('Must implement MSIZE now')
+        msize = 32 * global_state["miu_i"]
+        stack.insert(0, msize)
     elif instr_parts[0] == "GAS":
         # In general, we do not have this precisely. It depends on both
         # the initial gas and the amount has been depleted
-        new_var_name = gen.get_gas_var()
+        # we need o think about this in the future, in case precise gas
+        # can be tracked
+        new_var_name = gen.gen_gas_var()
         new_var = BitVec(new_var_name, 256)
         path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
@@ -1055,6 +1167,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     #  f0s: System Operations
     #
     elif instr_parts[0] == "CALL":
+        # DOTO: Need to handle miu_i
         if len(stack) > 6:
             outgas = stack.pop(0)
             recipient = stack.pop(0)
@@ -1112,10 +1225,10 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     path_conditions_and_vars["path_condition"].append(constraint)
                     new_balance = (old_balance + transfer_amount)
                     global_state["balance"][new_address_name] = new_balance
-
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "CALLCODE":
+        # DOTO: Need to handle miu_i
         if len(stack) > 6:
             outgas = stack.pop(0)
             stack.pop(0) # this is not used as recipient
@@ -1151,6 +1264,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "RETURN":
+        # DOTO: Need to handle miu_i
         if len(stack) > 1:
             stack.pop(0)
             stack.pop(0)
