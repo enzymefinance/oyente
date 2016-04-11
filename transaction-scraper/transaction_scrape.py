@@ -192,4 +192,4 @@ def run_re_file(re_str, fn):
     size = os.stat(fn).st_size
     with open(fn, 'r') as tf:
         data = mmap.mmap(tf.fileno(), size, access=mmap.ACCESS_READ)
-        return re.findall(re_str, data)    
+        return re.findall(re_str, data)

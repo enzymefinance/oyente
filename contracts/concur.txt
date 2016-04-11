@@ -1,4 +1,3 @@
-Another dangerous pattern: a contract decides how much other contract will send in a transaction
 0xc4c51de1abf5d60dbd329ec0f999fd8f021ae9fc	3	1
 0x7835142df32411a7df9e9e7dbc757083d50e4715	3	1
 0xbe6bacb89f90523bd1d2059bb789368128242ebf	3	1
@@ -25,7 +24,7 @@ Another dangerous pattern: a contract decides how much other contract will send 
 0x12db22010940f246407881c2c00a038e55086500	3	1
 0xa4ed17dbbce7b19fb63dd2ecd9600164d7a89005	3	1
 0xb3b37379af7bc1b2a7470f4b9217498c079c6b3a	4	3
-0xd79b4c6791784184e2755b2fc1659eaab0f80456	3	1
+0xd79b4c6791784184e2755b2fc1659eaab0f80456	3	1 https://etherscan.io/address/0xd79b4c6791784184e2755b2fc1659eaab0f80456#code HonestDice //contracts is malicious, host can always back out
 0x0a4466c6a1fcfb7b59e4ac014993dec42e1c868a	4	3
 0x034df87052894bbe35cbd4546fd1d3bdf7200e2f	3	1
 0xfe147b94a4ee2285db73d7897438a94a97be64c2	3	1
@@ -75,7 +74,7 @@ Another dangerous pattern: a contract decides how much other contract will send 
 0x73b0ba1c2e1286081dfbac08bcb54b56e5c9a3bb	3	1
 0xe1a99f2ce25f9639599d75d0bd212c1e6b0d2457	3	1
 0x522fa550e1a460d9274a53270548fe8f3b958b68	3	1
-0xab7689c7be6d9b5428d6bf4c536dc699fc919260	4	3
+0xab7689c7be6d9b5428d6bf4c536dc699fc919260	4	3 https://etherchain.org/account/0x85c84c949b1c29c85b777f2873a19450dbb1a057#code (A ponzi scheme, multiplier)
 0xfc67bd301a4c698b461e5e9f26eab60d230b77a4	8	21 https://www.reddit.com/r/ethereum/comments/3mln3k/waterfall_another_deterministic_lottery/
 0xf0e2031e24e1620a2878dfe293448f9a806bcf97	3	1
 0xf8376f93fb5b45d74a217feb888a806edf6012df	4	3
@@ -83,7 +82,7 @@ Another dangerous pattern: a contract decides how much other contract will send 
 0x267dca3effba82115410e14e18a48eda059ebb55	3	1
 0x0ef8a6fe45cac0e6ab8d8303617422eb10154c0e	4	3
 0xbaa54d6e90c3f4d7ebec11bd180134c7ed8ebb52	3	1
-0x109c4f2ccc82c4d77bde15f306707320294aea3f	3	1
+0x109c4f2ccc82c4d77bde15f306707320294aea3f	3	1 https://bitcointalk.org/index.php?topic=1146895.0 malicious, doesn't return fund
 0xda7cb8567ec4dd9c1eb13f2df8b10b3de40931df	3	1
 0xc4c5f8a9318e9ecef7ba16e5a6aee519bac1723e	3	1
 0xea51521b3e88cbf6c8933b81c0101683618ea18a	3	1
@@ -108,7 +107,7 @@ Another dangerous pattern: a contract decides how much other contract will send 
 0xd0ed093408af5417fdfac9625d3aeacb03300b48	3	1
 0x02ad2003dbb5eb291b812af7e46ba8ec25795fb5	3	1
 0x7559d08c01f80014220dcdfdbfc943519fe8a3a6	3	1
-0x85c84c949b1c29c85b777f2873a19450dbb1a057	4	3
+0x85c84c949b1c29c85b777f2873a19450dbb1a057	4	3 https://etherchain.org/account/0x85c84c949b1c29c85b777f2873a19450dbb1a057#code
 0x1e6fe309757a68497de95a6cdab524f94266c214	3	1
 0x0945a548467329e7d8603bee6dc55feb1af84349	3	1
 0x896f1a38cc6fe7386db5ab3823acd2b43b0db8ff	5	6

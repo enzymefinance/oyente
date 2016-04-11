@@ -390,21 +390,22 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         solver.push()  # SET A BOUNDARY FOR SOLVER
         solver.add(branch_expression)
 
-        try:
-            if solver.check() == unsat:
-                print "INFEASIBLE PATH DETECTED"
-            else:
-                left_branch = vertices[start].get_jump_target()
-                stack1 = list(stack)
-                mem1 = dict(mem)
-                global_state1 = my_copy_dict(global_state)
-                visited1 = list(visited)
-                path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
-                path_conditions_and_vars1["path_condition"].append(branch_expression)
-                analysis1 = my_copy_dict(analysis)
-                sym_exec_block(left_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
-        except Exception as e:
-            log_file.write(str(e))
+        # try:
+        if solver.check() == unsat:
+            print "INFEASIBLE PATH DETECTED"
+        else:
+            left_branch = vertices[start].get_jump_target()
+            stack1 = list(stack)
+            mem1 = dict(mem)
+            global_state1 = my_copy_dict(global_state)
+            visited1 = list(visited)
+            path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
+            path_conditions_and_vars1["path_condition"].append(branch_expression)
+            analysis1 = my_copy_dict(analysis)
+            sym_exec_block(left_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+        # except Exception as e:
+        #     raise e
+            # log_file.write(str(e))
 
         solver.pop()  # POP SOLVER CONTEXT
 
@@ -414,24 +415,24 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
 
         print "Negated branch expression: " + str(negated_branch_expression)
 
-        try:
-            if solver.check() == unsat:
-                # Note that this check can be optimized. I.e. if the previous check succeeds,
-                # no need to check for the negated condition, but we can immediately go into
-                # the else branch
-                print "INFEASIBLE PATH DETECTED"
-            else:
-                right_branch = vertices[start].get_falls_to()
-                stack1 = list(stack)
-                mem1 = dict(mem)
-                global_state1 = my_copy_dict(global_state)
-                visited1 = list(visited)
-                path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
-                path_conditions_and_vars1["path_condition"].append(negated_branch_expression)
-                analysis1 = my_copy_dict(analysis)
-                sym_exec_block(right_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
-        except Exception as e:
-            log_file.write(str(e))
+        # try:
+        if solver.check() == unsat:
+            # Note that this check can be optimized. I.e. if the previous check succeeds,
+            # no need to check for the negated condition, but we can immediately go into
+            # the else branch
+            print "INFEASIBLE PATH DETECTED"
+        else:
+            right_branch = vertices[start].get_falls_to()
+            stack1 = list(stack)
+            mem1 = dict(mem)
+            global_state1 = my_copy_dict(global_state)
+            visited1 = list(visited)
+            path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
+            path_conditions_and_vars1["path_condition"].append(negated_branch_expression)
+            analysis1 = my_copy_dict(analysis)
+            sym_exec_block(right_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+        # except Exception as e:
+        #     log_file.write(str(e))
         solver.pop()  # POP SOLVER CONTEXT
 
     else:
@@ -822,7 +823,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 new_var = BitVec(new_var_name, 256)
                 path_conditions_and_vars[new_var_name] = new_var
             if isinstance(address, (int, long)):
-                hashed_address = "concrete_address_" + address
+                hashed_address = "concrete_address_" + str(address)
             else:
                 hashed_address = str(address)
             global_state["balance"][hashed_address] = new_var
@@ -1008,6 +1009,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     current_miu_i = temp
                 mem[stored_address] = stored_value  # note that the stored_value could be symbolic
             else:
+                print "Debugging... temp" + str(stored_address)
                 temp = ((stored_address + 31) / 32) + 1
                 if isinstance(current_miu_i, (int, long)):
                     current_miu_i = BitVecVal(current_miu_i, 256)

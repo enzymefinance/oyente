@@ -3,8 +3,12 @@
 # the amount of money or the recipient.
 from z3 import *
 from z3util import get_vars
-from vargenerator import Generator
 import json
+import mmap
+import os
+import csv
+import re
+
 
 def my_copy_dict(input):
     output = {}
@@ -133,7 +137,51 @@ def split_dicts(filename, nsub = 500):
                 json.dump(current_file, outfile)
                 current_file.clear()
 
+
 def do_split_dicts():
     for i in range(11):
         split_dicts("contract" + str(i) + ".json")
         os.remove("contract" + str(i) + ".json")
+
+
+def run_re_file(re_str, fn):
+    size = os.stat(fn).st_size
+    with open(fn, 'r') as tf:
+        data = mmap.mmap(tf.fileno(), size, access=mmap.ACCESS_READ)
+        return re.findall(re_str, data)
+
+
+def get_contract_stats(list_of_contracts):
+    with open("concurr.csv", "w") as stats_file:
+        fp = csv.writer(stats_file, delimiter=',')
+        fp.writerow(["Contract address", "No. of paths", "No. of concurrency pairs",  "Balance", "No. of TXs", "Note"])
+        with open(list_of_contracts, "r") as f:
+            for contract in f.readlines():
+                contract_addr = contract.split()[0]
+                print "Getting info for contracts... " + contract_addr
+                file_name1 = "tmp/" + contract_addr + "_txs.html"
+                file_name2 = "tmp/" + contract_addr + ".html"
+                # get number of txs
+                txs = "unknown"
+                value = "unknown"
+                re_txs_value = r"<span>A total of (.+?) transactions found for address</span>"
+                re_str_value = r"<td>ETH Balance:\n<\/td>\n<td>\n(.+?)\n<\/td>"
+                try:
+                    txs = run_re_file(re_txs_value, file_name1)
+                    value = run_re_file(re_str_value, file_name2)
+                except Exception as e:
+                    try:
+                        os.system("wget -O %s http://etherscan.io/txs?a=%s" % (file_name1, contract_addr))
+                        re_txs_value = r"<span>A total of (.+?) transactions found for address</span>"
+                        txs = run_re_file(re_txs_value, file_name1)
+
+                        # get balance
+                        re_str_value = r"<td>ETH Balance:\n<\/td>\n<td>\n(.+?)\n<\/td>"
+                        os.system("wget -O %s https://etherscan.io/address/%s" % (file_name2, contract_addr))
+                        value = run_re_file(re_str_value, file_name2)
+                    except Exception as e:
+                        pass
+                fp.writerow([contract_addr, contract.split()[1], contract.split()[2],
+                             value, txs, contract.split()[3:]])
+
+
