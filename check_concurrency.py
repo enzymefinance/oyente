@@ -66,8 +66,5 @@ def collect_stats():
                         fp.writerow([address, no_paths, no_fp, no_concurrency, lf.readlines()])
 
 
-
-
-
 if __name__ == '__main__':
     main()

@@ -63,10 +63,12 @@ def compare_stack_unit_test(stack):
 
 def main():
     build_cfg_and_analyze()
-    detect_money_concurrency()
+    # detect_money_concurrency()
+    detect_time_dependency()
     # detect_data_concurrency()
     # detect_data_money_concurrency()
     # print_cfg()
+
 
 
 def build_cfg_and_analyze():
@@ -77,6 +79,33 @@ def build_cfg_and_analyze():
         construct_bb()
         construct_static_edges()
         full_sym_exec()  # jump targets are constructed on the fly
+
+
+# Detect if a money flow depends on the timestamp
+def detect_time_dependency():
+    TIMESTAMP_VAR = "IH_s"
+    is_dependant = False
+    for cond in path_conditions:
+        list_vars = []
+        for expr in cond:
+            list_vars += get_vars(expr)
+        set_vars = set(i.decl().name() for i in list_vars)
+        if TIMESTAMP_VAR in set_vars:
+            is_dependant = True
+            break
+        # for expr in flow:
+        #     print "expr: " + str(expr)
+        #     if is_in_expr(TIMESTAMP_VAR, flow):
+        #         is_dependant = True
+        #         break
+    file_name = sys.argv[1].split("/")[len(sys.argv[1].split("/"))-1].split(".")[0]
+    report_file = "time/" + file_name + '.txt'
+    with open(report_file, 'w') as rfile:
+        if is_dependant:
+            rfile.write("yes")
+        else:
+            rfile.write("no")
+
 
 
 # detect if two paths send money to different people
@@ -655,7 +684,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             else:
                 # DON'T KNOW WHAT could be the resulting value
                 # we then create a new symbolic variable
-            '''    
+            '''
         else:
             raise ValueError('STACK underflow')
     #
@@ -829,7 +858,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             global_state["balance"][hashed_address] = new_var
             stack.insert(0, new_var)
         else:
-            raise ValueError('STACK underflow')      
+            raise ValueError('STACK underflow')
     elif instr_parts[0] == "CALLER":  # get caller address
         # that is directly responsible for this execution
         new_var_name = gen.gen_caller_var()
