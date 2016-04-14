@@ -8,7 +8,7 @@ import mmap
 import os
 import csv
 import re
-
+import difflib
 
 def my_copy_dict(input):
     output = {}
@@ -151,6 +151,33 @@ def run_re_file(re_str, fn):
         return re.findall(re_str, data)
 
 
+def get_contract_info(contract_addr):
+    print "Getting info for contracts... " + contract_addr
+    file_name1 = "tmp/" + contract_addr + "_txs.html"
+    file_name2 = "tmp/" + contract_addr + ".html"
+    # get number of txs
+    txs = "unknown"
+    value = "unknown"
+    re_txs_value = r"<span>A total of (.+?) transactions found for address</span>"
+    re_str_value = r"<td>ETH Balance:\n<\/td>\n<td>\n(.+?)\n<\/td>"
+    try:
+        txs = run_re_file(re_txs_value, file_name1)
+        value = run_re_file(re_str_value, file_name2)
+    except Exception as e:
+        try:
+            os.system("wget -O %s http://etherscan.io/txs?a=%s" % (file_name1, contract_addr))
+            re_txs_value = r"<span>A total of (.+?) transactions found for address</span>"
+            txs = run_re_file(re_txs_value, file_name1)
+
+            # get balance
+            re_str_value = r"<td>ETH Balance:\n<\/td>\n<td>\n(.+?)\n<\/td>"
+            os.system("wget -O %s https://etherscan.io/address/%s" % (file_name2, contract_addr))
+            value = run_re_file(re_str_value, file_name2)
+        except Exception as e:
+            pass
+    return txs, value
+
+
 def get_contract_stats(list_of_contracts):
     with open("concurr.csv", "w") as stats_file:
         fp = csv.writer(stats_file, delimiter=',')
@@ -158,30 +185,59 @@ def get_contract_stats(list_of_contracts):
         with open(list_of_contracts, "r") as f:
             for contract in f.readlines():
                 contract_addr = contract.split()[0]
-                print "Getting info for contracts... " + contract_addr
-                file_name1 = "tmp/" + contract_addr + "_txs.html"
-                file_name2 = "tmp/" + contract_addr + ".html"
-                # get number of txs
-                txs = "unknown"
-                value = "unknown"
-                re_txs_value = r"<span>A total of (.+?) transactions found for address</span>"
-                re_str_value = r"<td>ETH Balance:\n<\/td>\n<td>\n(.+?)\n<\/td>"
-                try:
-                    txs = run_re_file(re_txs_value, file_name1)
-                    value = run_re_file(re_str_value, file_name2)
-                except Exception as e:
-                    try:
-                        os.system("wget -O %s http://etherscan.io/txs?a=%s" % (file_name1, contract_addr))
-                        re_txs_value = r"<span>A total of (.+?) transactions found for address</span>"
-                        txs = run_re_file(re_txs_value, file_name1)
-
-                        # get balance
-                        re_str_value = r"<td>ETH Balance:\n<\/td>\n<td>\n(.+?)\n<\/td>"
-                        os.system("wget -O %s https://etherscan.io/address/%s" % (file_name2, contract_addr))
-                        value = run_re_file(re_str_value, file_name2)
-                    except Exception as e:
-                        pass
+                value, txs = get_contract_info(contract_addr)
                 fp.writerow([contract_addr, contract.split()[1], contract.split()[2],
                              value, txs, contract.split()[3:]])
 
+
+def get_time_dependant_contracts(list_of_contracts):
+    with open("time.csv", "w") as stats_file:
+        fp = csv.writer(stats_file, delimiter=',')
+        fp.writerow(["Contract address", "Balance", "No. of TXs", "Note"])
+        with open(list_of_contracts, "r") as f:
+            for contract in f.readlines():
+                if len(contract.strip()) == 0:
+                    continue
+                contract_addr = contract.split(".")[0].split("_")[1]
+                txs, value = get_contract_info(contract_addr)
+                fp.writerow([contract_addr, value, txs])
+
+
+def get_distinct_contracts(list_of_contracts = "concurr.csv"):
+    flag = []
+    with open(list_of_contracts, "rb") as csvfile:
+        contracts = csvfile.readlines()[1:]
+        n =len(contracts)
+        for i in range(n):
+            flag.append(i) # mark which contract is similar to contract_i
+        for i in range(n):
+            if flag[i] != i:
+                continue
+            contract_i = contracts[i].split(",")[0]
+            npath_i = int(contracts[i].split(",")[1])
+            npair_i = int(contracts[i].split(",")[2])
+            file_i = "stats/tmp_" + contract_i + ".evm"
+            print " reading file " + file_i
+            for j in range(i+1, n):
+                if flag[j] != j:
+                    continue
+                contract_j = contracts[j].split(",")[0]
+                npath_j = int(contracts[j].split(",")[1])
+                npair_j = int(contracts[j].split(",")[2])
+                if (npath_i == npath_j) and (npair_i == npair_j):
+                    file_j = "stats/tmp_" + contract_j + ".evm"
+
+                    with open(file_i, 'r') as f1, open(file_j, 'r') as f2:
+                        code_i = f1.readlines()
+                        code_j = f2.readlines()
+                        if abs(len(code_i) - len(code_j)) >= 5:
+                            continue
+                        diff = difflib.ndiff(code_i, code_j)
+                        ndiff = 0
+                        for line in diff:
+                            if line.startswith("+") or line.startswith("-"):
+                                ndiff += 1
+                        if ndiff < 10:
+                            flag[j] = i
+    print flag
 
