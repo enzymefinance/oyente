@@ -10,7 +10,7 @@ class MyThread(threading.Thread):
 
     def run(self):
         # json file will contain all contracts in this format
-        # {contract address: [Code, TX hash that creates the contract]}
+        # {contract address: [Input, Code, TX hash that creates the contract]}
         temp_file = "stats/tmp_"
 
         with open(self.filename) as json_file:
@@ -21,7 +21,7 @@ class MyThread(threading.Thread):
                 evm_file = temp_file + contract +".evm"
                 code_file = temp_file + contract + ".code"
                 with open(code_file, 'w') as tfile:
-                    tfile.write(data[0][2:])
+                    tfile.write(data[1][2:])
                     tfile.write("\n")
                     tfile.close()
 
@@ -64,9 +64,6 @@ def collect_stats():
                     a_log_file = a_file.replace ("report", "log")
                     with open("stats/" + a_log_file, "r") as lf:
                         fp.writerow([address, no_paths, no_fp, no_concurrency, lf.readlines()])
-
-
-
 
 
 if __name__ == '__main__':
