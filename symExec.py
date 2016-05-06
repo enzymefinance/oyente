@@ -63,8 +63,8 @@ def compare_stack_unit_test(stack):
 
 def main():
     build_cfg_and_analyze()
-    # detect_money_concurrency()
-    detect_time_dependency()
+    detect_money_concurrency()
+    # detect_time_dependency()
     # detect_data_concurrency()
     # detect_data_money_concurrency()
     # print_cfg()
@@ -366,7 +366,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
     try:
         block_ins = vertices[start].get_instructions()
     except KeyError:
-        print "This path results in an exception"
+        print "This path results in an exception, possibly an invalid jump address"
         return ["ERROR"]
 
     for instr in block_ins:
@@ -997,11 +997,13 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             address = stack.pop(0)
             current_miu_i = global_state["miu_i"]
             if isinstance(address, (int, long)) and address in mem:
-                temp = ceil((address + 32) / float(32))
+                temp = long(ceil((address + 32) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
                 value = mem[address]
                 stack.insert(0, value)
+                print "temp: " + str(temp)
+                print "current_miu_i: " + str(current_miu_i)
             else:
                 temp = ((address + 31) / 32) + 1
                 if isinstance(current_miu_i, (int, long)):
@@ -1011,7 +1013,10 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 solver.add(expression)
                 if solver.check() != unsat:
                     # this means that it is possibly that current_miu_i < temp
-                    current_miu_i = If(expression,temp,current_miu_i)
+                    if expression == True:
+                        current_miu_i = temp
+                    else:
+                        current_miu_i = If(expression,temp,current_miu_i)
                 solver.pop()
                 new_var_name = gen.gen_mem_var(address)
                 if new_var_name in path_conditions_and_vars:
@@ -1024,6 +1029,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     mem[address] = new_var
                 else:
                     mem[str(address)] = new_var
+                print "temp: " + str(temp)
+                print "current_miu_i: " + str(current_miu_i)
             global_state["miu_i"] = current_miu_i
         else:
             raise ValueError('STACK underflow')
@@ -1033,24 +1040,33 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             stored_value = stack.pop(0)
             current_miu_i = global_state["miu_i"]
             if isinstance(stored_address, (int, long)):
-                temp = ceil((stored_address + 32) / float(32))
+                temp = long(ceil((stored_address + 32) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
                 mem[stored_address] = stored_value  # note that the stored_value could be symbolic
+                print "temp: " + str(temp)
+                print "current_miu_i: " + str(current_miu_i)
             else:
-                print "Debugging... temp" + str(stored_address)
+                print "Debugging... temp " + str(stored_address)
                 temp = ((stored_address + 31) / 32) + 1
                 if isinstance(current_miu_i, (int, long)):
                     current_miu_i = BitVecVal(current_miu_i, 256)
+                print "current_miu_i: " + str(current_miu_i)
                 expression = current_miu_i < temp
+                print "Expression: " + str(expression)
                 solver.push()
                 solver.add(expression)
                 if solver.check() != unsat:
                     # this means that it is possibly that current_miu_i < temp
-                    current_miu_i = If(expression,temp,current_miu_i)
+                    if expression == True:
+                        current_miu_i = temp
+                    else:
+                        current_miu_i = If(expression,temp,current_miu_i)
                 solver.pop()
                 mem.clear()  # very conservative
                 mem[str(stored_address)] = stored_value
+                print "temp: " + str(temp)
+                print "current_miu_i: " + str(current_miu_i)
             global_state["miu_i"] = current_miu_i
         else:
             raise ValueError('STACK underflow')
@@ -1061,7 +1077,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             stored_value = temp_value % 256  # get the least byte
             current_miu_i = global_state["miu_i"]
             if isinstance(stored_address, (int, long)):
-                temp = ceil((stored_address + 1) / float(32))
+                temp = long(ceil((stored_address + 1) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
                 mem[stored_address] = stored_value  # note that the stored_value could be symbolic
@@ -1074,7 +1090,10 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 solver.add(expression)
                 if solver.check() != unsat:
                     # this means that it is possibly that current_miu_i < temp
-                    current_miu_i = If(expression,temp,current_miu_i)
+                    if expression == True:
+                        current_miu_i = temp
+                    else:
+                        current_miu_i = If(expression,temp,current_miu_i)
                 solver.pop()
                 mem.clear()  # very conservative
                 mem[str(stored_address)] = stored_value
