@@ -107,7 +107,7 @@ class MyThread(threading.Thread):
 
 list_threads = []
 try:
-    for i in range(130, 145):
+    for i in range(0, 4):
         new_thread = MyThread(i)
         list_threads.append(new_thread)
     for my_thread in list_threads:
