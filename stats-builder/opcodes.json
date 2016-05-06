@@ -1,0 +1,258 @@
+{
+    "MLOAD": {
+        "contracts": 14592,
+        "freq": 715245
+    },
+    "ORIGIN": {
+        "contracts": 5045,
+        "freq": 9886
+    },
+    "RETURN": {
+        "contracts": 15408,
+        "freq": 101243
+    },
+    "SUB": {
+        "contracts": 14909,
+        "freq": 586646
+    },
+    "GAS": {
+        "contracts": 6722,
+        "freq": 38699
+    },
+    "STOP": {
+        "contracts": 15261,
+        "freq": 1176227
+    },
+    "NUMBER": {
+        "contracts": 3149,
+        "freq": 28293
+    },
+    "CALLDATASIZE": {
+        "contracts": 10481,
+        "freq": 61761
+    },
+    "COINBASE": {
+        "contracts": 515,
+        "freq": 644
+    },
+    "SLOAD": {
+        "contracts": 12541,
+        "freq": 748130
+    },
+    "GT": {
+        "contracts": 10076,
+        "freq": 131167
+    },
+    "EXP": {
+        "contracts": 14862,
+        "freq": 367315
+    },
+    "ISZERO": {
+        "contracts": 14697,
+        "freq": 672427
+    },
+    "MUL": {
+        "contracts": 13943,
+        "freq": 287574
+    },
+    "DIV": {
+        "contracts": 15234,
+        "freq": 269324
+    },
+    "ADDMOD": {
+        "contracts": 532,
+        "freq": 572
+    },
+    "LOG": {
+        "contracts": 7571,
+        "freq": 68689
+    },
+    "CALLDATALOAD": {
+        "contracts": 12875,
+        "freq": 206988
+    },
+    "TXGASPRICE": {
+        "contracts": 1945,
+        "freq": 7155
+    },
+    "SDIV": {
+        "contracts": 1433,
+        "freq": 2679
+    },
+    "CREATE": {
+        "contracts": 439,
+        "freq": 693
+    },
+    "CALLER": {
+        "contracts": 11804,
+        "freq": 133368
+    },
+    "CODESIZE": {
+        "contracts": 7986,
+        "freq": 9583
+    },
+    "SGT": {
+        "contracts": 584,
+        "freq": 2496
+    },
+    "POP": {
+        "contracts": 15067,
+        "freq": 2983214
+    },
+    "JUMPI": {
+        "contracts": 15338,
+        "freq": 857888
+    },
+    "PC": {
+        "contracts": 354,
+        "freq": 379
+    },
+    "LT": {
+        "contracts": 9894,
+        "freq": 227034
+    },
+    "CODECOPY": {
+        "contracts": 15408,
+        "freq": 48420
+    },
+    "SWAP": {
+        "contracts": 15309,
+        "freq": 4205811
+    },
+    "PUSH": {
+        "contracts": 15408,
+        "freq": 9031065
+    },
+    "SMOD": {
+        "contracts": 474,
+        "freq": 673
+    },
+    "SSTORE": {
+        "contracts": 14888,
+        "freq": 426167
+    },
+    "JUMPDEST": {
+        "contracts": 15354,
+        "freq": 1385696
+    },
+    "SUICIDE": {
+        "contracts": 7835,
+        "freq": 16094
+    },
+    "XOR": {
+        "contracts": 349,
+        "freq": 522
+    },
+    "SIGNEXTEND": {
+        "contracts": 1113,
+        "freq": 3778
+    },
+    "MSTORE": {
+        "contracts": 15404,
+        "freq": 1158201
+    },
+    "SLT": {
+        "contracts": 772,
+        "freq": 2548
+    },
+    "GASLIMIT": {
+        "contracts": 624,
+        "freq": 1108
+    },
+    "M": {
+        "contracts": 9442,
+        "freq": 149373
+    },
+    "JUMP": {
+        "contracts": 15181,
+        "freq": 756880
+    },
+    "SHA": {
+        "contracts": 11801,
+        "freq": 346156
+    },
+    "ADD": {
+        "contracts": 14592,
+        "freq": 1844922
+    },
+    "DUP": {
+        "contracts": 15408,
+        "freq": 5950154
+    },
+    "BYTE": {
+        "contracts": 437,
+        "freq": 1224
+    },
+    "BALANCE": {
+        "contracts": 4479,
+        "freq": 13053
+    },
+    "EQ": {
+        "contracts": 12901,
+        "freq": 334675
+    },
+    "AND": {
+        "contracts": 14808,
+        "freq": 714233
+    },
+    "MULMOD": {
+        "contracts": 359,
+        "freq": 380
+    },
+    "BLOCKHASH": {
+        "contracts": 1009,
+        "freq": 1563
+    },
+    "DIFFICULTY": {
+        "contracts": 514,
+        "freq": 739
+    },
+    "TIMESTAMP": {
+        "contracts": 6711,
+        "freq": 21515
+    },
+    "CALLDATACOPY": {
+        "contracts": 7107,
+        "freq": 66199
+    },
+    "CALLVALUE": {
+        "contracts": 8025,
+        "freq": 31329
+    },
+    "MSIZE": {
+        "contracts": 1126,
+        "freq": 12680
+    },
+    "CALL": {
+        "contracts": 11359,
+        "freq": 66539
+    },
+    "EXTCODECOPY": {
+        "contracts": 306,
+        "freq": 379
+    },
+    "ADDRESS": {
+        "contracts": 5612,
+        "freq": 14322
+    },
+    "NOT": {
+        "contracts": 11824,
+        "freq": 129570
+    },
+    "EXTCODESIZE": {
+        "contracts": 389,
+        "freq": 438
+    },
+    "CALLCODE": {
+        "contracts": 3022,
+        "freq": 7158
+    },
+    "OR": {
+        "contracts": 11699,
+        "freq": 81605
+    },
+    "MOD": {
+        "contracts": 887,
+        "freq": 3882
+    }
+}
