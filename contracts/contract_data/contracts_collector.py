@@ -52,8 +52,8 @@ class MyThread(threading.Thread):
         self.list_contract = {}
         self.index = index
 
-        self.low = index*50000 - 10000
-        self.high = self.low + 10000
+        self.low = index*10000
+        self.high = (index + 1)*10000
         # print self.low, self.high
         self.sess = requests.Session()
         self.adapter = requests.adapters.HTTPAdapter(pool_connections=100, pool_maxsize=100)
@@ -61,12 +61,12 @@ class MyThread(threading.Thread):
 
     def run(self):
         for i in range(self.low, self.high):
-            if i%10000 == 0:
+            if i%1000 == 0:
                 print 'Thread ' + str(self.index) + ' is processing block: ' + str(i)
                 print "Number of contracts in Thread " + str(self.index) + " so far: " + str(len(self.list_contract))
-                with open('contract_' + str(i) + '.json', 'w') as outfile:
-                    json.dump(self.list_contract, outfile)
-                    self.list_contract.clear()
+            #     with open('contract_' + str(i) + '.json', 'w') as outfile:
+            #         json.dump(self.list_contract, outfile)
+            #         self.list_contract.clear()
             self.data_TX_count['params'] = [str(hex(i))]
             r = self.sess.get(url, data=json.dumps(self.data_TX_count), allow_redirects=True)
             tx_count = int(get_result(r.content), 16)
@@ -107,7 +107,7 @@ class MyThread(threading.Thread):
 
 list_threads = []
 try:
-    for i in range(1, 27):
+    for i in range(130, 145):
         new_thread = MyThread(i)
         list_threads.append(new_thread)
     for my_thread in list_threads:

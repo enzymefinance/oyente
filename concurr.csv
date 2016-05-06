@@ -67,7 +67,7 @@ Contract address,No. of paths,No. of concurrency pairs,Balance,No. of TXs,Note
 0x9d4f32fc70c0a12b05d3649ec3ce0bf60e208616,3,1,"[""<span title='0 Ether'>0 wei</span>""]",['16'],[]
 0xdf373f3dab2561668e239ca6e43a8c6aaeb3f825,3,1,"[""<span title='0.000000000000000201 Ether'>201 wei</span>""]",['117'],[]
 0x9858ef8b50a53e738deb9c038e58b554925783fd,3,1,"[""<span title='0 Ether'>0 wei</span>""]",['3'],[]
-0xa327075af2a223a1c83a36ada1126afe7430f955,3,1,['130<b>.</b>000000000000000131 Ether'],['132'],[]
+0xa327075af2a223a1c83a36ada1126afe7430f955,3,1,['130<b>.</b>000000000000000131 Ether'],['132'],[]https://bitcointalk.org/index.php?topic=1146895.0
 0xcb09a0f188d34fb5fc2d47984668d35523e5dfda,3,1,"[""<span title='0 Ether'>0 wei</span>""]",[],[]
 0x9c2500ff0e715601b47140427d5e978cfa3007e1,3,1,"[""<span title='0 Ether'>0 wei</span>""]",['9'],[]
 0x19df848c0e45e0ff7c2a78c173fd80afb195278a,3,1,"[""<span title='0 Ether'>0 wei</span>""]",['3'],[]
@@ -82,7 +82,7 @@ Contract address,No. of paths,No. of concurrency pairs,Balance,No. of TXs,Note
 0x7a6ac92ba2093195f3a7c8f65220c7142efa9799,3,1,unknown,unknown,[]
 0x267dca3effba82115410e14e18a48eda059ebb55,3,1,"[""<span title='0.0001 Ether'>0<b>.</b>0001 Ether</span>""]",[],[]
 0x0ef8a6fe45cac0e6ab8d8303617422eb10154c0e,4,3,"[""<span title='0.001 Ether'>0<b>.</b>001 Ether</span>""]",['4'],[]
-0xbaa54d6e90c3f4d7ebec11bd180134c7ed8ebb52,3,1,"[""<span title='0.000000000000000116 Ether'>116 wei</span>""]",['712'],[]
+0xbaa54d6e90c3f4d7ebec11bd180134c7ed8ebb52,3,1,"[""<span title='0.000000000000000116 Ether'>116 wei</span>""]",['712'],[]https://bitcointalk.org/index.php?topic=1146895.0
 0x109c4f2ccc82c4d77bde15f306707320294aea3f,3,1,['9<b>.</b>000000000000000105 Ether'],['204'],"['https://bitcointalk.org/index.php?topic=1146895.0', 'malicious,', ""doesn't"", 'return', 'fund']"
 0xda7cb8567ec4dd9c1eb13f2df8b10b3de40931df,3,1,"[""<span title='0.0001 Ether'>0<b>.</b>0001 Ether</span>""]",[],[]
 0xc4c5f8a9318e9ecef7ba16e5a6aee519bac1723e,3,1,"[""<span title='0 Ether'>0 wei</span>""]",['15'],[]
