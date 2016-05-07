@@ -52,17 +52,23 @@ def process_worth_str(istr):
     return outval * factor
 
 def gen_txworth_hist(tfile):
-    txworth = [(transaction['txid'], process_worth_str(transaction['worth'])) for transaction in tqdm(tfile)]
+    txworth = [(transaction['txid'], process_worth_str(transaction['transactions'][0]['worth'])) for transaction in tqdm(tfile)]
     txworth = sorted(txworth, key = lambda k : k[1], reverse=True)
     with open('txworth.dat', 'w') as of:
         of.write('txid worth\n')
-        for element in nesting:
+        for element in txworth:
             of.write('%s %f\n' % (element[0], element[1]))
+        of.flush()
+        of.close()
+    with open('txworth_nozero.dat', 'w') as of:
+        of.write('txid worth\n')
+        for element in txworth:
+            if element[1] > 0: of.write('%s %f\n' % (element[0], element[1]))
         of.flush()
         of.close()
 
 tfile = json.loads(open('transactions.json').read())
 
 gen_opcode_hist()
-gen_txnesting_hist(tfile)
-gen_txworth_hist(tfile)
+# gen_txnesting_hist(tfile)
+# gen_txworth_hist(tfile)
