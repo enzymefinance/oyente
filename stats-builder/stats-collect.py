@@ -26,6 +26,13 @@ def update_stats_from_disasm(chash, ctx, inpinit, inpmain):
     for instruction in ifull:
         opcode = instruction[1]
         if opcode not in opcodes:
+        #     with open('tmp/'+opcode, 'w') as ofile:
+        #         ofile.write('Opcode: '+opcode+' args - '+instruction[0]+', '+instruction[2]+','+instruction[3]+'\n\nInit:\n\n')
+        #         ofile.write(inpinit)
+        #         ofile.write('Main: \n\n')
+        #         ofile.write(inpmain)
+        #         ofile.flush()
+        #         ofile.close()
             opcodes[opcode] = {}
             opcodes[opcode]['freq'] = 0
             opcodes[opcode]['contracts'] = 0
@@ -72,8 +79,8 @@ def load_contracts_dir(path):
     for i in tqdm(xrange(0, len(files))):
         if(files[i].endswith('.json')):
             load_contract_file(path+files[i])
-        save_json(contracts, 'contracts.json')
-        save_json(opcodes, 'opcodes.json')
+    save_json(contracts, 'contracts.json')
+    save_json(opcodes, 'opcodes.json')
 
 def save_json(inp, filename):
     with open(filename, 'w') as outfile:
