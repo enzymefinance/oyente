@@ -150,12 +150,15 @@ def gen_contract_tx(tfile):
         of.close()
     print "loading balances.."
     balances = []
+    weiconst = 1000000000000000000
     for contract in tqdm(cfile):
         if contract in cbalancefile:
-            balances.append(cbalancefile[contract])
+            balances.append(cbalancefile[contract]/weiconst)
         else:
             balances.append(0)
-    # balances = sorted(balances, reverse=True)
+
+    print "Min Balance: %d, Max Balance: %d, Sum: %f, Mean Balance: %f, Median Balance: %f" % (np.min(balances), np.max(balances), np.sum(balances), np.mean(balances), np.median(balances))
+    balances = sorted(balances, reverse=True)
     dsbalances = []
     print "Downscaling..."
     for i in tqdm(xrange(0, len(balances), downscale_binsize)):
