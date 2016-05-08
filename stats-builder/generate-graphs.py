@@ -111,13 +111,75 @@ def gen_txworth_hist(tfile):
     #     of.flush()
     #     of.close()
 
+def gen_contract_tx(tfile):
+    # Build unique transaction count for contracts
+    txcount = {}
+    contract_balance = {}
+    print "Collecting transaction count..."
+    for transaction in tqdm(tfile):
+        for tx in transaction['transactions']:
+            if 'from' in tx:
+                if tx['from'] not in txcount:
+                    txcount[tx['from']] = 0
+                txcount[tx['from']] += 1
+            if 'to' in tx:
+                if tx['to'] not in txcount:
+                    txcount[tx['to']] = 0
+                txcount[tx['to']] += 1
+    cbalancefile = json.load(open('../contracts/contract_data/contract_balance.json'))
+    cfile = json.load(open('contracts.json'))
+    transactions = []
+    print "Filtering..."
+    for contract in tqdm(cfile):
+        if contract in txcount:
+            transactions.append(txcount[contract])
+        else:
+            transactions.append(0)
+    # transactions = sorted(transactions, reverse=True)
+    downscale_binsize = 100
+    dstxs = []
+    print "Downscaling..."
+    for i in tqdm(xrange(0, len(transactions), downscale_binsize)):
+        dstxs.append(np.mean(transactions[i:(i+downscale_binsize)]))
+    transactions = dstxs
+    print "Writing..."
+    with open('ctxcount.csv', 'w') as of:
+        for tcount in transactions:
+            of.write('%f\n' % tcount)
+        of.flush()
+        of.close()
+    print "loading balances.."
+    balances = []
+    for contract in tqdm(cfile):
+        if contract in cbalancefile:
+            balances.append(cbalancefile[contract])
+        else:
+            balances.append(0)
+    # balances = sorted(balances, reverse=True)
+    dsbalances = []
+    print "Downscaling..."
+    for i in tqdm(xrange(0, len(balances), downscale_binsize)):
+        dsbalances.append(np.mean(balances[i:(i+downscale_binsize)]))
+    balances = dsbalances
+
+    with open('cbalance.csv', 'w') as of:
+        for tbalance in balances:
+            of.write('%f\n' % tbalance)
+        of.flush()
+        of.close()
+    print "Done."
+
+
 print "Loading transactions..."
 tfile = json.loads(open('transactions.json').read())
+print "Generating contract txcount and balances..."
+gen_contract_tx(tfile)
+
 # print "Generating Contract oplength..."
 # gen_contract_hist()
 # print "Generating Opcode histogram..."
 # gen_opcode_hist()
 # print "Generating Transaction Nesting Histogram..."
 # gen_txnesting_hist(tfile)
-print "Generating Transaction worth histogram..."
-gen_txworth_hist(tfile)
+# print "Generating Transaction worth histogram..."
+# gen_txworth_hist(tfile)
