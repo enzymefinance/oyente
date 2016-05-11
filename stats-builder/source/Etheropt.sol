@@ -1,3 +1,5 @@
+// 0xa3d4d7df3988d48c48728787cb5910a8a4cc4d26
+// 12.3273054
 contract Etheropt {
 
   struct Option {

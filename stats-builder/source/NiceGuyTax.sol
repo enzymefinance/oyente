@@ -1,3 +1,5 @@
+// 0xfba6ae30dfe97b20ad9ecccd5057ab3e5a1c41fa
+// 0.0
 contract NiceGuyTax {
     
     // Make a database of investors.

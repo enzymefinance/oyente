@@ -1,3 +1,5 @@
+// 0x2a3967d9b88c11612503d45411c7d07a13554250
+// 0.0
 contract Market {
 
   struct Option {

@@ -1,3 +1,5 @@
+// 0xd79b4c6791784184e2755b2fc1659eaab0f80456
+// 78.9445707436
 contract HonestDice {
 	
 	event Bet(address indexed user, uint blocknum, uint256 amount, uint chance);

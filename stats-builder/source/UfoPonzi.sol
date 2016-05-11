@@ -1,3 +1,5 @@
+// 0xa502f8112b2491718855f01a01a60462cc97a0d5
+// 1.7596
 contract UfoPonzi {
 
     struct Participant {

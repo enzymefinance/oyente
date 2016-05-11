@@ -1,3 +1,5 @@
+// 0xf767fca8e65d03fe16d4e38810f5e5376c3372a8
+// 1.1
 contract LuckyDoubler {
 //##########################################################
 //#### LuckyDoubler: A doubler with random payout order ####

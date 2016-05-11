@@ -1,3 +1,5 @@
+// 0x7fcc7ed28c99f64f721be410ad816247925aade8
+// 0.0
 contract timegame {
 
   struct Person {

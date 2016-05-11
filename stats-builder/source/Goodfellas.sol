@@ -1,3 +1,5 @@
+// 0x5e84c1a6e8b7cd42041004de5cd911d537c5c007
+// 0.0
 contract Goodfellas {
 
   struct Person {

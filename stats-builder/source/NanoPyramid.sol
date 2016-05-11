@@ -1,3 +1,5 @@
+// 0xe19e5f100d6a31169b5dca265c9285059c41d4f6
+// 0.0945706953732
 contract NanoPyramid {
     
     uint private pyramidMultiplier = 140;

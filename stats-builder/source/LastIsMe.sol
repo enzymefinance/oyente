@@ -1,3 +1,5 @@
+// 0xe89938a1cbf4205096405718e1699fa84608c4bd
+// 0.0
 // Last is me! Lottery paying the last player
 //
 // git: https://github.com/lastisme/lastisme.github.io/

@@ -1,3 +1,5 @@
+// 0x83051e225a06682ff0dde9bcd267d8418c4cbcd7
+// 0.0
 contract ParallelGambling {
     
     //--------parameters

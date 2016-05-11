@@ -1,3 +1,5 @@
+// 0x56705bc85a98853ee2df3834d2b3079cdfed87d8
+// 0.0
 contract ConsultingHalf {
     /*
      *  This contract accepts payment from clients, and payout to engineer and manager.

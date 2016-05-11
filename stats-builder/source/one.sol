@@ -1,3 +1,5 @@
+// 0x845f74aac51148bdd4ef6aed29822940c025a3a2
+// 0.0
 contract one {
     
     address public deployer;

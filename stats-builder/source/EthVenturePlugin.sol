@@ -1,3 +1,5 @@
+// 0xf1aa63ad7a897ca02cab6021513ee0a86820153e
+// 0.001
 // EthVenture plugin
 // TESTING CONTRACT
 

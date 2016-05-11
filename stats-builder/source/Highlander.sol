@@ -1,3 +1,5 @@
+// 0xd361e374be9e3907fceac60c6ea5cbdce89fc9ae
+// 5.0
 contract Highlander {
 
   struct Contestant {

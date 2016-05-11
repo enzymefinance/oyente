@@ -1,3 +1,5 @@
+// 0xad87e48d553c2308dccab428537f6d0809593ba4
+// 0.0
 contract GameRegistry {
 
     // This struct keeps all data for a Record.

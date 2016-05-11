@@ -1,3 +1,5 @@
+// 0x1afd952269873fe009c7bdff5f07fd91605a7227
+// 1.05968121212
 contract smallponzi {
 
   struct Person {

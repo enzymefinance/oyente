@@ -1,3 +1,5 @@
+// 0x8d7b6fb1523f04e644085e14d5e49b1c6278c92e
+// 0.0
 contract Token {
     event Transfer(address indexed from, address indexed to, uint256 value);
     function transfer(address _to, uint256 _value);

@@ -1,3 +1,5 @@
+// 0xcff9cb72d19c10df754ae7be6d280e379cdb2354
+// 0.6697
 contract quick {
 
   struct Person {

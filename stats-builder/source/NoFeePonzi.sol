@@ -1,3 +1,5 @@
+// 0xf7070fc72e2b92c6309785a39338d7c919a3cf4a
+// 4.9886
 contract NoFeePonzi {
 
   uint public constant MIN_VALUE = 1 ether;

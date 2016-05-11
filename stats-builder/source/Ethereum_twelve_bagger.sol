@@ -1,3 +1,5 @@
+// 0xfd2dfa00ba5941958eaec567e59b42c2aa9dbf70
+// 14.422
 contract Ethereum_twelve_bagger
 {
 

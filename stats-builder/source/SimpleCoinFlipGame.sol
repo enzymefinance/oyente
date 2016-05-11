@@ -1,3 +1,5 @@
+// 0xe941e5d4a66123dc74886699544fbbb942f1887a
+// 0.042
 contract SimpleCoinFlipGame {
     event FlippedCoin(address msgSender, uint msgValue, int coinsFlipped);
     

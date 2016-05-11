@@ -1,3 +1,5 @@
+// 0x772cba2f87f92e95bb8ffa96187bbedebbb484d3
+// 0.0
 contract ResetPonzi {
 
   struct Person {

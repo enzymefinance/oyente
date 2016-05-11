@@ -1,3 +1,5 @@
+// 0x062524205ca7ecf27f4a851edec93c7ad72f427b
+// 0.085
 contract FirePonzi {
    // NO FEE PONZI, 1.15 Multiplier, Limited to 3 Ether deposits, FAST and designed to be on FIRE !
    // Only input and output, no destroy function, owner can do nothing !

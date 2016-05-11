@@ -1,3 +1,5 @@
+// 0x160fc84c8c5d46561b01d38eb7d44671f3eed4ca
+// 1.03
 contract Consulting {
     /*
      *  This contract accepts payment from clients, and payout to engineer and manager.

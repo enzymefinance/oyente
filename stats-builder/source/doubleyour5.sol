@@ -1,3 +1,5 @@
+// 0xd12d8f8dfa54f1578b2177f99b2e282367b66b13
+// 0.01
 contract doubleyour5 {
 
   struct Person {

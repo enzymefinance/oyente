@@ -1,3 +1,5 @@
+// 0x0f26c26318872e8fa85dee5d30cba45ed53b3d3e
+// 0.7416
 contract theultimatepyramid {
 
   struct Person {

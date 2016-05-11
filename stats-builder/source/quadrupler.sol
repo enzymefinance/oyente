@@ -1,3 +1,5 @@
+// 0xa379bbdd0af814502eb9b38d475c7fa7411bb4ec
+// 1.5
 contract quadrupler {
 
   struct Person {

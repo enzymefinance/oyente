@@ -1,3 +1,5 @@
+// 0x49f053b866c33185fa1151e71fc80d5fe6b08a92
+// 0.0148868441818
 contract FivePercent 
 {
   	struct Participant 

@@ -1,3 +1,5 @@
+// 0xba3048b17d1e8c1412ea29af9af795786065b5f9
+// 0.0
 contract copypaste {
 
   struct Person {

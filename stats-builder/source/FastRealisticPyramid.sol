@@ -1,3 +1,5 @@
+// 0x19a6067538c90973ef5dc31ded5fa567f3d09059
+// 0.0
 contract FastRealisticPyramid {
 
         struct Person {

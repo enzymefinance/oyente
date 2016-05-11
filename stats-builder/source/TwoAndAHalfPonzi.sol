@@ -1,3 +1,5 @@
+// 0x89c2352cb600df56fe4bfb5882caadef3e96213f
+// 0.503
 contract TwoAndAHalfPonzi {
 
   uint public constant VALUE = 1001 finney;

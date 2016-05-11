@@ -1,3 +1,5 @@
+// 0x43bbc7fafb860d974037b8f7dd06b6f6fe799b3e
+// 0.473406234918
 // A Ponzi scheme where old investors are payed with the funds received from new investors.
 // Unlike what is out there in the market, the contract creator received no funds - if you
 // don&#39;t do work, you cannot expect to be paid. People who put in the funds receive all the

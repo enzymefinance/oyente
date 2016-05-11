@@ -1,3 +1,5 @@
+// 0x55d035ba1f4ae932cf98125b93d830d9858cd39f
+// 0.0
 contract BalancedPonzi {
     
     struct Person {

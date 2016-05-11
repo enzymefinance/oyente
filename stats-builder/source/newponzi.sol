@@ -1,3 +1,5 @@
+// 0xf835b307bc5348194ae01ed729170c84217ba688
+// 0.58
 contract newponzi {
 
   struct Person {

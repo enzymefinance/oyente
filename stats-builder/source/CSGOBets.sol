@@ -1,3 +1,5 @@
+// 0xa623bca1460bb9207aa8b4ad00faea3f30f0c549
+// 0.0
 contract CSGOBets {
 
         struct Bets {

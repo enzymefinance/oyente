@@ -1,3 +1,5 @@
+// 0xbb9854bfd082c48b4d426ac6a2a152b01326f46f
+// 2.0
 contract X3 {
 
         struct Participant {

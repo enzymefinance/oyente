@@ -1,3 +1,5 @@
+// 0x66342e803943929dc47bca1d625f42c7c725b049
+// 0.3055
 contract etherlist_top {
 
   // www.etherlist.top

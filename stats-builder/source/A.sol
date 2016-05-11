@@ -1,3 +1,5 @@
+// 0x70e2475b7da322d4a379e43cd7495c63c055192a
+// 0.0
 contract A {
 
   uint b = msg.value;

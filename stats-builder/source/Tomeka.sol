@@ -1,3 +1,5 @@
+// 0x24ec083b6a022099003e3d035fed48b9a58296e5
+// 0.037
 contract Tomeka {
 
     //Declare variables for storage critical to contract

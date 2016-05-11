@@ -1,3 +1,5 @@
+// 0x4229a873bbd207deef8f41e807e563c26033d118
+// 1.8
 contract triple {
 
   struct Person {

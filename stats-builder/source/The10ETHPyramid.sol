@@ -1,3 +1,5 @@
+// 0x80d9c4f6209044de069c545f68644419b520a02f
+// 1.0
 contract The10ETHPyramid {
 
   struct Person {

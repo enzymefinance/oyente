@@ -1,3 +1,5 @@
+// 0xf05782932dbabde1d657a5311fc3b78db81c60e7
+// 0.0
 /*
 Copyright (c) 2015-2016 Oraclize srl, Thomas Bertani
 */

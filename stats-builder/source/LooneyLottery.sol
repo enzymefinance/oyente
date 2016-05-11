@@ -1,3 +1,5 @@
+// 0x2ef76694fbfd691141d83f921a5ba710525de9b0
+// 0.01
 // LooneyLottery that pays out the full pool once a day
 //
 // git: https://github.com/thelooneyfarm/contracts/tree/master/src/lottery

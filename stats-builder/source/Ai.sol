@@ -1,3 +1,5 @@
+// 0x5158cf97c3e001b402ccb0f9063736ee8d6dad5a
+// 0.437333333333
 contract Ai {
 
   struct Participant {

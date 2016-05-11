@@ -1,3 +1,5 @@
+// 0xfd2487cc0e5dce97f08be1bc8ef1dce8d5988b4d
+// 28.97453
 contract Doubler {
 
     struct Participant {

@@ -1,3 +1,5 @@
+// 0xe82719202e5965cf5d9b6673b7503a3b92de20be
+// 4.00326484617
 contract Rubixi {
 
         //Declare variables for storage critical to contract

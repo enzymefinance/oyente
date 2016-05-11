@@ -1,3 +1,5 @@
+// 0xb071e5c53094cabb971e98eba3b1a86be555c943
+// 0.0
 contract IOU {
     address owner;
 
@@ -7,7 +9,7 @@ contract IOU {
     uint8 public decimals;
     
 /* This creates an array with all balances */
-    mapping (address => uint256) public balanceOf;
+    mapping (address =&gt; uint256) public balanceOf;
 
 /* This generates a public event on the blockchain that will notify clients */
 event Transfer(address indexed from, address indexed to, uint256 value);
@@ -34,7 +36,7 @@ event Transfer(address indexed from, address indexed to, uint256 value);
 
 contract RipplePayMain {
 
-mapping(string => address) currencies;
+mapping(string =&gt; address) currencies;
 
 function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){
 currencies[currencySymbol] = new IOU(currencyName, currencySymbol, decimalUnits);

@@ -1,3 +1,5 @@
+// 0xcccd5b66bf6990c7210fd76781469b19bcff9bae
+// 1.0
 contract RPS
 {
     struct Hand

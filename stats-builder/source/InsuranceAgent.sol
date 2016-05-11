@@ -1,3 +1,5 @@
+// 0xc5e8aaec3bd3ebe78b5bcd0f1560f0a61cc945cf
+// 0.0
 contract InsuranceAgent {
     address public owner;
     event CoinTransfer(address sender, address receiver, uint amount);

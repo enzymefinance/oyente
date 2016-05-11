@@ -1,3 +1,5 @@
+// 0x3325439082ff8ba7371dfdaa1af297bbfcac21b2
+// 1.0
 //[ETH] Wealth Redistribution Contract
 //
 //Please keep in mind this contract is for educational and entertainment purposes only and was created to understand the limitations of Ethereum contracts.

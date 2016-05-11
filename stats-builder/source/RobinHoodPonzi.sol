@@ -1,3 +1,5 @@
+// 0xbe46324018124b2d604c2f3eae91d3de9b388b09
+// 0.073126862017
 contract RobinHoodPonzi {
 
 //  Robin Hood Ponzi

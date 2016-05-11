@@ -1,3 +1,5 @@
+// 0xdcabd383a7c497069d0804070e4ba70ab6ecdd51
+// 9.33927584e-07
 contract BlockChainEnterprise {
     
         uint private BlockBalance = 0; //block balance (0 to BlockSize eth)

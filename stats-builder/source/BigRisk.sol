@@ -1,3 +1,5 @@
+// 0x2a53f42ad8bba138c21b50a4e5711f18381a61e9
+// 100.0
 contract BigRisk {
 
   struct Person {

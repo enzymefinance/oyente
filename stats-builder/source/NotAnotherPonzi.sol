@@ -1,3 +1,5 @@
+// 0x5a437d94843541d5cb83221a4a4b253de30b97b7
+// 0.065
 contract NotAnotherPonzi {
 
   struct Person {

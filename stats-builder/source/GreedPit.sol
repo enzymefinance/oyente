@@ -1,3 +1,5 @@
+// 0x446d1696a5527018453cda3d67aa4c2cd189b9f6
+// 15.0433622548
 contract GreedPit {
     
     address private owner;

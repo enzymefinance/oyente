@@ -1,3 +1,5 @@
+// 0x02b2101903eb6a51518e63e84b785180859fda9d
+// 0.02113
 contract thewhalegame {
 
   struct Person {

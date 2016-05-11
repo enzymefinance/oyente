@@ -8,6 +8,9 @@ from tqdm import tqdm
 contracts = {}
 opcodes = {}
 callstack_error_contracts = []
+cterror_balances = []
+
+cbalancefile = json.load(open('../contracts/contract_data/contract_balance.json'))
 
 write_out = False
 
@@ -41,6 +44,10 @@ def update_stats_from_disasm(chash, ctx, inpinit, inpmain):
 
     # Check for callstack attack
     if check_callstack_attack(imain) or check_callstack_attack(iinit):
+        if chash in cbalancefile:
+            cterror_balances.append(cbalancefile[chash])
+        else:
+            cterror_balances.append(0)
         callstack_error_contracts.append(chash)
 
     # Extract opcode data
@@ -108,6 +115,7 @@ def load_contracts_dir(path):
         save_json(contracts, 'contracts.json')
         save_json(opcodes, 'opcodes.json')
     save_json(callstack_error_contracts, 'callstack_stats.json')
+    save_json(cterror_balances, 'cterror_balances.json')
 
 def save_json(inp, filename):
     with open(filename, 'w') as outfile:

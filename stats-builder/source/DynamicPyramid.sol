@@ -1,3 +1,5 @@
+// 0xa9e4e3b1da2462752aea980698c335e70e9ab26c
+// 45.6325181934
 contract DynamicPyramid {
 
     //Declare variables for storage critical to contract

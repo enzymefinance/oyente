@@ -1,3 +1,5 @@
+// 0x28cc60c7c651f3e81e4b85b7a66366df0809870f
+// 9.95306175203
 contract Ethereum_doubler
 {
 

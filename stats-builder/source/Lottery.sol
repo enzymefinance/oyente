@@ -1,3 +1,5 @@
+// 0x748defc02aa6221ae4db129bbe7e6a97537a6f45
+// 6.705
 contract Lottery
 {
     struct Ticket

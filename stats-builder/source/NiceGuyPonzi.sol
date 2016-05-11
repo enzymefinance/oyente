@@ -1,3 +1,5 @@
+// 0xe1388626c8de5fd7e5683a83d8da6a34153e9b18
+// 0.0
 contract NiceGuyPonzi {
 
   struct Person {

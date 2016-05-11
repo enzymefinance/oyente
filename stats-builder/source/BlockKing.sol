@@ -1,3 +1,5 @@
+// 0x3ad14db4e5a658d8d20f8836deabe9d5286f79e1
+// 0.0432822634988
 /*
   Become the Block King when the last digit of your payment block number
   matches the randaom number received from Oraclize.it.
