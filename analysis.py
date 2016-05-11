@@ -4,6 +4,8 @@ from z3 import *
 from z3util import *
 from vargenerator import *
 from utils import *
+from global_params import *
+
 # THIS IS TO DEFINE A SKELETON FOR ANALYSIS
 # FOR NEW TYPE OF ANALYSIS: add necessary details to the skeleton functions
 
@@ -57,32 +59,33 @@ def update_analysis(analysis, opcode, stack, mem, global_state):
             recipient = simplify(recipient)
         analysis["money_flow"].append(("Ia", str(recipient), "all_remaining"))
     # this is for data flow
-    elif opcode == "SLOAD":
-        if len(stack) > 0:
-            address = stack[0]
-            if not isinstance(address, (int, long)):
-                address = str(address)
-            if address not in analysis["sload"]:
-                analysis["sload"].append(address)
-        else:
-            raise ValueError('STACK underflow')
-    elif opcode == "SSTORE":
-        if len(stack) > 1:
-            stored_address = stack[0]
-            stored_value = stack[1]
-            print type(stored_address)
-            # a temporary fix, not a good one.
-            # TODO move to z3 4.4.2 in which BitVecRef is hashable
-            if not isinstance(stored_address, (int, long)):
-                stored_address = str(stored_address)
-            print "storing value " + str(stored_value) + " to address " + str(stored_address)
-            if stored_address in analysis["sstore"]:
-                # recording the new values of the item in storage
-                analysis["sstore"][stored_address].append(stored_value)
+    elif DATA_FLOW:
+        if opcode == "SLOAD":
+            if len(stack) > 0:
+                address = stack[0]
+                if not isinstance(address, (int, long)):
+                    address = str(address)
+                if address not in analysis["sload"]:
+                    analysis["sload"].append(address)
             else:
-                analysis["sstore"][stored_address] = [stored_value]
-        else:
-            raise ValueError('STACK underflow')
+                raise ValueError('STACK underflow')
+        elif opcode == "SSTORE":
+            if len(stack) > 1:
+                stored_address = stack[0]
+                stored_value = stack[1]
+                print type(stored_address)
+                # a temporary fix, not a good one.
+                # TODO move to z3 4.4.2 in which BitVecRef is hashable
+                if not isinstance(stored_address, (int, long)):
+                    stored_address = str(stored_address)
+                print "storing value " + str(stored_value) + " to address " + str(stored_address)
+                if stored_address in analysis["sstore"]:
+                    # recording the new values of the item in storage
+                    analysis["sstore"][stored_address].append(stored_value)
+                else:
+                    analysis["sstore"][stored_address] = [stored_value]
+            else:
+                raise ValueError('STACK underflow')
 
 
 # Check if it is possible to execute a path after a previous path

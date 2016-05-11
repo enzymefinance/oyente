@@ -6,10 +6,14 @@ from basicblock import BasicBlock
 from analysis import *
 from utils import *
 from math import *
+import time
+from global_params import *
 
-REPORT_MODE = 1
-DEBUG_MODE = 1
-CHECK_CONCURRENCY_FLAG = 0
+
+if REPORT_MODE:
+    report_file = sys.argv[1] + '.report'
+    rfile = open(report_file, 'w')
+
 count_unresolved_jumps = 0
 gen = Generator()  # to generate names for symbolic variables
 
@@ -18,6 +22,7 @@ instructions = {}  # capturing all the instructions, keys are corresponding addr
 jump_type = {}  # capturing the "jump type" of each basic block
 vertices = {}
 edges = {}
+global_pc = []
 money_flow_all_paths = []
 data_flow_all_paths = [[], []] # store all storage addresses
 path_conditions = [] # store the path condition corresponding to each path in money_flow_all_paths
@@ -36,11 +41,11 @@ if UNIT_TEST == 1:
     try:
         result_file = open(sys.argv[2], 'r')
     except:
-        print "Could not open result file for unit test"
+        if PRINT_MODE: print "Could not open result file for unit test"
         exit()
 
-if DEBUG_MODE:
-    log_file = open(sys.argv[1] + '.log', "w")
+
+log_file = open(sys.argv[1] + '.log', "w")
 
 # A simple function to compare the end stack with the expected stack
 # configurations specified in a test file
@@ -51,22 +56,28 @@ def compare_stack_unit_test(stack):
         size = int(result_file.readline())
         content = result_file.readline().strip('\n')
         if size == len(stack) and str(stack) == content:
-            print "PASSED UNIT-TEST"
+            if PRINT_MODE: print "PASSED UNIT-TEST"
         else:
-            print "FAILED UNIT-TEST"
-            print "Expected size %d, Resulted size %d" % (size, len(stack))
-            print "Expected content %s \nResulted content %s" % (content, str(stack))
+            if PRINT_MODE: print "FAILED UNIT-TEST"
+            if PRINT_MODE: print "Expected size %d, Resulted size %d" % (size, len(stack))
+            if PRINT_MODE: print "Expected content %s \nResulted content %s" % (content, str(stack))
     except Exception as e:
-        print "FAILED UNIT-TEST"
-        print e.message
+        if PRINT_MODE: print "FAILED UNIT-TEST"
+        if PRINT_MODE: print e.message
 
 
 def main():
+    start = time.time()
     build_cfg_and_analyze()
     detect_money_concurrency()
-    # detect_time_dependency()
-    # detect_data_concurrency()
-    # detect_data_money_concurrency()
+    detect_time_dependency()
+    stop = time.time()
+    if REPORT_MODE:
+        rfile.write(str(stop-start))
+        rfile.close()
+    if DATA_FLOW:
+        detect_data_concurrency()
+        detect_data_money_concurrency()
     # print_cfg()
 
 
@@ -93,27 +104,23 @@ def detect_time_dependency():
         if TIMESTAMP_VAR in set_vars:
             is_dependant = True
             break
-        # for expr in flow:
-        #     print "expr: " + str(expr)
-        #     if is_in_expr(TIMESTAMP_VAR, flow):
-        #         is_dependant = True
-        #         break
-    file_name = sys.argv[1].split("/")[len(sys.argv[1].split("/"))-1].split(".")[0]
-    report_file = "time/" + file_name + '.txt'
-    with open(report_file, 'w') as rfile:
+
+    # file_name = sys.argv[1].split("/")[len(sys.argv[1].split("/"))-1].split(".")[0]
+    # report_file = "time/" + file_name + '.txt'
+    # with open(report_file, 'w') as rfile:
+    if REPORT_MODE:
         if is_dependant:
             rfile.write("yes")
         else:
             rfile.write("no")
 
 
-
 # detect if two paths send money to different people
 def detect_money_concurrency():
     n = len(money_flow_all_paths)
     for i in range(n):
-        print "Path " + str(i) + ": " + str(money_flow_all_paths[i])
-        print all_gs[i]
+        if PRINT_MODE: print "Path " + str(i) + ": " + str(money_flow_all_paths[i])
+        if PRINT_MODE: print all_gs[i]
     i = 0
     false_positive = []
     concurrency_paths = []
@@ -127,22 +134,19 @@ def detect_money_concurrency():
                 continue
             if is_diff(flow, jflow):
                 concurrency_paths.append([i-1, j])
-                if CHECK_CONCURRENCY_FLAG and \
+                if CHECK_CONCURRENCY_FP and \
                         is_false_positive(i-1, j, all_gs, path_conditions) and \
                         is_false_positive(j, i-1, all_gs, path_conditions):
                     false_positive.append([i-1, j])
 
-    print "All false positive cases: ", false_positive
-    print "Concurrency in paths: ", concurrency_paths
+    # if PRINT_MODE: print "All false positive cases: ", false_positive
+    # if PRINT_MODE: print "Concurrency in paths: ", concurrency_paths
     if REPORT_MODE:
-        report_file = sys.argv[1] + '.report'
-        with open(report_file, 'w') as rfile:
-            rfile.write(str(n) + "\n")
-            rfile.write(str(len(false_positive)) + "\n")
-            rfile.write(str(false_positive) + "\n")
-            rfile.write(str(len(concurrency_paths)) + "\n")
-            rfile.write(str(concurrency_paths) + "\n")
-            rfile.close()
+        rfile.write(str(n) + "\n")
+        rfile.write(str(len(false_positive)) + "\n")
+        rfile.write(str(false_positive) + "\n")
+        rfile.write(str(len(concurrency_paths)) + "\n")
+        rfile.write(str(concurrency_paths) + "\n")
 
 
 # Detect if there is data concurrency in two different flows.
@@ -151,8 +155,6 @@ def detect_money_concurrency():
 def detect_data_concurrency():
     sload_flows = data_flow_all_paths[0]
     sstore_flows = data_flow_all_paths[1]
-    # print sload_flows
-    # print sstore_flows
     concurrency_addr = []
     for sflow in sstore_flows:
         for addr in sflow:
@@ -161,7 +163,7 @@ def detect_data_concurrency():
                     if not addr in concurrency_addr:
                         concurrency_addr.append(addr)
                     break
-    print "data conccureny in storage " + str(concurrency_addr)
+    if PRINT_MODE: print "data conccureny in storage " + str(concurrency_addr)
 
 # detect if any change in a storage address will result in a different
 # flow of money. Currently I implement this detection by
@@ -182,13 +184,13 @@ def detect_data_money_concurrency():
                 var_name = gen.gen_owner_store_var(addr)
                 if var_name in set_vars:
                     concurrency_addr.append(var_name)
-    print "Concurrency in data that affects money flow: " + str(set(concurrency_addr))
+    if PRINT_MODE: print "Concurrency in data that affects money flow: " + str(set(concurrency_addr))
 
 
 def print_cfg():
     for block in vertices.values():
         block.display()
-    print str(edges)
+    if PRINT_MODE: print str(edges)
 
 
 # 1. Parse the disassembled file
@@ -211,7 +213,7 @@ def collect_vertices(tokens):
                     is_new_line = True
                     current_line_content += push_val + ' '
                     instructions[current_ins_address] = current_line_content
-                    print current_line_content
+                    if PRINT_MODE: print current_line_content
                     current_line_content = ""
                     wait_for_push = False
                     break
@@ -227,7 +229,7 @@ def collect_vertices(tokens):
             try:
                 current_ins_address = int(tok_string)
             except ValueError:
-                print "ERROR when parsing row %d col %d" % (srow, scol)
+                if PRINT_MODE: print "ERROR when parsing row %d col %d" % (srow, scol)
                 quit()
             is_new_line = False
             if is_new_block:
@@ -236,7 +238,7 @@ def collect_vertices(tokens):
             continue
         elif tok_type == NEWLINE:
             is_new_line = True
-            print current_line_content
+            if PRINT_MODE: print current_line_content
             instructions[current_ins_address] = current_line_content
             current_line_content = ""
             continue
@@ -264,8 +266,8 @@ def collect_vertices(tokens):
             current_line_content += tok_string + " "
 
     if current_block not in end_ins_dict:
-        print "current block: %d" % current_block
-        print "last line: %d" % current_ins_address
+        if PRINT_MODE: print "current block: %d" % current_block
+        if PRINT_MODE: print "last line: %d" % current_ins_address
         end_ins_dict[current_block] = current_ins_address
 
     if current_block not in jump_type:
@@ -352,21 +354,21 @@ def full_sym_exec():
 # Symbolically executing a block from the start address
 def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and_vars, analysis):
     if start < 0:
-        print "ERROR: UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH"
+        if PRINT_MODE: print "ERROR: UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH"
         return ["ERROR"]
 
-    print "\nDEBUG: Reach block address %d \n" % start
-    print "STACK: " + str(stack)
+    if PRINT_MODE: print "\nDEBUG: Reach block address %d \n" % start
+    if PRINT_MODE: print "STACK: " + str(stack)
 
     if start in visited:
-        print "Seeing a loop. Terminating this path ... "
+        if PRINT_MODE: print "Seeing a loop. Terminating this path ... "
         return stack
 
     # Execute every instruction, one at a time
     try:
         block_ins = vertices[start].get_instructions()
     except KeyError:
-        print "This path results in an exception, possibly an invalid jump address"
+        if PRINT_MODE: print "This path results in an exception, possibly an invalid jump address"
         return ["ERROR"]
 
     for instr in block_ins:
@@ -377,18 +379,20 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
 
     # Go to next Basic Block(s)
     if jump_type[start] == "terminal":
-        print "TERMINATING A PATH ..."
+        if PRINT_MODE: print "TERMINATING A PATH ..."
         display_analysis(analysis)
+        global_pc.append(path_conditions_and_vars["path_condition"])
         if analysis["money_flow"] not in money_flow_all_paths:
             money_flow_all_paths.append(analysis["money_flow"])
             path_conditions.append(path_conditions_and_vars["path_condition"])
             all_gs.append(copy_global_values(global_state))
-        if analysis["sload"] not in data_flow_all_paths[0]:
-            data_flow_all_paths[0].append(analysis["sload"])
-        if analysis["sstore"] not in data_flow_all_paths[1]:
-            data_flow_all_paths[1].append(analysis["sstore"])
+        if DATA_FLOW:
+            if analysis["sload"] not in data_flow_all_paths[0]:
+                data_flow_all_paths[0].append(analysis["sload"])
+            if analysis["sstore"] not in data_flow_all_paths[1]:
+                data_flow_all_paths[1].append(analysis["sstore"])
         compare_stack_unit_test(stack)
-        # print "Path condition = " + str(path_conditions_and_vars["path_condition"])
+        # if PRINT_MODE: print "Path condition = " + str(path_conditions_and_vars["path_condition"])
         # raw_input("Press Enter to continue...\n")
     elif jump_type[start] == "unconditional":  # executing "JUMP"
         successor = vertices[start].get_jump_target()
@@ -414,27 +418,26 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
 
         branch_expression = vertices[start].get_branch_expression()
 
-        print "Branch expression: " + str(branch_expression)
+        if PRINT_MODE: print "Branch expression: " + str(branch_expression)
 
         solver.push()  # SET A BOUNDARY FOR SOLVER
         solver.add(branch_expression)
 
-        # try:
-        if solver.check() == unsat:
-            print "INFEASIBLE PATH DETECTED"
-        else:
-            left_branch = vertices[start].get_jump_target()
-            stack1 = list(stack)
-            mem1 = dict(mem)
-            global_state1 = my_copy_dict(global_state)
-            visited1 = list(visited)
-            path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
-            path_conditions_and_vars1["path_condition"].append(branch_expression)
-            analysis1 = my_copy_dict(analysis)
-            sym_exec_block(left_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
-        # except Exception as e:
-        #     raise e
-            # log_file.write(str(e))
+        try:
+            if solver.check() == unsat:
+                if PRINT_MODE: print "INFEASIBLE PATH DETECTED"
+            else:
+                left_branch = vertices[start].get_jump_target()
+                stack1 = list(stack)
+                mem1 = dict(mem)
+                global_state1 = my_copy_dict(global_state)
+                visited1 = list(visited)
+                path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
+                path_conditions_and_vars1["path_condition"].append(branch_expression)
+                analysis1 = my_copy_dict(analysis)
+                sym_exec_block(left_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+        except Exception as e:
+            log_file.write(str(e))
 
         solver.pop()  # POP SOLVER CONTEXT
 
@@ -442,26 +445,26 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         negated_branch_expression = Not(branch_expression)
         solver.add(negated_branch_expression)
 
-        print "Negated branch expression: " + str(negated_branch_expression)
+        if PRINT_MODE: print "Negated branch expression: " + str(negated_branch_expression)
 
-        # try:
-        if solver.check() == unsat:
-            # Note that this check can be optimized. I.e. if the previous check succeeds,
-            # no need to check for the negated condition, but we can immediately go into
-            # the else branch
-            print "INFEASIBLE PATH DETECTED"
-        else:
-            right_branch = vertices[start].get_falls_to()
-            stack1 = list(stack)
-            mem1 = dict(mem)
-            global_state1 = my_copy_dict(global_state)
-            visited1 = list(visited)
-            path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
-            path_conditions_and_vars1["path_condition"].append(negated_branch_expression)
-            analysis1 = my_copy_dict(analysis)
-            sym_exec_block(right_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
-        # except Exception as e:
-        #     log_file.write(str(e))
+        try:
+            if solver.check() == unsat:
+                # Note that this check can be optimized. I.e. if the previous check succeeds,
+                # no need to check for the negated condition, but we can immediately go into
+                # the else branch
+                if PRINT_MODE: print "INFEASIBLE PATH DETECTED"
+            else:
+                right_branch = vertices[start].get_falls_to()
+                stack1 = list(stack)
+                mem1 = dict(mem)
+                global_state1 = my_copy_dict(global_state)
+                visited1 = list(visited)
+                path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
+                path_conditions_and_vars1["path_condition"].append(negated_branch_expression)
+                analysis1 = my_copy_dict(analysis)
+                sym_exec_block(right_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+        except Exception as e:
+            log_file.write(str(e))
         solver.pop()  # POP SOLVER CONTEXT
 
     else:
@@ -477,8 +480,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     # since SE will modify the stack and mem
     update_analysis(analysis, instr_parts[0], stack, mem, global_state)
 
-    print "=============================="
-    print "EXECUTING: " + instr
+    if PRINT_MODE: print "=============================="
+    if PRINT_MODE: print "EXECUTING: " + instr
 
     #
     #  0s: Stop and Arithmetic Operations
@@ -1002,8 +1005,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     current_miu_i = temp
                 value = mem[address]
                 stack.insert(0, value)
-                print "temp: " + str(temp)
-                print "current_miu_i: " + str(current_miu_i)
+                if PRINT_MODE: print "temp: " + str(temp)
+                if PRINT_MODE: print "current_miu_i: " + str(current_miu_i)
             else:
                 temp = ((address + 31) / 32) + 1
                 if isinstance(current_miu_i, (int, long)):
@@ -1029,8 +1032,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     mem[address] = new_var
                 else:
                     mem[str(address)] = new_var
-                print "temp: " + str(temp)
-                print "current_miu_i: " + str(current_miu_i)
+                if PRINT_MODE: print "temp: " + str(temp)
+                if PRINT_MODE: print "current_miu_i: " + str(current_miu_i)
             global_state["miu_i"] = current_miu_i
         else:
             raise ValueError('STACK underflow')
@@ -1044,16 +1047,16 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 if temp > current_miu_i:
                     current_miu_i = temp
                 mem[stored_address] = stored_value  # note that the stored_value could be symbolic
-                print "temp: " + str(temp)
-                print "current_miu_i: " + str(current_miu_i)
+                if PRINT_MODE: print "temp: " + str(temp)
+                if PRINT_MODE: print "current_miu_i: " + str(current_miu_i)
             else:
-                print "Debugging... temp " + str(stored_address)
+                if PRINT_MODE: print "Debugging... temp " + str(stored_address)
                 temp = ((stored_address + 31) / 32) + 1
                 if isinstance(current_miu_i, (int, long)):
                     current_miu_i = BitVecVal(current_miu_i, 256)
-                print "current_miu_i: " + str(current_miu_i)
+                if PRINT_MODE: print "current_miu_i: " + str(current_miu_i)
                 expression = current_miu_i < temp
-                print "Expression: " + str(expression)
+                if PRINT_MODE: print "Expression: " + str(expression)
                 solver.push()
                 solver.add(expression)
                 if solver.check() != unsat:
@@ -1065,8 +1068,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 solver.pop()
                 mem.clear()  # very conservative
                 mem[str(stored_address)] = stored_value
-                print "temp: " + str(temp)
-                print "current_miu_i: " + str(current_miu_i)
+                if PRINT_MODE: print "temp: " + str(temp)
+                if PRINT_MODE: print "current_miu_i: " + str(current_miu_i)
             global_state["miu_i"] = current_miu_i
         else:
             raise ValueError('STACK underflow')
@@ -1342,16 +1345,16 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         return
 
     else:
-        print "UNKNOWN INSTRUCTION: " + instr_parts[0]
+        if PRINT_MODE: print "UNKNOWN INSTRUCTION: " + instr_parts[0]
         raise Exception('UNKNOWN INSTRUCTION' + instr_parts[0])
 
     print_state(start, stack, mem, global_state)
 
 
 def print_state(block_address, stack, mem, global_state):
-    print "STACK: " + str(stack)
-    print "MEM: " + str(mem)
-    print "GLOBAL STATE: " + str(global_state)
+    if PRINT_MODE: print "STACK: " + str(stack)
+    if PRINT_MODE: print "MEM: " + str(mem)
+    if PRINT_MODE: print "GLOBAL STATE: " + str(global_state)
 
 
 main()
