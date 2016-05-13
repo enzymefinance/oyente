@@ -19,19 +19,38 @@ class MyThread(threading.Thread):
             # Find and write the source code to disk for disassembly
             for contract, data in c.iteritems():
                 evm_file = temp_file + contract +".evm"
-                code_file = temp_file + contract + ".code"
-                with open(code_file, 'w') as tfile:
-                    tfile.write(data[1][2:])
-                    tfile.write("\n")
-                    tfile.close()
+                # code_file = temp_file + contract + ".code"
+                # with open(code_file, 'w') as tfile:
+                #     tfile.write(data[1][2:])
+                #     tfile.write("\n")
+                #     tfile.close()
 
                 sys.stdout.write("\tRunning disassembly on contract %s...\t\r" % (contract))
                 sys.stdout.flush()
-                os.system("cat %s | disasm > %s" % (code_file, evm_file))
+                # os.system("cat %s | disasm > %s" % (code_file, evm_file))
                 os.system("python symExec.py %s" % evm_file)
                 # os.system("rm -rf %s*" % temp_file)
         return
 
+
+def parse_code (filename):
+    temp_file = "stats/tmp_"
+    with open(filename) as json_file:
+        c = json.load(json_file)
+
+        # Find and write the source code to disk for disassembly
+        for contract, data in c.iteritems():
+            evm_file = temp_file + contract +".evm"
+            code_file = temp_file + contract + ".code"
+            with open(code_file, 'w') as tfile:
+                tfile.write(data[1][2:])
+                tfile.write("\n")
+                tfile.close()
+
+            sys.stdout.write("\tRunning disassembly on contract %s...\t\r" % contract)
+            sys.stdout.flush()
+            os.system("cat %s | disasm > %s" % (code_file, evm_file))
+            sys.stdout.flush()
 
 def main():
     if (len(sys.argv) < 2):
@@ -40,7 +59,9 @@ def main():
         return
 
     list_threads = []
-    for i in xrange(1, len(sys.argv)):
+    for i in range(1, len(sys.argv)):
+        parse_code(sys.argv[i])
+    for i in range(1, len(sys.argv)):
         new_thread = MyThread(sys.argv[i])
         list_threads.append(new_thread)
     for my_thread in list_threads:

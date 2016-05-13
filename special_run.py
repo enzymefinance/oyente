@@ -20,8 +20,6 @@ def run_symExec(address):
                 sys.stdout.write("\tRunning disassembly on contract %s...\t\r" % address)
                 sys.stdout.flush()
                 os.system("cat %s | disasm > %s" % (code_file, evm_file))
-                sys.stdout.write("\t Running the main symbolic execution %s...\t\r")
-                sys.stdout.flush()
                 os.system("python symExec.py %s" % evm_file)
                 os.system("rm -rf %s*" % address)
 
