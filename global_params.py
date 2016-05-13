@@ -11,4 +11,10 @@ DATA_FLOW = 0
 DEBUG_MODE = 1
 
 # check false positive in concurrency
-CHECK_CONCURRENCY_FP = 0
+CHECK_CONCURRENCY_FP = 1
+
+# Timeout for z3
+TIMEOUT = 1000
+
+# Set this flag to 1 if we want to do unit test
+UNIT_TEST = 0

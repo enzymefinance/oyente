@@ -3,7 +3,7 @@ import json
 import os
 
 
-def run_symExe(address):
+def run_symExec(address):
     for index in range(1, 146):
         filename = "contracts/contract_data/contract_" + str(index) + "0000.json"
         with open(filename) as json_file:
@@ -33,7 +33,7 @@ def main():
         return
 
     for i in xrange(1, len(sys.argv)):
-        run_symExe(sys.argv[i])
+        run_symExec(sys.argv[i])
 
 
 if __name__ == '__main__':

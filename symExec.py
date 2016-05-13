@@ -30,12 +30,9 @@ all_gs = [] # store global variables, e.g. storage, balance of all paths
 
 # Z3 solver
 solver = Solver()
-solver.set("timeout", 6000)
+solver.set("timeout", TIMEOUT)
 
 CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
-
-# Set this flag to 1 if we want to do unit test
-UNIT_TEST = 0
 
 if UNIT_TEST == 1:
     try:
