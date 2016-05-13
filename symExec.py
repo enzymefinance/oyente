@@ -107,9 +107,9 @@ def detect_time_dependency():
     # with open(report_file, 'w') as rfile:
     if REPORT_MODE:
         if is_dependant:
-            rfile.write("yes")
+            rfile.write("yes\n")
         else:
-            rfile.write("no")
+            rfile.write("no\n")
 
 
 # detect if two paths send money to different people
@@ -139,10 +139,13 @@ def detect_money_concurrency():
     # if PRINT_MODE: print "All false positive cases: ", false_positive
     # if PRINT_MODE: print "Concurrency in paths: ", concurrency_paths
     if REPORT_MODE:
-        rfile.write(str(n) + "\n")
+        rfile.write("number of path: " + str(n) + "\n")
+        # number of FP detected
         rfile.write(str(len(false_positive)) + "\n")
         rfile.write(str(false_positive) + "\n")
+        # number of total races
         rfile.write(str(len(concurrency_paths)) + "\n")
+        # all the races
         rfile.write(str(concurrency_paths) + "\n")
 
 

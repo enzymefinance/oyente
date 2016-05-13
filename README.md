@@ -101,7 +101,7 @@ evm --code [runtime-binary] --gas 10000 --price 0 --dump --debug
 
 We can also specify the input data.
 
-#### Miscilanous
+#### Miscellaneous
 If you encounter the `unhashable instance` error, please add the following to your `class AstRef(Z3PPObject):` in `/usr/lib/python2.7/dist-packages/z3.py`:
 ```
 def __hash__(self):
