@@ -4,8 +4,8 @@ import os
 
 
 def run_symExec(address):
-    for index in range(1, 146):
-        filename = "contracts/contract_data/contract_" + str(index) + "0000.json"
+    for index in range(1, 20):
+        filename = "contracts/contract_data/contract" + str(index) + ".json"
         with open(filename) as json_file:
             c = json.load(json_file)
             # Find and write the source code to disk for disassembly
