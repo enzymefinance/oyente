@@ -4,3 +4,4 @@ tests/*
 .DS_Store
 .idea/
 stats/*
+*.json
