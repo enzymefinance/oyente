@@ -22,11 +22,11 @@ instructions = {}  # capturing all the instructions, keys are corresponding addr
 jump_type = {}  # capturing the "jump type" of each basic block
 vertices = {}
 edges = {}
-global_pc = []
 money_flow_all_paths = []
 data_flow_all_paths = [[], []] # store all storage addresses
 path_conditions = [] # store the path condition corresponding to each path in money_flow_all_paths
 all_gs = [] # store global variables, e.g. storage, balance of all paths
+total_no_of_paths = 0
 
 # Z3 solver
 solver = Solver()
@@ -67,6 +67,8 @@ def main():
     start = time.time()
     build_cfg_and_analyze()
     print "Done Symbolic execution"
+    if REPORT_MODE:
+        rfile.write(str(total_no_of_paths) + "\n")
     detect_money_concurrency()
     detect_time_dependency()
     stop = time.time()
@@ -382,7 +384,9 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
     if jump_type[start] == "terminal":
         if PRINT_MODE: print "TERMINATING A PATH ..."
         display_analysis(analysis)
-        global_pc.append(path_conditions_and_vars["path_condition"])
+        global total_no_of_paths
+        total_no_of_paths += 1
+        # global_pc.append(path_conditions_and_vars["path_condition"])
         if analysis["money_flow"] not in money_flow_all_paths:
             money_flow_all_paths.append(analysis["money_flow"])
             path_conditions.append(path_conditions_and_vars["path_condition"])
