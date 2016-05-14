@@ -5,6 +5,7 @@ import threading
 
 
 def should_run(evm_file):
+    return True
     report_file = evm_file + ".log"
     return not (os.path.isfile(report_file))
 
