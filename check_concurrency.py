@@ -59,8 +59,8 @@ def main():
         return
 
     list_threads = []
-    for i in range(1, len(sys.argv)):
-        parse_code(sys.argv[i])
+    #for i in range(1, len(sys.argv)):
+    #    parse_code(sys.argv[i])
     for i in range(1, len(sys.argv)):
         new_thread = MyThread(sys.argv[i])
         list_threads.append(new_thread)
