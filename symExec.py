@@ -66,6 +66,7 @@ def compare_stack_unit_test(stack):
 def main():
     start = time.time()
     build_cfg_and_analyze()
+    print "Done Symbolic execution"
     detect_money_concurrency()
     detect_time_dependency()
     stop = time.time()

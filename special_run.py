@@ -21,7 +21,7 @@ def run_symExec(address):
                 sys.stdout.flush()
                 os.system("cat %s | disasm > %s" % (code_file, evm_file))
                 os.system("python symExec.py %s" % evm_file)
-                os.system("rm -rf %s*" % address)
+                #os.system("rm -rf %s*" % address)
 
 
 def main():

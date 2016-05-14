@@ -3,6 +3,12 @@ import json
 import csv
 import threading
 
+
+def should_run(evm_file):
+    report_file = evm_file + ".log"
+    return not (os.path.isfile(report_file))
+
+
 class MyThread(threading.Thread):
     def __init__(self, file_name):
         threading.Thread.__init__(self)
@@ -19,16 +25,17 @@ class MyThread(threading.Thread):
             # Find and write the source code to disk for disassembly
             for contract, data in c.iteritems():
                 evm_file = temp_file + contract +".evm"
-                # code_file = temp_file + contract + ".code"
-                # with open(code_file, 'w') as tfile:
-                #     tfile.write(data[1][2:])
-                #     tfile.write("\n")
-                #     tfile.close()
+                if should_run(evm_file):
+                    # code_file = temp_file + contract + ".code"
+                    # with open(code_file, 'w') as tfile:
+                    #     tfile.write(data[1][2:])
+                    #     tfile.write("\n")
+                    #     tfile.close()
 
-                sys.stdout.write("\tRunning disassembly on contract %s...\t\r" % (contract))
-                sys.stdout.flush()
-                # os.system("cat %s | disasm > %s" % (code_file, evm_file))
-                os.system("python symExec.py %s" % evm_file)
+                    sys.stdout.write("\tRunning disassembly on contract %s...\t\r" % (contract))
+                    sys.stdout.flush()
+                    # os.system("cat %s | disasm > %s" % (code_file, evm_file))
+                    os.system("python symExec.py %s" % evm_file)
                 # os.system("rm -rf %s*" % temp_file)
         return
 
