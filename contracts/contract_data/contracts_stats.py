@@ -19,11 +19,15 @@ def get_block_time(block_no):
     print "Getting info for block... " + str(block_no)
     file_name = "tmp/" + str(block_no) + ".html"
     try:
-        # os.system("wget -O %s http://etherscan.io/block/%s" % (file_name, block_no))
-        with open(file_name, 'r') as myfile:
-            data = myfile.read().replace('\n', '')
-            match = re.search(r'\d+/\d+/\d{4}', data)
-            return datetime.strptime(match.group(), '%m/%d/%Y').date()
+        try:
+            with open(file_name, 'r') as myfile:
+                data = myfile.read().replace('\n', '')
+        except Exception as e:
+            os.system("wget -O %s http://etherscan.io/block/%s" % (file_name, block_no))
+            with open(file_name, 'r') as myfile:
+                data = myfile.read().replace('\n', '')
+        match = re.search(r'\d+/\d+/\d{4}', data)
+        return datetime.strptime(match.group(), '%m/%d/%Y').date()
     except Exception as e:
         print e
         return None
@@ -31,7 +35,7 @@ def get_block_time(block_no):
 
 contracts = []
 number = 0
-for i in range(5, 130):
+for i in range(5, 146):
     filename = "contract_" + str(i*10000) + ".json"
     with open(filename) as json_file:
         c = json.load(json_file)
