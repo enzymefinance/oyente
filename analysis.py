@@ -155,15 +155,18 @@ def is_diff(flow1, flow2):
     for i in range(n):
         if flow1[i] == flow2[i]:
             continue
-        tx_cd = Or(Not(flow1[i][0] == flow2[i][0]),
-                   Not(flow1[i][1] == flow2[i][1]),
-                   Not(flow1[i][2] == flow2[i][2]))
-        solver = Solver()
-        solver.push()
-        solver.add(tx_cd)
+        try:
+            tx_cd = Or(Not(flow1[i][0] == flow2[i][0]),
+                       Not(flow1[i][1] == flow2[i][1]),
+                       Not(flow1[i][2] == flow2[i][2]))
+            solver = Solver()
+            solver.push()
+            solver.add(tx_cd)
 
-        if solver.check() == sat:
+            if solver.check() == sat:
+                solver.pop()
+                return 1
             solver.pop()
+        except Exception as e:
             return 1
-        solver.pop()
     return 0
