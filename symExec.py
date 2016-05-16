@@ -70,7 +70,7 @@ def handler(signum, frame):
 def main():
     start = time.time()
     signal.signal(signal.SIGALRM, handler)
-    signal.alarm(200)
+    signal.alarm(GLOBAL_TIMEOUT)
     try:
         build_cfg_and_analyze()
         print "Done Symbolic execution"

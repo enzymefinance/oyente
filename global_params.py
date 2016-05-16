@@ -18,3 +18,6 @@ TIMEOUT = 1000
 
 # Set this flag to 1 if we want to do unit test
 UNIT_TEST = 0
+
+# timeout to run symbolic execution (in secs)
+GLOBAL_TIMEOUT = 1800
