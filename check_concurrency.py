@@ -5,9 +5,8 @@ import threading
 
 
 def should_run(evm_file):
-    return True
-    report_file = evm_file + ".log"
-    return not (os.path.isfile(report_file))
+    report_file = evm_file + ".report"
+    return (not os.path.isfile(report_file)) or (os.stat(report_file).st_size == 0)
 
 
 class MyThread(threading.Thread):
@@ -33,10 +32,11 @@ class MyThread(threading.Thread):
                     #     tfile.write("\n")
                     #     tfile.close()
 
-                    sys.stdout.write("\tRunning disassembly on contract %s...\t\r" % (contract))
-                    sys.stdout.flush()
+                    sys.stdout.write("\tRunning disassembly on contract %s...\n" % contract)
                     # os.system("cat %s | disasm > %s" % (code_file, evm_file))
                     os.system("python symExec.py %s" % evm_file)
+                else:
+                    sys.stdout.write("\tSkipping contract %s...\t\n" % contract)
                 # os.system("rm -rf %s*" % temp_file)
         return
 

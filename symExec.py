@@ -1,6 +1,7 @@
 from z3 import *
 from vargenerator import *
 import tokenize
+import signal
 from tokenize import NUMBER, NAME, NEWLINE
 from basicblock import BasicBlock
 from analysis import *
@@ -63,10 +64,21 @@ def compare_stack_unit_test(stack):
         if PRINT_MODE: print e.message
 
 
+def handler(signum, frame):
+    raise Exception("timeout")
+
 def main():
     start = time.time()
-    build_cfg_and_analyze()
-    print "Done Symbolic execution"
+    signal.signal(signal.SIGALRM, handler)
+    signal.alarm(200)
+    try:
+        build_cfg_and_analyze()
+        print "Done Symbolic execution"
+    except Exception as e:
+        print "Time out"
+        # print "Running time " + str(time.time()-start)
+    signal.alarm(0)
+
     if REPORT_MODE:
         rfile.write(str(total_no_of_paths) + "\n")
     detect_money_concurrency()
@@ -78,6 +90,9 @@ def main():
     if DATA_FLOW:
         detect_data_concurrency()
         detect_data_money_concurrency()
+
+
+
     # print_cfg()
 
 
@@ -443,6 +458,8 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
                 sym_exec_block(left_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
         except Exception as e:
             log_file.write(str(e))
+            if str(e) == "timeout":
+                raise e
 
         solver.pop()  # POP SOLVER CONTEXT
 
@@ -470,6 +487,8 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
                 sym_exec_block(right_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
         except Exception as e:
             log_file.write(str(e))
+            if str(e) == "timeout":
+                raise e
         solver.pop()  # POP SOLVER CONTEXT
 
     else:
