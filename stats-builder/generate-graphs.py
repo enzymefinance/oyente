@@ -2,6 +2,8 @@ from tqdm import tqdm
 import json
 import re
 import numpy as np
+import os
+from fuzzywuzzy import fuzz, process
 
 def gen_opcode_hist():
     # load opcodes
@@ -172,11 +174,210 @@ def gen_contract_tx(tfile):
         of.close()
     print "Done."
 
+def load_report(filen, contract_name, contract_sats, failed):
+    try:
+        with open(filen) as f:
+            explored_paths = int(f.readline())
+            pathno = int(re.findall(r"number of path: ([\d]+)", f.readline())[0])
+            f.readline()
+            f.readline()
+            concurrency_pairs = int(f.readline())
+            f.readline()
+            timestamp_dependent = False
+            td = f.readline()
+            if td[0:2] == "no": 
+                timestamp_dependent = False
+            elif td[0:3] == "yes":
+                timestamp_dependent = True
+            else:
+                failed.append(filen)
+                return
+            exec_time = 0
+            try:        
+                exec_time = float(f.readline())
+            except:
+                failed.append(filen)
+                return
+            contract_sats.append((contract_name, explored_paths, pathno, concurrency_pairs, timestamp_dependent, exec_time))
+    except ValueError:
+        return
+        print "ValueError in file %s. contents - " % filen
+        with open(filen) as f:
+            print f.read()
 
-print "Loading transactions..."
-tfile = json.loads(open('transactions.json').read())
-print "Generating contract txcount and balances..."
-gen_contract_tx(tfile)
+def load_sat_stats():
+    dirname = "stats"
+    files = os.listdir(dirname)
+    pattern = r"(0x[a-f\d]+)\."
+    contract_sats = []
+    failed = []
+    for filen in tqdm(files):
+        if filen.endswith(".report"):
+            contract_name = re.findall(pattern,filen)[0]
+            load_report(dirname + "/" + filen, contract_name, contract_sats, failed)
+    print "Loading contract db..."
+    contracts = json.loads(open('contracts.json').read())
+    stats = []
+    for entry in contract_sats:
+        if entry[0] in contracts:
+            stats.append((entry[1], entry[5]))
+    stats = sorted(stats, key = lambda k : k[0])
+    print "Writing..."
+    with open('running-time.csv', 'w') as rtcsv:
+        rtcsv.write("contract,paths,time\n")
+        for i in tqdm(xrange(0, len(stats))):
+            rtcsv.write("%d,%d,%f\n" % (i, stats[i][0], stats[i][1]))
+    print "Done."
+    with open('sat_stats.json','w') as of:
+        of.write(json.dumps(contract_sats, indent=1))
+    transaction_race = 0
+    timestamp = 0
+    for entry in contract_sats: 
+        if entry[3] > 0: transaction_race+=1
+        if entry[4] == True: timestamp += 1 
+    print "Transaction Race: %d" % transaction_race
+    print "TimeStamp Dependence: %d" % timestamp
+    print "Average time: %f" % np.mean([entry[5] for entry in contract_sats])
+
+
+# load_sat_stats()
+
+def get_all():
+    sats = json.loads(open('sat_stats.json').read())
+    cstack = json.loads(open('callstack_stats.json').read())
+
+    all_problematic = []
+
+    for c in cstack:
+        all_problematic.append(c)
+
+    # all_problematic = cstack
+    t_race = []
+    ts_depend = []
+    for entry in sats:
+        if entry[0] in all_problematic: continue
+        if entry[3] > 0: 
+            t_race.append(entry[0])
+            all_problematic.append(entry[0])
+        if entry[4] == True: 
+            ts_depend.append(entry[0])
+            if entry[0] not in all_problematic: all_problematic.append(entry[0])
+
+    print "%d transaction race, %d timestamp, %d in cstack." % (len(t_race), len(ts_depend), len(cstack))
+
+    print "%d problematic contracts" % len(all_problematic)
+    print "Loading contract bytecode..."
+    cpath = "../contracts/contract_data"
+    cfiles = os.listdir(cpath)
+    # print "files:"
+    # print open(cpath+'/'+cfiles[0]).read()
+    cmains = {}
+
+    for cfile in tqdm(cfiles):
+        if not cfile.endswith('.json'): continue
+        if cfile == "contract_balance.json": continue
+        cjson = json.loads(open(cpath+'/'+cfile).read())
+        for contract in all_problematic:
+            if contract in cmains: continue
+            if contract in cjson:
+                cmains[contract] = cjson[contract][1]
+
+    # Remove duplicates
+    cmains_sorted = {}
+    # for c in cmains:
+    #     cmains_sorted.append((c, cmains[c]))
+
+    # cmains_sorted = sorted(cmains_sorted, lamda k: k[1])
+
+    threshold = 99
+
+    print "Removing duplicates..."
+
+    duplicates = 0
+
+    new_t_race = []
+    new_ts_depend = []
+    new_cstack = []
+
+    print "Transaction Race..."
+    for c in tqdm(t_race):
+        found = False
+        for cont in new_t_race:
+            if cmains[cont] == cmains[c]:
+                found = True
+                break
+        if not found:
+            new_t_race.append(c)
+
+    print "Timestamp..."
+    for c in tqdm(ts_depend):
+        found = False
+        for cont in new_ts_depend:
+            if cmains[cont] == cmains[c]:
+                found = True
+                break
+        if not found:
+            new_ts_depend.append(c)
+
+    print "Callstack..."
+    for c in tqdm(cstack):
+        found = False
+        for cont in new_cstack:
+            if cmains[cont] == cmains[c]:
+                found = True
+                break
+        if not found:
+            new_cstack.append(c)
+
+    print "All..."
+    for contract in tqdm(cmains):
+        found = False
+        for c in cmains_sorted:
+            # if fuzz.ratio(cmains_sorted[c], cmains[contract]) >= threshold:
+            if cmains[contract] == cmains_sorted[c]:
+                found = True
+                break
+        if not found:
+            cmains_sorted[contract] = cmains[contract]
+        else:
+            duplicates += 1
+            # print "duplicate count: %d, original len: %d" % (duplicates, len(cmains_sorted))
+
+    print "Original Contracts: %d" % len(cmains_sorted)
+
+    print "Original Counts - "
+    print "CallStack - %d, Transaction Race - %d, Timestamp Dependence - %d" % (len(new_cstack), len(new_t_race), len(new_ts_depend))
+
+    # return cmains_sorted
+
+
+# cmains = get_all()
+
+def get_source_timestamp():
+    sats = json.loads(open('sat_stats.json').read())
+    source_list = []
+
+    for entry in sats:
+        if entry[4] == True:
+            source_list.append(entry[0])
+
+    from get_source import get_contract_code
+
+    for c in tqdm(source_list):
+        code = get_contract_code(c)
+
+        if len(code[1]) > 0:
+            with open('timestamp_source/'+c+'.sol', 'w') as of:
+                of.write(code[1][0])
+                of.flush()
+                of.close()
+
+get_source_timestamp()
+
+# print "Loading transactions..."
+# tfile = json.loads(open('transactions.json').read())
+# print "Generating contract txcount and balances..."
+# gen_contract_tx(tfile)
 
 # print "Generating Contract oplength..."
 # gen_contract_hist()

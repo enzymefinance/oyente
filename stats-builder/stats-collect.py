@@ -123,4 +123,6 @@ def save_json(inp, filename):
 
 
 sample_path = "../contracts/contract_data"
-load_contracts_dir(sample_path)
+
+if __name__ == '__main__':
+    load_contracts_dir(sample_path)

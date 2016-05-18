@@ -39,4 +39,5 @@ def save_callstack_source(dirname):
             of.flush()
             of.close()
 
-save_callstack_source('source')
+if __name__ == '__main__':
+    save_callstack_source('source')
