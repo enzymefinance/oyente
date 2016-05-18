@@ -12,3 +12,12 @@ DEBUG_MODE = 1
 
 # check false positive in concurrency
 CHECK_CONCURRENCY_FP = 0
+
+# Timeout for z3
+TIMEOUT = 1000
+
+# Set this flag to 1 if we want to do unit test
+UNIT_TEST = 0
+
+# timeout to run symbolic execution (in secs)
+GLOBAL_TIMEOUT = 1800

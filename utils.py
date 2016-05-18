@@ -9,6 +9,8 @@ import os
 import csv
 import re
 import difflib
+import signal
+
 
 def my_copy_dict(input):
     output = {}
@@ -22,6 +24,22 @@ def my_copy_dict(input):
 
     return output
 
+
+# class Timeout():
+#     """Timeout class using ALARM signal."""
+#
+#     def __init__(self, sec):
+#         self.sec = sec
+#
+#     def __enter__(self):
+#         signal.signal(signal.SIGALRM, self.raise_timeout)
+#         signal.alarm(self.sec)
+#
+#     def __exit__(self, *args):
+#         signal.alarm(0)    # disable alarm
+#
+#     def raise_timeout(self, *args):
+#         raise Exception("Timeout")
 
 # check if a variable is a storage address in a contract
 # currently accept only int addresses in the storage
@@ -97,23 +115,25 @@ def rename_vars(pcs, global_states):
     # replace variable in storage expression
     for storage_addr in global_states:
         expr = global_states[storage_addr]
-        list_vars = get_vars(expr)
-        for var in list_vars:
-            if var in vars_mapping:
-                expr = substitute(expr, (var, vars_mapping[var]))
-                continue
-            var_name = var.decl().name()
-            # check if a var is global
-            if var_name.startswith("Ia_store_"):
-                position = int(var_name.split('_')[len(var_name.split('_'))-1])
-                # if it is not modified
-                if position not in global_states:
+        # stupid z3 4.1 makes me add this line
+        if is_expr(expr):
+            list_vars = get_vars(expr)
+            for var in list_vars:
+                if var in vars_mapping:
+                    expr = substitute(expr, (var, vars_mapping[var]))
                     continue
-            # otherwise, change the name of the variable
-            new_var_name = var_name + '_old'
-            new_var = BitVec(new_var_name, 256)
-            vars_mapping[var] = new_var
-            expr = substitute(expr, (var, vars_mapping[var]))
+                var_name = var.decl().name()
+                # check if a var is global
+                if var_name.startswith("Ia_store_"):
+                    position = int(var_name.split('_')[len(var_name.split('_'))-1])
+                    # if it is not modified
+                    if position not in global_states:
+                        continue
+                # otherwise, change the name of the variable
+                new_var_name = var_name + '_old'
+                new_var = BitVec(new_var_name, 256)
+                vars_mapping[var] = new_var
+                expr = substitute(expr, (var, vars_mapping[var]))
         ret_gs[storage_addr] = expr
 
     return ret_pcs, ret_gs

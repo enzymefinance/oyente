@@ -24,9 +24,9 @@ def init_analysis():
 # Money flow: (source, destination, amount)
 
 def display_analysis(analysis):
-    # print "Gas paid for execution: %d" % analysis["gas"]
-    # print "Gas paid for memory usage: %d" % analysis["gas_mem"]
-    print "Money flow: " + str(analysis["money_flow"])
+    # if PRINT_MODE: print "Gas paid for execution: %d" % analysis["gas"]
+    # if PRINT_MODE: print "Gas paid for memory usage: %d" % analysis["gas_mem"]
+    if PRINT_MODE: print "Money flow: " + str(analysis["money_flow"])
 
 
 def update_analysis(analysis, opcode, stack, mem, global_state):
@@ -73,12 +73,12 @@ def update_analysis(analysis, opcode, stack, mem, global_state):
             if len(stack) > 1:
                 stored_address = stack[0]
                 stored_value = stack[1]
-                print type(stored_address)
+                if PRINT_MODE: print type(stored_address)
                 # a temporary fix, not a good one.
                 # TODO move to z3 4.4.2 in which BitVecRef is hashable
                 if not isinstance(stored_address, (int, long)):
                     stored_address = str(stored_address)
-                print "storing value " + str(stored_value) + " to address " + str(stored_address)
+                if PRINT_MODE: print "storing value " + str(stored_value) + " to address " + str(stored_address)
                 if stored_address in analysis["sstore"]:
                     # recording the new values of the item in storage
                     analysis["sstore"][stored_address].append(stored_value)
@@ -104,7 +104,7 @@ def is_feasible(prev_pc, gstate, curr_pc):
         var = gen.gen_owner_store_var(storage_address)
         if var in vars_mapping:
             new_pc.append(vars_mapping[var] == gstate[storage_address])
-    # print "Final path condition: ", new_pc
+    # if PRINT_MODE: print "Final path condition: ", new_pc
     solver = Solver()
     solver.push()
     solver.add(new_pc)
@@ -128,22 +128,22 @@ def is_false_positive(i, j, all_gs, path_conditions):
     pathj = path_conditions[j]
     statei = all_gs[i]
     # statej = all_gs[j]
-    # print "Path condition " + str(i) + ": " + str(pathi)
-    # print "Path condition " + str(j) + ": " + str(pathj)
-    # print "Global state values in path " + str(i) + ": " + str(statei)
-    # print "Global state values in path " + str(j) + ": " + str(statej)
+    # if PRINT_MODE: print "Path condition " + str(i) + ": " + str(pathi)
+    # if PRINT_MODE: print "Path condition " + str(j) + ": " + str(pathj)
+    # if PRINT_MODE: print "Global state values in path " + str(i) + ": " + str(statei)
+    # if PRINT_MODE: print "Global state values in path " + str(j) + ": " + str(statej)
 
 
-    # print "Set of PCs having only global vars" + str(set_of_pcs)
+    # if PRINT_MODE: print "Set of PCs having only global vars" + str(set_of_pcs)
     # rename global variables in path i
     set_of_pcs, statei = rename_vars(pathi, statei)
-    print "Set of PCs after renaming global vars" + str(set_of_pcs)
-    print "Global state values in path " + str(i) + " after renaming: " + str(statei)
+    if PRINT_MODE: print "Set of PCs after renaming global vars" + str(set_of_pcs)
+    if PRINT_MODE: print "Global state values in path " + str(i) + " after renaming: " + str(statei)
     if is_feasible(set_of_pcs, statei, pathj):
-        # print "Its possible to execute path ", i, " after path ", j
+        # if PRINT_MODE: print "Its possible to execute path ", i, " after path ", j
         return 0
     else:
-        # print "Its not possible to execute path ", i, " after path ", j
+        # if PRINT_MODE: print "Its not possible to execute path ", i, " after path ", j
         return 1
 
 
@@ -155,15 +155,18 @@ def is_diff(flow1, flow2):
     for i in range(n):
         if flow1[i] == flow2[i]:
             continue
-        tx_cd = Or(Not(flow1[i][0] == flow2[i][0]),
-                   Not(flow1[i][1] == flow2[i][1]),
-                   Not(flow1[i][2] == flow2[i][2]))
-        solver = Solver()
-        solver.push()
-        solver.add(tx_cd)
+        try:
+            tx_cd = Or(Not(flow1[i][0] == flow2[i][0]),
+                       Not(flow1[i][1] == flow2[i][1]),
+                       Not(flow1[i][2] == flow2[i][2]))
+            solver = Solver()
+            solver.push()
+            solver.add(tx_cd)
 
-        if solver.check() == sat:
+            if solver.check() == sat:
+                solver.pop()
+                return 1
             solver.pop()
+        except Exception as e:
             return 1
-        solver.pop()
     return 0

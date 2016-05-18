@@ -3,9 +3,9 @@ import json
 import os
 
 
-def run_symExe(address):
-    for index in range(1, 146):
-        filename = "contracts/contract_data/contract_" + str(index) + "0000.json"
+def run_symExec(address):
+    for index in range(1, 20):
+        filename = "contracts/contract_data/contract" + str(index) + ".json"
         with open(filename) as json_file:
             c = json.load(json_file)
             # Find and write the source code to disk for disassembly
@@ -20,10 +20,8 @@ def run_symExe(address):
                 sys.stdout.write("\tRunning disassembly on contract %s...\t\r" % address)
                 sys.stdout.flush()
                 os.system("cat %s | disasm > %s" % (code_file, evm_file))
-                sys.stdout.write("\t Running the main symbolic execution %s...\t\r")
-                sys.stdout.flush()
                 os.system("python symExec.py %s" % evm_file)
-                os.system("rm -rf %s*" % address)
+                #os.system("rm -rf %s*" % address)
 
 
 def main():
@@ -33,7 +31,7 @@ def main():
         return
 
     for i in xrange(1, len(sys.argv)):
-        run_symExe(sys.argv[i])
+        run_symExec(sys.argv[i])
 
 
 if __name__ == '__main__':

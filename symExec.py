@@ -1,6 +1,7 @@
 from z3 import *
 from vargenerator import *
 import tokenize
+import signal
 from tokenize import NUMBER, NAME, NEWLINE
 from basicblock import BasicBlock
 from analysis import *
@@ -22,20 +23,17 @@ instructions = {}  # capturing all the instructions, keys are corresponding addr
 jump_type = {}  # capturing the "jump type" of each basic block
 vertices = {}
 edges = {}
-global_pc = []
 money_flow_all_paths = []
 data_flow_all_paths = [[], []] # store all storage addresses
 path_conditions = [] # store the path condition corresponding to each path in money_flow_all_paths
 all_gs = [] # store global variables, e.g. storage, balance of all paths
+total_no_of_paths = 0
 
 # Z3 solver
 solver = Solver()
-solver.set("timeout", 6000)
+solver.set("timeout", TIMEOUT)
 
 CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
-
-# Set this flag to 1 if we want to do unit test
-UNIT_TEST = 0
 
 if UNIT_TEST == 1:
     try:
@@ -66,9 +64,23 @@ def compare_stack_unit_test(stack):
         if PRINT_MODE: print e.message
 
 
+def handler(signum, frame):
+    raise Exception("timeout")
+
 def main():
     start = time.time()
-    build_cfg_and_analyze()
+    signal.signal(signal.SIGALRM, handler)
+    signal.alarm(GLOBAL_TIMEOUT)
+    try:
+        build_cfg_and_analyze()
+        print "Done Symbolic execution"
+    except Exception as e:
+        print "Time out"
+        # print "Running time " + str(time.time()-start)
+    signal.alarm(0)
+
+    if REPORT_MODE:
+        rfile.write(str(total_no_of_paths) + "\n")
     detect_money_concurrency()
     detect_time_dependency()
     stop = time.time()
@@ -78,6 +90,9 @@ def main():
     if DATA_FLOW:
         detect_data_concurrency()
         detect_data_money_concurrency()
+
+
+
     # print_cfg()
 
 
@@ -110,9 +125,9 @@ def detect_time_dependency():
     # with open(report_file, 'w') as rfile:
     if REPORT_MODE:
         if is_dependant:
-            rfile.write("yes")
+            rfile.write("yes\n")
         else:
-            rfile.write("no")
+            rfile.write("no\n")
 
 
 # detect if two paths send money to different people
@@ -142,10 +157,13 @@ def detect_money_concurrency():
     # if PRINT_MODE: print "All false positive cases: ", false_positive
     # if PRINT_MODE: print "Concurrency in paths: ", concurrency_paths
     if REPORT_MODE:
-        rfile.write(str(n) + "\n")
+        rfile.write("number of path: " + str(n) + "\n")
+        # number of FP detected
         rfile.write(str(len(false_positive)) + "\n")
         rfile.write(str(false_positive) + "\n")
+        # number of total races
         rfile.write(str(len(concurrency_paths)) + "\n")
+        # all the races
         rfile.write(str(concurrency_paths) + "\n")
 
 
@@ -381,7 +399,9 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
     if jump_type[start] == "terminal":
         if PRINT_MODE: print "TERMINATING A PATH ..."
         display_analysis(analysis)
-        global_pc.append(path_conditions_and_vars["path_condition"])
+        global total_no_of_paths
+        total_no_of_paths += 1
+        # global_pc.append(path_conditions_and_vars["path_condition"])
         if analysis["money_flow"] not in money_flow_all_paths:
             money_flow_all_paths.append(analysis["money_flow"])
             path_conditions.append(path_conditions_and_vars["path_condition"])
@@ -438,6 +458,8 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
                 sym_exec_block(left_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
         except Exception as e:
             log_file.write(str(e))
+            if str(e) == "timeout":
+                raise e
 
         solver.pop()  # POP SOLVER CONTEXT
 
@@ -465,6 +487,8 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
                 sym_exec_block(right_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
         except Exception as e:
             log_file.write(str(e))
+            if str(e) == "timeout":
+                raise e
         solver.pop()  # POP SOLVER CONTEXT
 
     else:
