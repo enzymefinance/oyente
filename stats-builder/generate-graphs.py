@@ -242,6 +242,44 @@ def load_sat_stats():
 
 # load_sat_stats()
 
+def check_unique():
+    # Load all contracts
+    cpath = "../contracts/contract_data"
+    cfiles = os.listdir(cpath)
+    contracts = {}
+    cmains = {}
+
+    for cfile in tqdm(cfiles):
+        if not cfile.endswith('.json'): continue
+        if cfile == "contract_balance.json": continue
+        cjson = json.loads(open(cpath+'/'+cfile).read())
+        contracts.update(cjson)
+        for contract in cjson:
+            cmains[contract] = cjson[contract][1]
+
+    print "Loaded %d contracts." % len(cmains)
+    print "Removing duplicates..."
+
+    original_cmains = {}
+
+    for element in tqdm(cmains):
+        found = False
+        for o in original_cmains:
+            if cmains[element] == original_cmains[o]: 
+                found = True
+                break
+        if not found:
+            original_cmains[element] = cmains[element]
+
+    print "%d original contracts." % len(original_cmains)
+
+    with open('unique_contracts.json', 'w') as of:
+        of.write(json.dumps(original_cmains, indent=1))
+        of.flush()
+        of.close()
+
+check_unique()
+
 def get_all():
     sats = json.loads(open('sat_stats.json').read())
     cstack = json.loads(open('callstack_stats.json').read())
@@ -269,8 +307,6 @@ def get_all():
     print "Loading contract bytecode..."
     cpath = "../contracts/contract_data"
     cfiles = os.listdir(cpath)
-    # print "files:"
-    # print open(cpath+'/'+cfiles[0]).read()
     cmains = {}
 
     for cfile in tqdm(cfiles):
@@ -372,7 +408,26 @@ def get_source_timestamp():
                 of.flush()
                 of.close()
 
-get_source_timestamp()
+def get_tsdepend_timestamp():
+    sats = json.loads(open('sat_stats.json').read())
+    source_list = []
+
+    for entry in sats:
+        if entry[3] > 0:
+            source_list.append(entry[0])
+
+    from get_source import get_contract_code
+
+    for c in tqdm(source_list):
+        code = get_contract_code(c)
+
+        if len(code[1]) > 0:
+            with open('tod_source/'+c+'.sol', 'w') as of:
+                of.write(code[1][0])
+                of.flush()
+                of.close()
+
+# get_tsdepend_timestamp()
 
 # print "Loading transactions..."
 # tfile = json.loads(open('transactions.json').read())

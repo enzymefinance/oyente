@@ -19,6 +19,7 @@ def path_leaf(path):
     return tail or ntpath.basename(head)
 
 core_url = "https://etherscan.io/txsInternal?valid=false&p=%d"
+core_url2 = "https://etherscan.io/txsInternal?p=%s"
 txinfo_headers = ["transaction","from","to","gas","gas used","cumulative gas used","transaction value"]
 cinfo_headers = ["contract code url","contract value"]
 
@@ -29,6 +30,16 @@ def download_txs(dirn):
     max_p = run_re_file(r"Page <b>1<\/b> of <b>(\d+)<\/b><\/span>", "tmp.html")[0]
     print "Max pages = %d" % (int(max_p)) 
     os.system("curl 'https://etherscan.io/txsInternal?valid=false&p=[1-%d]'' -o %stxs#1.html" % (max_p,dirn))
+    print "Download complete."
+    os.system("rm tmp.html")
+
+def download_txs_all(dirn):
+    # Load the first page
+    print "Downloading transactions..."
+    os.system("wget https://etherscan.io/txsInternal -O tmp.html")
+    max_p = run_re_file(r"Page <b>1<\/b> of <b>(\d+)<\/b><\/span>", "tmp.html")[0]
+    print "Max pages = %d" % (int(max_p)) 
+    os.system("curl 'https://etherscan.io/txsInternal?p=[1-%d]' -o %stxs#1.html" % (int(max_p),dirn))
     print "Download complete."
     os.system("rm tmp.html")
 
