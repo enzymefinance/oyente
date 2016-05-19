@@ -232,13 +232,15 @@ def load_sat_stats():
         of.write(json.dumps(contract_sats, indent=1))
     transaction_race = 0
     timestamp = 0
+    paths = []
     for entry in contract_sats: 
+        paths.append(entry[1])
         if entry[3] > 0: transaction_race+=1
         if entry[4] == True: timestamp += 1 
+    print "Average number of paths: %d" % np.mean(paths)
     print "Transaction Race: %d" % transaction_race
     print "TimeStamp Dependence: %d" % timestamp
     print "Average time: %f" % np.mean([entry[5] for entry in contract_sats])
-
 
 # load_sat_stats()
 
@@ -278,7 +280,28 @@ def check_unique():
         of.flush()
         of.close()
 
-check_unique()
+    print "merging..."
+
+    duplicates = []
+
+    for contract in tqdm(cmains):
+        found = False
+        for l in duplicates:
+            if cmains[l[0]] == cmains[contract]:
+                l.append(contract)
+                found = True
+                break
+        if not found:
+            duplicates.append([contract])
+
+    print "%d elements in merge list." % len(duplicates)
+
+    with open('duplicate_contracts.json', 'w') as of:
+        of.write(json.dumps(duplicates, indent=1))
+        of.flush()
+        of.close()    
+
+# check_unique()
 
 def get_all():
     sats = json.loads(open('sat_stats.json').read())
@@ -386,7 +409,6 @@ def get_all():
 
     # return cmains_sorted
 
-
 # cmains = get_all()
 
 def get_source_timestamp():
@@ -426,6 +448,34 @@ def get_tsdepend_timestamp():
                 of.write(code[1][0])
                 of.flush()
                 of.close()
+
+def get_source_stats():
+    contracts = []
+
+    cpath = "../contracts/contract_data"
+    cfiles = os.listdir(cpath)
+
+    print "Loading contracts..."
+
+    for cfile in tqdm(cfiles):
+        if not cfile.endswith('.json'): continue
+        if cfile == "contract_balance.json": continue
+        cjson = json.loads(open(cpath+'/'+cfile).read())
+        for contract in cjson: contracts.append(contract)
+
+    print "Checking for source..."
+
+    from get_source import get_contract_code
+
+    with_source = 0
+
+    for contract in tqdm(contracts):
+        if(len(get_contract_code(contract)[1]) > 0): with_source+=1
+
+    print "%d contracts have source out of %d." % (with_source, len(contracts))
+
+get_source_stats()
+
 
 # get_tsdepend_timestamp()
 
