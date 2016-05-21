@@ -111,10 +111,15 @@ def build_cfg_and_analyze():
 def detect_time_dependency():
     TIMESTAMP_VAR = "IH_s"
     is_dependant = False
+    index = 0
+    print "ALL PATH CONDITIONS"
     for cond in path_conditions:
+        index += 1
+        print "PATH " + str(index) + ": " + str(cond)
         list_vars = []
         for expr in cond:
-            list_vars += get_vars(expr)
+            if is_expr(expr):
+                list_vars += get_vars(expr)
         set_vars = set(i.decl().name() for i in list_vars)
         if TIMESTAMP_VAR in set_vars:
             is_dependant = True
