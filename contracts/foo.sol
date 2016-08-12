@@ -1,9 +1,10 @@
 contract foo{	
-	function fo() returns (int) {
+	function foo() {
 		 return bar(256);
 	}
 
-	function bar(int d) returns (int) {
-		return d+1;
+	function bar(int d) {
+		if (now >= now+1) 
+		    msg.sender.send(100);		  
 	}	
 }

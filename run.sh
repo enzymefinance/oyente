@@ -12,8 +12,5 @@ solc --optimize --bin-runtime "$1" -o ./tmp;
 echo "Calling the counter..."
 echo '' >> ./tmp/"$2".bin-runtime;
 echo "Disambling the bytecode";
-cat ./tmp/"$2".bin-runtime | disasm > ./tmp/"$2".evm
-
-echo "Run buildCFG.py on the disassembler output"
-python buildCFG.py ./tmp/"$2".evm
-echo "Finished. Open localhost:7474 to see the visualizer"
+cat ./tmp/"$2".bin-runtime | /Users/loi/Downloads/go-ethereum-1.4.10/build/bin/disasm > ./tmp/"$2".evm
+python symExec.py ./tmp/"$2".evm

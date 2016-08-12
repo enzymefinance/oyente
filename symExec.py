@@ -80,7 +80,7 @@ def main():
     signal.alarm(0)
 
     if REPORT_MODE:
-        rfile.write(str(total_no_of_paths) + "\n")
+        rfile.write(str(total_no_of_paths) + "\n")    
     detect_money_concurrency()
     detect_time_dependency()
     stop = time.time()
@@ -507,7 +507,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     # collecting the analysis result by calling this skeletal function
     # this should be done before symbolically executing the instruction,
     # since SE will modify the stack and mem
-    update_analysis(analysis, instr_parts[0], stack, mem, global_state)
+    update_analysis(analysis, instr_parts[0], stack, mem, global_state, path_conditions_and_vars)
 
     if PRINT_MODE: print "=============================="
     if PRINT_MODE: print "EXECUTING: " + instr

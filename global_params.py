@@ -2,7 +2,7 @@
 REPORT_MODE = 1
 
 #print everything in the console
-PRINT_MODE = 1
+PRINT_MODE = 0
 
 # enable data flow analysis (incomplete yet)
 DATA_FLOW = 0

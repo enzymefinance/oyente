@@ -29,7 +29,7 @@ def display_analysis(analysis):
     if PRINT_MODE: print "Money flow: " + str(analysis["money_flow"])
 
 
-def update_analysis(analysis, opcode, stack, mem, global_state):
+def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_and_vars):
     gas_increment = get_ins_cost(opcode)
     if opcode in ("LOG0", "LOG1", "LOG2", "LOG3", "LOG4"):
         gas_increment += GCOST["Glogdata"] * stack[1]
@@ -46,6 +46,9 @@ def update_analysis(analysis, opcode, stack, mem, global_state):
     analysis["gas_mem"] = GCOST["Gmemory"] * length + (length ** 2) // 512
 
     if opcode == "CALL":
+        print "THIS IS A CALLLLLLLLLL"
+        print str(path_conditions_and_vars)
+        print str(global_state)
         recipient = stack[1]
         transfer_amount = stack[2]
         if isinstance(transfer_amount, (int, long)) and transfer_amount == 0:

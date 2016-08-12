@@ -19,7 +19,7 @@ def run_symExec(address):
 
                 sys.stdout.write("\tRunning disassembly on contract %s...\t\r" % address)
                 sys.stdout.flush()
-                os.system("cat %s | disasm > %s" % (code_file, evm_file))
+                os.system("cat %s | /Users/loi/Downloads/go-ethereum-1.4.10/build/bin/disasm > %s" % (code_file, evm_file))
                 os.system("python symExec.py %s" % evm_file)
                 #os.system("rm -rf %s*" % address)
 
