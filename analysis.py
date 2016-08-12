@@ -16,7 +16,8 @@ def init_analysis():
         "gas_mem": 0,
         "money_flow": [("Is", "Ia", "Iv")],  # (source, destination, amount)
         "sload": [],
-        "sstore": {}
+        "sstore": {},
+        "reentrancy_bug":[]
     }
     return analysis
 
@@ -82,7 +83,7 @@ def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_
         print str(recipient) + "\n"
         print str(transfer_amount) + "\n"
 
-        check_reentrancy_bug(path_conditions_and_vars, global_state)
+        analysis["reentrancy_bug"].append(check_reentrancy_bug(path_conditions_and_vars, global_state))
         if isinstance(transfer_amount, (int, long)) and transfer_amount == 0:
             return
         if not isinstance(recipient, (int, long)):

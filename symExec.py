@@ -24,6 +24,7 @@ jump_type = {}  # capturing the "jump type" of each basic block
 vertices = {}
 edges = {}
 money_flow_all_paths = []
+reentrancy_all_paths =[]
 data_flow_all_paths = [[], []] # store all storage addresses
 path_conditions = [] # store the path condition corresponding to each path in money_flow_all_paths
 all_gs = [] # store global variables, e.g. storage, balance of all paths
@@ -82,7 +83,7 @@ def main():
     if REPORT_MODE:
         rfile.write(str(total_no_of_paths) + "\n")    
     detect_money_concurrency()
-    detect_time_dependency()
+    detect_time_dependency()    
     stop = time.time()
     if REPORT_MODE:
         rfile.write(str(stop-start))
@@ -90,7 +91,7 @@ def main():
     if DATA_FLOW:
         detect_data_concurrency()
         detect_data_money_concurrency()
-
+    print "reentrancy_bug " + str(reentrancy_all_paths)
 
 
     # print_cfg()
@@ -407,6 +408,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         global total_no_of_paths
         total_no_of_paths += 1
         # global_pc.append(path_conditions_and_vars["path_condition"])
+        reentrancy_all_paths.append(analysis["reentrancy_bug"])
         if analysis["money_flow"] not in money_flow_all_paths:
             money_flow_all_paths.append(analysis["money_flow"])
             path_conditions.append(path_conditions_and_vars["path_condition"])
