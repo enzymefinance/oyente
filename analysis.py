@@ -28,7 +28,32 @@ def display_analysis(analysis):
     # if PRINT_MODE: print "Gas paid for memory usage: %d" % analysis["gas_mem"]
     if PRINT_MODE: print "Money flow: " + str(analysis["money_flow"])
 
+# Check if this call has the Reentrancy bug
+# Return true if it does, false otherwise
+def check_reentrancy_bug(path_conditions_and_vars, global_state):
+    path_condition = path_conditions_and_vars["path_condition"]
+    new_path_condition = [] 
+    for expr in path_condition:
+        list_vars = get_vars(expr)
+        for var in list_vars:
+            var_name = var.decl().name()
+            # check if a var is global
+            if var_name.startswith("Ia_store_"):
+                storage_key = var_name.split("Ia_store_")[1]
+                if storage_key in global_state["Ia"]:
+                    new_path_condition.append(var == global_state["Ia"][storage_key])
+    print "\n =>>>>>> New PC: " + str(new_path_condition) + " \n"
 
+    solver = Solver()
+    solver.push()
+    solver.add(path_condition)
+    solver.add(new_path_condition)
+    # if it is not feasible to re-execute the call, its not a bug
+    ret_val = not (solver.check() == unsat)
+    solver.pop()
+    print "Reentrancy_bug? " + str(ret_val) + "\n"
+    return ret_val
+    
 def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_and_vars):
     gas_increment = get_ins_cost(opcode)
     if opcode in ("LOG0", "LOG1", "LOG2", "LOG3", "LOG4"):
@@ -48,14 +73,21 @@ def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_
     if opcode == "CALL":
         print "THIS IS A CALLLLLLLLLL"
         print str(path_conditions_and_vars)
+        print "\n This is the global state"
         print str(global_state)
+        print str(mem)
         recipient = stack[1]
         transfer_amount = stack[2]
+        print "\nCALL params\n"
+        print str(recipient) + "\n"
+        print str(transfer_amount) + "\n"
+
+        check_reentrancy_bug(path_conditions_and_vars, global_state)
         if isinstance(transfer_amount, (int, long)) and transfer_amount == 0:
             return
         if not isinstance(recipient, (int, long)):
             recipient = simplify(recipient)
-        analysis["money_flow"].append(("Ia", str(recipient), transfer_amount))
+        analysis["money_flow"].append(("Ia", str(recipient), transfer_amount))        
     elif opcode == "SUICIDE":
         recipient = stack[0]
         if not isinstance(recipient, (int, long)):

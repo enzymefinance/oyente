@@ -100,7 +100,7 @@ def rename_vars(pcs, global_states):
             var_name = var.decl().name()
             # check if a var is global
             if var_name.startswith("Ia_store_"):
-                position = int(var_name.split('_')[len(var_name.split('_'))-1])
+                position = var_name.split('Ia_store_')[1]
                 # if it is not modified then keep the previous name
                 if position not in global_states:
                     continue
