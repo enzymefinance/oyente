@@ -12,5 +12,5 @@ solc --optimize --bin-runtime "$1" -o ./tmp;
 echo "Calling the counter..."
 echo '' >> ./tmp/"$2".bin-runtime;
 echo "Disambling the bytecode";
-cat ./tmp/"$2".bin-runtime | /Users/loi/Downloads/go-ethereum-1.4.10/build/bin/disasm > ./tmp/"$2".evm
+cat ./tmp/"$2".bin-runtime | disasm > ./tmp/"$2".evm
 python symExec.py ./tmp/"$2".evm
