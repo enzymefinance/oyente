@@ -29,13 +29,13 @@ def load_json(filename):
             # with open(temp_file+contract+".evm", 'r') as disasm:
 
             disasm_str = open(temp_file+contract+".evm").read()
-            if not re.search(filter_rexp, disasm_str):
+            if re.search(filter_rexp, disasm_str):
                 # print "Possible Recursive bug. Investigating..."
                 os.system('python symExec.py '+temp_file+contract+'.evm')
 
     os.system('rm tmp_*')
 
-with open('re_report_non_filtered.report', 'w') as f: f.write('') 
+with open('re_report.report', 'w') as f: f.write('') 
 
 for filen in glob.glob('contracts/contract_data/*.json'):
     load_json(filen)

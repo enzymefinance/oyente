@@ -11,7 +11,7 @@ from subprocess import Popen
 # FOR NEW TYPE OF ANALYSIS: add necessary details to the skeleton functions
 cur_file = ""
 reported = False
-reentrancy_report_file = "re_report_non_filtered.report"
+reentrancy_report_file = "re_report.report"
 
 def set_cur_file(c_file):
     global cur_file

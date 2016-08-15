@@ -19,15 +19,8 @@ def get_source_for_report(rname, prefix):
     lines = open(rname).read().split('\n')
     for line in tqdm(lines):
         if len(line) > 0:
-            # # Save into JSON
-            # reentrancy_json.append(line[:42])
-
-            # # Find unique number
-            # if line[:42] not in contract_json:
-            #     print "Contract "+line[:42]+" not found in the json."
-            #     continue
-            # if contract_json[line[:42]][0] not in code:
-            #     code.append(contract_json[line[:42]][0])
+            # Save into JSON
+            reentrancy_json.append(line[:42])
 
             # Get and save source code
             name, source = get_source.get_contract_code(line[:42])
@@ -40,9 +33,9 @@ def get_source_for_report(rname, prefix):
             sfile.write(source[0])
             sfile.flush()
             sfile.close()
-    # with open('stats_builder/re_stats.json', 'w') as refile:
-    #     refile.write(json.dumps(reentrancy_json, indent = 1))
+    with open('stats_builder/re_stats.json', 'w') as refile:
+        refile.write(json.dumps(reentrancy_json, indent = 1))
 
-
+# 
 get_source_for_report('re_report.report', 'filtered/')
 # get_source_for_report('re_report_non_filtered.report', 'unfiltered/')

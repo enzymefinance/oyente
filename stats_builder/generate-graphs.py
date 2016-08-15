@@ -426,6 +426,8 @@ def get_all():
     print "Original Counts - "
     print "CallStack - %d, Transaction Race - %d, Timestamp Dependence - %d, Reentrancy - %d" % (len(new_cstack), len(new_t_race), len(new_ts_depend), len(new_reentrancy))
 
+    return all_problematic
+
     # return cmains_sorted
 
 # cmains = get_all()
@@ -495,6 +497,7 @@ def get_source_stats():
 
 # get_source_stats()
 
+get_all()
 
 # get_tsdepend_timestamp()
 
