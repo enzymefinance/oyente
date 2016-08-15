@@ -1,10 +1,25 @@
-contract foo{	
-	function foo() {
-		 return bar(256);
-	}
+contract TestContract {
+    mapping (address => uint) userBalances;
+    bool withdrawn = false;
 
-	function bar(int d) {
-		if (now >= now+1) 
-		    msg.sender.send(100);		  
-	}	
+    function getBalance(address user) constant returns(uint) {  
+      return userBalances[user];
+    }
+    
+    function addToBalance() {  
+      userBalances[msg.sender] += msg.value;
+    }
+    
+    function withdrawBalance() {  
+      uint amountToWithdraw = 5;
+
+      // if (!msg.sender.send(amountToWithdraw)) { throw; }
+
+      withdrawn = false;
+      
+      if (!(msg.sender.call.value(amountToWithdraw)())) { throw; }
+
+
+      // sample code
+    }
 }

@@ -11,7 +11,6 @@ import time
 from global_params import *
 import sys
 
-
 if REPORT_MODE:
     report_file = sys.argv[1] + '.report'
     rfile = open(report_file, 'w')
@@ -30,6 +29,11 @@ data_flow_all_paths = [[], []] # store all storage addresses
 path_conditions = [] # store the path condition corresponding to each path in money_flow_all_paths
 all_gs = [] # store global variables, e.g. storage, balance of all paths
 total_no_of_paths = 0
+
+c_name = sys.argv[1]
+if(len(c_name) > 5):
+    c_name = c_name[4:]
+set_cur_file(c_name)
 
 # Z3 solver
 solver = Solver()
@@ -77,6 +81,8 @@ def main():
         build_cfg_and_analyze()
         print "Done Symbolic execution"
     except Exception as e:
+        raise
+        print "Exception - "+str(e)
         print "Time out"
         # print "Running time " + str(time.time()-start)
     signal.alarm(0)
@@ -93,8 +99,12 @@ def main():
         detect_data_concurrency()
         detect_data_money_concurrency()
     print "reentrancy_bug " + str(reentrancy_all_paths)
-
-
+    reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
+    # if reentrancy_bug_found:
+        # print "logging re bug"
+        # with open(reentrancy_report_file, 'a') as r_report:
+        #     r_report.write('\n'+analysis.cur_file)
+            
     # print_cfg()
 
 
@@ -409,6 +419,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         global total_no_of_paths
         total_no_of_paths += 1
         # global_pc.append(path_conditions_and_vars["path_condition"])
+        print "analysis[reentrancy_bug] = " + str(analysis["reentrancy_bug"])
         reentrancy_all_paths.append(analysis["reentrancy_bug"])
         if analysis["money_flow"] not in money_flow_all_paths:
             money_flow_all_paths.append(analysis["money_flow"])
@@ -466,6 +477,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
                 sym_exec_block(left_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
         except Exception as e:
             log_file.write(str(e))
+            print "Exception - "+str(e)
             if str(e) == "timeout":
                 raise e
 

@@ -2,6 +2,11 @@
 
 ## Ethereum OpCode Parser
 
+### What the files do
+
+1. ```autobench.py``` - Runs instruction benchmarks on a json file.
+2. ```check_recbug.py``` - Runs recursive splitting bug checks on json file (possibly expand this to include all SE-evaluations)
+
 ### Dependencies
 
 1. Install [go-ethereum](https://github.com/ethereum/go-ethereum)

@@ -8,7 +8,7 @@ then
 	exit 1
 fi
 echo "Compiling (using the --bin-runtime flag)..."
-solc --optimize --bin-runtime "$1" -o ./tmp;
+solc --optimize --bin-runtime "$1" -o ./tmp
 echo "Calling the counter..."
 echo '' >> ./tmp/"$2".bin-runtime;
 echo "Disambling the bytecode";

@@ -5,10 +5,17 @@ from z3util import *
 from vargenerator import *
 from utils import *
 from global_params import *
+from subprocess import Popen
 
 # THIS IS TO DEFINE A SKELETON FOR ANALYSIS
 # FOR NEW TYPE OF ANALYSIS: add necessary details to the skeleton functions
+cur_file = ""
+reported = False
+reentrancy_report_file = "re_report_non_filtered.report"
 
+def set_cur_file(c_file):
+    global cur_file
+    cur_file = c_file
 
 def init_analysis():
     analysis = {
@@ -53,6 +60,12 @@ def check_reentrancy_bug(path_conditions_and_vars, global_state):
     ret_val = not (solver.check() == unsat)
     solver.pop()
     print "Reentrancy_bug? " + str(ret_val) + "\n"
+    global reported
+    if not reported:
+        # print "Writing %s to %s" % (cur_file, reentrancy_report_file)
+        with open(reentrancy_report_file, 'a') as r_report:
+            r_report.write('\n'+cur_file)
+        reported = True
     return ret_val
     
 def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_and_vars):
@@ -82,8 +95,9 @@ def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_
         print "\nCALL params\n"
         print str(recipient) + "\n"
         print str(transfer_amount) + "\n"
-
-        analysis["reentrancy_bug"].append(check_reentrancy_bug(path_conditions_and_vars, global_state))
+        reentrancy_result = check_reentrancy_bug(path_conditions_and_vars, global_state)
+        analysis["reentrancy_bug"].append(reentrancy_result)
+        print "Added "+str(reentrancy_result)
         if isinstance(transfer_amount, (int, long)) and transfer_amount == 0:
             return
         if not isinstance(recipient, (int, long)):
