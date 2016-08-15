@@ -319,6 +319,7 @@ def construct_bb():
     for key in end_ins_dict:
         end_address = end_ins_dict[key]
         block = BasicBlock(key, end_address)
+        if key not in instructions: continue
         block.add_instruction(instructions[key])
         i = sorted_addresses.index(key) + 1
         while i < size and sorted_addresses[i] <= end_address:
@@ -478,8 +479,9 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         except Exception as e:
             log_file.write(str(e))
             print "Exception - "+str(e)
-            if str(e) == "timeout":
-                raise e
+            if not IGNORE_EXCEPTIONS:
+                if str(e) == "timeout":
+                    raise e
 
         solver.pop()  # POP SOLVER CONTEXT
 

@@ -109,3 +109,5 @@
 0x5769fbb8395fe0b221efea0475df56808c5ca7e9.evm
 0x80622cc6c5c8dc4fa96c9b4994278695da71af69.evm
 p/TokenWithInvariants.evm
+p/ManagedAccount.evm
+p/TokenCreation.evm

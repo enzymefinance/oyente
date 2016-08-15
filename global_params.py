@@ -1,3 +1,6 @@
+# enable exceptions instead of ignoring them
+IGNORE_EXCEPTIONS = 0
+
 # enable reporting of the result
 REPORT_MODE = 0
 
