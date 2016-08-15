@@ -4,8 +4,4 @@ tests/*
 .DS_Store
 .idea/
 stats/*
-<<<<<<< Updated upstream
-*.json
-=======
 stats-builder/transactions.json
->>>>>>> Stashed changes
