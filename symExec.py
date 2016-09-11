@@ -89,9 +89,17 @@ def main():
     start = time.time()
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(GLOBAL_TIMEOUT)
+
+    print "Running, please wait..."
+
+    if PRINT_MODE:
+        print "Checking for Callstack attack..."
+    run_callstack_attack()
+
     try:
         build_cfg_and_analyze()
-        print "Done Symbolic execution"
+        if PRINT_MODE:
+            print "Done Symbolic execution"
     except Exception as e:
         raise
         print "Exception - "+str(e)
@@ -110,7 +118,8 @@ def main():
     if DATA_FLOW:
         detect_data_concurrency()
         detect_data_money_concurrency()
-    print "Results for Reentrancy Bug: " + str(reentrancy_all_paths)
+    if PRINT_MODE:
+        print "Results for Reentrancy Bug: " + str(reentrancy_all_paths)
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
     print "Reentrancy bug exists: %s" % str(reentrancy_bug_found)
     # if reentrancy_bug_found:
@@ -189,7 +198,11 @@ def detect_money_concurrency():
                     false_positive.append([i-1, j])
 
     # if PRINT_MODE: print "All false positive cases: ", false_positive
-    # if PRINT_MODE: print "Concurrency in paths: ", concurrency_paths
+    if PRINT_MODE: print "Concurrency in paths: ", concurrency_paths
+    if len(concurrency_paths) > 0:
+        print "Concurrency found in paths: %s" + str(concurrency_paths)
+    else:
+        print "Concurrency Bug: False"
     if REPORT_MODE:
         rfile.write("number of path: " + str(n) + "\n")
         # number of FP detected
@@ -1411,6 +1424,30 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         raise Exception('UNKNOWN INSTRUCTION' + instr_parts[0])
 
     print_state(start, stack, mem, global_state)
+
+def check_callstack_attack(disasm):
+    problematic_instructions = ['CALL', 'CALLCODE']
+    for i in xrange(0, len(disasm)):
+        instruction = disasm[i]
+        if instruction[1] in problematic_instructions:
+            error = True
+            for j in xrange(i+1, len(disasm)):
+                if disasm[j][1] in problematic_instructions:
+                    break
+                if disasm[j][1] == 'ISZERO':
+                    error = False
+                    break
+            if error == True: return True                
+    return False
+
+def run_callstack_attack():
+    disasm_data = open(sys.argv[1]).read()
+    instr_pattern = r"([\d]+) +([A-Z]+)([\d]?){1}(?: +(?:=> )?(\d+)?)?"
+    instructions = re.findall(instr_pattern, disasm_data)
+
+    result = check_callstack_attack(instructions)
+
+    print "CallStack Attack: %s" % result
 
 
 def print_state(block_address, stack, mem, global_state):
