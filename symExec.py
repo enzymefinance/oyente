@@ -98,8 +98,9 @@ def main():
     if DATA_FLOW:
         detect_data_concurrency()
         detect_data_money_concurrency()
-    print "reentrancy_bug " + str(reentrancy_all_paths)
+    print "Results for Reentrancy Bug: " + str(reentrancy_all_paths)
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
+    print "Reentrancy bug exists: %s" % str(reentrancy_bug_found)
     # if reentrancy_bug_found:
         # print "logging re bug"
         # with open(reentrancy_report_file, 'a') as r_report:
@@ -124,10 +125,12 @@ def detect_time_dependency():
     TIMESTAMP_VAR = "IH_s"
     is_dependant = False
     index = 0
-    print "ALL PATH CONDITIONS"
+    if PRINT_PATHS:
+        print "ALL PATH CONDITIONS"
     for cond in path_conditions:
         index += 1
-        print "PATH " + str(index) + ": " + str(cond)
+        if PRINT_PATHS:
+            print "PATH " + str(index) + ": " + str(cond)
         list_vars = []
         for expr in cond:
             if is_expr(expr):
@@ -137,14 +140,16 @@ def detect_time_dependency():
             is_dependant = True
             break
 
-    # file_name = sys.argv[1].split("/")[len(sys.argv[1].split("/"))-1].split(".")[0]
-    # report_file = "time/" + file_name + '.txt'
-    # with open(report_file, 'w') as rfile:
+    print "Time Dependency: %s" % is_dependant
+
     if REPORT_MODE:
-        if is_dependant:
-            rfile.write("yes\n")
-        else:
-            rfile.write("no\n")
+        file_name = sys.argv[1].split("/")[len(sys.argv[1].split("/"))-1].split(".")[0]
+        report_file = file_name + '.report'
+        with open(report_file, 'w') as rfile:
+            if is_dependant:
+                rfile.write("yes\n")
+            else:
+                rfile.write("no\n")
 
 
 # detect if two paths send money to different people
@@ -420,7 +425,6 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         global total_no_of_paths
         total_no_of_paths += 1
         # global_pc.append(path_conditions_and_vars["path_condition"])
-        print "analysis[reentrancy_bug] = " + str(analysis["reentrancy_bug"])
         reentrancy_all_paths.append(analysis["reentrancy_bug"])
         if analysis["money_flow"] not in money_flow_all_paths:
             money_flow_all_paths.append(analysis["money_flow"])
