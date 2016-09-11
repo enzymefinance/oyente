@@ -11,6 +11,18 @@ import time
 from global_params import *
 import sys
 
+if len(sys.argv) >= 12:
+    IGNORE_EXCEPTIONS = int(sys.argv[2])
+    REPORT_MODE = int(sys.argv[3])
+    PRINT_MODE = int(sys.argv[4])
+    DATA_FLOW = int(sys.argv[5])
+    DEBUG_MODE = int(sys.argv[6])
+    CHECK_CONCURRENCY_FP = int(sys.argv[7])
+    TIMEOUT = int(sys.argv[8])
+    UNIT_TEST = int(sys.argv[9])
+    GLOBAL_TIMEOUT = int(sys.argv[10])
+    PRINT_PATHS = int(sys.argv[11])
+
 if REPORT_MODE:
     report_file = sys.argv[1] + '.report'
     rfile = open(report_file, 'w')
@@ -43,7 +55,7 @@ CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 
 if UNIT_TEST == 1:
     try:
-        result_file = open(sys.argv[2], 'r')
+        result_file = open(sys.argv[12], 'r')
     except:
         if PRINT_MODE: print "Could not open result file for unit test"
         exit()

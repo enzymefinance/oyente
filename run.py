@@ -79,9 +79,9 @@ def main():
 	with open(args.source+'.evm', 'w') as of:
 		of.write(disasm_out)
 
-	# TODO: Do this as an import and run, instead of a shell call
+	# TODO: Do this as an import and run, instead of shell call and hacky fix
 
-	os.system('python symExec.py %s.evm' % (args.source))
+	os.system('python symExec.py %s.evm %d %d %d %d %d %d %d %d %d %d' % (args.source, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS))
 
 	if not args.evm:
 		os.system('rm %s.evm' % (args.source))
