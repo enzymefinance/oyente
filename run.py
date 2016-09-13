@@ -18,8 +18,11 @@ def cmd_exists(cmd):
         stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
 
 def main():
+	# TODO: Implement -o switch.
+
 	parser = argparse.ArgumentParser()
 	parser.add_argument("source", type=str, help="Solidity file name.")
+	parser.add_argument("-o", "--output", help="Redirect results to a json file.")
 	parser.add_argument("-e", "--evm", help="Do not remove the .evm file.", action="store_true")
 	parser.add_argument("-p", "--paths", help="Print path condition information.", action="store_true")
 	parser.add_argument("--error", help="Enable exceptions and print output. Monsters here.", action="store_true")

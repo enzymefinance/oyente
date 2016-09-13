@@ -127,12 +127,6 @@ def main():
         print "Results for Reentrancy Bug: " + str(reentrancy_all_paths)
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
     print "\t  Reentrancy bug exists: %s" % str(reentrancy_bug_found)
-    # if reentrancy_bug_found:
-        # print "logging re bug"
-        # with open(reentrancy_report_file, 'a') as r_report:
-        #     r_report.write('\n'+analysis.cur_file)
-            
-    # print_cfg()
 
 def closing_message():
     print "\t====== Analysis Completed ======"
