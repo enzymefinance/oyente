@@ -32,8 +32,6 @@ def init_analysis():
 # Money flow: (source, destination, amount)
 
 def display_analysis(analysis):
-    # if PRINT_MODE: print "Gas paid for execution: %d" % analysis["gas"]
-    # if PRINT_MODE: print "Gas paid for memory usage: %d" % analysis["gas_mem"]
     if PRINT_MODE: print "Money flow: " + str(analysis["money_flow"])
 
 # Check if this call has the Reentrancy bug
@@ -177,23 +175,14 @@ def is_false_positive(i, j, all_gs, path_conditions):
     pathi = path_conditions[i]
     pathj = path_conditions[j]
     statei = all_gs[i]
-    # statej = all_gs[j]
-    # if PRINT_MODE: print "Path condition " + str(i) + ": " + str(pathi)
-    # if PRINT_MODE: print "Path condition " + str(j) + ": " + str(pathj)
-    # if PRINT_MODE: print "Global state values in path " + str(i) + ": " + str(statei)
-    # if PRINT_MODE: print "Global state values in path " + str(j) + ": " + str(statej)
-
-
-    # if PRINT_MODE: print "Set of PCs having only global vars" + str(set_of_pcs)
+    
     # rename global variables in path i
     set_of_pcs, statei = rename_vars(pathi, statei)
     if PRINT_MODE: print "Set of PCs after renaming global vars" + str(set_of_pcs)
     if PRINT_MODE: print "Global state values in path " + str(i) + " after renaming: " + str(statei)
     if is_feasible(set_of_pcs, statei, pathj):
-        # if PRINT_MODE: print "Its possible to execute path ", i, " after path ", j
         return 0
     else:
-        # if PRINT_MODE: print "Its not possible to execute path ", i, " after path ", j
         return 1
 
 
