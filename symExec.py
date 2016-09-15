@@ -11,6 +11,18 @@ import time
 from global_params import *
 import sys
 
+if len(sys.argv) >= 12:
+    IGNORE_EXCEPTIONS = int(sys.argv[2])
+    REPORT_MODE = int(sys.argv[3])
+    PRINT_MODE = int(sys.argv[4])
+    DATA_FLOW = int(sys.argv[5])
+    DEBUG_MODE = int(sys.argv[6])
+    CHECK_CONCURRENCY_FP = int(sys.argv[7])
+    TIMEOUT = int(sys.argv[8])
+    UNIT_TEST = int(sys.argv[9])
+    GLOBAL_TIMEOUT = int(sys.argv[10])
+    PRINT_PATHS = int(sys.argv[11])
+
 if REPORT_MODE:
     report_file = sys.argv[1] + '.report'
     rfile = open(report_file, 'w')
@@ -43,7 +55,7 @@ CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 
 if UNIT_TEST == 1:
     try:
-        result_file = open(sys.argv[2], 'r')
+        result_file = open(sys.argv[12], 'r')
     except:
         if PRINT_MODE: print "Could not open result file for unit test"
         exit()
@@ -77,9 +89,17 @@ def main():
     start = time.time()
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(GLOBAL_TIMEOUT)
+
+    print "Running, please wait..."
+
+    if PRINT_MODE:
+        print "Checking for Callstack attack..."
+    run_callstack_attack()
+
     try:
         build_cfg_and_analyze()
-        print "Done Symbolic execution"
+        if PRINT_MODE:
+            print "Done Symbolic execution"
     except Exception as e:
         raise
         print "Exception - "+str(e)
@@ -98,8 +118,10 @@ def main():
     if DATA_FLOW:
         detect_data_concurrency()
         detect_data_money_concurrency()
-    print "reentrancy_bug " + str(reentrancy_all_paths)
+    if PRINT_MODE:
+        print "Results for Reentrancy Bug: " + str(reentrancy_all_paths)
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
+    print "Reentrancy bug exists: %s" % str(reentrancy_bug_found)
     # if reentrancy_bug_found:
         # print "logging re bug"
         # with open(reentrancy_report_file, 'a') as r_report:
@@ -124,10 +146,12 @@ def detect_time_dependency():
     TIMESTAMP_VAR = "IH_s"
     is_dependant = False
     index = 0
-    print "ALL PATH CONDITIONS"
+    if PRINT_PATHS:
+        print "ALL PATH CONDITIONS"
     for cond in path_conditions:
         index += 1
-        print "PATH " + str(index) + ": " + str(cond)
+        if PRINT_PATHS:
+            print "PATH " + str(index) + ": " + str(cond)
         list_vars = []
         for expr in cond:
             if is_expr(expr):
@@ -137,14 +161,16 @@ def detect_time_dependency():
             is_dependant = True
             break
 
-    # file_name = sys.argv[1].split("/")[len(sys.argv[1].split("/"))-1].split(".")[0]
-    # report_file = "time/" + file_name + '.txt'
-    # with open(report_file, 'w') as rfile:
+    print "Time Dependency: %s" % is_dependant
+
     if REPORT_MODE:
-        if is_dependant:
-            rfile.write("yes\n")
-        else:
-            rfile.write("no\n")
+        file_name = sys.argv[1].split("/")[len(sys.argv[1].split("/"))-1].split(".")[0]
+        report_file = file_name + '.report'
+        with open(report_file, 'w') as rfile:
+            if is_dependant:
+                rfile.write("yes\n")
+            else:
+                rfile.write("no\n")
 
 
 # detect if two paths send money to different people
@@ -172,7 +198,11 @@ def detect_money_concurrency():
                     false_positive.append([i-1, j])
 
     # if PRINT_MODE: print "All false positive cases: ", false_positive
-    # if PRINT_MODE: print "Concurrency in paths: ", concurrency_paths
+    if PRINT_MODE: print "Concurrency in paths: ", concurrency_paths
+    if len(concurrency_paths) > 0:
+        print "Concurrency found in paths: %s" + str(concurrency_paths)
+    else:
+        print "Concurrency Bug: False"
     if REPORT_MODE:
         rfile.write("number of path: " + str(n) + "\n")
         # number of FP detected
@@ -420,7 +450,6 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         global total_no_of_paths
         total_no_of_paths += 1
         # global_pc.append(path_conditions_and_vars["path_condition"])
-        print "analysis[reentrancy_bug] = " + str(analysis["reentrancy_bug"])
         reentrancy_all_paths.append(analysis["reentrancy_bug"])
         if analysis["money_flow"] not in money_flow_all_paths:
             money_flow_all_paths.append(analysis["money_flow"])
@@ -1395,6 +1424,30 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         raise Exception('UNKNOWN INSTRUCTION' + instr_parts[0])
 
     print_state(start, stack, mem, global_state)
+
+def check_callstack_attack(disasm):
+    problematic_instructions = ['CALL', 'CALLCODE']
+    for i in xrange(0, len(disasm)):
+        instruction = disasm[i]
+        if instruction[1] in problematic_instructions:
+            error = True
+            for j in xrange(i+1, len(disasm)):
+                if disasm[j][1] in problematic_instructions:
+                    break
+                if disasm[j][1] == 'ISZERO':
+                    error = False
+                    break
+            if error == True: return True                
+    return False
+
+def run_callstack_attack():
+    disasm_data = open(sys.argv[1]).read()
+    instr_pattern = r"([\d]+) +([A-Z]+)([\d]?){1}(?: +(?:=> )?(\d+)?)?"
+    instructions = re.findall(instr_pattern, disasm_data)
+
+    result = check_callstack_attack(instructions)
+
+    print "CallStack Attack: %s" % result
 
 
 def print_state(block_address, stack, mem, global_state):
