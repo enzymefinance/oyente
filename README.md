@@ -9,9 +9,9 @@
 
 ## Evaluating Ethereum Contracts
 
-```python run.py <contract filename>```
+```python oyente.py <contract filename>```
 
-And that's it! Run ```python run.py --help``` for a list of options.
+And that's it! Run ```python oyente.py --help``` for a list of options.
 
 ## Paper
 
