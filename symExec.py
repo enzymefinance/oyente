@@ -12,6 +12,8 @@ from global_params import *
 import sys
 import atexit
 
+results = {}
+
 
 if len(sys.argv) >= 12:
     IGNORE_EXCEPTIONS = int(sys.argv[2])
@@ -57,7 +59,7 @@ CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 
 if UNIT_TEST == 1:
     try:
-        result_file = open(sys.argv[12], 'r')
+        result_file = open(sys.argv[13], 'r')
     except:
         if PRINT_MODE: print "Could not open result file for unit test"
         exit()
@@ -127,9 +129,14 @@ def main():
         print "Results for Reentrancy Bug: " + str(reentrancy_all_paths)
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
     print "\t  Reentrancy bug exists: %s" % str(reentrancy_bug_found)
+    results['reentrancy'] = reentrancy_bug_found
 
 def closing_message():
     print "\t====== Analysis Completed ======"
+    if len(sys.argv) > 12:
+        with open(sys.argv[12], 'w') as of:
+            of.write(json.dumps(results,indent=1))
+        print "Wrote results to %s." % sys.argv[12]
 
 atexit.register(closing_message)
 
@@ -165,6 +172,7 @@ def detect_time_dependency():
             break
 
     print "\t  Time Dependency: \t %s" % is_dependant
+    results['time_dependency'] = is_dependant
 
     if REPORT_MODE:
         file_name = sys.argv[1].split("/")[len(sys.argv[1].split("/"))-1].split(".")[0]
@@ -204,8 +212,10 @@ def detect_money_concurrency():
     if PRINT_MODE: print "Concurrency in paths: ", concurrency_paths
     if len(concurrency_paths) > 0:
         print "\t  Concurrency found in paths: %s" + str(concurrency_paths)
+        results['concurrency'] = True
     else:
         print "\t  Concurrency Bug: \t False"
+        results['concurrency'] = False
     if REPORT_MODE:
         rfile.write("number of path: " + str(n) + "\n")
         # number of FP detected
@@ -1451,6 +1461,7 @@ def run_callstack_attack():
     result = check_callstack_attack(instructions)
 
     print "\t  CallStack Attack: \t %s" % result
+    results['callstack'] = result
 
 
 def print_state(block_address, stack, mem, global_state):
