@@ -1402,5 +1402,5 @@ def print_state(block_address, stack, mem, global_state):
     if PRINT_MODE: print "MEM: " + str(mem)
     if PRINT_MODE: print "GLOBAL STATE: " + str(global_state)
 
-
-main()
+if __name__ == '__main__':
+    main()
