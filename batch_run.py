@@ -27,3 +27,13 @@ for c in tqdm(cjson):
 		results[c] = json.loads(open('tmp.evm.json').read())
 	except:
 		missed.append(c)
+
+print "Writing results..."
+
+with open('results.json', 'w') as of:
+	of.write(json.dumps(results,indent=1))
+
+with open('missed.json', 'w') as of:
+	of.write(json.dumps(missed,indent=1))
+
+print "Completed."
