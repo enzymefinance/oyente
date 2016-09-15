@@ -10,6 +10,8 @@ from math import *
 import time
 from global_params import *
 import sys
+import atexit
+
 
 if len(sys.argv) >= 12:
     IGNORE_EXCEPTIONS = int(sys.argv[2])
@@ -92,6 +94,9 @@ def main():
 
     print "Running, please wait..."
 
+
+    print "\t============ Results ==========="
+
     if PRINT_MODE:
         print "Checking for Callstack attack..."
     run_callstack_attack()
@@ -121,14 +126,12 @@ def main():
     if PRINT_MODE:
         print "Results for Reentrancy Bug: " + str(reentrancy_all_paths)
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
-    print "Reentrancy bug exists: %s" % str(reentrancy_bug_found)
-    # if reentrancy_bug_found:
-        # print "logging re bug"
-        # with open(reentrancy_report_file, 'a') as r_report:
-        #     r_report.write('\n'+analysis.cur_file)
-            
-    # print_cfg()
+    print "\t  Reentrancy bug exists: %s" % str(reentrancy_bug_found)
 
+def closing_message():
+    print "\t====== Analysis Completed ======"
+
+atexit.register(closing_message)
 
 
 def build_cfg_and_analyze():
@@ -161,7 +164,7 @@ def detect_time_dependency():
             is_dependant = True
             break
 
-    print "Time Dependency: %s" % is_dependant
+    print "\t  Time Dependency: \t %s" % is_dependant
 
     if REPORT_MODE:
         file_name = sys.argv[1].split("/")[len(sys.argv[1].split("/"))-1].split(".")[0]
@@ -200,9 +203,9 @@ def detect_money_concurrency():
     # if PRINT_MODE: print "All false positive cases: ", false_positive
     if PRINT_MODE: print "Concurrency in paths: ", concurrency_paths
     if len(concurrency_paths) > 0:
-        print "Concurrency found in paths: %s" + str(concurrency_paths)
+        print "\t  Concurrency found in paths: %s" + str(concurrency_paths)
     else:
-        print "Concurrency Bug: False"
+        print "\t  Concurrency Bug: \t False"
     if REPORT_MODE:
         rfile.write("number of path: " + str(n) + "\n")
         # number of FP detected
@@ -1447,7 +1450,7 @@ def run_callstack_attack():
 
     result = check_callstack_attack(instructions)
 
-    print "CallStack Attack: %s" % result
+    print "\t  CallStack Attack: \t %s" % result
 
 
 def print_state(block_address, stack, mem, global_state):

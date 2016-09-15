@@ -18,8 +18,11 @@ def cmd_exists(cmd):
         stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
 
 def main():
+	# TODO: Implement -o switch.
+
 	parser = argparse.ArgumentParser()
 	parser.add_argument("source", type=str, help="Solidity file name.")
+	parser.add_argument("-o", "--output", help="Redirect results to a json file.")
 	parser.add_argument("-e", "--evm", help="Do not remove the .evm file.", action="store_true")
 	parser.add_argument("-p", "--paths", help="Print path condition information.", action="store_true")
 	parser.add_argument("--error", help="Enable exceptions and print output. Monsters here.", action="store_true")
@@ -57,34 +60,30 @@ def main():
 	solc_p = subprocess.Popen(shlex.split(solc_cmd % args.source), stdout = subprocess.PIPE, stderr=FNULL)
 	solc_out = solc_p.communicate()
 
-	bin_str = ""
-	try:
-		bin_str = re.search(r"part: \n(.*?)\n", solc_out[0]).groups()[0]
-	except:
-		print("Compilation failed. Please fix any errors in the source code and ensure that compiling with your global solc produces a valid binary.")
-		return
 
-	bin_str += "\0"
+	for (cname, bin_str) in re.findall(r"\n======= (.*?) =======\nBinary of the runtime part: \n(.*?)\n", solc_out[0]):
+		print "Contract %s:" % cname
+		bin_str += "\0"
 
-	disasm_out = ""
-	try:
-		disasm_p = subprocess.Popen(shlex.split('disasm'), stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-		disasm_out = disasm_p.communicate(input=bin_str)[0]
+		disasm_out = ""
+		try:
+			disasm_p = subprocess.Popen(shlex.split('disasm'), stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+			disasm_out = disasm_p.communicate(input=bin_str)[0]
 
-	except:
-		print "Disassembly failed."
+		except:
+			print "Disassembly failed."
 
-	# Run symExec
+		# Run symExec
 
-	with open(args.source+'.evm', 'w') as of:
-		of.write(disasm_out)
+		with open(cname+'.evm', 'w') as of:
+			of.write(disasm_out)
 
-	# TODO: Do this as an import and run, instead of shell call and hacky fix
+		# TODO: Do this as an import and run, instead of shell call and hacky fix
 
-	os.system('python symExec.py %s.evm %d %d %d %d %d %d %d %d %d %d' % (args.source, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS))
+		os.system('python symExec.py %s.evm %d %d %d %d %d %d %d %d %d %d' % (cname, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS))
 
-	if not args.evm:
-		os.system('rm %s.evm' % (args.source))
+		if not args.evm:
+			os.system('rm %s.evm' % (cname))
 
 
 if __name__ == '__main__':
