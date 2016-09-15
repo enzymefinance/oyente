@@ -1,2395 +1,0 @@
-
-======= Honestgamble =======
-EVM assembly:
-.code:
-  PUSH 60		contract Honestgamble {...
-  PUSH 40		contract Honestgamble {...
-  MSTORE			contract Honestgamble {...
-  PUSH 8AC7230489E80000		10 ether
-  PUSH 0		uint private deposit = 10 ether
-  PUSH 0		uint private deposit = 10 ether
-  POP			uint private deposit = 10 ether
-  SSTORE			uint private deposit = 10 ether
-  PUSH A		10
-  PUSH 1		uint private feeFrac = 10
-  PUSH 0		uint private feeFrac = 10
-  POP			uint private feeFrac = 10
-  SSTORE			uint private feeFrac = 10
-  PUSH 82		130
-  PUSH 2		uint private first_prize = 130
-  PUSH 0		uint private first_prize = 130
-  POP			uint private first_prize = 130
-  SSTORE			uint private first_prize = 130
-  PUSH 6E		110
-  PUSH 3		uint private second_prize = 110
-  PUSH 0		uint private second_prize = 110
-  POP			uint private second_prize = 110
-  SSTORE			uint private second_prize = 110
-  PUSH 3C		60
-  PUSH 4		uint private third_prize = 60
-  PUSH 0		uint private third_prize = 60
-  POP			uint private third_prize = 60
-  SSTORE			uint private third_prize = 60
-  PUSH 0		0
-  PUSH 5		uint private Balance = 0
-  PUSH 0		uint private Balance = 0
-  POP			uint private Balance = 0
-  SSTORE			uint private Balance = 0
-  PUSH 0		0
-  PUSH 6		uint private fees = 0
-  PUSH 0		uint private fees = 0
-  POP			uint private fees = 0
-  SSTORE			uint private fees = 0
-  PUSH 0		0
-  PUSH 7		uint private Payout_id = 0
-  PUSH 0		uint private Payout_id = 0
-  POP			uint private Payout_id = 0
-  SSTORE			uint private Payout_id = 0
-  PUSH 0		0
-  PUSH 8		uint private number_of_players = 0
-  PUSH 0		uint private number_of_players = 0
-  POP			uint private number_of_players = 0
-  SSTORE			uint private number_of_players = 0
-tag2: 
-  JUMPDEST		function Honestgamble() {...
-  CALLER			msg.sender
-  PUSH A		admin
-  PUSH 0		admin
-  PUSH 100		admin = msg.sender
-  EXP			admin = msg.sender
-  DUP2			admin = msg.sender
-  SLOAD			admin = msg.sender
-  DUP2			admin = msg.sender
-  PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		admin = msg.sender
-  MUL			admin = msg.sender
-  NOT			admin = msg.sender
-  AND			admin = msg.sender
-  SWAP1			admin = msg.sender
-  DUP4			admin = msg.sender
-  MUL			admin = msg.sender
-  OR			admin = msg.sender
-  SWAP1			admin = msg.sender
-  SSTORE			admin = msg.sender
-  POP			admin = msg.sender
-  TIMESTAMP			block.timestamp
-  PUSH 9		last_time
-  PUSH 0		last_time
-  POP			last_time = block.timestamp
-  DUP2			last_time = block.timestamp
-  SWAP1			last_time = block.timestamp
-  SSTORE			last_time = block.timestamp
-  POP			last_time = block.timestamp
-tag3: 
-  JUMPDEST		function Honestgamble() {...
-  PUSH #[$00000000…00000000]		contract Honestgamble {...
-  DUP1			contract Honestgamble {...
-  PUSH [$00000000…00000000]		contract Honestgamble {...
-  PUSH 0		contract Honestgamble {...
-  CODECOPY			contract Honestgamble {...
-  PUSH 0		contract Honestgamble {...
-  RETURN			contract Honestgamble {...
-.data:
-  0: 
-  .code:
-    PUSH 60		contract Honestgamble {...
-    PUSH 40		contract Honestgamble {...
-    MSTORE			contract Honestgamble {...
-    CALLDATASIZE			contract Honestgamble {...
-    ISZERO			contract Honestgamble {...
-    PUSH [tag2]		contract Honestgamble {...
-    JUMPI			contract Honestgamble {...
-    PUSH 0		contract Honestgamble {...
-    CALLDATALOAD			contract Honestgamble {...
-    PUSH 100000000000000000000000000000000000000000000000000000000		contract Honestgamble {...
-    SWAP1			contract Honestgamble {...
-    DIV			contract Honestgamble {...
-    DUP1			contract Honestgamble {...
-    PUSH 244DED7A		contract Honestgamble {...
-    EQ			contract Honestgamble {...
-    PUSH [tag3]		contract Honestgamble {...
-    JUMPI			contract Honestgamble {...
-    DUP1			contract Honestgamble {...
-    PUSH 3FB0B2C9		contract Honestgamble {...
-    EQ			contract Honestgamble {...
-    PUSH [tag4]		contract Honestgamble {...
-    JUMPI			contract Honestgamble {...
-    DUP1			contract Honestgamble {...
-    PUSH 4EF5710A		contract Honestgamble {...
-    EQ			contract Honestgamble {...
-    PUSH [tag5]		contract Honestgamble {...
-    JUMPI			contract Honestgamble {...
-    DUP1			contract Honestgamble {...
-    PUSH 5D5483B3		contract Honestgamble {...
-    EQ			contract Honestgamble {...
-    PUSH [tag6]		contract Honestgamble {...
-    JUMPI			contract Honestgamble {...
-    DUP1			contract Honestgamble {...
-    PUSH 61BA3377		contract Honestgamble {...
-    EQ			contract Honestgamble {...
-    PUSH [tag7]		contract Honestgamble {...
-    JUMPI			contract Honestgamble {...
-    DUP1			contract Honestgamble {...
-    PUSH 63AEA3E0		contract Honestgamble {...
-    EQ			contract Honestgamble {...
-    PUSH [tag8]		contract Honestgamble {...
-    JUMPI			contract Honestgamble {...
-    DUP1			contract Honestgamble {...
-    PUSH 7879E19E		contract Honestgamble {...
-    EQ			contract Honestgamble {...
-    PUSH [tag9]		contract Honestgamble {...
-    JUMPI			contract Honestgamble {...
-    DUP1			contract Honestgamble {...
-    PUSH AF8B7525		contract Honestgamble {...
-    EQ			contract Honestgamble {...
-    PUSH [tag10]		contract Honestgamble {...
-    JUMPI			contract Honestgamble {...
-    DUP1			contract Honestgamble {...
-    PUSH CF6B3822		contract Honestgamble {...
-    EQ			contract Honestgamble {...
-    PUSH [tag11]		contract Honestgamble {...
-    JUMPI			contract Honestgamble {...
-    DUP1			contract Honestgamble {...
-    PUSH D628E0A6		contract Honestgamble {...
-    EQ			contract Honestgamble {...
-    PUSH [tag12]		contract Honestgamble {...
-    JUMPI			contract Honestgamble {...
-    PUSH [tag2]		contract Honestgamble {...
-    JUMP			contract Honestgamble {...
-  tag2: 
-    JUMPDEST		contract Honestgamble {...
-    PUSH [tag13]		contract Honestgamble {...
-  tag14: 
-    JUMPDEST		function() {...
-    PUSH [tag16]		init()
-    PUSH [tag17]		init
-    JUMP	[in]		init()
-  tag16: 
-    JUMPDEST		init()
-  tag15: 
-    JUMPDEST		function() {...
-    JUMP	[out]		function() {...
-  tag13: 
-    JUMPDEST		contract Honestgamble {...
-    STOP			contract Honestgamble {...
-  tag3: 
-    JUMPDEST		function ChangeOwnership(address _owner) onlyowner {...
-    PUSH [tag18]		function ChangeOwnership(address _owner) onlyowner {...
-    PUSH 4		function ChangeOwnership(address _owner) onlyowner {...
-    DUP1			function ChangeOwnership(address _owner) onlyowner {...
-    DUP1			function ChangeOwnership(address _owner) onlyowner {...
-    CALLDATALOAD			function ChangeOwnership(address _owner) onlyowner {...
-    SWAP1			function ChangeOwnership(address _owner) onlyowner {...
-    PUSH 20		function ChangeOwnership(address _owner) onlyowner {...
-    ADD			function ChangeOwnership(address _owner) onlyowner {...
-    SWAP1			function ChangeOwnership(address _owner) onlyowner {...
-    SWAP2			function ChangeOwnership(address _owner) onlyowner {...
-    SWAP1			function ChangeOwnership(address _owner) onlyowner {...
-    POP			function ChangeOwnership(address _owner) onlyowner {...
-    POP			function ChangeOwnership(address _owner) onlyowner {...
-    PUSH [tag19]		function ChangeOwnership(address _owner) onlyowner {...
-    JUMP			function ChangeOwnership(address _owner) onlyowner {...
-  tag18: 
-    JUMPDEST		function ChangeOwnership(address _owner) onlyowner {...
-    STOP			function ChangeOwnership(address _owner) onlyowner {...
-  tag4: 
-    JUMPDEST		function CancelRoundAndRefundAll() { //refund every participants, anyone can call this !...
-    PUSH [tag20]		function CancelRoundAndRefundAll() { //refund every participants, anyone can call this !...
-    PUSH 4		function CancelRoundAndRefundAll() { //refund every participants, anyone can call this !...
-    DUP1			function CancelRoundAndRefundAll() { //refund every participants, anyone can call this !...
-    POP			function CancelRoundAndRefundAll() { //refund every participants, anyone can call this !...
-    POP			function CancelRoundAndRefundAll() { //refund every participants, anyone can call this !...
-    PUSH [tag21]		function CancelRoundAndRefundAll() { //refund every participants, anyone can call this !...
-    JUMP			function CancelRoundAndRefundAll() { //refund every participants, anyone can call this !...
-  tag20: 
-    JUMPDEST		function CancelRoundAndRefundAll() { //refund every participants, anyone can call this !...
-    STOP			function CancelRoundAndRefundAll() { //refund every participants, anyone can call this !...
-  tag5: 
-    JUMPDEST		function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    PUSH [tag22]		function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    PUSH 4		function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    DUP1			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    POP			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    POP			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    PUSH [tag23]		function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    JUMP			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-  tag22: 
-    JUMPDEST		function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    PUSH 40		function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    MLOAD			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    DUP1			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    DUP3			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    DUP2			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    MSTORE			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    PUSH 20		function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    ADD			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    SWAP2			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    POP			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    POP			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    PUSH 40		function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    MLOAD			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    DUP1			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    SWAP2			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    SUB			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    SWAP1			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    RETURN			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-  tag6: 
-    JUMPDEST		function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    PUSH [tag24]		function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    PUSH 4		function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    DUP1			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    POP			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    POP			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    PUSH [tag25]		function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    JUMP			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-  tag24: 
-    JUMPDEST		function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    PUSH 40		function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    MLOAD			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    DUP1			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    DUP3			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    DUP2			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    MSTORE			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    PUSH 20		function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    ADD			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    SWAP2			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    POP			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    POP			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    PUSH 40		function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    MLOAD			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    DUP1			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    SWAP2			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    SUB			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    SWAP1			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    RETURN			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-  tag7: 
-    JUMPDEST		function WatchLastTime() constant returns(uint LastTimestamp) {...
-    PUSH [tag26]		function WatchLastTime() constant returns(uint LastTimestamp) {...
-    PUSH 4		function WatchLastTime() constant returns(uint LastTimestamp) {...
-    DUP1			function WatchLastTime() constant returns(uint LastTimestamp) {...
-    POP			function WatchLastTime() constant returns(uint LastTimestamp) {...
-    POP			function WatchLastTime() constant returns(uint LastTimestamp) {...
-    PUSH [tag27]		function WatchLastTime() constant returns(uint LastTimestamp) {...
-    JUMP			function WatchLastTime() constant returns(uint LastTimestamp) {...
-  tag26: 
-    JUMPDEST		function WatchLastTime() constant returns(uint LastTimestamp) {...
-    PUSH 40		function WatchLastTime() constant returns(uint LastTimestamp) {...
-    MLOAD			function WatchLastTime() constant returns(uint LastTimestamp) {...
-    DUP1			function WatchLastTime() constant returns(uint LastTimestamp) {...
-    DUP3			function WatchLastTime() constant returns(uint LastTimestamp) {...
-    DUP2			function WatchLastTime() constant returns(uint LastTimestamp) {...
-    MSTORE			function WatchLastTime() constant returns(uint LastTimestamp) {...
-    PUSH 20		function WatchLastTime() constant returns(uint LastTimestamp) {...
-    ADD			function WatchLastTime() constant returns(uint LastTimestamp) {...
-    SWAP2			function WatchLastTime() constant returns(uint LastTimestamp) {...
-    POP			function WatchLastTime() constant returns(uint LastTimestamp) {...
-    POP			function WatchLastTime() constant returns(uint LastTimestamp) {...
-    PUSH 40		function WatchLastTime() constant returns(uint LastTimestamp) {...
-    MLOAD			function WatchLastTime() constant returns(uint LastTimestamp) {...
-    DUP1			function WatchLastTime() constant returns(uint LastTimestamp) {...
-    SWAP2			function WatchLastTime() constant returns(uint LastTimestamp) {...
-    SUB			function WatchLastTime() constant returns(uint LastTimestamp) {...
-    SWAP1			function WatchLastTime() constant returns(uint LastTimestamp) {...
-    RETURN			function WatchLastTime() constant returns(uint LastTimestamp) {...
-  tag8: 
-    JUMPDEST		function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    PUSH [tag28]		function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    PUSH 4		function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    DUP1			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    DUP1			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    CALLDATALOAD			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    SWAP1			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    PUSH 20		function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    ADD			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    SWAP1			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    SWAP2			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    SWAP1			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    POP			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    POP			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    PUSH [tag29]		function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    JUMP			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-  tag28: 
-    JUMPDEST		function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    PUSH 40		function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    MLOAD			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    DUP1			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    DUP5			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    AND			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    DUP2			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    MSTORE			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    PUSH 20		function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    ADD			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    DUP4			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    DUP2			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    MSTORE			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    PUSH 20		function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    ADD			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    DUP3			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    ISZERO			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    ISZERO			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    DUP2			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    MSTORE			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    PUSH 20		function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    ADD			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    SWAP4			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    POP			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    POP			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    POP			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    POP			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    PUSH 40		function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    MLOAD			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    DUP1			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    SWAP2			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    SUB			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    SWAP1			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    RETURN			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-  tag9: 
-    JUMPDEST		function CollectAllFees() onlyowner {...
-    PUSH [tag30]		function CollectAllFees() onlyowner {...
-    PUSH 4		function CollectAllFees() onlyowner {...
-    DUP1			function CollectAllFees() onlyowner {...
-    POP			function CollectAllFees() onlyowner {...
-    POP			function CollectAllFees() onlyowner {...
-    PUSH [tag31]		function CollectAllFees() onlyowner {...
-    JUMP			function CollectAllFees() onlyowner {...
-  tag30: 
-    JUMPDEST		function CollectAllFees() onlyowner {...
-    STOP			function CollectAllFees() onlyowner {...
-  tag10: 
-    JUMPDEST		function CollectAndReduceFees(uint p) onlyowner {...
-    PUSH [tag32]		function CollectAndReduceFees(uint p) onlyowner {...
-    PUSH 4		function CollectAndReduceFees(uint p) onlyowner {...
-    DUP1			function CollectAndReduceFees(uint p) onlyowner {...
-    DUP1			function CollectAndReduceFees(uint p) onlyowner {...
-    CALLDATALOAD			function CollectAndReduceFees(uint p) onlyowner {...
-    SWAP1			function CollectAndReduceFees(uint p) onlyowner {...
-    PUSH 20		function CollectAndReduceFees(uint p) onlyowner {...
-    ADD			function CollectAndReduceFees(uint p) onlyowner {...
-    SWAP1			function CollectAndReduceFees(uint p) onlyowner {...
-    SWAP2			function CollectAndReduceFees(uint p) onlyowner {...
-    SWAP1			function CollectAndReduceFees(uint p) onlyowner {...
-    POP			function CollectAndReduceFees(uint p) onlyowner {...
-    POP			function CollectAndReduceFees(uint p) onlyowner {...
-    PUSH [tag33]		function CollectAndReduceFees(uint p) onlyowner {...
-    JUMP			function CollectAndReduceFees(uint p) onlyowner {...
-  tag32: 
-    JUMPDEST		function CollectAndReduceFees(uint p) onlyowner {...
-    STOP			function CollectAndReduceFees(uint p) onlyowner {...
-  tag11: 
-    JUMPDEST		function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    PUSH [tag34]		function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    PUSH 4		function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    DUP1			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    POP			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    POP			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    PUSH [tag35]		function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    JUMP			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-  tag34: 
-    JUMPDEST		function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    PUSH 40		function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    MLOAD			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    DUP1			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    DUP3			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    DUP2			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    MSTORE			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    PUSH 20		function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    ADD			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    SWAP2			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    POP			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    POP			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    PUSH 40		function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    MLOAD			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    DUP1			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    SWAP2			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    SUB			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    SWAP1			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    RETURN			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-  tag12: 
-    JUMPDEST		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH [tag36]		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH 4		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP1			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    POP			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    POP			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH [tag37]		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    JUMP			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-  tag36: 
-    JUMPDEST		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH 40		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    MLOAD			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP1			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP4			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP2			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    MSTORE			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH 20		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    ADD			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP1			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH 20		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    ADD			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP3			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP2			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    SUB			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP3			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    MSTORE			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP4			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP2			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP2			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    MLOAD			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP2			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    MSTORE			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH 20		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    ADD			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    SWAP2			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    POP			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP1			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    MLOAD			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    SWAP1			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH 20		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    ADD			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    SWAP1			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP1			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP4			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP4			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP3			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    SWAP1			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH 0		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH 4		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH 20		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP5			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH 1F		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    ADD			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DIV			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH 3		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    MUL			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH F		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    ADD			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    CALL			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    POP			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    SWAP1			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    POP			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    SWAP1			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP2			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    ADD			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    SWAP1			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH 1F		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    AND			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP1			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    ISZERO			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH [tag38]		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    JUMPI			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP1			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP3			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    SUB			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP1			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    MLOAD			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH 1		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP4			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH 20		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    SUB			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH 100		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    EXP			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    SUB			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    NOT			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    AND			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP2			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    MSTORE			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH 20		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    ADD			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    SWAP2			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    POP			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-  tag38: 
-    JUMPDEST		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    POP			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    SWAP4			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    POP			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    POP			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    POP			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    POP			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH 40		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    MLOAD			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    DUP1			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    SWAP2			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    SUB			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    SWAP1			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    RETURN			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-  tag17: 
-    JUMPDEST		function init() private {...
-    PUSH 0		deposit
-    PUSH 0		deposit
-    POP			deposit
-    SLOAD			deposit
-    CALLVALUE			msg.value
-    LT			msg.value < deposit
-    ISZERO			if (msg.value < deposit) { ...
-    PUSH [tag40]		if (msg.value < deposit) { ...
-    JUMPI			if (msg.value < deposit) { ...
-    CALLER			msg.sender
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		msg.sender.send
-    AND			msg.sender.send
-    PUSH 0		msg.sender.send(msg.value)
-    CALLVALUE			msg.value
-    PUSH 40		msg.sender.send(msg.value)
-    MLOAD			msg.sender.send(msg.value)
-    DUP1			msg.sender.send(msg.value)
-    SWAP1			msg.sender.send(msg.value)
-    POP			msg.sender.send(msg.value)
-    PUSH 0		msg.sender.send(msg.value)
-    PUSH 40		msg.sender.send(msg.value)
-    MLOAD			msg.sender.send(msg.value)
-    DUP1			msg.sender.send(msg.value)
-    DUP4			msg.sender.send(msg.value)
-    SUB			msg.sender.send(msg.value)
-    DUP2			msg.sender.send(msg.value)
-    DUP6			msg.sender.send(msg.value)
-    DUP9			msg.sender.send(msg.value)
-    DUP9			msg.sender.send(msg.value)
-    CALL			msg.sender.send(msg.value)
-    SWAP4			msg.sender.send(msg.value)
-    POP			msg.sender.send(msg.value)
-    POP			msg.sender.send(msg.value)
-    POP			msg.sender.send(msg.value)
-    POP			msg.sender.send(msg.value)
-    POP			msg.sender.send(msg.value)
-    PUSH [tag39]		return;
-    JUMP			return;
-  tag40: 
-    JUMPDEST		if (msg.value < deposit) { ...
-    PUSH 0		deposit
-    PUSH 0		deposit
-    POP			deposit
-    SLOAD			deposit
-    CALLVALUE			msg.value
-    GT			msg.value > deposit
-    ISZERO			if(msg.value > deposit){...
-    PUSH [tag41]		if(msg.value > deposit){...
-    JUMPI			if(msg.value > deposit){...
-    CALLER			msg.sender
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		msg.sender.send
-    AND			msg.sender.send
-    PUSH 0		msg.sender.send(msg.value-deposit)
-    PUSH 0		deposit
-    PUSH 0		deposit
-    POP			deposit
-    SLOAD			deposit
-    CALLVALUE			msg.value
-    SUB			msg.value-deposit
-    PUSH 40		msg.sender.send(msg.value-deposit)
-    MLOAD			msg.sender.send(msg.value-deposit)
-    DUP1			msg.sender.send(msg.value-deposit)
-    SWAP1			msg.sender.send(msg.value-deposit)
-    POP			msg.sender.send(msg.value-deposit)
-    PUSH 0		msg.sender.send(msg.value-deposit)
-    PUSH 40		msg.sender.send(msg.value-deposit)
-    MLOAD			msg.sender.send(msg.value-deposit)
-    DUP1			msg.sender.send(msg.value-deposit)
-    DUP4			msg.sender.send(msg.value-deposit)
-    SUB			msg.sender.send(msg.value-deposit)
-    DUP2			msg.sender.send(msg.value-deposit)
-    DUP6			msg.sender.send(msg.value-deposit)
-    DUP9			msg.sender.send(msg.value-deposit)
-    DUP9			msg.sender.send(msg.value-deposit)
-    CALL			msg.sender.send(msg.value-deposit)
-    SWAP4			msg.sender.send(msg.value-deposit)
-    POP			msg.sender.send(msg.value-deposit)
-    POP			msg.sender.send(msg.value-deposit)
-    POP			msg.sender.send(msg.value-deposit)
-    POP			msg.sender.send(msg.value-deposit)
-    POP			msg.sender.send(msg.value-deposit)
-  tag41: 
-    JUMPDEST		if(msg.value > deposit){...
-    PUSH 3E8		1000
-    PUSH 1		feeFrac
-    PUSH 0		feeFrac
-    POP			feeFrac
-    SLOAD			feeFrac
-    PUSH 3E8		1000
-    SUB			1000 - feeFrac
-    PUSH 0		deposit
-    PUSH 0		deposit
-    POP			deposit
-    SLOAD			deposit
-    MUL			deposit * (1000 - feeFrac )
-    DIV			(deposit * (1000 - feeFrac )) / 1000
-    PUSH 5		Balance
-    PUSH 0		Balance
-    DUP3			Balance += (deposit * (1000 - feeFrac )) / 1000
-    DUP3			Balance += (deposit * (1000 - feeFrac )) / 1000
-    DUP3			Balance += (deposit * (1000 - feeFrac )) / 1000
-    POP			Balance += (deposit * (1000 - feeFrac )) / 1000
-    SLOAD			Balance += (deposit * (1000 - feeFrac )) / 1000
-    ADD			Balance += (deposit * (1000 - feeFrac )) / 1000
-    SWAP3			Balance += (deposit * (1000 - feeFrac )) / 1000
-    POP			Balance += (deposit * (1000 - feeFrac )) / 1000
-    POP			Balance += (deposit * (1000 - feeFrac )) / 1000
-    DUP2			Balance += (deposit * (1000 - feeFrac )) / 1000
-    SWAP1			Balance += (deposit * (1000 - feeFrac )) / 1000
-    SSTORE			Balance += (deposit * (1000 - feeFrac )) / 1000
-    POP			Balance += (deposit * (1000 - feeFrac )) / 1000
-    PUSH 3E8		1000
-    PUSH 1		feeFrac
-    PUSH 0		feeFrac
-    POP			feeFrac
-    SLOAD			feeFrac
-    PUSH 0		deposit
-    PUSH 0		deposit
-    POP			deposit
-    SLOAD			deposit
-    MUL			deposit * feeFrac
-    DIV			(deposit * feeFrac) / 1000
-    PUSH 6		fees
-    PUSH 0		fees
-    DUP3			fees += (deposit * feeFrac) / 1000
-    DUP3			fees += (deposit * feeFrac) / 1000
-    DUP3			fees += (deposit * feeFrac) / 1000
-    POP			fees += (deposit * feeFrac) / 1000
-    SLOAD			fees += (deposit * feeFrac) / 1000
-    ADD			fees += (deposit * feeFrac) / 1000
-    SWAP3			fees += (deposit * feeFrac) / 1000
-    POP			fees += (deposit * feeFrac) / 1000
-    POP			fees += (deposit * feeFrac) / 1000
-    DUP2			fees += (deposit * feeFrac) / 1000
-    SWAP1			fees += (deposit * feeFrac) / 1000
-    SSTORE			fees += (deposit * feeFrac) / 1000
-    POP			fees += (deposit * feeFrac) / 1000
-    TIMESTAMP			block.timestamp
-    PUSH 9		last_time
-    PUSH 0		last_time
-    POP			last_time = block.timestamp
-    DUP2			last_time = block.timestamp
-    SWAP1			last_time = block.timestamp
-    SSTORE			last_time = block.timestamp
-    POP			last_time = block.timestamp
-    PUSH B		players
-    PUSH 0		players
-    POP			players
-    DUP1			players.push(Player(msg.sender,  0 , false))
-    SLOAD			players.push(Player(msg.sender,  0 , false))
-    DUP1			players.push(Player(msg.sender,  0 , false))
-    PUSH 1		players.push(Player(msg.sender,  0 , false))
-    ADD			players.push(Player(msg.sender,  0 , false))
-    DUP3			players.push(Player(msg.sender,  0 , false))
-    DUP2			players.push(Player(msg.sender,  0 , false))
-    DUP2			players.push(Player(msg.sender,  0 , false))
-    SLOAD			players.push(Player(msg.sender,  0 , false))
-    DUP2			players.push(Player(msg.sender,  0 , false))
-    DUP4			players.push(Player(msg.sender,  0 , false))
-    SSTORE			players.push(Player(msg.sender,  0 , false))
-    DUP2			players.push(Player(msg.sender,  0 , false))
-    DUP2			players.push(Player(msg.sender,  0 , false))
-    ISZERO			players.push(Player(msg.sender,  0 , false))
-    GT			players.push(Player(msg.sender,  0 , false))
-    PUSH [tag42]		players.push(Player(msg.sender,  0 , false))
-    JUMPI			players.push(Player(msg.sender,  0 , false))
-    PUSH 3		players.push(Player(msg.sender,  0 , false))
-    MUL			players.push(Player(msg.sender,  0 , false))
-    DUP2			players.push(Player(msg.sender,  0 , false))
-    PUSH 3		players.push(Player(msg.sender,  0 , false))
-    MUL			players.push(Player(msg.sender,  0 , false))
-    DUP4			players.push(Player(msg.sender,  0 , false))
-    PUSH 0		players.push(Player(msg.sender,  0 , false))
-    MSTORE			players.push(Player(msg.sender,  0 , false))
-    PUSH 20		players.push(Player(msg.sender,  0 , false))
-    PUSH 0		players.push(Player(msg.sender,  0 , false))
-    SHA3			players.push(Player(msg.sender,  0 , false))
-    SWAP2			players.push(Player(msg.sender,  0 , false))
-    DUP3			players.push(Player(msg.sender,  0 , false))
-    ADD			players.push(Player(msg.sender,  0 , false))
-    SWAP2			players.push(Player(msg.sender,  0 , false))
-    ADD			players.push(Player(msg.sender,  0 , false))
-    PUSH [tag43]		players.push(Player(msg.sender,  0 , false))
-    SWAP2			players.push(Player(msg.sender,  0 , false))
-    SWAP1			players.push(Player(msg.sender,  0 , false))
-    PUSH [tag44]		players.push(Player(msg.sender,  0 , false))
-    JUMP			players.push(Player(msg.sender,  0 , false))
-  tag44: 
-    JUMPDEST		players.push(Player(msg.sender,  0 , false))
-    DUP1			players.push(Player(msg.sender,  0 , false))
-    DUP3			players.push(Player(msg.sender,  0 , false))
-    GT			players.push(Player(msg.sender,  0 , false))
-    ISZERO			players.push(Player(msg.sender,  0 , false))
-    PUSH [tag45]		players.push(Player(msg.sender,  0 , false))
-    JUMPI			players.push(Player(msg.sender,  0 , false))
-    PUSH 0		players.push(Player(msg.sender,  0 , false))
-    PUSH 0		players.push(Player(msg.sender,  0 , false))
-    DUP3			players.push(Player(msg.sender,  0 , false))
-    ADD			players.push(Player(msg.sender,  0 , false))
-    PUSH 0		players.push(Player(msg.sender,  0 , false))
-    PUSH 100		players.push(Player(msg.sender,  0 , false))
-    EXP			players.push(Player(msg.sender,  0 , false))
-    DUP2			players.push(Player(msg.sender,  0 , false))
-    SLOAD			players.push(Player(msg.sender,  0 , false))
-    SWAP1			players.push(Player(msg.sender,  0 , false))
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		players.push(Player(msg.sender,  0 , false))
-    MUL			players.push(Player(msg.sender,  0 , false))
-    NOT			players.push(Player(msg.sender,  0 , false))
-    AND			players.push(Player(msg.sender,  0 , false))
-    SWAP1			players.push(Player(msg.sender,  0 , false))
-    SSTORE			players.push(Player(msg.sender,  0 , false))
-    PUSH 1		players.push(Player(msg.sender,  0 , false))
-    DUP3			players.push(Player(msg.sender,  0 , false))
-    ADD			players.push(Player(msg.sender,  0 , false))
-    PUSH 0		players.push(Player(msg.sender,  0 , false))
-    POP			players.push(Player(msg.sender,  0 , false))
-    PUSH 0		players.push(Player(msg.sender,  0 , false))
-    SWAP1			players.push(Player(msg.sender,  0 , false))
-    SSTORE			players.push(Player(msg.sender,  0 , false))
-    PUSH 2		players.push(Player(msg.sender,  0 , false))
-    DUP3			players.push(Player(msg.sender,  0 , false))
-    ADD			players.push(Player(msg.sender,  0 , false))
-    PUSH 0		players.push(Player(msg.sender,  0 , false))
-    PUSH 100		players.push(Player(msg.sender,  0 , false))
-    EXP			players.push(Player(msg.sender,  0 , false))
-    DUP2			players.push(Player(msg.sender,  0 , false))
-    SLOAD			players.push(Player(msg.sender,  0 , false))
-    SWAP1			players.push(Player(msg.sender,  0 , false))
-    PUSH FF		players.push(Player(msg.sender,  0 , false))
-    MUL			players.push(Player(msg.sender,  0 , false))
-    NOT			players.push(Player(msg.sender,  0 , false))
-    AND			players.push(Player(msg.sender,  0 , false))
-    SWAP1			players.push(Player(msg.sender,  0 , false))
-    SSTORE			players.push(Player(msg.sender,  0 , false))
-    POP			players.push(Player(msg.sender,  0 , false))
-    PUSH 3		players.push(Player(msg.sender,  0 , false))
-    ADD			players.push(Player(msg.sender,  0 , false))
-    PUSH [tag44]		players.push(Player(msg.sender,  0 , false))
-    JUMP			players.push(Player(msg.sender,  0 , false))
-  tag45: 
-    JUMPDEST		players.push(Player(msg.sender,  0 , false))
-    POP			players.push(Player(msg.sender,  0 , false))
-    SWAP1			players.push(Player(msg.sender,  0 , false))
-    JUMP			players.push(Player(msg.sender,  0 , false))
-  tag43: 
-    JUMPDEST		players.push(Player(msg.sender,  0 , false))
-  tag42: 
-    JUMPDEST		players.push(Player(msg.sender,  0 , false))
-    POP			players.push(Player(msg.sender,  0 , false))
-    POP			players.push(Player(msg.sender,  0 , false))
-    POP			players.push(Player(msg.sender,  0 , false))
-    SWAP2			players.push(Player(msg.sender,  0 , false))
-    SWAP1			players.push(Player(msg.sender,  0 , false))
-    SWAP1			players.push(Player(msg.sender,  0 , false))
-    PUSH 0		players.push(Player(msg.sender,  0 , false))
-    MSTORE			players.push(Player(msg.sender,  0 , false))
-    PUSH 20		players.push(Player(msg.sender,  0 , false))
-    PUSH 0		players.push(Player(msg.sender,  0 , false))
-    SHA3			players.push(Player(msg.sender,  0 , false))
-    SWAP1			players.push(Player(msg.sender,  0 , false))
-    PUSH 3		players.push(Player(msg.sender,  0 , false))
-    MUL			players.push(Player(msg.sender,  0 , false))
-    ADD			players.push(Player(msg.sender,  0 , false))
-    PUSH 0		players.push(Player(msg.sender,  0 , false))
-  tag46: 
-    JUMPDEST		players.push(Player(msg.sender,  0 , false))
-    PUSH 60		Player(msg.sender,  0 , false)
-    PUSH 40		Player(msg.sender,  0 , false)
-    MLOAD			Player(msg.sender,  0 , false)
-    SWAP1			Player(msg.sender,  0 , false)
-    DUP2			Player(msg.sender,  0 , false)
-    ADD			Player(msg.sender,  0 , false)
-    PUSH 40		Player(msg.sender,  0 , false)
-    MSTORE			Player(msg.sender,  0 , false)
-    DUP1			Player(msg.sender,  0 , false)
-    CALLER			msg.sender
-    DUP2			Player(msg.sender,  0 , false)
-    MSTORE			Player(msg.sender,  0 , false)
-    PUSH 20		Player(msg.sender,  0 , false)
-    ADD			Player(msg.sender,  0 , false)
-    PUSH 0		0
-    DUP2			Player(msg.sender,  0 , false)
-    MSTORE			Player(msg.sender,  0 , false)
-    PUSH 20		Player(msg.sender,  0 , false)
-    ADD			Player(msg.sender,  0 , false)
-    PUSH 0		false
-    DUP2			Player(msg.sender,  0 , false)
-    MSTORE			Player(msg.sender,  0 , false)
-    PUSH 20		Player(msg.sender,  0 , false)
-    ADD			Player(msg.sender,  0 , false)
-    POP			Player(msg.sender,  0 , false)
-    SWAP1			players.push(Player(msg.sender,  0 , false))
-    SWAP2			players.push(Player(msg.sender,  0 , false))
-    SWAP1			players.push(Player(msg.sender,  0 , false))
-    SWAP2			players.push(Player(msg.sender,  0 , false))
-    POP			players.push(Player(msg.sender,  0 , false))
-    PUSH 0		players.push(Player(msg.sender,  0 , false))
-    DUP3			players.push(Player(msg.sender,  0 , false))
-    ADD			players.push(Player(msg.sender,  0 , false))
-    MLOAD			players.push(Player(msg.sender,  0 , false))
-    DUP2			players.push(Player(msg.sender,  0 , false))
-    PUSH 0		players.push(Player(msg.sender,  0 , false))
-    ADD			players.push(Player(msg.sender,  0 , false))
-    PUSH 0		players.push(Player(msg.sender,  0 , false))
-    PUSH 100		players.push(Player(msg.sender,  0 , false))
-    EXP			players.push(Player(msg.sender,  0 , false))
-    DUP2			players.push(Player(msg.sender,  0 , false))
-    SLOAD			players.push(Player(msg.sender,  0 , false))
-    DUP2			players.push(Player(msg.sender,  0 , false))
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		players.push(Player(msg.sender,  0 , false))
-    MUL			players.push(Player(msg.sender,  0 , false))
-    NOT			players.push(Player(msg.sender,  0 , false))
-    AND			players.push(Player(msg.sender,  0 , false))
-    SWAP1			players.push(Player(msg.sender,  0 , false))
-    DUP4			players.push(Player(msg.sender,  0 , false))
-    MUL			players.push(Player(msg.sender,  0 , false))
-    OR			players.push(Player(msg.sender,  0 , false))
-    SWAP1			players.push(Player(msg.sender,  0 , false))
-    SSTORE			players.push(Player(msg.sender,  0 , false))
-    POP			players.push(Player(msg.sender,  0 , false))
-    PUSH 20		players.push(Player(msg.sender,  0 , false))
-    DUP3			players.push(Player(msg.sender,  0 , false))
-    ADD			players.push(Player(msg.sender,  0 , false))
-    MLOAD			players.push(Player(msg.sender,  0 , false))
-    DUP2			players.push(Player(msg.sender,  0 , false))
-    PUSH 1		players.push(Player(msg.sender,  0 , false))
-    ADD			players.push(Player(msg.sender,  0 , false))
-    PUSH 0		players.push(Player(msg.sender,  0 , false))
-    POP			players.push(Player(msg.sender,  0 , false))
-    SSTORE			players.push(Player(msg.sender,  0 , false))
-    PUSH 40		players.push(Player(msg.sender,  0 , false))
-    DUP3			players.push(Player(msg.sender,  0 , false))
-    ADD			players.push(Player(msg.sender,  0 , false))
-    MLOAD			players.push(Player(msg.sender,  0 , false))
-    DUP2			players.push(Player(msg.sender,  0 , false))
-    PUSH 2		players.push(Player(msg.sender,  0 , false))
-    ADD			players.push(Player(msg.sender,  0 , false))
-    PUSH 0		players.push(Player(msg.sender,  0 , false))
-    PUSH 100		players.push(Player(msg.sender,  0 , false))
-    EXP			players.push(Player(msg.sender,  0 , false))
-    DUP2			players.push(Player(msg.sender,  0 , false))
-    SLOAD			players.push(Player(msg.sender,  0 , false))
-    DUP2			players.push(Player(msg.sender,  0 , false))
-    PUSH FF		players.push(Player(msg.sender,  0 , false))
-    MUL			players.push(Player(msg.sender,  0 , false))
-    NOT			players.push(Player(msg.sender,  0 , false))
-    AND			players.push(Player(msg.sender,  0 , false))
-    SWAP1			players.push(Player(msg.sender,  0 , false))
-    DUP4			players.push(Player(msg.sender,  0 , false))
-    MUL			players.push(Player(msg.sender,  0 , false))
-    OR			players.push(Player(msg.sender,  0 , false))
-    SWAP1			players.push(Player(msg.sender,  0 , false))
-    SSTORE			players.push(Player(msg.sender,  0 , false))
-    POP			players.push(Player(msg.sender,  0 , false))
-    POP			players.push(Player(msg.sender,  0 , false))
-    POP			players.push(Player(msg.sender,  0 , false))
-    POP			players.push(Player(msg.sender,  0 , false))
-    PUSH 8		number_of_players
-    PUSH 0		number_of_players
-    DUP2			number_of_players++
-    DUP2			number_of_players++
-    POP			number_of_players++
-    SLOAD			number_of_players++
-    DUP1			number_of_players++
-    SWAP3			number_of_players++
-    SWAP2			number_of_players++
-    SWAP1			number_of_players++
-    PUSH 1		number_of_players++
-    ADD			number_of_players++
-    SWAP2			number_of_players++
-    SWAP1			number_of_players++
-    POP			number_of_players++
-    SSTORE			number_of_players++
-    POP			number_of_players++
-    PUSH 3		3
-    PUSH 8		number_of_players
-    PUSH 0		number_of_players
-    POP			number_of_players
-    SLOAD			number_of_players
-    EQ			number_of_players == 3
-    ISZERO			if(number_of_players == 3){ //end of a round...
-    PUSH [tag47]		if(number_of_players == 3){ //end of a round...
-    JUMPI			if(number_of_players == 3){ //end of a round...
-    PUSH [tag48]		Pay()
-    PUSH [tag49]		Pay
-    JUMP	[in]		Pay()
-  tag48: 
-    JUMPDEST		Pay()
-  tag47: 
-    JUMPDEST		if(number_of_players == 3){ //end of a round...
-  tag39: 
-    JUMPDEST		function init() private {...
-    JUMP	[out]		function init() private {...
-  tag19: 
-    JUMPDEST		function ChangeOwnership(address _owner) onlyowner {...
-    PUSH A		admin
-    PUSH 0		admin
-    SWAP1			admin
-    SLOAD			admin
-    SWAP1			admin
-    PUSH 100		admin
-    EXP			admin
-    SWAP1			admin
-    DIV			admin
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		admin
-    AND			admin
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		msg.sender == admin
-    AND			msg.sender == admin
-    CALLER			msg.sender
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		msg.sender == admin
-    AND			msg.sender == admin
-    EQ			msg.sender == admin
-    ISZERO			if (msg.sender == admin) _
-    PUSH [tag51]		if (msg.sender == admin) _
-    JUMPI			if (msg.sender == admin) _
-    DUP1			_owner
-    PUSH A		admin
-    PUSH 0		admin
-    PUSH 100		admin = _owner
-    EXP			admin = _owner
-    DUP2			admin = _owner
-    SLOAD			admin = _owner
-    DUP2			admin = _owner
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		admin = _owner
-    MUL			admin = _owner
-    NOT			admin = _owner
-    AND			admin = _owner
-    SWAP1			admin = _owner
-    DUP4			admin = _owner
-    MUL			admin = _owner
-    OR			admin = _owner
-    SWAP1			admin = _owner
-    SSTORE			admin = _owner
-    POP			admin = _owner
-  tag51: 
-    JUMPDEST		if (msg.sender == admin) _
-  tag50: 
-    JUMPDEST		function ChangeOwnership(address _owner) onlyowner {...
-    POP			function ChangeOwnership(address _owner) onlyowner {...
-    JUMP	[out]		function ChangeOwnership(address _owner) onlyowner {...
-  tag21: 
-    JUMPDEST		function CancelRoundAndRefundAll() { //refund every participants, anyone can call this !...
-    PUSH 0		uint i
-    PUSH 0		0
-    PUSH 8		number_of_players
-    PUSH 0		number_of_players
-    POP			number_of_players
-    SLOAD			number_of_players
-    EQ			number_of_players==0
-    ISZERO			if(number_of_players==0) return;
-    PUSH [tag53]		if(number_of_players==0) return;
-    JUMPI			if(number_of_players==0) return;
-    PUSH [tag52]		return;
-    JUMP			return;
-  tag53: 
-    JUMPDEST		if(number_of_players==0) return;
-    TIMESTAMP			block.timestamp
-    PUSH A8C0		12 * 60 * 60
-    PUSH 9		last_time
-    PUSH 0		last_time
-    POP			last_time
-    SLOAD			last_time
-    ADD			last_time + time_max
-    LT			last_time + time_max < block.timestamp
-    ISZERO			if (last_time + time_max < block.timestamp) {...
-    PUSH [tag54]		if (last_time + time_max < block.timestamp) {...
-    JUMPI			if (last_time + time_max < block.timestamp) {...
-    PUSH 7		Payout_id
-    PUSH 0		Payout_id
-    POP			Payout_id
-    SLOAD			Payout_id
-    SWAP1			uint i=Payout_id
-    POP			uint i=Payout_id
-  tag55: 
-    JUMPDEST		for(uint i=Payout_id; i<(Payout_id+number_of_players); i++){...
-    PUSH 8		number_of_players
-    PUSH 0		number_of_players
-    POP			number_of_players
-    SLOAD			number_of_players
-    PUSH 7		Payout_id
-    PUSH 0		Payout_id
-    POP			Payout_id
-    SLOAD			Payout_id
-    ADD			Payout_id+number_of_players
-    DUP2			i
-    LT			i<(Payout_id+number_of_players)
-    ISZERO			for(uint i=Payout_id; i<(Payout_id+number_of_players); i++){...
-    PUSH [tag56]		for(uint i=Payout_id; i<(Payout_id+number_of_players); i++){...
-    JUMPI			for(uint i=Payout_id; i<(Payout_id+number_of_players); i++){...
-    PUSH B		players
-    PUSH 0		players
-    POP			players
-    DUP2			i
-    DUP2			players[i]
-    SLOAD			players[i]
-    DUP2			players[i]
-    LT			players[i]
-    ISZERO			players[i]
-    PUSH [ErrorTag]		players[i]
-    JUMPI			players[i]
-    SWAP1			players[i]
-    PUSH 0		players[i]
-    MSTORE			players[i]
-    PUSH 20		players[i]
-    PUSH 0		players[i]
-    SHA3			players[i]
-    SWAP1			players[i]
-    PUSH 3		players[i]
-    MUL			players[i]
-    ADD			players[i]
-    PUSH 0		players[i]
-  tag58: 
-    JUMPDEST		players[i]
-    POP			players[i]
-    PUSH 0		players[i].addr
-    ADD			players[i].addr
-    PUSH 0		players[i].addr
-    SWAP1			players[i].addr
-    SLOAD			players[i].addr
-    SWAP1			players[i].addr
-    PUSH 100		players[i].addr
-    EXP			players[i].addr
-    SWAP1			players[i].addr
-    DIV			players[i].addr
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		players[i].addr
-    AND			players[i].addr
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		players[i].addr.send
-    AND			players[i].addr.send
-    PUSH 0		players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    PUSH 3E8		1000
-    PUSH 1		feeFrac
-    PUSH 0		feeFrac
-    POP			feeFrac
-    SLOAD			feeFrac
-    PUSH 3E8		1000
-    SUB			1000 - feeFrac
-    PUSH 0		deposit
-    PUSH 0		deposit
-    POP			deposit
-    SLOAD			deposit
-    MUL			deposit * (1000 - feeFrac )
-    DIV			(deposit * (1000 - feeFrac )) / 1000
-    PUSH 40		players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    MLOAD			players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    DUP1			players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    SWAP1			players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    POP			players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    PUSH 0		players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    PUSH 40		players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    MLOAD			players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    DUP1			players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    DUP4			players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    SUB			players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    DUP2			players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    DUP6			players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    DUP9			players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    DUP9			players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    CALL			players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    SWAP4			players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    POP			players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    POP			players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    POP			players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    POP			players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    POP			players[i].addr.send((deposit * (1000 - feeFrac )) / 1000 )
-    PUSH 1		true
-    PUSH B		players
-    PUSH 0		players
-    POP			players
-    DUP3			i
-    DUP2			players[i]
-    SLOAD			players[i]
-    DUP2			players[i]
-    LT			players[i]
-    ISZERO			players[i]
-    PUSH [ErrorTag]		players[i]
-    JUMPI			players[i]
-    SWAP1			players[i]
-    PUSH 0		players[i]
-    MSTORE			players[i]
-    PUSH 20		players[i]
-    PUSH 0		players[i]
-    SHA3			players[i]
-    SWAP1			players[i]
-    PUSH 3		players[i]
-    MUL			players[i]
-    ADD			players[i]
-    PUSH 0		players[i]
-  tag59: 
-    JUMPDEST		players[i]
-    POP			players[i]
-    PUSH 2		players[i].paid
-    ADD			players[i].paid
-    PUSH 0		players[i].paid
-    PUSH 100		players[i].paid=true
-    EXP			players[i].paid=true
-    DUP2			players[i].paid=true
-    SLOAD			players[i].paid=true
-    DUP2			players[i].paid=true
-    PUSH FF		players[i].paid=true
-    MUL			players[i].paid=true
-    NOT			players[i].paid=true
-    AND			players[i].paid=true
-    SWAP1			players[i].paid=true
-    DUP4			players[i].paid=true
-    MUL			players[i].paid=true
-    OR			players[i].paid=true
-    SWAP1			players[i].paid=true
-    SSTORE			players[i].paid=true
-    POP			players[i].paid=true
-    PUSH 3E8		1000
-    PUSH 1		feeFrac
-    PUSH 0		feeFrac
-    POP			feeFrac
-    SLOAD			feeFrac
-    PUSH 3E8		1000
-    SUB			1000 - feeFrac
-    PUSH 0		deposit
-    PUSH 0		deposit
-    POP			deposit
-    SLOAD			deposit
-    MUL			deposit * (1000 - feeFrac )
-    DIV			(deposit * (1000 - feeFrac )) / 1000
-    PUSH B		players
-    PUSH 0		players
-    POP			players
-    DUP3			i
-    DUP2			players[i]
-    SLOAD			players[i]
-    DUP2			players[i]
-    LT			players[i]
-    ISZERO			players[i]
-    PUSH [ErrorTag]		players[i]
-    JUMPI			players[i]
-    SWAP1			players[i]
-    PUSH 0		players[i]
-    MSTORE			players[i]
-    PUSH 20		players[i]
-    PUSH 0		players[i]
-    SHA3			players[i]
-    SWAP1			players[i]
-    PUSH 3		players[i]
-    MUL			players[i]
-    ADD			players[i]
-    PUSH 0		players[i]
-  tag60: 
-    JUMPDEST		players[i]
-    POP			players[i]
-    PUSH 1		players[i].payout
-    ADD			players[i].payout
-    PUSH 0		players[i].payout
-    POP			players[i].payout=(deposit * (1000 - feeFrac )) / 1000
-    DUP2			players[i].payout=(deposit * (1000 - feeFrac )) / 1000
-    SWAP1			players[i].payout=(deposit * (1000 - feeFrac )) / 1000
-    SSTORE			players[i].payout=(deposit * (1000 - feeFrac )) / 1000
-    POP			players[i].payout=(deposit * (1000 - feeFrac )) / 1000
-  tag57: 
-    JUMPDEST		for(uint i=Payout_id; i<(Payout_id+number_of_players); i++){...
-    DUP1			i++
-    DUP1			i++
-    PUSH 1		i++
-    ADD			i++
-    SWAP2			i++
-    POP			i++
-    POP			i++
-    PUSH [tag55]		for(uint i=Payout_id; i<(Payout_id+number_of_players); i++){...
-    JUMP			for(uint i=Payout_id; i<(Payout_id+number_of_players); i++){...
-  tag56: 
-    JUMPDEST		for(uint i=Payout_id; i<(Payout_id+number_of_players); i++){...
-    PUSH 8		number_of_players
-    PUSH 0		number_of_players
-    POP			number_of_players
-    SLOAD			number_of_players
-    PUSH 7		Payout_id
-    PUSH 0		Payout_id
-    DUP3			Payout_id += number_of_players
-    DUP3			Payout_id += number_of_players
-    DUP3			Payout_id += number_of_players
-    POP			Payout_id += number_of_players
-    SLOAD			Payout_id += number_of_players
-    ADD			Payout_id += number_of_players
-    SWAP3			Payout_id += number_of_players
-    POP			Payout_id += number_of_players
-    POP			Payout_id += number_of_players
-    DUP2			Payout_id += number_of_players
-    SWAP1			Payout_id += number_of_players
-    SSTORE			Payout_id += number_of_players
-    POP			Payout_id += number_of_players
-    PUSH 0		0
-    PUSH 8		number_of_players
-    PUSH 0		number_of_players
-    POP			number_of_players=0
-    DUP2			number_of_players=0
-    SWAP1			number_of_players=0
-    SSTORE			number_of_players=0
-    POP			number_of_players=0
-  tag54: 
-    JUMPDEST		if (last_time + time_max < block.timestamp) {...
-  tag52: 
-    JUMPDEST		function CancelRoundAndRefundAll() { //refund every participants, anyone can call this !...
-    POP			function CancelRoundAndRefundAll() { //refund every participants, anyone can call this !...
-    JUMP	[out]		function CancelRoundAndRefundAll() { //refund every participants, anyone can call this !...
-  tag23: 
-    JUMPDEST		function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    PUSH 0		uint N
-    PUSH 8		number_of_players
-    PUSH 0		number_of_players
-    POP			number_of_players
-    SLOAD			number_of_players
-    SWAP1			N = number_of_players
-    POP			N = number_of_players
-    DUP1			N = number_of_players
-    POP			N = number_of_players
-  tag61: 
-    JUMPDEST		function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    SWAP1			function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-    JUMP	[out]		function WatchNumberOfPlayerInCurrentRound() constant returns(uint N) {...
-  tag25: 
-    JUMPDEST		function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    PUSH 0		uint FeePercent
-    PUSH A		10
-    PUSH 1		feeFrac
-    PUSH 0		feeFrac
-    POP			feeFrac
-    SLOAD			feeFrac
-    DIV			feeFrac/10
-    SWAP1			FeePercent = feeFrac/10
-    POP			FeePercent = feeFrac/10
-    DUP1			FeePercent = feeFrac/10
-    POP			FeePercent = feeFrac/10
-  tag62: 
-    JUMPDEST		function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    SWAP1			function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-    JUMP	[out]		function WatchAppliedFeePercentage() constant returns(uint FeePercent) {...
-  tag27: 
-    JUMPDEST		function WatchLastTime() constant returns(uint LastTimestamp) {...
-    PUSH 0		uint LastTimestamp
-    PUSH 9		last_time
-    PUSH 0		last_time
-    POP			last_time
-    SLOAD			last_time
-    SWAP1			LastTimestamp = last_time
-    POP			LastTimestamp = last_time
-    DUP1			LastTimestamp = last_time
-    POP			LastTimestamp = last_time
-  tag63: 
-    JUMPDEST		function WatchLastTime() constant returns(uint LastTimestamp) {...
-    SWAP1			function WatchLastTime() constant returns(uint LastTimestamp) {...
-    JUMP	[out]		function WatchLastTime() constant returns(uint LastTimestamp) {...
-  tag29: 
-    JUMPDEST		function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    PUSH 0		address Address
-    PUSH 0		uint Payout
-    PUSH 0		bool UserPaid
-    PUSH B		players
-    PUSH 0		players
-    POP			players
-    DUP1			players.length
-    SLOAD			players.length
-    SWAP1			players.length
-    POP			players.length
-    DUP5			id
-    GT			id <= players.length
-    ISZERO			id <= players.length
-    ISZERO			if (id <= players.length) {...
-    PUSH [tag65]		if (id <= players.length) {...
-    JUMPI			if (id <= players.length) {...
-    PUSH B		players
-    PUSH 0		players
-    POP			players
-    DUP5			id
-    DUP2			players[id]
-    SLOAD			players[id]
-    DUP2			players[id]
-    LT			players[id]
-    ISZERO			players[id]
-    PUSH [ErrorTag]		players[id]
-    JUMPI			players[id]
-    SWAP1			players[id]
-    PUSH 0		players[id]
-    MSTORE			players[id]
-    PUSH 20		players[id]
-    PUSH 0		players[id]
-    SHA3			players[id]
-    SWAP1			players[id]
-    PUSH 3		players[id]
-    MUL			players[id]
-    ADD			players[id]
-    PUSH 0		players[id]
-  tag66: 
-    JUMPDEST		players[id]
-    POP			players[id]
-    PUSH 0		players[id].addr
-    ADD			players[id].addr
-    PUSH 0		players[id].addr
-    SWAP1			players[id].addr
-    SLOAD			players[id].addr
-    SWAP1			players[id].addr
-    PUSH 100		players[id].addr
-    EXP			players[id].addr
-    SWAP1			players[id].addr
-    DIV			players[id].addr
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		players[id].addr
-    AND			players[id].addr
-    SWAP3			Address = players[id].addr
-    POP			Address = players[id].addr
-    DUP3			Address = players[id].addr
-    POP			Address = players[id].addr
-    PUSH 38D7EA4C68000		1 finney
-    PUSH B		players
-    PUSH 0		players
-    POP			players
-    DUP6			id
-    DUP2			players[id]
-    SLOAD			players[id]
-    DUP2			players[id]
-    LT			players[id]
-    ISZERO			players[id]
-    PUSH [ErrorTag]		players[id]
-    JUMPI			players[id]
-    SWAP1			players[id]
-    PUSH 0		players[id]
-    MSTORE			players[id]
-    PUSH 20		players[id]
-    PUSH 0		players[id]
-    SHA3			players[id]
-    SWAP1			players[id]
-    PUSH 3		players[id]
-    MUL			players[id]
-    ADD			players[id]
-    PUSH 0		players[id]
-  tag67: 
-    JUMPDEST		players[id]
-    POP			players[id]
-    PUSH 1		players[id].payout
-    ADD			players[id].payout
-    PUSH 0		players[id].payout
-    POP			players[id].payout
-    SLOAD			players[id].payout
-    DIV			(players[id].payout) / 1 finney
-    SWAP2			Payout = (players[id].payout) / 1 finney
-    POP			Payout = (players[id].payout) / 1 finney
-    DUP2			Payout = (players[id].payout) / 1 finney
-    POP			Payout = (players[id].payout) / 1 finney
-    PUSH B		players
-    PUSH 0		players
-    POP			players
-    DUP5			id
-    DUP2			players[id]
-    SLOAD			players[id]
-    DUP2			players[id]
-    LT			players[id]
-    ISZERO			players[id]
-    PUSH [ErrorTag]		players[id]
-    JUMPI			players[id]
-    SWAP1			players[id]
-    PUSH 0		players[id]
-    MSTORE			players[id]
-    PUSH 20		players[id]
-    PUSH 0		players[id]
-    SHA3			players[id]
-    SWAP1			players[id]
-    PUSH 3		players[id]
-    MUL			players[id]
-    ADD			players[id]
-    PUSH 0		players[id]
-  tag68: 
-    JUMPDEST		players[id]
-    POP			players[id]
-    PUSH 2		players[id].paid
-    ADD			players[id].paid
-    PUSH 0		players[id].paid
-    SWAP1			players[id].paid
-    SLOAD			players[id].paid
-    SWAP1			players[id].paid
-    PUSH 100		players[id].paid
-    EXP			players[id].paid
-    SWAP1			players[id].paid
-    DIV			players[id].paid
-    PUSH FF		players[id].paid
-    AND			players[id].paid
-    SWAP1			UserPaid=players[id].paid
-    POP			UserPaid=players[id].paid
-    DUP1			UserPaid=players[id].paid
-    POP			UserPaid=players[id].paid
-  tag65: 
-    JUMPDEST		if (id <= players.length) {...
-  tag64: 
-    JUMPDEST		function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    SWAP2			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    SWAP4			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    SWAP1			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    SWAP3			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    POP			function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-    JUMP	[out]		function PlayerInfo(uint id) constant returns(address Address, uint Payout, bool UserPaid) {...
-  tag31: 
-    JUMPDEST		function CollectAllFees() onlyowner {...
-    PUSH A		admin
-    PUSH 0		admin
-    SWAP1			admin
-    SLOAD			admin
-    SWAP1			admin
-    PUSH 100		admin
-    EXP			admin
-    SWAP1			admin
-    DIV			admin
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		admin
-    AND			admin
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		msg.sender == admin
-    AND			msg.sender == admin
-    CALLER			msg.sender
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		msg.sender == admin
-    AND			msg.sender == admin
-    EQ			msg.sender == admin
-    ISZERO			if (msg.sender == admin) _
-    PUSH [tag70]		if (msg.sender == admin) _
-    JUMPI			if (msg.sender == admin) _
-    PUSH 0		0
-    PUSH 6		fees
-    PUSH 0		fees
-    POP			fees
-    SLOAD			fees
-    EQ			fees == 0
-    ISZERO			if (fees == 0) throw
-    PUSH [tag71]		if (fees == 0) throw
-    JUMPI			if (fees == 0) throw
-    PUSH [ErrorTag]		throw
-    JUMP			throw
-  tag71: 
-    JUMPDEST		if (fees == 0) throw
-    PUSH A		admin
-    PUSH 0		admin
-    SWAP1			admin
-    SLOAD			admin
-    SWAP1			admin
-    PUSH 100		admin
-    EXP			admin
-    SWAP1			admin
-    DIV			admin
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		admin
-    AND			admin
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		admin.send
-    AND			admin.send
-    PUSH 0		admin.send(fees)
-    PUSH 6		fees
-    PUSH 0		fees
-    POP			fees
-    SLOAD			fees
-    PUSH 40		admin.send(fees)
-    MLOAD			admin.send(fees)
-    DUP1			admin.send(fees)
-    SWAP1			admin.send(fees)
-    POP			admin.send(fees)
-    PUSH 0		admin.send(fees)
-    PUSH 40		admin.send(fees)
-    MLOAD			admin.send(fees)
-    DUP1			admin.send(fees)
-    DUP4			admin.send(fees)
-    SUB			admin.send(fees)
-    DUP2			admin.send(fees)
-    DUP6			admin.send(fees)
-    DUP9			admin.send(fees)
-    DUP9			admin.send(fees)
-    CALL			admin.send(fees)
-    SWAP4			admin.send(fees)
-    POP			admin.send(fees)
-    POP			admin.send(fees)
-    POP			admin.send(fees)
-    POP			admin.send(fees)
-    POP			admin.send(fees)
-    PUSH 0		0
-    PUSH 6		fees
-    PUSH 0		fees
-    POP			fees = 0
-    DUP2			fees = 0
-    SWAP1			fees = 0
-    SSTORE			fees = 0
-    POP			fees = 0
-  tag70: 
-    JUMPDEST		if (msg.sender == admin) _
-  tag69: 
-    JUMPDEST		function CollectAllFees() onlyowner {...
-    JUMP	[out]		function CollectAllFees() onlyowner {...
-  tag33: 
-    JUMPDEST		function CollectAndReduceFees(uint p) onlyowner {...
-    PUSH A		admin
-    PUSH 0		admin
-    SWAP1			admin
-    SLOAD			admin
-    SWAP1			admin
-    PUSH 100		admin
-    EXP			admin
-    SWAP1			admin
-    DIV			admin
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		admin
-    AND			admin
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		msg.sender == admin
-    AND			msg.sender == admin
-    CALLER			msg.sender
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		msg.sender == admin
-    AND			msg.sender == admin
-    EQ			msg.sender == admin
-    ISZERO			if (msg.sender == admin) _
-    PUSH [tag73]		if (msg.sender == admin) _
-    JUMPI			if (msg.sender == admin) _
-    PUSH 0		0
-    PUSH 6		fees
-    PUSH 0		fees
-    POP			fees
-    SLOAD			fees
-    EQ			fees == 0
-    ISZERO			if (fees == 0) feeFrac=feeFrac*50/100
-    PUSH [tag74]		if (fees == 0) feeFrac=feeFrac*50/100
-    JUMPI			if (fees == 0) feeFrac=feeFrac*50/100
-    PUSH 64		100
-    PUSH 32		50
-    PUSH 1		feeFrac
-    PUSH 0		feeFrac
-    POP			feeFrac
-    SLOAD			feeFrac
-    MUL			feeFrac*50
-    DIV			feeFrac*50/100
-    PUSH 1		feeFrac
-    PUSH 0		feeFrac
-    POP			feeFrac=feeFrac*50/100
-    DUP2			feeFrac=feeFrac*50/100
-    SWAP1			feeFrac=feeFrac*50/100
-    SSTORE			feeFrac=feeFrac*50/100
-    POP			feeFrac=feeFrac*50/100
-  tag74: 
-    JUMPDEST		if (fees == 0) feeFrac=feeFrac*50/100
-    PUSH A		admin
-    PUSH 0		admin
-    SWAP1			admin
-    SLOAD			admin
-    SWAP1			admin
-    PUSH 100		admin
-    EXP			admin
-    SWAP1			admin
-    DIV			admin
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		admin
-    AND			admin
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		admin.send
-    AND			admin.send
-    PUSH 0		admin.send(fees / 1000 * p)
-    DUP3			p
-    PUSH 3E8		1000
-    PUSH 6		fees
-    PUSH 0		fees
-    POP			fees
-    SLOAD			fees
-    DIV			fees / 1000
-    MUL			fees / 1000 * p
-    PUSH 40		admin.send(fees / 1000 * p)
-    MLOAD			admin.send(fees / 1000 * p)
-    DUP1			admin.send(fees / 1000 * p)
-    SWAP1			admin.send(fees / 1000 * p)
-    POP			admin.send(fees / 1000 * p)
-    PUSH 0		admin.send(fees / 1000 * p)
-    PUSH 40		admin.send(fees / 1000 * p)
-    MLOAD			admin.send(fees / 1000 * p)
-    DUP1			admin.send(fees / 1000 * p)
-    DUP4			admin.send(fees / 1000 * p)
-    SUB			admin.send(fees / 1000 * p)
-    DUP2			admin.send(fees / 1000 * p)
-    DUP6			admin.send(fees / 1000 * p)
-    DUP9			admin.send(fees / 1000 * p)
-    DUP9			admin.send(fees / 1000 * p)
-    CALL			admin.send(fees / 1000 * p)
-    SWAP4			admin.send(fees / 1000 * p)
-    POP			admin.send(fees / 1000 * p)
-    POP			admin.send(fees / 1000 * p)
-    POP			admin.send(fees / 1000 * p)
-    POP			admin.send(fees / 1000 * p)
-    POP			admin.send(fees / 1000 * p)
-    DUP1			p
-    PUSH 3E8		1000
-    PUSH 6		fees
-    PUSH 0		fees
-    POP			fees
-    SLOAD			fees
-    DIV			fees / 1000
-    MUL			fees / 1000 * p
-    PUSH 6		fees
-    PUSH 0		fees
-    DUP3			fees -= fees / 1000 * p
-    DUP3			fees -= fees / 1000 * p
-    DUP3			fees -= fees / 1000 * p
-    POP			fees -= fees / 1000 * p
-    SLOAD			fees -= fees / 1000 * p
-    SUB			fees -= fees / 1000 * p
-    SWAP3			fees -= fees / 1000 * p
-    POP			fees -= fees / 1000 * p
-    POP			fees -= fees / 1000 * p
-    DUP2			fees -= fees / 1000 * p
-    SWAP1			fees -= fees / 1000 * p
-    SSTORE			fees -= fees / 1000 * p
-    POP			fees -= fees / 1000 * p
-  tag73: 
-    JUMPDEST		if (msg.sender == admin) _
-  tag72: 
-    JUMPDEST		function CollectAndReduceFees(uint p) onlyowner {...
-    POP			function CollectAndReduceFees(uint p) onlyowner {...
-    JUMP	[out]		function CollectAndReduceFees(uint p) onlyowner {...
-  tag35: 
-    JUMPDEST		function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    PUSH 0		uint Fees
-    PUSH E8D4A51000		1 szabo
-    PUSH 6		fees
-    PUSH 0		fees
-    POP			fees
-    SLOAD			fees
-    DIV			fees / 1 szabo
-    SWAP1			Fees = fees / 1 szabo
-    POP			Fees = fees / 1 szabo
-    DUP1			Fees = fees / 1 szabo
-    POP			Fees = fees / 1 szabo
-  tag75: 
-    JUMPDEST		function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    SWAP1			function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-    JUMP	[out]		function WatchCollectedFeesInSzabo() constant returns(uint Fees) {...
-  tag37: 
-    JUMPDEST		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    PUSH 0		uint TotalBalance
-    PUSH 20		string info
-    PUSH 40		string info
-    MLOAD			string info
-    SWAP1			string info
-    DUP2			string info
-    ADD			string info
-    PUSH 40		string info
-    MSTORE			string info
-    DUP1			string info
-    PUSH 0		string info
-    DUP2			string info
-    MSTORE			string info
-    PUSH 20		string info
-    ADD			string info
-    POP			string info
-    PUSH 38D7EA4C68000		1 finney
-    PUSH 5		Balance
-    PUSH 0		Balance
-    POP			Balance
-    SLOAD			Balance
-    DIV			Balance /  1 finney
-    SWAP2			TotalBalance = Balance /  1 finney
-    POP			TotalBalance = Balance /  1 finney
-    DUP2			TotalBalance = Balance /  1 finney
-    POP			TotalBalance = Balance /  1 finney
-    PUSH 40		info ='Balance in finney'
-    PUSH 40		info ='Balance in finney'
-    MLOAD			info ='Balance in finney'
-    SWAP1			info ='Balance in finney'
-    DUP2			info ='Balance in finney'
-    ADD			info ='Balance in finney'
-    PUSH 40		info ='Balance in finney'
-    MSTORE			info ='Balance in finney'
-    DUP1			info ='Balance in finney'
-    PUSH 11		info ='Balance in finney'
-    DUP2			info ='Balance in finney'
-    MSTORE			info ='Balance in finney'
-    PUSH 20		info ='Balance in finney'
-    ADD			info ='Balance in finney'
-    PUSH 42616C616E636520696E2066696E6E6579000000000000000000000000000000		info ='Balance in finney'
-    DUP2			info ='Balance in finney'
-    MSTORE			info ='Balance in finney'
-    PUSH 20		info ='Balance in finney'
-    ADD			info ='Balance in finney'
-    POP			info ='Balance in finney'
-    SWAP1			info ='Balance in finney'
-    POP			info ='Balance in finney'
-    DUP1			info ='Balance in finney'
-    POP			info ='Balance in finney'
-  tag76: 
-    JUMPDEST		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    SWAP1			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    SWAP2			function WatchBalance() constant returns(uint TotalBalance, string info) {...
-    JUMP	[out]		function WatchBalance() constant returns(uint TotalBalance, string info) {...
-  tag49: 
-    JUMPDEST		function  Pay() private{...
-    PUSH 0		uint256 toss
-    PUSH 0		uint i_13
-    PUSH 0		uint i_11
-    PUSH 0		uint i_6
-    PUSH 0		uint256 bet
-    TIMESTAMP			block.timestamp
-    PUSH 40		sha3(block.timestamp)
-    MLOAD			sha3(block.timestamp)
-    DUP1			sha3(block.timestamp)
-    DUP3			sha3(block.timestamp)
-    DUP2			sha3(block.timestamp)
-    MSTORE			sha3(block.timestamp)
-    PUSH 20		sha3(block.timestamp)
-    ADD			sha3(block.timestamp)
-    SWAP2			sha3(block.timestamp)
-    POP			sha3(block.timestamp)
-    POP			sha3(block.timestamp)
-    PUSH 40		sha3(block.timestamp)
-    MLOAD			sha3(block.timestamp)
-    DUP1			sha3(block.timestamp)
-    SWAP2			sha3(block.timestamp)
-    SUB			sha3(block.timestamp)
-    SWAP1			sha3(block.timestamp)
-    SHA3			sha3(block.timestamp)
-    PUSH 1		uint256(sha3(block.timestamp))
-    SWAP1			uint256(sha3(block.timestamp))
-    DIV			uint256(sha3(block.timestamp))
-    GAS			msg.gas
-    PUSH 40		sha3(msg.gas)
-    MLOAD			sha3(msg.gas)
-    DUP1			sha3(msg.gas)
-    DUP3			sha3(msg.gas)
-    DUP2			sha3(msg.gas)
-    MSTORE			sha3(msg.gas)
-    PUSH 20		sha3(msg.gas)
-    ADD			sha3(msg.gas)
-    SWAP2			sha3(msg.gas)
-    POP			sha3(msg.gas)
-    POP			sha3(msg.gas)
-    PUSH 40		sha3(msg.gas)
-    MLOAD			sha3(msg.gas)
-    DUP1			sha3(msg.gas)
-    SWAP2			sha3(msg.gas)
-    SUB			sha3(msg.gas)
-    SWAP1			sha3(msg.gas)
-    SHA3			sha3(msg.gas)
-    PUSH 1		uint256(sha3(msg.gas))
-    SWAP1			uint256(sha3(msg.gas))
-    DIV			uint256(sha3(msg.gas))
-    ADD			uint256(sha3(msg.gas)) + uint256(sha3(block.timestamp))
-    SWAP5			uint256 toss = uint256(sha3(msg.gas)) + uint256(sha3(block.timestamp))
-    POP			uint256 toss = uint256(sha3(msg.gas)) + uint256(sha3(block.timestamp))
-    PUSH 0		0
-    PUSH 3		3
-    DUP7			toss
-    MOD			toss % 3
-    EQ			toss % 3 == 0
-    ISZERO			if( toss % 3 == 0 ){...
-    PUSH [tag78]		if( toss % 3 == 0 ){...
-    JUMPI			if( toss % 3 == 0 ){...
-    PUSH 7		Payout_id
-    PUSH 0		Payout_id
-    POP			Payout_id
-    SLOAD			Payout_id
-    SWAP4			i_13=Payout_id
-    POP			i_13=Payout_id
-    DUP4			i_13=Payout_id
-    POP			i_13=Payout_id
-    PUSH 1		1
-    PUSH 7		Payout_id
-    PUSH 0		Payout_id
-    POP			Payout_id
-    SLOAD			Payout_id
-    ADD			Payout_id+1
-    SWAP3			i_11=Payout_id+1
-    POP			i_11=Payout_id+1
-    DUP3			i_11=Payout_id+1
-    POP			i_11=Payout_id+1
-    PUSH 2		2
-    PUSH 7		Payout_id
-    PUSH 0		Payout_id
-    POP			Payout_id
-    SLOAD			Payout_id
-    ADD			Payout_id+2
-    SWAP2			i_6 =Payout_id+2
-    POP			i_6 =Payout_id+2
-    DUP2			i_6 =Payout_id+2
-    POP			i_6 =Payout_id+2
-    PUSH [tag79]		if( toss % 3 == 0 ){...
-    JUMP			if( toss % 3 == 0 ){...
-  tag78: 
-    JUMPDEST		if( toss % 3 == 0 ){...
-    PUSH 1		1
-    PUSH 3		3
-    DUP7			toss
-    MOD			toss % 3
-    EQ			toss % 3 == 1
-    ISZERO			if( toss % 3 == 1){...
-    PUSH [tag80]		if( toss % 3 == 1){...
-    JUMPI			if( toss % 3 == 1){...
-    PUSH 2		2
-    PUSH 7		Payout_id
-    PUSH 0		Payout_id
-    POP			Payout_id
-    SLOAD			Payout_id
-    ADD			Payout_id+2
-    SWAP4			i_13=Payout_id+2
-    POP			i_13=Payout_id+2
-    DUP4			i_13=Payout_id+2
-    POP			i_13=Payout_id+2
-    PUSH 7		Payout_id
-    PUSH 0		Payout_id
-    POP			Payout_id
-    SLOAD			Payout_id
-    SWAP3			i_11=Payout_id
-    POP			i_11=Payout_id
-    DUP3			i_11=Payout_id
-    POP			i_11=Payout_id
-    PUSH 1		1
-    PUSH 7		Payout_id
-    PUSH 0		Payout_id
-    POP			Payout_id
-    SLOAD			Payout_id
-    ADD			Payout_id+1
-    SWAP2			i_6 =Payout_id+1
-    POP			i_6 =Payout_id+1
-    DUP2			i_6 =Payout_id+1
-    POP			i_6 =Payout_id+1
-    PUSH [tag81]		if( toss % 3 == 1){...
-    JUMP			if( toss % 3 == 1){...
-  tag80: 
-    JUMPDEST		if( toss % 3 == 1){...
-    PUSH 1		1
-    PUSH 7		Payout_id
-    PUSH 0		Payout_id
-    POP			Payout_id
-    SLOAD			Payout_id
-    ADD			Payout_id+1
-    SWAP4			i_13=Payout_id+1
-    POP			i_13=Payout_id+1
-    DUP4			i_13=Payout_id+1
-    POP			i_13=Payout_id+1
-    PUSH 2		2
-    PUSH 7		Payout_id
-    PUSH 0		Payout_id
-    POP			Payout_id
-    SLOAD			Payout_id
-    ADD			Payout_id+2
-    SWAP3			i_11=Payout_id+2
-    POP			i_11=Payout_id+2
-    DUP3			i_11=Payout_id+2
-    POP			i_11=Payout_id+2
-    PUSH 7		Payout_id
-    PUSH 0		Payout_id
-    POP			Payout_id
-    SLOAD			Payout_id
-    SWAP2			i_6 =Payout_id
-    POP			i_6 =Payout_id
-    DUP2			i_6 =Payout_id
-    POP			i_6 =Payout_id
-  tag81: 
-    JUMPDEST		if( toss % 3 == 1){...
-  tag79: 
-    JUMPDEST		if( toss % 3 == 0 ){...
-    PUSH 3E8		1000
-    PUSH 1		feeFrac
-    PUSH 0		feeFrac
-    POP			feeFrac
-    SLOAD			feeFrac
-    PUSH 3E8		1000
-    SUB			1000 - feeFrac
-    PUSH 0		deposit
-    PUSH 0		deposit
-    POP			deposit
-    SLOAD			deposit
-    MUL			deposit * (1000 - feeFrac )
-    DIV			(deposit * (1000 - feeFrac )) / 1000
-    SWAP1			uint256 bet=(deposit * (1000 - feeFrac )) / 1000
-    POP			uint256 bet=(deposit * (1000 - feeFrac )) / 1000
-    PUSH B		players
-    PUSH 0		players
-    POP			players
-    DUP5			i_13
-    DUP2			players[i_13]
-    SLOAD			players[i_13]
-    DUP2			players[i_13]
-    LT			players[i_13]
-    ISZERO			players[i_13]
-    PUSH [ErrorTag]		players[i_13]
-    JUMPI			players[i_13]
-    SWAP1			players[i_13]
-    PUSH 0		players[i_13]
-    MSTORE			players[i_13]
-    PUSH 20		players[i_13]
-    PUSH 0		players[i_13]
-    SHA3			players[i_13]
-    SWAP1			players[i_13]
-    PUSH 3		players[i_13]
-    MUL			players[i_13]
-    ADD			players[i_13]
-    PUSH 0		players[i_13]
-  tag82: 
-    JUMPDEST		players[i_13]
-    POP			players[i_13]
-    PUSH 0		players[i_13].addr
-    ADD			players[i_13].addr
-    PUSH 0		players[i_13].addr
-    SWAP1			players[i_13].addr
-    SLOAD			players[i_13].addr
-    SWAP1			players[i_13].addr
-    PUSH 100		players[i_13].addr
-    EXP			players[i_13].addr
-    SWAP1			players[i_13].addr
-    DIV			players[i_13].addr
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		players[i_13].addr
-    AND			players[i_13].addr
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		players[i_13].addr.send
-    AND			players[i_13].addr.send
-    PUSH 0		players[i_13].addr.send(bet*first_prize/100)
-    PUSH 64		100
-    PUSH 2		first_prize
-    PUSH 0		first_prize
-    POP			first_prize
-    SLOAD			first_prize
-    DUP5			bet
-    MUL			bet*first_prize
-    DIV			bet*first_prize/100
-    PUSH 40		players[i_13].addr.send(bet*first_prize/100)
-    MLOAD			players[i_13].addr.send(bet*first_prize/100)
-    DUP1			players[i_13].addr.send(bet*first_prize/100)
-    SWAP1			players[i_13].addr.send(bet*first_prize/100)
-    POP			players[i_13].addr.send(bet*first_prize/100)
-    PUSH 0		players[i_13].addr.send(bet*first_prize/100)
-    PUSH 40		players[i_13].addr.send(bet*first_prize/100)
-    MLOAD			players[i_13].addr.send(bet*first_prize/100)
-    DUP1			players[i_13].addr.send(bet*first_prize/100)
-    DUP4			players[i_13].addr.send(bet*first_prize/100)
-    SUB			players[i_13].addr.send(bet*first_prize/100)
-    DUP2			players[i_13].addr.send(bet*first_prize/100)
-    DUP6			players[i_13].addr.send(bet*first_prize/100)
-    DUP9			players[i_13].addr.send(bet*first_prize/100)
-    DUP9			players[i_13].addr.send(bet*first_prize/100)
-    CALL			players[i_13].addr.send(bet*first_prize/100)
-    SWAP4			players[i_13].addr.send(bet*first_prize/100)
-    POP			players[i_13].addr.send(bet*first_prize/100)
-    POP			players[i_13].addr.send(bet*first_prize/100)
-    POP			players[i_13].addr.send(bet*first_prize/100)
-    POP			players[i_13].addr.send(bet*first_prize/100)
-    POP			players[i_13].addr.send(bet*first_prize/100)
-    PUSH B		players
-    PUSH 0		players
-    POP			players
-    DUP4			i_11
-    DUP2			players[i_11]
-    SLOAD			players[i_11]
-    DUP2			players[i_11]
-    LT			players[i_11]
-    ISZERO			players[i_11]
-    PUSH [ErrorTag]		players[i_11]
-    JUMPI			players[i_11]
-    SWAP1			players[i_11]
-    PUSH 0		players[i_11]
-    MSTORE			players[i_11]
-    PUSH 20		players[i_11]
-    PUSH 0		players[i_11]
-    SHA3			players[i_11]
-    SWAP1			players[i_11]
-    PUSH 3		players[i_11]
-    MUL			players[i_11]
-    ADD			players[i_11]
-    PUSH 0		players[i_11]
-  tag83: 
-    JUMPDEST		players[i_11]
-    POP			players[i_11]
-    PUSH 0		players[i_11].addr
-    ADD			players[i_11].addr
-    PUSH 0		players[i_11].addr
-    SWAP1			players[i_11].addr
-    SLOAD			players[i_11].addr
-    SWAP1			players[i_11].addr
-    PUSH 100		players[i_11].addr
-    EXP			players[i_11].addr
-    SWAP1			players[i_11].addr
-    DIV			players[i_11].addr
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		players[i_11].addr
-    AND			players[i_11].addr
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		players[i_11].addr.send
-    AND			players[i_11].addr.send
-    PUSH 0		players[i_11].addr.send(bet*second_prize/100)
-    PUSH 64		100
-    PUSH 3		second_prize
-    PUSH 0		second_prize
-    POP			second_prize
-    SLOAD			second_prize
-    DUP5			bet
-    MUL			bet*second_prize
-    DIV			bet*second_prize/100
-    PUSH 40		players[i_11].addr.send(bet*second_prize/100)
-    MLOAD			players[i_11].addr.send(bet*second_prize/100)
-    DUP1			players[i_11].addr.send(bet*second_prize/100)
-    SWAP1			players[i_11].addr.send(bet*second_prize/100)
-    POP			players[i_11].addr.send(bet*second_prize/100)
-    PUSH 0		players[i_11].addr.send(bet*second_prize/100)
-    PUSH 40		players[i_11].addr.send(bet*second_prize/100)
-    MLOAD			players[i_11].addr.send(bet*second_prize/100)
-    DUP1			players[i_11].addr.send(bet*second_prize/100)
-    DUP4			players[i_11].addr.send(bet*second_prize/100)
-    SUB			players[i_11].addr.send(bet*second_prize/100)
-    DUP2			players[i_11].addr.send(bet*second_prize/100)
-    DUP6			players[i_11].addr.send(bet*second_prize/100)
-    DUP9			players[i_11].addr.send(bet*second_prize/100)
-    DUP9			players[i_11].addr.send(bet*second_prize/100)
-    CALL			players[i_11].addr.send(bet*second_prize/100)
-    SWAP4			players[i_11].addr.send(bet*second_prize/100)
-    POP			players[i_11].addr.send(bet*second_prize/100)
-    POP			players[i_11].addr.send(bet*second_prize/100)
-    POP			players[i_11].addr.send(bet*second_prize/100)
-    POP			players[i_11].addr.send(bet*second_prize/100)
-    POP			players[i_11].addr.send(bet*second_prize/100)
-    PUSH B		players
-    PUSH 0		players
-    POP			players
-    DUP3			i_6
-    DUP2			players[i_6]
-    SLOAD			players[i_6]
-    DUP2			players[i_6]
-    LT			players[i_6]
-    ISZERO			players[i_6]
-    PUSH [ErrorTag]		players[i_6]
-    JUMPI			players[i_6]
-    SWAP1			players[i_6]
-    PUSH 0		players[i_6]
-    MSTORE			players[i_6]
-    PUSH 20		players[i_6]
-    PUSH 0		players[i_6]
-    SHA3			players[i_6]
-    SWAP1			players[i_6]
-    PUSH 3		players[i_6]
-    MUL			players[i_6]
-    ADD			players[i_6]
-    PUSH 0		players[i_6]
-  tag84: 
-    JUMPDEST		players[i_6]
-    POP			players[i_6]
-    PUSH 0		players[i_6].addr
-    ADD			players[i_6].addr
-    PUSH 0		players[i_6].addr
-    SWAP1			players[i_6].addr
-    SLOAD			players[i_6].addr
-    SWAP1			players[i_6].addr
-    PUSH 100		players[i_6].addr
-    EXP			players[i_6].addr
-    SWAP1			players[i_6].addr
-    DIV			players[i_6].addr
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		players[i_6].addr
-    AND			players[i_6].addr
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		players[i_6].addr.send
-    AND			players[i_6].addr.send
-    PUSH 0		players[i_6].addr.send(bet*third_prize/100)
-    PUSH 64		100
-    PUSH 4		third_prize
-    PUSH 0		third_prize
-    POP			third_prize
-    SLOAD			third_prize
-    DUP5			bet
-    MUL			bet*third_prize
-    DIV			bet*third_prize/100
-    PUSH 40		players[i_6].addr.send(bet*third_prize/100)
-    MLOAD			players[i_6].addr.send(bet*third_prize/100)
-    DUP1			players[i_6].addr.send(bet*third_prize/100)
-    SWAP1			players[i_6].addr.send(bet*third_prize/100)
-    POP			players[i_6].addr.send(bet*third_prize/100)
-    PUSH 0		players[i_6].addr.send(bet*third_prize/100)
-    PUSH 40		players[i_6].addr.send(bet*third_prize/100)
-    MLOAD			players[i_6].addr.send(bet*third_prize/100)
-    DUP1			players[i_6].addr.send(bet*third_prize/100)
-    DUP4			players[i_6].addr.send(bet*third_prize/100)
-    SUB			players[i_6].addr.send(bet*third_prize/100)
-    DUP2			players[i_6].addr.send(bet*third_prize/100)
-    DUP6			players[i_6].addr.send(bet*third_prize/100)
-    DUP9			players[i_6].addr.send(bet*third_prize/100)
-    DUP9			players[i_6].addr.send(bet*third_prize/100)
-    CALL			players[i_6].addr.send(bet*third_prize/100)
-    SWAP4			players[i_6].addr.send(bet*third_prize/100)
-    POP			players[i_6].addr.send(bet*third_prize/100)
-    POP			players[i_6].addr.send(bet*third_prize/100)
-    POP			players[i_6].addr.send(bet*third_prize/100)
-    POP			players[i_6].addr.send(bet*third_prize/100)
-    POP			players[i_6].addr.send(bet*third_prize/100)
-    PUSH 64		100
-    PUSH 2		first_prize
-    PUSH 0		first_prize
-    POP			first_prize
-    SLOAD			first_prize
-    DUP3			bet
-    MUL			bet*first_prize
-    DIV			bet*first_prize/100
-    PUSH B		players
-    PUSH 0		players
-    POP			players
-    DUP6			i_13
-    DUP2			players[i_13]
-    SLOAD			players[i_13]
-    DUP2			players[i_13]
-    LT			players[i_13]
-    ISZERO			players[i_13]
-    PUSH [ErrorTag]		players[i_13]
-    JUMPI			players[i_13]
-    SWAP1			players[i_13]
-    PUSH 0		players[i_13]
-    MSTORE			players[i_13]
-    PUSH 20		players[i_13]
-    PUSH 0		players[i_13]
-    SHA3			players[i_13]
-    SWAP1			players[i_13]
-    PUSH 3		players[i_13]
-    MUL			players[i_13]
-    ADD			players[i_13]
-    PUSH 0		players[i_13]
-  tag85: 
-    JUMPDEST		players[i_13]
-    POP			players[i_13]
-    PUSH 1		players[i_13].payout
-    ADD			players[i_13].payout
-    PUSH 0		players[i_13].payout
-    POP			players[i_13].payout=bet*first_prize/100
-    DUP2			players[i_13].payout=bet*first_prize/100
-    SWAP1			players[i_13].payout=bet*first_prize/100
-    SSTORE			players[i_13].payout=bet*first_prize/100
-    POP			players[i_13].payout=bet*first_prize/100
-    PUSH 64		100
-    PUSH 3		second_prize
-    PUSH 0		second_prize
-    POP			second_prize
-    SLOAD			second_prize
-    DUP3			bet
-    MUL			bet*second_prize
-    DIV			bet*second_prize/100
-    PUSH B		players
-    PUSH 0		players
-    POP			players
-    DUP5			i_11
-    DUP2			players[i_11]
-    SLOAD			players[i_11]
-    DUP2			players[i_11]
-    LT			players[i_11]
-    ISZERO			players[i_11]
-    PUSH [ErrorTag]		players[i_11]
-    JUMPI			players[i_11]
-    SWAP1			players[i_11]
-    PUSH 0		players[i_11]
-    MSTORE			players[i_11]
-    PUSH 20		players[i_11]
-    PUSH 0		players[i_11]
-    SHA3			players[i_11]
-    SWAP1			players[i_11]
-    PUSH 3		players[i_11]
-    MUL			players[i_11]
-    ADD			players[i_11]
-    PUSH 0		players[i_11]
-  tag86: 
-    JUMPDEST		players[i_11]
-    POP			players[i_11]
-    PUSH 1		players[i_11].payout
-    ADD			players[i_11].payout
-    PUSH 0		players[i_11].payout
-    POP			players[i_11].payout=bet*second_prize/100
-    DUP2			players[i_11].payout=bet*second_prize/100
-    SWAP1			players[i_11].payout=bet*second_prize/100
-    SSTORE			players[i_11].payout=bet*second_prize/100
-    POP			players[i_11].payout=bet*second_prize/100
-    PUSH 64		100
-    PUSH 4		third_prize
-    PUSH 0		third_prize
-    POP			third_prize
-    SLOAD			third_prize
-    DUP3			bet
-    MUL			bet*third_prize
-    DIV			bet*third_prize/100
-    PUSH B		players
-    PUSH 0		players
-    POP			players
-    DUP4			i_6
-    DUP2			players[i_6]
-    SLOAD			players[i_6]
-    DUP2			players[i_6]
-    LT			players[i_6]
-    ISZERO			players[i_6]
-    PUSH [ErrorTag]		players[i_6]
-    JUMPI			players[i_6]
-    SWAP1			players[i_6]
-    PUSH 0		players[i_6]
-    MSTORE			players[i_6]
-    PUSH 20		players[i_6]
-    PUSH 0		players[i_6]
-    SHA3			players[i_6]
-    SWAP1			players[i_6]
-    PUSH 3		players[i_6]
-    MUL			players[i_6]
-    ADD			players[i_6]
-    PUSH 0		players[i_6]
-  tag87: 
-    JUMPDEST		players[i_6]
-    POP			players[i_6]
-    PUSH 1		players[i_6].payout
-    ADD			players[i_6].payout
-    PUSH 0		players[i_6].payout
-    POP			players[i_6].payout=bet*third_prize/100
-    DUP2			players[i_6].payout=bet*third_prize/100
-    SWAP1			players[i_6].payout=bet*third_prize/100
-    SSTORE			players[i_6].payout=bet*third_prize/100
-    POP			players[i_6].payout=bet*third_prize/100
-    PUSH 1		true
-    PUSH B		players
-    PUSH 0		players
-    POP			players
-    PUSH 7		Payout_id
-    PUSH 0		Payout_id
-    POP			Payout_id
-    SLOAD			Payout_id
-    DUP2			players[Payout_id]
-    SLOAD			players[Payout_id]
-    DUP2			players[Payout_id]
-    LT			players[Payout_id]
-    ISZERO			players[Payout_id]
-    PUSH [ErrorTag]		players[Payout_id]
-    JUMPI			players[Payout_id]
-    SWAP1			players[Payout_id]
-    PUSH 0		players[Payout_id]
-    MSTORE			players[Payout_id]
-    PUSH 20		players[Payout_id]
-    PUSH 0		players[Payout_id]
-    SHA3			players[Payout_id]
-    SWAP1			players[Payout_id]
-    PUSH 3		players[Payout_id]
-    MUL			players[Payout_id]
-    ADD			players[Payout_id]
-    PUSH 0		players[Payout_id]
-  tag88: 
-    JUMPDEST		players[Payout_id]
-    POP			players[Payout_id]
-    PUSH 2		players[Payout_id].paid
-    ADD			players[Payout_id].paid
-    PUSH 0		players[Payout_id].paid
-    PUSH 100		players[Payout_id].paid=true
-    EXP			players[Payout_id].paid=true
-    DUP2			players[Payout_id].paid=true
-    SLOAD			players[Payout_id].paid=true
-    DUP2			players[Payout_id].paid=true
-    PUSH FF		players[Payout_id].paid=true
-    MUL			players[Payout_id].paid=true
-    NOT			players[Payout_id].paid=true
-    AND			players[Payout_id].paid=true
-    SWAP1			players[Payout_id].paid=true
-    DUP4			players[Payout_id].paid=true
-    MUL			players[Payout_id].paid=true
-    OR			players[Payout_id].paid=true
-    SWAP1			players[Payout_id].paid=true
-    SSTORE			players[Payout_id].paid=true
-    POP			players[Payout_id].paid=true
-    PUSH 1		true
-    PUSH B		players
-    PUSH 0		players
-    POP			players
-    PUSH 1		1
-    PUSH 7		Payout_id
-    PUSH 0		Payout_id
-    POP			Payout_id
-    SLOAD			Payout_id
-    ADD			Payout_id+1
-    DUP2			players[Payout_id+1]
-    SLOAD			players[Payout_id+1]
-    DUP2			players[Payout_id+1]
-    LT			players[Payout_id+1]
-    ISZERO			players[Payout_id+1]
-    PUSH [ErrorTag]		players[Payout_id+1]
-    JUMPI			players[Payout_id+1]
-    SWAP1			players[Payout_id+1]
-    PUSH 0		players[Payout_id+1]
-    MSTORE			players[Payout_id+1]
-    PUSH 20		players[Payout_id+1]
-    PUSH 0		players[Payout_id+1]
-    SHA3			players[Payout_id+1]
-    SWAP1			players[Payout_id+1]
-    PUSH 3		players[Payout_id+1]
-    MUL			players[Payout_id+1]
-    ADD			players[Payout_id+1]
-    PUSH 0		players[Payout_id+1]
-  tag89: 
-    JUMPDEST		players[Payout_id+1]
-    POP			players[Payout_id+1]
-    PUSH 2		players[Payout_id+1].paid
-    ADD			players[Payout_id+1].paid
-    PUSH 0		players[Payout_id+1].paid
-    PUSH 100		players[Payout_id+1].paid=true
-    EXP			players[Payout_id+1].paid=true
-    DUP2			players[Payout_id+1].paid=true
-    SLOAD			players[Payout_id+1].paid=true
-    DUP2			players[Payout_id+1].paid=true
-    PUSH FF		players[Payout_id+1].paid=true
-    MUL			players[Payout_id+1].paid=true
-    NOT			players[Payout_id+1].paid=true
-    AND			players[Payout_id+1].paid=true
-    SWAP1			players[Payout_id+1].paid=true
-    DUP4			players[Payout_id+1].paid=true
-    MUL			players[Payout_id+1].paid=true
-    OR			players[Payout_id+1].paid=true
-    SWAP1			players[Payout_id+1].paid=true
-    SSTORE			players[Payout_id+1].paid=true
-    POP			players[Payout_id+1].paid=true
-    PUSH 1		true
-    PUSH B		players
-    PUSH 0		players
-    POP			players
-    PUSH 2		2
-    PUSH 7		Payout_id
-    PUSH 0		Payout_id
-    POP			Payout_id
-    SLOAD			Payout_id
-    ADD			Payout_id+2
-    DUP2			players[Payout_id+2]
-    SLOAD			players[Payout_id+2]
-    DUP2			players[Payout_id+2]
-    LT			players[Payout_id+2]
-    ISZERO			players[Payout_id+2]
-    PUSH [ErrorTag]		players[Payout_id+2]
-    JUMPI			players[Payout_id+2]
-    SWAP1			players[Payout_id+2]
-    PUSH 0		players[Payout_id+2]
-    MSTORE			players[Payout_id+2]
-    PUSH 20		players[Payout_id+2]
-    PUSH 0		players[Payout_id+2]
-    SHA3			players[Payout_id+2]
-    SWAP1			players[Payout_id+2]
-    PUSH 3		players[Payout_id+2]
-    MUL			players[Payout_id+2]
-    ADD			players[Payout_id+2]
-    PUSH 0		players[Payout_id+2]
-  tag90: 
-    JUMPDEST		players[Payout_id+2]
-    POP			players[Payout_id+2]
-    PUSH 2		players[Payout_id+2].paid
-    ADD			players[Payout_id+2].paid
-    PUSH 0		players[Payout_id+2].paid
-    PUSH 100		players[Payout_id+2].paid=true
-    EXP			players[Payout_id+2].paid=true
-    DUP2			players[Payout_id+2].paid=true
-    SLOAD			players[Payout_id+2].paid=true
-    DUP2			players[Payout_id+2].paid=true
-    PUSH FF		players[Payout_id+2].paid=true
-    MUL			players[Payout_id+2].paid=true
-    NOT			players[Payout_id+2].paid=true
-    AND			players[Payout_id+2].paid=true
-    SWAP1			players[Payout_id+2].paid=true
-    DUP4			players[Payout_id+2].paid=true
-    MUL			players[Payout_id+2].paid=true
-    OR			players[Payout_id+2].paid=true
-    SWAP1			players[Payout_id+2].paid=true
-    SSTORE			players[Payout_id+2].paid=true
-    POP			players[Payout_id+2].paid=true
-    PUSH 0		0
-    PUSH 5		Balance
-    PUSH 0		Balance
-    POP			Balance=0
-    DUP2			Balance=0
-    SWAP1			Balance=0
-    SSTORE			Balance=0
-    POP			Balance=0
-    PUSH 0		0
-    PUSH 8		number_of_players
-    PUSH 0		number_of_players
-    POP			number_of_players=0
-    DUP2			number_of_players=0
-    SWAP1			number_of_players=0
-    SSTORE			number_of_players=0
-    POP			number_of_players=0
-    PUSH 3		3
-    PUSH 7		Payout_id
-    PUSH 0		Payout_id
-    DUP3			Payout_id += 3
-    DUP3			Payout_id += 3
-    DUP3			Payout_id += 3
-    POP			Payout_id += 3
-    SLOAD			Payout_id += 3
-    ADD			Payout_id += 3
-    SWAP3			Payout_id += 3
-    POP			Payout_id += 3
-    POP			Payout_id += 3
-    DUP2			Payout_id += 3
-    SWAP1			Payout_id += 3
-    SSTORE			Payout_id += 3
-    POP			Payout_id += 3
-  tag77: 
-    JUMPDEST		function  Pay() private{...
-    POP			function  Pay() private{...
-    POP			function  Pay() private{...
-    POP			function  Pay() private{...
-    POP			function  Pay() private{...
-    POP			function  Pay() private{...
-    JUMP	[out]		function  Pay() private{...

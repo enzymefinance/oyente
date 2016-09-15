@@ -1,5 +1,0 @@
-
-0      PUSH1  => 60
-2      PUSH1  => 40
-4      ADD
-5      STOP

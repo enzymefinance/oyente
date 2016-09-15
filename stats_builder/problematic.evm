@@ -1,2960 +1,0 @@
-
-======= IOU =======
-EVM assembly:
-.code:
-  PUSH 60		contract IOU {...
-  PUSH 40		contract IOU {...
-  MSTORE			contract IOU {...
-  PUSH 40		function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  MLOAD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  PUSHSIZE		function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  CODESIZE			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  SUB			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  DUP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  PUSHSIZE		function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  DUP4			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  CODECOPY			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  DUP2			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  ADD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  PUSH 40		function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  MSTORE			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  DUP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  DUP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  MLOAD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  DUP3			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  ADD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  SWAP2			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  SWAP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  PUSH 20		function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  ADD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  DUP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  MLOAD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  DUP3			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  ADD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  SWAP2			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  SWAP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  PUSH 20		function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  ADD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  DUP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  MLOAD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  SWAP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  PUSH 20		function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  ADD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  SWAP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  SWAP2			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  SWAP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  POP			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  POP			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-tag1: 
-  JUMPDEST		function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  CALLER			msg.sender
-  PUSH 0		owner
-  PUSH 0		owner
-  PUSH 100		owner = msg.sender
-  EXP			owner = msg.sender
-  DUP2			owner = msg.sender
-  SLOAD			owner = msg.sender
-  DUP2			owner = msg.sender
-  PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		owner = msg.sender
-  MUL			owner = msg.sender
-  NOT			owner = msg.sender
-  AND			owner = msg.sender
-  SWAP1			owner = msg.sender
-  DUP4			owner = msg.sender
-  MUL			owner = msg.sender
-  OR			owner = msg.sender
-  SWAP1			owner = msg.sender
-  SSTORE			owner = msg.sender
-  POP			owner = msg.sender
-  DUP3			tokenName
-  PUSH 1		name
-  PUSH 0		name
-  POP			name = tokenName
-  SWAP1			name = tokenName
-  DUP1			name = tokenName
-  MLOAD			name = tokenName
-  SWAP1			name = tokenName
-  PUSH 20		name = tokenName
-  ADD			name = tokenName
-  SWAP1			name = tokenName
-  DUP3			name = tokenName
-  DUP1			name = tokenName
-  SLOAD			name = tokenName
-  PUSH 1		name = tokenName
-  DUP2			name = tokenName
-  PUSH 1		name = tokenName
-  AND			name = tokenName
-  ISZERO			name = tokenName
-  PUSH 100		name = tokenName
-  MUL			name = tokenName
-  SUB			name = tokenName
-  AND			name = tokenName
-  PUSH 2		name = tokenName
-  SWAP1			name = tokenName
-  DIV			name = tokenName
-  SWAP1			name = tokenName
-  PUSH 0		name = tokenName
-  MSTORE			name = tokenName
-  PUSH 20		name = tokenName
-  PUSH 0		name = tokenName
-  SHA3			name = tokenName
-  SWAP1			name = tokenName
-  PUSH 1F		name = tokenName
-  ADD			name = tokenName
-  PUSH 20		name = tokenName
-  SWAP1			name = tokenName
-  DIV			name = tokenName
-  DUP2			name = tokenName
-  ADD			name = tokenName
-  SWAP3			name = tokenName
-  DUP3			name = tokenName
-  PUSH 1F		name = tokenName
-  LT			name = tokenName
-  PUSH [tag4]		name = tokenName
-  JUMPI			name = tokenName
-  DUP1			name = tokenName
-  MLOAD			name = tokenName
-  PUSH FF		name = tokenName
-  NOT			name = tokenName
-  AND			name = tokenName
-  DUP4			name = tokenName
-  DUP1			name = tokenName
-  ADD			name = tokenName
-  OR			name = tokenName
-  DUP6			name = tokenName
-  SSTORE			name = tokenName
-  PUSH [tag3]		name = tokenName
-  JUMP			name = tokenName
-tag4: 
-  JUMPDEST		name = tokenName
-  DUP3			name = tokenName
-  DUP1			name = tokenName
-  ADD			name = tokenName
-  PUSH 1		name = tokenName
-  ADD			name = tokenName
-  DUP6			name = tokenName
-  SSTORE			name = tokenName
-  DUP3			name = tokenName
-  ISZERO			name = tokenName
-  PUSH [tag3]		name = tokenName
-  JUMPI			name = tokenName
-  SWAP2			name = tokenName
-  DUP3			name = tokenName
-  ADD			name = tokenName
-tag5: 
-  JUMPDEST		name = tokenName
-  DUP3			name = tokenName
-  DUP2			name = tokenName
-  GT			name = tokenName
-  ISZERO			name = tokenName
-  PUSH [tag6]		name = tokenName
-  JUMPI			name = tokenName
-  DUP3			name = tokenName
-  MLOAD			name = tokenName
-  DUP3			name = tokenName
-  PUSH 0		name = tokenName
-  POP			name = tokenName
-  SSTORE			name = tokenName
-  SWAP2			name = tokenName
-  PUSH 20		name = tokenName
-  ADD			name = tokenName
-  SWAP2			name = tokenName
-  SWAP1			name = tokenName
-  PUSH 1		name = tokenName
-  ADD			name = tokenName
-  SWAP1			name = tokenName
-  PUSH [tag5]		name = tokenName
-  JUMP			name = tokenName
-tag6: 
-  JUMPDEST		name = tokenName
-tag3: 
-  JUMPDEST		name = tokenName
-  POP			name = tokenName
-  SWAP1			name = tokenName
-  POP			name = tokenName
-  PUSH [tag7]		name = tokenName
-  SWAP2			name = tokenName
-  SWAP1			name = tokenName
-  PUSH [tag8]		name = tokenName
-  JUMP			name = tokenName
-tag8: 
-  JUMPDEST		name = tokenName
-  DUP1			name = tokenName
-  DUP3			name = tokenName
-  GT			name = tokenName
-  ISZERO			name = tokenName
-  PUSH [tag9]		name = tokenName
-  JUMPI			name = tokenName
-  PUSH 0		name = tokenName
-  DUP2			name = tokenName
-  DUP2			name = tokenName
-  POP			name = tokenName
-  PUSH 0		name = tokenName
-  SWAP1			name = tokenName
-  SSTORE			name = tokenName
-  POP			name = tokenName
-  PUSH 1		name = tokenName
-  ADD			name = tokenName
-  PUSH [tag8]		name = tokenName
-  JUMP			name = tokenName
-tag9: 
-  JUMPDEST		name = tokenName
-  POP			name = tokenName
-  SWAP1			name = tokenName
-  JUMP			name = tokenName
-tag7: 
-  JUMPDEST		name = tokenName
-  POP			name = tokenName
-  POP			name = tokenName
-  DUP2			tokenSymbol
-  PUSH 2		symbol
-  PUSH 0		symbol
-  POP			symbol = tokenSymbol
-  SWAP1			symbol = tokenSymbol
-  DUP1			symbol = tokenSymbol
-  MLOAD			symbol = tokenSymbol
-  SWAP1			symbol = tokenSymbol
-  PUSH 20		symbol = tokenSymbol
-  ADD			symbol = tokenSymbol
-  SWAP1			symbol = tokenSymbol
-  DUP3			symbol = tokenSymbol
-  DUP1			symbol = tokenSymbol
-  SLOAD			symbol = tokenSymbol
-  PUSH 1		symbol = tokenSymbol
-  DUP2			symbol = tokenSymbol
-  PUSH 1		symbol = tokenSymbol
-  AND			symbol = tokenSymbol
-  ISZERO			symbol = tokenSymbol
-  PUSH 100		symbol = tokenSymbol
-  MUL			symbol = tokenSymbol
-  SUB			symbol = tokenSymbol
-  AND			symbol = tokenSymbol
-  PUSH 2		symbol = tokenSymbol
-  SWAP1			symbol = tokenSymbol
-  DIV			symbol = tokenSymbol
-  SWAP1			symbol = tokenSymbol
-  PUSH 0		symbol = tokenSymbol
-  MSTORE			symbol = tokenSymbol
-  PUSH 20		symbol = tokenSymbol
-  PUSH 0		symbol = tokenSymbol
-  SHA3			symbol = tokenSymbol
-  SWAP1			symbol = tokenSymbol
-  PUSH 1F		symbol = tokenSymbol
-  ADD			symbol = tokenSymbol
-  PUSH 20		symbol = tokenSymbol
-  SWAP1			symbol = tokenSymbol
-  DIV			symbol = tokenSymbol
-  DUP2			symbol = tokenSymbol
-  ADD			symbol = tokenSymbol
-  SWAP3			symbol = tokenSymbol
-  DUP3			symbol = tokenSymbol
-  PUSH 1F		symbol = tokenSymbol
-  LT			symbol = tokenSymbol
-  PUSH [tag11]		symbol = tokenSymbol
-  JUMPI			symbol = tokenSymbol
-  DUP1			symbol = tokenSymbol
-  MLOAD			symbol = tokenSymbol
-  PUSH FF		symbol = tokenSymbol
-  NOT			symbol = tokenSymbol
-  AND			symbol = tokenSymbol
-  DUP4			symbol = tokenSymbol
-  DUP1			symbol = tokenSymbol
-  ADD			symbol = tokenSymbol
-  OR			symbol = tokenSymbol
-  DUP6			symbol = tokenSymbol
-  SSTORE			symbol = tokenSymbol
-  PUSH [tag10]		symbol = tokenSymbol
-  JUMP			symbol = tokenSymbol
-tag11: 
-  JUMPDEST		symbol = tokenSymbol
-  DUP3			symbol = tokenSymbol
-  DUP1			symbol = tokenSymbol
-  ADD			symbol = tokenSymbol
-  PUSH 1		symbol = tokenSymbol
-  ADD			symbol = tokenSymbol
-  DUP6			symbol = tokenSymbol
-  SSTORE			symbol = tokenSymbol
-  DUP3			symbol = tokenSymbol
-  ISZERO			symbol = tokenSymbol
-  PUSH [tag10]		symbol = tokenSymbol
-  JUMPI			symbol = tokenSymbol
-  SWAP2			symbol = tokenSymbol
-  DUP3			symbol = tokenSymbol
-  ADD			symbol = tokenSymbol
-tag12: 
-  JUMPDEST		symbol = tokenSymbol
-  DUP3			symbol = tokenSymbol
-  DUP2			symbol = tokenSymbol
-  GT			symbol = tokenSymbol
-  ISZERO			symbol = tokenSymbol
-  PUSH [tag13]		symbol = tokenSymbol
-  JUMPI			symbol = tokenSymbol
-  DUP3			symbol = tokenSymbol
-  MLOAD			symbol = tokenSymbol
-  DUP3			symbol = tokenSymbol
-  PUSH 0		symbol = tokenSymbol
-  POP			symbol = tokenSymbol
-  SSTORE			symbol = tokenSymbol
-  SWAP2			symbol = tokenSymbol
-  PUSH 20		symbol = tokenSymbol
-  ADD			symbol = tokenSymbol
-  SWAP2			symbol = tokenSymbol
-  SWAP1			symbol = tokenSymbol
-  PUSH 1		symbol = tokenSymbol
-  ADD			symbol = tokenSymbol
-  SWAP1			symbol = tokenSymbol
-  PUSH [tag12]		symbol = tokenSymbol
-  JUMP			symbol = tokenSymbol
-tag13: 
-  JUMPDEST		symbol = tokenSymbol
-tag10: 
-  JUMPDEST		symbol = tokenSymbol
-  POP			symbol = tokenSymbol
-  SWAP1			symbol = tokenSymbol
-  POP			symbol = tokenSymbol
-  PUSH [tag14]		symbol = tokenSymbol
-  SWAP2			symbol = tokenSymbol
-  SWAP1			symbol = tokenSymbol
-  PUSH [tag15]		symbol = tokenSymbol
-  JUMP			symbol = tokenSymbol
-tag15: 
-  JUMPDEST		symbol = tokenSymbol
-  DUP1			symbol = tokenSymbol
-  DUP3			symbol = tokenSymbol
-  GT			symbol = tokenSymbol
-  ISZERO			symbol = tokenSymbol
-  PUSH [tag16]		symbol = tokenSymbol
-  JUMPI			symbol = tokenSymbol
-  PUSH 0		symbol = tokenSymbol
-  DUP2			symbol = tokenSymbol
-  DUP2			symbol = tokenSymbol
-  POP			symbol = tokenSymbol
-  PUSH 0		symbol = tokenSymbol
-  SWAP1			symbol = tokenSymbol
-  SSTORE			symbol = tokenSymbol
-  POP			symbol = tokenSymbol
-  PUSH 1		symbol = tokenSymbol
-  ADD			symbol = tokenSymbol
-  PUSH [tag15]		symbol = tokenSymbol
-  JUMP			symbol = tokenSymbol
-tag16: 
-  JUMPDEST		symbol = tokenSymbol
-  POP			symbol = tokenSymbol
-  SWAP1			symbol = tokenSymbol
-  JUMP			symbol = tokenSymbol
-tag14: 
-  JUMPDEST		symbol = tokenSymbol
-  POP			symbol = tokenSymbol
-  POP			symbol = tokenSymbol
-  DUP1			decimalUnits
-  PUSH 3		decimals
-  PUSH 0		decimals
-  PUSH 100		decimals = decimalUnits
-  EXP			decimals = decimalUnits
-  DUP2			decimals = decimalUnits
-  SLOAD			decimals = decimalUnits
-  DUP2			decimals = decimalUnits
-  PUSH FF		decimals = decimalUnits
-  MUL			decimals = decimalUnits
-  NOT			decimals = decimalUnits
-  AND			decimals = decimalUnits
-  SWAP1			decimals = decimalUnits
-  DUP4			decimals = decimalUnits
-  MUL			decimals = decimalUnits
-  OR			decimals = decimalUnits
-  SWAP1			decimals = decimalUnits
-  SSTORE			decimals = decimalUnits
-  POP			decimals = decimalUnits
-tag2: 
-  JUMPDEST		function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  POP			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  POP			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  POP			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-  PUSH #[$00000000…00000000]		contract IOU {...
-  DUP1			contract IOU {...
-  PUSH [$00000000…00000000]		contract IOU {...
-  PUSH 0		contract IOU {...
-  CODECOPY			contract IOU {...
-  PUSH 0		contract IOU {...
-  RETURN			contract IOU {...
-.data:
-  0: 
-  .code:
-    PUSH 60		contract IOU {...
-    PUSH 40		contract IOU {...
-    MSTORE			contract IOU {...
-    PUSH 0		contract IOU {...
-    CALLDATALOAD			contract IOU {...
-    PUSH 100000000000000000000000000000000000000000000000000000000		contract IOU {...
-    SWAP1			contract IOU {...
-    DIV			contract IOU {...
-    DUP1			contract IOU {...
-    PUSH 6FDDE03		contract IOU {...
-    EQ			contract IOU {...
-    PUSH [tag2]		contract IOU {...
-    JUMPI			contract IOU {...
-    DUP1			contract IOU {...
-    PUSH 313CE567		contract IOU {...
-    EQ			contract IOU {...
-    PUSH [tag3]		contract IOU {...
-    JUMPI			contract IOU {...
-    DUP1			contract IOU {...
-    PUSH 70A08231		contract IOU {...
-    EQ			contract IOU {...
-    PUSH [tag4]		contract IOU {...
-    JUMPI			contract IOU {...
-    DUP1			contract IOU {...
-    PUSH 95D89B41		contract IOU {...
-    EQ			contract IOU {...
-    PUSH [tag5]		contract IOU {...
-    JUMPI			contract IOU {...
-    DUP1			contract IOU {...
-    PUSH BEABACC8		contract IOU {...
-    EQ			contract IOU {...
-    PUSH [tag6]		contract IOU {...
-    JUMPI			contract IOU {...
-    PUSH [tag1]		contract IOU {...
-    JUMP			contract IOU {...
-  tag1: 
-    JUMPDEST		contract IOU {...
-    STOP			contract IOU {...
-  tag2: 
-    JUMPDEST		string public name
-    PUSH [tag7]		string public name
-    PUSH 4		string public name
-    DUP1			string public name
-    POP			string public name
-    POP			string public name
-    PUSH [tag8]		string public name
-    JUMP			string public name
-  tag7: 
-    JUMPDEST		string public name
-    PUSH 40		string public name
-    MLOAD			string public name
-    DUP1			string public name
-    DUP1			string public name
-    PUSH 20		string public name
-    ADD			string public name
-    DUP3			string public name
-    DUP2			string public name
-    SUB			string public name
-    DUP3			string public name
-    MSTORE			string public name
-    DUP4			string public name
-    DUP2			string public name
-    DUP2			string public name
-    MLOAD			string public name
-    DUP2			string public name
-    MSTORE			string public name
-    PUSH 20		string public name
-    ADD			string public name
-    SWAP2			string public name
-    POP			string public name
-    DUP1			string public name
-    MLOAD			string public name
-    SWAP1			string public name
-    PUSH 20		string public name
-    ADD			string public name
-    SWAP1			string public name
-    DUP1			string public name
-    DUP4			string public name
-    DUP4			string public name
-    DUP3			string public name
-    SWAP1			string public name
-    PUSH 0		string public name
-    PUSH 4		string public name
-    PUSH 20		string public name
-    DUP5			string public name
-    PUSH 1F		string public name
-    ADD			string public name
-    DIV			string public name
-    PUSH F		string public name
-    MUL			string public name
-    PUSH 3		string public name
-    ADD			string public name
-    CALL			string public name
-    POP			string public name
-    SWAP1			string public name
-    POP			string public name
-    SWAP1			string public name
-    DUP2			string public name
-    ADD			string public name
-    SWAP1			string public name
-    PUSH 1F		string public name
-    AND			string public name
-    DUP1			string public name
-    ISZERO			string public name
-    PUSH [tag9]		string public name
-    JUMPI			string public name
-    DUP1			string public name
-    DUP3			string public name
-    SUB			string public name
-    DUP1			string public name
-    MLOAD			string public name
-    PUSH 1		string public name
-    DUP4			string public name
-    PUSH 20		string public name
-    SUB			string public name
-    PUSH 100		string public name
-    EXP			string public name
-    SUB			string public name
-    NOT			string public name
-    AND			string public name
-    DUP2			string public name
-    MSTORE			string public name
-    PUSH 20		string public name
-    ADD			string public name
-    SWAP2			string public name
-    POP			string public name
-  tag9: 
-    JUMPDEST		string public name
-    POP			string public name
-    SWAP3			string public name
-    POP			string public name
-    POP			string public name
-    POP			string public name
-    PUSH 40		string public name
-    MLOAD			string public name
-    DUP1			string public name
-    SWAP2			string public name
-    SUB			string public name
-    SWAP1			string public name
-    RETURN			string public name
-  tag3: 
-    JUMPDEST		uint8 public decimals
-    PUSH [tag10]		uint8 public decimals
-    PUSH 4		uint8 public decimals
-    DUP1			uint8 public decimals
-    POP			uint8 public decimals
-    POP			uint8 public decimals
-    PUSH [tag11]		uint8 public decimals
-    JUMP			uint8 public decimals
-  tag10: 
-    JUMPDEST		uint8 public decimals
-    PUSH 40		uint8 public decimals
-    MLOAD			uint8 public decimals
-    DUP1			uint8 public decimals
-    DUP3			uint8 public decimals
-    PUSH FF		uint8 public decimals
-    AND			uint8 public decimals
-    DUP2			uint8 public decimals
-    MSTORE			uint8 public decimals
-    PUSH 20		uint8 public decimals
-    ADD			uint8 public decimals
-    SWAP2			uint8 public decimals
-    POP			uint8 public decimals
-    POP			uint8 public decimals
-    PUSH 40		uint8 public decimals
-    MLOAD			uint8 public decimals
-    DUP1			uint8 public decimals
-    SWAP2			uint8 public decimals
-    SUB			uint8 public decimals
-    SWAP1			uint8 public decimals
-    RETURN			uint8 public decimals
-  tag4: 
-    JUMPDEST		mapping (address => uint256) public balanceOf
-    PUSH [tag12]		mapping (address => uint256) public balanceOf
-    PUSH 4		mapping (address => uint256) public balanceOf
-    DUP1			mapping (address => uint256) public balanceOf
-    DUP1			mapping (address => uint256) public balanceOf
-    CALLDATALOAD			mapping (address => uint256) public balanceOf
-    SWAP1			mapping (address => uint256) public balanceOf
-    PUSH 20		mapping (address => uint256) public balanceOf
-    ADD			mapping (address => uint256) public balanceOf
-    SWAP1			mapping (address => uint256) public balanceOf
-    SWAP2			mapping (address => uint256) public balanceOf
-    SWAP1			mapping (address => uint256) public balanceOf
-    POP			mapping (address => uint256) public balanceOf
-    POP			mapping (address => uint256) public balanceOf
-    PUSH [tag13]		mapping (address => uint256) public balanceOf
-    JUMP			mapping (address => uint256) public balanceOf
-  tag12: 
-    JUMPDEST		mapping (address => uint256) public balanceOf
-    PUSH 40		mapping (address => uint256) public balanceOf
-    MLOAD			mapping (address => uint256) public balanceOf
-    DUP1			mapping (address => uint256) public balanceOf
-    DUP3			mapping (address => uint256) public balanceOf
-    DUP2			mapping (address => uint256) public balanceOf
-    MSTORE			mapping (address => uint256) public balanceOf
-    PUSH 20		mapping (address => uint256) public balanceOf
-    ADD			mapping (address => uint256) public balanceOf
-    SWAP2			mapping (address => uint256) public balanceOf
-    POP			mapping (address => uint256) public balanceOf
-    POP			mapping (address => uint256) public balanceOf
-    PUSH 40		mapping (address => uint256) public balanceOf
-    MLOAD			mapping (address => uint256) public balanceOf
-    DUP1			mapping (address => uint256) public balanceOf
-    SWAP2			mapping (address => uint256) public balanceOf
-    SUB			mapping (address => uint256) public balanceOf
-    SWAP1			mapping (address => uint256) public balanceOf
-    RETURN			mapping (address => uint256) public balanceOf
-  tag5: 
-    JUMPDEST		string public symbol
-    PUSH [tag14]		string public symbol
-    PUSH 4		string public symbol
-    DUP1			string public symbol
-    POP			string public symbol
-    POP			string public symbol
-    PUSH [tag15]		string public symbol
-    JUMP			string public symbol
-  tag14: 
-    JUMPDEST		string public symbol
-    PUSH 40		string public symbol
-    MLOAD			string public symbol
-    DUP1			string public symbol
-    DUP1			string public symbol
-    PUSH 20		string public symbol
-    ADD			string public symbol
-    DUP3			string public symbol
-    DUP2			string public symbol
-    SUB			string public symbol
-    DUP3			string public symbol
-    MSTORE			string public symbol
-    DUP4			string public symbol
-    DUP2			string public symbol
-    DUP2			string public symbol
-    MLOAD			string public symbol
-    DUP2			string public symbol
-    MSTORE			string public symbol
-    PUSH 20		string public symbol
-    ADD			string public symbol
-    SWAP2			string public symbol
-    POP			string public symbol
-    DUP1			string public symbol
-    MLOAD			string public symbol
-    SWAP1			string public symbol
-    PUSH 20		string public symbol
-    ADD			string public symbol
-    SWAP1			string public symbol
-    DUP1			string public symbol
-    DUP4			string public symbol
-    DUP4			string public symbol
-    DUP3			string public symbol
-    SWAP1			string public symbol
-    PUSH 0		string public symbol
-    PUSH 4		string public symbol
-    PUSH 20		string public symbol
-    DUP5			string public symbol
-    PUSH 1F		string public symbol
-    ADD			string public symbol
-    DIV			string public symbol
-    PUSH F		string public symbol
-    MUL			string public symbol
-    PUSH 3		string public symbol
-    ADD			string public symbol
-    CALL			string public symbol
-    POP			string public symbol
-    SWAP1			string public symbol
-    POP			string public symbol
-    SWAP1			string public symbol
-    DUP2			string public symbol
-    ADD			string public symbol
-    SWAP1			string public symbol
-    PUSH 1F		string public symbol
-    AND			string public symbol
-    DUP1			string public symbol
-    ISZERO			string public symbol
-    PUSH [tag16]		string public symbol
-    JUMPI			string public symbol
-    DUP1			string public symbol
-    DUP3			string public symbol
-    SUB			string public symbol
-    DUP1			string public symbol
-    MLOAD			string public symbol
-    PUSH 1		string public symbol
-    DUP4			string public symbol
-    PUSH 20		string public symbol
-    SUB			string public symbol
-    PUSH 100		string public symbol
-    EXP			string public symbol
-    SUB			string public symbol
-    NOT			string public symbol
-    AND			string public symbol
-    DUP2			string public symbol
-    MSTORE			string public symbol
-    PUSH 20		string public symbol
-    ADD			string public symbol
-    SWAP2			string public symbol
-    POP			string public symbol
-  tag16: 
-    JUMPDEST		string public symbol
-    POP			string public symbol
-    SWAP3			string public symbol
-    POP			string public symbol
-    POP			string public symbol
-    POP			string public symbol
-    PUSH 40		string public symbol
-    MLOAD			string public symbol
-    DUP1			string public symbol
-    SWAP2			string public symbol
-    SUB			string public symbol
-    SWAP1			string public symbol
-    RETURN			string public symbol
-  tag6: 
-    JUMPDEST		function transfer(address _from, address _to, uint256 _value) {...
-    PUSH [tag17]		function transfer(address _from, address _to, uint256 _value) {...
-    PUSH 4		function transfer(address _from, address _to, uint256 _value) {...
-    DUP1			function transfer(address _from, address _to, uint256 _value) {...
-    DUP1			function transfer(address _from, address _to, uint256 _value) {...
-    CALLDATALOAD			function transfer(address _from, address _to, uint256 _value) {...
-    SWAP1			function transfer(address _from, address _to, uint256 _value) {...
-    PUSH 20		function transfer(address _from, address _to, uint256 _value) {...
-    ADD			function transfer(address _from, address _to, uint256 _value) {...
-    SWAP1			function transfer(address _from, address _to, uint256 _value) {...
-    SWAP2			function transfer(address _from, address _to, uint256 _value) {...
-    SWAP1			function transfer(address _from, address _to, uint256 _value) {...
-    DUP1			function transfer(address _from, address _to, uint256 _value) {...
-    CALLDATALOAD			function transfer(address _from, address _to, uint256 _value) {...
-    SWAP1			function transfer(address _from, address _to, uint256 _value) {...
-    PUSH 20		function transfer(address _from, address _to, uint256 _value) {...
-    ADD			function transfer(address _from, address _to, uint256 _value) {...
-    SWAP1			function transfer(address _from, address _to, uint256 _value) {...
-    SWAP2			function transfer(address _from, address _to, uint256 _value) {...
-    SWAP1			function transfer(address _from, address _to, uint256 _value) {...
-    DUP1			function transfer(address _from, address _to, uint256 _value) {...
-    CALLDATALOAD			function transfer(address _from, address _to, uint256 _value) {...
-    SWAP1			function transfer(address _from, address _to, uint256 _value) {...
-    PUSH 20		function transfer(address _from, address _to, uint256 _value) {...
-    ADD			function transfer(address _from, address _to, uint256 _value) {...
-    SWAP1			function transfer(address _from, address _to, uint256 _value) {...
-    SWAP2			function transfer(address _from, address _to, uint256 _value) {...
-    SWAP1			function transfer(address _from, address _to, uint256 _value) {...
-    POP			function transfer(address _from, address _to, uint256 _value) {...
-    POP			function transfer(address _from, address _to, uint256 _value) {...
-    PUSH [tag18]		function transfer(address _from, address _to, uint256 _value) {...
-    JUMP			function transfer(address _from, address _to, uint256 _value) {...
-  tag17: 
-    JUMPDEST		function transfer(address _from, address _to, uint256 _value) {...
-    STOP			function transfer(address _from, address _to, uint256 _value) {...
-  tag8: 
-    JUMPDEST		string public name
-    PUSH 1		string public name
-    PUSH 0		string public name
-    POP			string public name
-    DUP1			string public name
-    SLOAD			string public name
-    PUSH 1		string public name
-    DUP2			string public name
-    PUSH 1		string public name
-    AND			string public name
-    ISZERO			string public name
-    PUSH 100		string public name
-    MUL			string public name
-    SUB			string public name
-    AND			string public name
-    PUSH 2		string public name
-    SWAP1			string public name
-    DIV			string public name
-    DUP1			string public name
-    PUSH 1F		string public name
-    ADD			string public name
-    PUSH 20		string public name
-    DUP1			string public name
-    SWAP2			string public name
-    DIV			string public name
-    MUL			string public name
-    PUSH 20		string public name
-    ADD			string public name
-    PUSH 40		string public name
-    MLOAD			string public name
-    SWAP1			string public name
-    DUP2			string public name
-    ADD			string public name
-    PUSH 40		string public name
-    MSTORE			string public name
-    DUP1			string public name
-    SWAP3			string public name
-    SWAP2			string public name
-    SWAP1			string public name
-    DUP2			string public name
-    DUP2			string public name
-    MSTORE			string public name
-    PUSH 20		string public name
-    ADD			string public name
-    DUP3			string public name
-    DUP1			string public name
-    SLOAD			string public name
-    PUSH 1		string public name
-    DUP2			string public name
-    PUSH 1		string public name
-    AND			string public name
-    ISZERO			string public name
-    PUSH 100		string public name
-    MUL			string public name
-    SUB			string public name
-    AND			string public name
-    PUSH 2		string public name
-    SWAP1			string public name
-    DIV			string public name
-    DUP1			string public name
-    ISZERO			string public name
-    PUSH [tag19]		string public name
-    JUMPI			string public name
-    DUP1			string public name
-    PUSH 1F		string public name
-    LT			string public name
-    PUSH [tag20]		string public name
-    JUMPI			string public name
-    PUSH 100		string public name
-    DUP1			string public name
-    DUP4			string public name
-    SLOAD			string public name
-    DIV			string public name
-    MUL			string public name
-    DUP4			string public name
-    MSTORE			string public name
-    SWAP2			string public name
-    PUSH 20		string public name
-    ADD			string public name
-    SWAP2			string public name
-    PUSH [tag19]		string public name
-    JUMP			string public name
-  tag20: 
-    JUMPDEST		string public name
-    DUP3			string public name
-    ADD			string public name
-    SWAP2			string public name
-    SWAP1			string public name
-    PUSH 0		string public name
-    MSTORE			string public name
-    PUSH 20		string public name
-    PUSH 0		string public name
-    SHA3			string public name
-    SWAP1			string public name
-  tag21: 
-    JUMPDEST		string public name
-    DUP2			string public name
-    SLOAD			string public name
-    DUP2			string public name
-    MSTORE			string public name
-    SWAP1			string public name
-    PUSH 1		string public name
-    ADD			string public name
-    SWAP1			string public name
-    PUSH 20		string public name
-    ADD			string public name
-    DUP1			string public name
-    DUP4			string public name
-    GT			string public name
-    PUSH [tag21]		string public name
-    JUMPI			string public name
-    DUP3			string public name
-    SWAP1			string public name
-    SUB			string public name
-    PUSH 1F		string public name
-    AND			string public name
-    DUP3			string public name
-    ADD			string public name
-    SWAP2			string public name
-  tag19: 
-    JUMPDEST		string public name
-    POP			string public name
-    POP			string public name
-    POP			string public name
-    POP			string public name
-    POP			string public name
-    DUP2			string public name
-    JUMP	[out]		string public name
-  tag15: 
-    JUMPDEST		string public symbol
-    PUSH 2		string public symbol
-    PUSH 0		string public symbol
-    POP			string public symbol
-    DUP1			string public symbol
-    SLOAD			string public symbol
-    PUSH 1		string public symbol
-    DUP2			string public symbol
-    PUSH 1		string public symbol
-    AND			string public symbol
-    ISZERO			string public symbol
-    PUSH 100		string public symbol
-    MUL			string public symbol
-    SUB			string public symbol
-    AND			string public symbol
-    PUSH 2		string public symbol
-    SWAP1			string public symbol
-    DIV			string public symbol
-    DUP1			string public symbol
-    PUSH 1F		string public symbol
-    ADD			string public symbol
-    PUSH 20		string public symbol
-    DUP1			string public symbol
-    SWAP2			string public symbol
-    DIV			string public symbol
-    MUL			string public symbol
-    PUSH 20		string public symbol
-    ADD			string public symbol
-    PUSH 40		string public symbol
-    MLOAD			string public symbol
-    SWAP1			string public symbol
-    DUP2			string public symbol
-    ADD			string public symbol
-    PUSH 40		string public symbol
-    MSTORE			string public symbol
-    DUP1			string public symbol
-    SWAP3			string public symbol
-    SWAP2			string public symbol
-    SWAP1			string public symbol
-    DUP2			string public symbol
-    DUP2			string public symbol
-    MSTORE			string public symbol
-    PUSH 20		string public symbol
-    ADD			string public symbol
-    DUP3			string public symbol
-    DUP1			string public symbol
-    SLOAD			string public symbol
-    PUSH 1		string public symbol
-    DUP2			string public symbol
-    PUSH 1		string public symbol
-    AND			string public symbol
-    ISZERO			string public symbol
-    PUSH 100		string public symbol
-    MUL			string public symbol
-    SUB			string public symbol
-    AND			string public symbol
-    PUSH 2		string public symbol
-    SWAP1			string public symbol
-    DIV			string public symbol
-    DUP1			string public symbol
-    ISZERO			string public symbol
-    PUSH [tag22]		string public symbol
-    JUMPI			string public symbol
-    DUP1			string public symbol
-    PUSH 1F		string public symbol
-    LT			string public symbol
-    PUSH [tag23]		string public symbol
-    JUMPI			string public symbol
-    PUSH 100		string public symbol
-    DUP1			string public symbol
-    DUP4			string public symbol
-    SLOAD			string public symbol
-    DIV			string public symbol
-    MUL			string public symbol
-    DUP4			string public symbol
-    MSTORE			string public symbol
-    SWAP2			string public symbol
-    PUSH 20		string public symbol
-    ADD			string public symbol
-    SWAP2			string public symbol
-    PUSH [tag22]		string public symbol
-    JUMP			string public symbol
-  tag23: 
-    JUMPDEST		string public symbol
-    DUP3			string public symbol
-    ADD			string public symbol
-    SWAP2			string public symbol
-    SWAP1			string public symbol
-    PUSH 0		string public symbol
-    MSTORE			string public symbol
-    PUSH 20		string public symbol
-    PUSH 0		string public symbol
-    SHA3			string public symbol
-    SWAP1			string public symbol
-  tag24: 
-    JUMPDEST		string public symbol
-    DUP2			string public symbol
-    SLOAD			string public symbol
-    DUP2			string public symbol
-    MSTORE			string public symbol
-    SWAP1			string public symbol
-    PUSH 1		string public symbol
-    ADD			string public symbol
-    SWAP1			string public symbol
-    PUSH 20		string public symbol
-    ADD			string public symbol
-    DUP1			string public symbol
-    DUP4			string public symbol
-    GT			string public symbol
-    PUSH [tag24]		string public symbol
-    JUMPI			string public symbol
-    DUP3			string public symbol
-    SWAP1			string public symbol
-    SUB			string public symbol
-    PUSH 1F		string public symbol
-    AND			string public symbol
-    DUP3			string public symbol
-    ADD			string public symbol
-    SWAP2			string public symbol
-  tag22: 
-    JUMPDEST		string public symbol
-    POP			string public symbol
-    POP			string public symbol
-    POP			string public symbol
-    POP			string public symbol
-    POP			string public symbol
-    DUP2			string public symbol
-    JUMP	[out]		string public symbol
-  tag11: 
-    JUMPDEST		uint8 public decimals
-    PUSH 3		uint8 public decimals
-    PUSH 0		uint8 public decimals
-    SWAP1			uint8 public decimals
-    SLOAD			uint8 public decimals
-    SWAP1			uint8 public decimals
-    PUSH 100		uint8 public decimals
-    EXP			uint8 public decimals
-    SWAP1			uint8 public decimals
-    DIV			uint8 public decimals
-    PUSH FF		uint8 public decimals
-    AND			uint8 public decimals
-    DUP2			uint8 public decimals
-    JUMP	[out]		uint8 public decimals
-  tag13: 
-    JUMPDEST		mapping (address => uint256) public balanceOf
-    PUSH 4		mapping (address => uint256) public balanceOf
-    PUSH 0		mapping (address => uint256) public balanceOf
-    POP			mapping (address => uint256) public balanceOf
-    PUSH 20		mapping (address => uint256) public balanceOf
-    MSTORE			mapping (address => uint256) public balanceOf
-    DUP1			mapping (address => uint256) public balanceOf
-    PUSH 0		mapping (address => uint256) public balanceOf
-    MSTORE			mapping (address => uint256) public balanceOf
-    PUSH 40		mapping (address => uint256) public balanceOf
-    PUSH 0		mapping (address => uint256) public balanceOf
-    SHA3			mapping (address => uint256) public balanceOf
-    PUSH 0		mapping (address => uint256) public balanceOf
-    SWAP2			mapping (address => uint256) public balanceOf
-    POP			mapping (address => uint256) public balanceOf
-    SWAP1			mapping (address => uint256) public balanceOf
-    POP			mapping (address => uint256) public balanceOf
-    SLOAD			mapping (address => uint256) public balanceOf
-    DUP2			mapping (address => uint256) public balanceOf
-    JUMP	[out]		mapping (address => uint256) public balanceOf
-  tag18: 
-    JUMPDEST		function transfer(address _from, address _to, uint256 _value) {...
-    PUSH 0		owner
-    PUSH 0		owner
-    SWAP1			owner
-    SLOAD			owner
-    SWAP1			owner
-    PUSH 100		owner
-    EXP			owner
-    SWAP1			owner
-    DIV			owner
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		owner
-    AND			owner
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		msg.sender != owner
-    AND			msg.sender != owner
-    CALLER			msg.sender
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		msg.sender != owner
-    AND			msg.sender != owner
-    EQ			msg.sender != owner
-    ISZERO			msg.sender != owner
-    ISZERO			if(msg.sender != owner) throw
-    PUSH [tag26]		if(msg.sender != owner) throw
-    JUMPI			if(msg.sender != owner) throw
-    PUSH [ErrorTag]		throw
-    JUMP			throw
-  tag26: 
-    JUMPDEST		if(msg.sender != owner) throw
-    DUP1			_value
-    PUSH 4		balanceOf
-    PUSH 0		balanceOf
-    POP			balanceOf
-    PUSH 0		balanceOf[_from]
-    DUP6			_from
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		balanceOf[_from]
-    AND			balanceOf[_from]
-    DUP2			balanceOf[_from]
-    MSTORE			balanceOf[_from]
-    PUSH 20		balanceOf[_from]
-    ADD			balanceOf[_from]
-    SWAP1			balanceOf[_from]
-    DUP2			balanceOf[_from]
-    MSTORE			balanceOf[_from]
-    PUSH 20		balanceOf[_from]
-    ADD			balanceOf[_from]
-    PUSH 0		balanceOf[_from]
-    SHA3			balanceOf[_from]
-    PUSH 0		balanceOf[_from]
-    DUP3			balanceOf[_from] -= _value
-    DUP3			balanceOf[_from] -= _value
-    DUP3			balanceOf[_from] -= _value
-    POP			balanceOf[_from] -= _value
-    SLOAD			balanceOf[_from] -= _value
-    SUB			balanceOf[_from] -= _value
-    SWAP3			balanceOf[_from] -= _value
-    POP			balanceOf[_from] -= _value
-    POP			balanceOf[_from] -= _value
-    DUP2			balanceOf[_from] -= _value
-    SWAP1			balanceOf[_from] -= _value
-    SSTORE			balanceOf[_from] -= _value
-    POP			balanceOf[_from] -= _value
-    DUP1			_value
-    PUSH 4		balanceOf
-    PUSH 0		balanceOf
-    POP			balanceOf
-    PUSH 0		balanceOf[_to]
-    DUP5			_to
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		balanceOf[_to]
-    AND			balanceOf[_to]
-    DUP2			balanceOf[_to]
-    MSTORE			balanceOf[_to]
-    PUSH 20		balanceOf[_to]
-    ADD			balanceOf[_to]
-    SWAP1			balanceOf[_to]
-    DUP2			balanceOf[_to]
-    MSTORE			balanceOf[_to]
-    PUSH 20		balanceOf[_to]
-    ADD			balanceOf[_to]
-    PUSH 0		balanceOf[_to]
-    SHA3			balanceOf[_to]
-    PUSH 0		balanceOf[_to]
-    DUP3			balanceOf[_to] += _value
-    DUP3			balanceOf[_to] += _value
-    DUP3			balanceOf[_to] += _value
-    POP			balanceOf[_to] += _value
-    SLOAD			balanceOf[_to] += _value
-    ADD			balanceOf[_to] += _value
-    SWAP3			balanceOf[_to] += _value
-    POP			balanceOf[_to] += _value
-    POP			balanceOf[_to] += _value
-    DUP2			balanceOf[_to] += _value
-    SWAP1			balanceOf[_to] += _value
-    SSTORE			balanceOf[_to] += _value
-    POP			balanceOf[_to] += _value
-    DUP2			_to
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		Transfer(msg.sender, _to, _value)
-    AND			Transfer(msg.sender, _to, _value)
-    CALLER			msg.sender
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		Transfer(msg.sender, _to, _value)
-    AND			Transfer(msg.sender, _to, _value)
-    PUSH DDF252AD1BE2C89B69C2B068FC378DAA952BA7F163C4A11628F55A4DF523B3EF		Transfer(msg.sender, _to, _value)
-    DUP4			_value
-    PUSH 40		Transfer(msg.sender, _to, _value)
-    MLOAD			Transfer(msg.sender, _to, _value)
-    DUP1			Transfer(msg.sender, _to, _value)
-    DUP3			Transfer(msg.sender, _to, _value)
-    DUP2			Transfer(msg.sender, _to, _value)
-    MSTORE			Transfer(msg.sender, _to, _value)
-    PUSH 20		Transfer(msg.sender, _to, _value)
-    ADD			Transfer(msg.sender, _to, _value)
-    SWAP2			Transfer(msg.sender, _to, _value)
-    POP			Transfer(msg.sender, _to, _value)
-    POP			Transfer(msg.sender, _to, _value)
-    PUSH 40		Transfer(msg.sender, _to, _value)
-    MLOAD			Transfer(msg.sender, _to, _value)
-    DUP1			Transfer(msg.sender, _to, _value)
-    SWAP2			Transfer(msg.sender, _to, _value)
-    SUB			Transfer(msg.sender, _to, _value)
-    SWAP1			Transfer(msg.sender, _to, _value)
-    LOG3			Transfer(msg.sender, _to, _value)
-  tag25: 
-    JUMPDEST		function transfer(address _from, address _to, uint256 _value) {...
-    POP			function transfer(address _from, address _to, uint256 _value) {...
-    POP			function transfer(address _from, address _to, uint256 _value) {...
-    POP			function transfer(address _from, address _to, uint256 _value) {...
-    JUMP	[out]		function transfer(address _from, address _to, uint256 _value) {...
-
-======= RipplePayMain =======
-EVM assembly:
-.code:
-  PUSH 60		contract RipplePayMain {...
-  PUSH 40		contract RipplePayMain {...
-  MSTORE			contract RipplePayMain {...
-  PUSH #[$00000000…00000000]		contract RipplePayMain {...
-  DUP1			contract RipplePayMain {...
-  PUSH [$00000000…00000000]		contract RipplePayMain {...
-  PUSH 0		contract RipplePayMain {...
-  CODECOPY			contract RipplePayMain {...
-  PUSH 0		contract RipplePayMain {...
-  RETURN			contract RipplePayMain {...
-.data:
-  0: 
-  .code:
-    PUSH 60		contract RipplePayMain {...
-    PUSH 40		contract RipplePayMain {...
-    MSTORE			contract RipplePayMain {...
-    PUSH 0		contract RipplePayMain {...
-    CALLDATALOAD			contract RipplePayMain {...
-    PUSH 100000000000000000000000000000000000000000000000000000000		contract RipplePayMain {...
-    SWAP1			contract RipplePayMain {...
-    DIV			contract RipplePayMain {...
-    DUP1			contract RipplePayMain {...
-    PUSH 3E5CEE05		contract RipplePayMain {...
-    EQ			contract RipplePayMain {...
-    PUSH [tag2]		contract RipplePayMain {...
-    JUMPI			contract RipplePayMain {...
-    DUP1			contract RipplePayMain {...
-    PUSH F3DD3D8A		contract RipplePayMain {...
-    EQ			contract RipplePayMain {...
-    PUSH [tag3]		contract RipplePayMain {...
-    JUMPI			contract RipplePayMain {...
-    PUSH [tag1]		contract RipplePayMain {...
-    JUMP			contract RipplePayMain {...
-  tag1: 
-    JUMPDEST		contract RipplePayMain {...
-    STOP			contract RipplePayMain {...
-  tag2: 
-    JUMPDEST		function issueIOU(string _currency, uint256 _amount, address _to){...
-    PUSH [tag4]		function issueIOU(string _currency, uint256 _amount, address _to){...
-    PUSH 4		function issueIOU(string _currency, uint256 _amount, address _to){...
-    DUP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    DUP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    CALLDATALOAD			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    PUSH 20		function issueIOU(string _currency, uint256 _amount, address _to){...
-    ADD			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    DUP3			function issueIOU(string _currency, uint256 _amount, address _to){...
-    ADD			function issueIOU(string _currency, uint256 _amount, address _to){...
-    DUP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    CALLDATALOAD			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    PUSH 20		function issueIOU(string _currency, uint256 _amount, address _to){...
-    ADD			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP2			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP2			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    DUP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    DUP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    PUSH 1F		function issueIOU(string _currency, uint256 _amount, address _to){...
-    ADD			function issueIOU(string _currency, uint256 _amount, address _to){...
-    PUSH 20		function issueIOU(string _currency, uint256 _amount, address _to){...
-    DUP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP2			function issueIOU(string _currency, uint256 _amount, address _to){...
-    DIV			function issueIOU(string _currency, uint256 _amount, address _to){...
-    MUL			function issueIOU(string _currency, uint256 _amount, address _to){...
-    PUSH 20		function issueIOU(string _currency, uint256 _amount, address _to){...
-    ADD			function issueIOU(string _currency, uint256 _amount, address _to){...
-    PUSH 40		function issueIOU(string _currency, uint256 _amount, address _to){...
-    MLOAD			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    DUP2			function issueIOU(string _currency, uint256 _amount, address _to){...
-    ADD			function issueIOU(string _currency, uint256 _amount, address _to){...
-    PUSH 40		function issueIOU(string _currency, uint256 _amount, address _to){...
-    MSTORE			function issueIOU(string _currency, uint256 _amount, address _to){...
-    DUP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP4			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP3			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP2			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    DUP2			function issueIOU(string _currency, uint256 _amount, address _to){...
-    DUP2			function issueIOU(string _currency, uint256 _amount, address _to){...
-    MSTORE			function issueIOU(string _currency, uint256 _amount, address _to){...
-    PUSH 20		function issueIOU(string _currency, uint256 _amount, address _to){...
-    ADD			function issueIOU(string _currency, uint256 _amount, address _to){...
-    DUP4			function issueIOU(string _currency, uint256 _amount, address _to){...
-    DUP4			function issueIOU(string _currency, uint256 _amount, address _to){...
-    DUP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    DUP3			function issueIOU(string _currency, uint256 _amount, address _to){...
-    DUP5			function issueIOU(string _currency, uint256 _amount, address _to){...
-    CALLDATACOPY			function issueIOU(string _currency, uint256 _amount, address _to){...
-    DUP3			function issueIOU(string _currency, uint256 _amount, address _to){...
-    ADD			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP2			function issueIOU(string _currency, uint256 _amount, address _to){...
-    POP			function issueIOU(string _currency, uint256 _amount, address _to){...
-    POP			function issueIOU(string _currency, uint256 _amount, address _to){...
-    POP			function issueIOU(string _currency, uint256 _amount, address _to){...
-    POP			function issueIOU(string _currency, uint256 _amount, address _to){...
-    POP			function issueIOU(string _currency, uint256 _amount, address _to){...
-    POP			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP2			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    DUP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    CALLDATALOAD			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    PUSH 20		function issueIOU(string _currency, uint256 _amount, address _to){...
-    ADD			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP2			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    DUP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    CALLDATALOAD			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    PUSH 20		function issueIOU(string _currency, uint256 _amount, address _to){...
-    ADD			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP2			function issueIOU(string _currency, uint256 _amount, address _to){...
-    SWAP1			function issueIOU(string _currency, uint256 _amount, address _to){...
-    POP			function issueIOU(string _currency, uint256 _amount, address _to){...
-    POP			function issueIOU(string _currency, uint256 _amount, address _to){...
-    PUSH [tag5]		function issueIOU(string _currency, uint256 _amount, address _to){...
-    JUMP			function issueIOU(string _currency, uint256 _amount, address _to){...
-  tag4: 
-    JUMPDEST		function issueIOU(string _currency, uint256 _amount, address _to){...
-    STOP			function issueIOU(string _currency, uint256 _amount, address _to){...
-  tag3: 
-    JUMPDEST		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH [tag6]		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH 4		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    CALLDATALOAD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH 20		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    ADD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP3			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    ADD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    CALLDATALOAD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH 20		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    ADD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP2			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP2			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH 1F		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    ADD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH 20		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP2			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DIV			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    MUL			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH 20		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    ADD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH 40		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    MLOAD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP2			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    ADD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH 40		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    MSTORE			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP4			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP3			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP2			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP2			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP2			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    MSTORE			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH 20		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    ADD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP4			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP4			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP3			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP5			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    CALLDATACOPY			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP3			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    ADD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP2			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    POP			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    POP			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    POP			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    POP			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    POP			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    POP			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP2			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    CALLDATALOAD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH 20		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    ADD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP3			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    ADD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    CALLDATALOAD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH 20		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    ADD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP2			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP2			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH 1F		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    ADD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH 20		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP2			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DIV			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    MUL			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH 20		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    ADD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH 40		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    MLOAD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP2			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    ADD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH 40		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    MSTORE			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP4			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP3			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP2			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP2			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP2			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    MSTORE			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH 20		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    ADD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP4			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP4			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP3			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP5			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    CALLDATACOPY			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP3			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    ADD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP2			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    POP			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    POP			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    POP			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    POP			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    POP			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    POP			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP2			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    CALLDATALOAD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH 20		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    ADD			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP2			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    SWAP1			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    POP			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    POP			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    PUSH [tag7]		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    JUMP			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-  tag6: 
-    JUMPDEST		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    STOP			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-  tag7: 
-    JUMPDEST		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    DUP3			currencyName
-    DUP3			currencySymbol
-    DUP3			decimalUnits
-    PUSH 40		new IOU(currencyName, currencySymbol, decimalUnits)
-    MLOAD			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH #[$00000000…00000000]		new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH [$00000000…00000000]		new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP4			new IOU(currencyName, currencySymbol, decimalUnits)
-    CODECOPY			new IOU(currencyName, currencySymbol, decimalUnits)
-    ADD			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 20		new IOU(currencyName, currencySymbol, decimalUnits)
-    ADD			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 20		new IOU(currencyName, currencySymbol, decimalUnits)
-    ADD			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP5			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH FF		new IOU(currencyName, currencySymbol, decimalUnits)
-    AND			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP2			new IOU(currencyName, currencySymbol, decimalUnits)
-    MSTORE			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 20		new IOU(currencyName, currencySymbol, decimalUnits)
-    ADD			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP4			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP2			new IOU(currencyName, currencySymbol, decimalUnits)
-    SUB			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP4			new IOU(currencyName, currencySymbol, decimalUnits)
-    MSTORE			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP7			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP2			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP2			new IOU(currencyName, currencySymbol, decimalUnits)
-    MLOAD			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP2			new IOU(currencyName, currencySymbol, decimalUnits)
-    MSTORE			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 20		new IOU(currencyName, currencySymbol, decimalUnits)
-    ADD			new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP2			new IOU(currencyName, currencySymbol, decimalUnits)
-    POP			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    MLOAD			new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 20		new IOU(currencyName, currencySymbol, decimalUnits)
-    ADD			new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP4			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP4			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP3			new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 0		new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 4		new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 20		new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP5			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 1F		new IOU(currencyName, currencySymbol, decimalUnits)
-    ADD			new IOU(currencyName, currencySymbol, decimalUnits)
-    DIV			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH F		new IOU(currencyName, currencySymbol, decimalUnits)
-    MUL			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 3		new IOU(currencyName, currencySymbol, decimalUnits)
-    ADD			new IOU(currencyName, currencySymbol, decimalUnits)
-    CALL			new IOU(currencyName, currencySymbol, decimalUnits)
-    POP			new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    POP			new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP2			new IOU(currencyName, currencySymbol, decimalUnits)
-    ADD			new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 1F		new IOU(currencyName, currencySymbol, decimalUnits)
-    AND			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    ISZERO			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH [tag9]		new IOU(currencyName, currencySymbol, decimalUnits)
-    JUMPI			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP3			new IOU(currencyName, currencySymbol, decimalUnits)
-    SUB			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    MLOAD			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 1		new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP4			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 20		new IOU(currencyName, currencySymbol, decimalUnits)
-    SUB			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 100		new IOU(currencyName, currencySymbol, decimalUnits)
-    EXP			new IOU(currencyName, currencySymbol, decimalUnits)
-    SUB			new IOU(currencyName, currencySymbol, decimalUnits)
-    NOT			new IOU(currencyName, currencySymbol, decimalUnits)
-    AND			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP2			new IOU(currencyName, currencySymbol, decimalUnits)
-    MSTORE			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 20		new IOU(currencyName, currencySymbol, decimalUnits)
-    ADD			new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP2			new IOU(currencyName, currencySymbol, decimalUnits)
-    POP			new IOU(currencyName, currencySymbol, decimalUnits)
-  tag9: 
-    JUMPDEST		new IOU(currencyName, currencySymbol, decimalUnits)
-    POP			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP4			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP2			new IOU(currencyName, currencySymbol, decimalUnits)
-    SUB			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP3			new IOU(currencyName, currencySymbol, decimalUnits)
-    MSTORE			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP6			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP2			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP2			new IOU(currencyName, currencySymbol, decimalUnits)
-    MLOAD			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP2			new IOU(currencyName, currencySymbol, decimalUnits)
-    MSTORE			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 20		new IOU(currencyName, currencySymbol, decimalUnits)
-    ADD			new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP2			new IOU(currencyName, currencySymbol, decimalUnits)
-    POP			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    MLOAD			new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 20		new IOU(currencyName, currencySymbol, decimalUnits)
-    ADD			new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP4			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP4			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP3			new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 0		new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 4		new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 20		new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP5			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 1F		new IOU(currencyName, currencySymbol, decimalUnits)
-    ADD			new IOU(currencyName, currencySymbol, decimalUnits)
-    DIV			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH F		new IOU(currencyName, currencySymbol, decimalUnits)
-    MUL			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 3		new IOU(currencyName, currencySymbol, decimalUnits)
-    ADD			new IOU(currencyName, currencySymbol, decimalUnits)
-    CALL			new IOU(currencyName, currencySymbol, decimalUnits)
-    POP			new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    POP			new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP2			new IOU(currencyName, currencySymbol, decimalUnits)
-    ADD			new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 1F		new IOU(currencyName, currencySymbol, decimalUnits)
-    AND			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    ISZERO			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH [tag10]		new IOU(currencyName, currencySymbol, decimalUnits)
-    JUMPI			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP3			new IOU(currencyName, currencySymbol, decimalUnits)
-    SUB			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    MLOAD			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 1		new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP4			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 20		new IOU(currencyName, currencySymbol, decimalUnits)
-    SUB			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 100		new IOU(currencyName, currencySymbol, decimalUnits)
-    EXP			new IOU(currencyName, currencySymbol, decimalUnits)
-    SUB			new IOU(currencyName, currencySymbol, decimalUnits)
-    NOT			new IOU(currencyName, currencySymbol, decimalUnits)
-    AND			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP2			new IOU(currencyName, currencySymbol, decimalUnits)
-    MSTORE			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 20		new IOU(currencyName, currencySymbol, decimalUnits)
-    ADD			new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP2			new IOU(currencyName, currencySymbol, decimalUnits)
-    POP			new IOU(currencyName, currencySymbol, decimalUnits)
-  tag10: 
-    JUMPDEST		new IOU(currencyName, currencySymbol, decimalUnits)
-    POP			new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP6			new IOU(currencyName, currencySymbol, decimalUnits)
-    POP			new IOU(currencyName, currencySymbol, decimalUnits)
-    POP			new IOU(currencyName, currencySymbol, decimalUnits)
-    POP			new IOU(currencyName, currencySymbol, decimalUnits)
-    POP			new IOU(currencyName, currencySymbol, decimalUnits)
-    POP			new IOU(currencyName, currencySymbol, decimalUnits)
-    POP			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 40		new IOU(currencyName, currencySymbol, decimalUnits)
-    MLOAD			new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP2			new IOU(currencyName, currencySymbol, decimalUnits)
-    SUB			new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP1			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 0		new IOU(currencyName, currencySymbol, decimalUnits)
-    CREATE			new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH 0		currencies
-    PUSH 0		currencies
-    POP			currencies
-    DUP4			currencySymbol
-    PUSH 40		currencies[currencySymbol]
-    MLOAD			currencies[currencySymbol]
-    DUP1			currencies[currencySymbol]
-    DUP3			currencies[currencySymbol]
-    DUP1			currencies[currencySymbol]
-    MLOAD			currencies[currencySymbol]
-    SWAP1			currencies[currencySymbol]
-    PUSH 20		currencies[currencySymbol]
-    ADD			currencies[currencySymbol]
-    SWAP1			currencies[currencySymbol]
-    DUP1			currencies[currencySymbol]
-    DUP4			currencies[currencySymbol]
-    DUP4			currencies[currencySymbol]
-    DUP3			currencies[currencySymbol]
-    SWAP1			currencies[currencySymbol]
-    PUSH 0		currencies[currencySymbol]
-    PUSH 4		currencies[currencySymbol]
-    PUSH 20		currencies[currencySymbol]
-    DUP5			currencies[currencySymbol]
-    PUSH 1F		currencies[currencySymbol]
-    ADD			currencies[currencySymbol]
-    DIV			currencies[currencySymbol]
-    PUSH F		currencies[currencySymbol]
-    MUL			currencies[currencySymbol]
-    PUSH 3		currencies[currencySymbol]
-    ADD			currencies[currencySymbol]
-    CALL			currencies[currencySymbol]
-    POP			currencies[currencySymbol]
-    SWAP1			currencies[currencySymbol]
-    POP			currencies[currencySymbol]
-    ADD			currencies[currencySymbol]
-    SWAP2			currencies[currencySymbol]
-    POP			currencies[currencySymbol]
-    POP			currencies[currencySymbol]
-    SWAP1			currencies[currencySymbol]
-    DUP2			currencies[currencySymbol]
-    MSTORE			currencies[currencySymbol]
-    PUSH 20		currencies[currencySymbol]
-    ADD			currencies[currencySymbol]
-    PUSH 40		currencies[currencySymbol]
-    MLOAD			currencies[currencySymbol]
-    DUP1			currencies[currencySymbol]
-    SWAP2			currencies[currencySymbol]
-    SUB			currencies[currencySymbol]
-    SWAP1			currencies[currencySymbol]
-    SHA3			currencies[currencySymbol]
-    PUSH 0		currencies[currencySymbol]
-    PUSH 100		currencies[currencySymbol] = new IOU(currencyName, currencySymbol, decimalUnits)
-    EXP			currencies[currencySymbol] = new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP2			currencies[currencySymbol] = new IOU(currencyName, currencySymbol, decimalUnits)
-    SLOAD			currencies[currencySymbol] = new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP2			currencies[currencySymbol] = new IOU(currencyName, currencySymbol, decimalUnits)
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		currencies[currencySymbol] = new IOU(currencyName, currencySymbol, decimalUnits)
-    MUL			currencies[currencySymbol] = new IOU(currencyName, currencySymbol, decimalUnits)
-    NOT			currencies[currencySymbol] = new IOU(currencyName, currencySymbol, decimalUnits)
-    AND			currencies[currencySymbol] = new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP1			currencies[currencySymbol] = new IOU(currencyName, currencySymbol, decimalUnits)
-    DUP4			currencies[currencySymbol] = new IOU(currencyName, currencySymbol, decimalUnits)
-    MUL			currencies[currencySymbol] = new IOU(currencyName, currencySymbol, decimalUnits)
-    OR			currencies[currencySymbol] = new IOU(currencyName, currencySymbol, decimalUnits)
-    SWAP1			currencies[currencySymbol] = new IOU(currencyName, currencySymbol, decimalUnits)
-    SSTORE			currencies[currencySymbol] = new IOU(currencyName, currencySymbol, decimalUnits)
-    POP			currencies[currencySymbol] = new IOU(currencyName, currencySymbol, decimalUnits)
-  tag8: 
-    JUMPDEST		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    POP			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    POP			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    POP			function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-    JUMP	[out]		function newCurrency(string currencyName, string currencySymbol, uint8 decimalUnits){...
-  tag5: 
-    JUMPDEST		function issueIOU(string _currency, uint256 _amount, address _to){...
-    PUSH 0		currencies
-    PUSH 0		currencies
-    POP			currencies
-    DUP4			_currency
-    PUSH 40		currencies[_currency]
-    MLOAD			currencies[_currency]
-    DUP1			currencies[_currency]
-    DUP3			currencies[_currency]
-    DUP1			currencies[_currency]
-    MLOAD			currencies[_currency]
-    SWAP1			currencies[_currency]
-    PUSH 20		currencies[_currency]
-    ADD			currencies[_currency]
-    SWAP1			currencies[_currency]
-    DUP1			currencies[_currency]
-    DUP4			currencies[_currency]
-    DUP4			currencies[_currency]
-    DUP3			currencies[_currency]
-    SWAP1			currencies[_currency]
-    PUSH 0		currencies[_currency]
-    PUSH 4		currencies[_currency]
-    PUSH 20		currencies[_currency]
-    DUP5			currencies[_currency]
-    PUSH 1F		currencies[_currency]
-    ADD			currencies[_currency]
-    DIV			currencies[_currency]
-    PUSH F		currencies[_currency]
-    MUL			currencies[_currency]
-    PUSH 3		currencies[_currency]
-    ADD			currencies[_currency]
-    CALL			currencies[_currency]
-    POP			currencies[_currency]
-    SWAP1			currencies[_currency]
-    POP			currencies[_currency]
-    ADD			currencies[_currency]
-    SWAP2			currencies[_currency]
-    POP			currencies[_currency]
-    POP			currencies[_currency]
-    SWAP1			currencies[_currency]
-    DUP2			currencies[_currency]
-    MSTORE			currencies[_currency]
-    PUSH 20		currencies[_currency]
-    ADD			currencies[_currency]
-    PUSH 40		currencies[_currency]
-    MLOAD			currencies[_currency]
-    DUP1			currencies[_currency]
-    SWAP2			currencies[_currency]
-    SUB			currencies[_currency]
-    SWAP1			currencies[_currency]
-    SHA3			currencies[_currency]
-    PUSH 0		currencies[_currency]
-    SWAP1			currencies[_currency]
-    SLOAD			currencies[_currency]
-    SWAP1			currencies[_currency]
-    PUSH 100		currencies[_currency]
-    EXP			currencies[_currency]
-    SWAP1			currencies[_currency]
-    DIV			currencies[_currency]
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		currencies[_currency]
-    AND			currencies[_currency]
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		IOU(currencies[_currency]).transfer
-    AND			IOU(currencies[_currency]).transfer
-    PUSH BEABACC8		IOU(currencies[_currency]).transfer
-    CALLER			msg.sender
-    DUP4			_to
-    DUP6			_amount
-    PUSH 40		IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    MLOAD			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    DUP5			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    PUSH 100000000000000000000000000000000000000000000000000000000		IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    MUL			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    DUP2			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    MSTORE			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    PUSH 4		IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    ADD			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    DUP1			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    DUP5			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    AND			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    DUP2			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    MSTORE			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    PUSH 20		IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    ADD			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    DUP4			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    AND			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    DUP2			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    MSTORE			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    PUSH 20		IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    ADD			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    DUP3			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    DUP2			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    MSTORE			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    PUSH 20		IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    ADD			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    SWAP4			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    POP			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    POP			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    POP			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    POP			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    PUSH 0		IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    PUSH 40		IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    MLOAD			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    DUP1			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    DUP4			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    SUB			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    DUP2			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    PUSH 0		IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    DUP8			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    PUSH 61DA		IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    GAS			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    SUB			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    CALL			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    ISZERO			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    PUSH [ErrorTag]		IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    JUMPI			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    POP			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    POP			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-    POP			IOU(currencies[_currency]).transfer(msg.sender, _to, _amount)
-  tag11: 
-    JUMPDEST		function issueIOU(string _currency, uint256 _amount, address _to){...
-    POP			function issueIOU(string _currency, uint256 _amount, address _to){...
-    POP			function issueIOU(string _currency, uint256 _amount, address _to){...
-    POP			function issueIOU(string _currency, uint256 _amount, address _to){...
-    JUMP	[out]		function issueIOU(string _currency, uint256 _amount, address _to){...
-  .data:
-    0: 
-    .code:
-      PUSH 60		contract IOU {...
-      PUSH 40		contract IOU {...
-      MSTORE			contract IOU {...
-      PUSH 40		function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      MLOAD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      PUSHSIZE		function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      CODESIZE			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      SUB			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      DUP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      PUSHSIZE		function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      DUP4			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      CODECOPY			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      DUP2			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      ADD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      PUSH 40		function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      MSTORE			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      DUP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      DUP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      MLOAD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      DUP3			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      ADD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      SWAP2			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      SWAP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      PUSH 20		function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      ADD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      DUP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      MLOAD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      DUP3			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      ADD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      SWAP2			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      SWAP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      PUSH 20		function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      ADD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      DUP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      MLOAD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      SWAP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      PUSH 20		function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      ADD			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      SWAP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      SWAP2			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      SWAP1			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      POP			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      POP			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-    tag1: 
-      JUMPDEST		function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      CALLER			msg.sender
-      PUSH 0		owner
-      PUSH 0		owner
-      PUSH 100		owner = msg.sender
-      EXP			owner = msg.sender
-      DUP2			owner = msg.sender
-      SLOAD			owner = msg.sender
-      DUP2			owner = msg.sender
-      PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		owner = msg.sender
-      MUL			owner = msg.sender
-      NOT			owner = msg.sender
-      AND			owner = msg.sender
-      SWAP1			owner = msg.sender
-      DUP4			owner = msg.sender
-      MUL			owner = msg.sender
-      OR			owner = msg.sender
-      SWAP1			owner = msg.sender
-      SSTORE			owner = msg.sender
-      POP			owner = msg.sender
-      DUP3			tokenName
-      PUSH 1		name
-      PUSH 0		name
-      POP			name = tokenName
-      SWAP1			name = tokenName
-      DUP1			name = tokenName
-      MLOAD			name = tokenName
-      SWAP1			name = tokenName
-      PUSH 20		name = tokenName
-      ADD			name = tokenName
-      SWAP1			name = tokenName
-      DUP3			name = tokenName
-      DUP1			name = tokenName
-      SLOAD			name = tokenName
-      PUSH 1		name = tokenName
-      DUP2			name = tokenName
-      PUSH 1		name = tokenName
-      AND			name = tokenName
-      ISZERO			name = tokenName
-      PUSH 100		name = tokenName
-      MUL			name = tokenName
-      SUB			name = tokenName
-      AND			name = tokenName
-      PUSH 2		name = tokenName
-      SWAP1			name = tokenName
-      DIV			name = tokenName
-      SWAP1			name = tokenName
-      PUSH 0		name = tokenName
-      MSTORE			name = tokenName
-      PUSH 20		name = tokenName
-      PUSH 0		name = tokenName
-      SHA3			name = tokenName
-      SWAP1			name = tokenName
-      PUSH 1F		name = tokenName
-      ADD			name = tokenName
-      PUSH 20		name = tokenName
-      SWAP1			name = tokenName
-      DIV			name = tokenName
-      DUP2			name = tokenName
-      ADD			name = tokenName
-      SWAP3			name = tokenName
-      DUP3			name = tokenName
-      PUSH 1F		name = tokenName
-      LT			name = tokenName
-      PUSH [tag4]		name = tokenName
-      JUMPI			name = tokenName
-      DUP1			name = tokenName
-      MLOAD			name = tokenName
-      PUSH FF		name = tokenName
-      NOT			name = tokenName
-      AND			name = tokenName
-      DUP4			name = tokenName
-      DUP1			name = tokenName
-      ADD			name = tokenName
-      OR			name = tokenName
-      DUP6			name = tokenName
-      SSTORE			name = tokenName
-      PUSH [tag3]		name = tokenName
-      JUMP			name = tokenName
-    tag4: 
-      JUMPDEST		name = tokenName
-      DUP3			name = tokenName
-      DUP1			name = tokenName
-      ADD			name = tokenName
-      PUSH 1		name = tokenName
-      ADD			name = tokenName
-      DUP6			name = tokenName
-      SSTORE			name = tokenName
-      DUP3			name = tokenName
-      ISZERO			name = tokenName
-      PUSH [tag3]		name = tokenName
-      JUMPI			name = tokenName
-      SWAP2			name = tokenName
-      DUP3			name = tokenName
-      ADD			name = tokenName
-    tag5: 
-      JUMPDEST		name = tokenName
-      DUP3			name = tokenName
-      DUP2			name = tokenName
-      GT			name = tokenName
-      ISZERO			name = tokenName
-      PUSH [tag6]		name = tokenName
-      JUMPI			name = tokenName
-      DUP3			name = tokenName
-      MLOAD			name = tokenName
-      DUP3			name = tokenName
-      PUSH 0		name = tokenName
-      POP			name = tokenName
-      SSTORE			name = tokenName
-      SWAP2			name = tokenName
-      PUSH 20		name = tokenName
-      ADD			name = tokenName
-      SWAP2			name = tokenName
-      SWAP1			name = tokenName
-      PUSH 1		name = tokenName
-      ADD			name = tokenName
-      SWAP1			name = tokenName
-      PUSH [tag5]		name = tokenName
-      JUMP			name = tokenName
-    tag6: 
-      JUMPDEST		name = tokenName
-    tag3: 
-      JUMPDEST		name = tokenName
-      POP			name = tokenName
-      SWAP1			name = tokenName
-      POP			name = tokenName
-      PUSH [tag7]		name = tokenName
-      SWAP2			name = tokenName
-      SWAP1			name = tokenName
-      PUSH [tag8]		name = tokenName
-      JUMP			name = tokenName
-    tag8: 
-      JUMPDEST		name = tokenName
-      DUP1			name = tokenName
-      DUP3			name = tokenName
-      GT			name = tokenName
-      ISZERO			name = tokenName
-      PUSH [tag9]		name = tokenName
-      JUMPI			name = tokenName
-      PUSH 0		name = tokenName
-      DUP2			name = tokenName
-      DUP2			name = tokenName
-      POP			name = tokenName
-      PUSH 0		name = tokenName
-      SWAP1			name = tokenName
-      SSTORE			name = tokenName
-      POP			name = tokenName
-      PUSH 1		name = tokenName
-      ADD			name = tokenName
-      PUSH [tag8]		name = tokenName
-      JUMP			name = tokenName
-    tag9: 
-      JUMPDEST		name = tokenName
-      POP			name = tokenName
-      SWAP1			name = tokenName
-      JUMP			name = tokenName
-    tag7: 
-      JUMPDEST		name = tokenName
-      POP			name = tokenName
-      POP			name = tokenName
-      DUP2			tokenSymbol
-      PUSH 2		symbol
-      PUSH 0		symbol
-      POP			symbol = tokenSymbol
-      SWAP1			symbol = tokenSymbol
-      DUP1			symbol = tokenSymbol
-      MLOAD			symbol = tokenSymbol
-      SWAP1			symbol = tokenSymbol
-      PUSH 20		symbol = tokenSymbol
-      ADD			symbol = tokenSymbol
-      SWAP1			symbol = tokenSymbol
-      DUP3			symbol = tokenSymbol
-      DUP1			symbol = tokenSymbol
-      SLOAD			symbol = tokenSymbol
-      PUSH 1		symbol = tokenSymbol
-      DUP2			symbol = tokenSymbol
-      PUSH 1		symbol = tokenSymbol
-      AND			symbol = tokenSymbol
-      ISZERO			symbol = tokenSymbol
-      PUSH 100		symbol = tokenSymbol
-      MUL			symbol = tokenSymbol
-      SUB			symbol = tokenSymbol
-      AND			symbol = tokenSymbol
-      PUSH 2		symbol = tokenSymbol
-      SWAP1			symbol = tokenSymbol
-      DIV			symbol = tokenSymbol
-      SWAP1			symbol = tokenSymbol
-      PUSH 0		symbol = tokenSymbol
-      MSTORE			symbol = tokenSymbol
-      PUSH 20		symbol = tokenSymbol
-      PUSH 0		symbol = tokenSymbol
-      SHA3			symbol = tokenSymbol
-      SWAP1			symbol = tokenSymbol
-      PUSH 1F		symbol = tokenSymbol
-      ADD			symbol = tokenSymbol
-      PUSH 20		symbol = tokenSymbol
-      SWAP1			symbol = tokenSymbol
-      DIV			symbol = tokenSymbol
-      DUP2			symbol = tokenSymbol
-      ADD			symbol = tokenSymbol
-      SWAP3			symbol = tokenSymbol
-      DUP3			symbol = tokenSymbol
-      PUSH 1F		symbol = tokenSymbol
-      LT			symbol = tokenSymbol
-      PUSH [tag11]		symbol = tokenSymbol
-      JUMPI			symbol = tokenSymbol
-      DUP1			symbol = tokenSymbol
-      MLOAD			symbol = tokenSymbol
-      PUSH FF		symbol = tokenSymbol
-      NOT			symbol = tokenSymbol
-      AND			symbol = tokenSymbol
-      DUP4			symbol = tokenSymbol
-      DUP1			symbol = tokenSymbol
-      ADD			symbol = tokenSymbol
-      OR			symbol = tokenSymbol
-      DUP6			symbol = tokenSymbol
-      SSTORE			symbol = tokenSymbol
-      PUSH [tag10]		symbol = tokenSymbol
-      JUMP			symbol = tokenSymbol
-    tag11: 
-      JUMPDEST		symbol = tokenSymbol
-      DUP3			symbol = tokenSymbol
-      DUP1			symbol = tokenSymbol
-      ADD			symbol = tokenSymbol
-      PUSH 1		symbol = tokenSymbol
-      ADD			symbol = tokenSymbol
-      DUP6			symbol = tokenSymbol
-      SSTORE			symbol = tokenSymbol
-      DUP3			symbol = tokenSymbol
-      ISZERO			symbol = tokenSymbol
-      PUSH [tag10]		symbol = tokenSymbol
-      JUMPI			symbol = tokenSymbol
-      SWAP2			symbol = tokenSymbol
-      DUP3			symbol = tokenSymbol
-      ADD			symbol = tokenSymbol
-    tag12: 
-      JUMPDEST		symbol = tokenSymbol
-      DUP3			symbol = tokenSymbol
-      DUP2			symbol = tokenSymbol
-      GT			symbol = tokenSymbol
-      ISZERO			symbol = tokenSymbol
-      PUSH [tag13]		symbol = tokenSymbol
-      JUMPI			symbol = tokenSymbol
-      DUP3			symbol = tokenSymbol
-      MLOAD			symbol = tokenSymbol
-      DUP3			symbol = tokenSymbol
-      PUSH 0		symbol = tokenSymbol
-      POP			symbol = tokenSymbol
-      SSTORE			symbol = tokenSymbol
-      SWAP2			symbol = tokenSymbol
-      PUSH 20		symbol = tokenSymbol
-      ADD			symbol = tokenSymbol
-      SWAP2			symbol = tokenSymbol
-      SWAP1			symbol = tokenSymbol
-      PUSH 1		symbol = tokenSymbol
-      ADD			symbol = tokenSymbol
-      SWAP1			symbol = tokenSymbol
-      PUSH [tag12]		symbol = tokenSymbol
-      JUMP			symbol = tokenSymbol
-    tag13: 
-      JUMPDEST		symbol = tokenSymbol
-    tag10: 
-      JUMPDEST		symbol = tokenSymbol
-      POP			symbol = tokenSymbol
-      SWAP1			symbol = tokenSymbol
-      POP			symbol = tokenSymbol
-      PUSH [tag14]		symbol = tokenSymbol
-      SWAP2			symbol = tokenSymbol
-      SWAP1			symbol = tokenSymbol
-      PUSH [tag15]		symbol = tokenSymbol
-      JUMP			symbol = tokenSymbol
-    tag15: 
-      JUMPDEST		symbol = tokenSymbol
-      DUP1			symbol = tokenSymbol
-      DUP3			symbol = tokenSymbol
-      GT			symbol = tokenSymbol
-      ISZERO			symbol = tokenSymbol
-      PUSH [tag16]		symbol = tokenSymbol
-      JUMPI			symbol = tokenSymbol
-      PUSH 0		symbol = tokenSymbol
-      DUP2			symbol = tokenSymbol
-      DUP2			symbol = tokenSymbol
-      POP			symbol = tokenSymbol
-      PUSH 0		symbol = tokenSymbol
-      SWAP1			symbol = tokenSymbol
-      SSTORE			symbol = tokenSymbol
-      POP			symbol = tokenSymbol
-      PUSH 1		symbol = tokenSymbol
-      ADD			symbol = tokenSymbol
-      PUSH [tag15]		symbol = tokenSymbol
-      JUMP			symbol = tokenSymbol
-    tag16: 
-      JUMPDEST		symbol = tokenSymbol
-      POP			symbol = tokenSymbol
-      SWAP1			symbol = tokenSymbol
-      JUMP			symbol = tokenSymbol
-    tag14: 
-      JUMPDEST		symbol = tokenSymbol
-      POP			symbol = tokenSymbol
-      POP			symbol = tokenSymbol
-      DUP1			decimalUnits
-      PUSH 3		decimals
-      PUSH 0		decimals
-      PUSH 100		decimals = decimalUnits
-      EXP			decimals = decimalUnits
-      DUP2			decimals = decimalUnits
-      SLOAD			decimals = decimalUnits
-      DUP2			decimals = decimalUnits
-      PUSH FF		decimals = decimalUnits
-      MUL			decimals = decimalUnits
-      NOT			decimals = decimalUnits
-      AND			decimals = decimalUnits
-      SWAP1			decimals = decimalUnits
-      DUP4			decimals = decimalUnits
-      MUL			decimals = decimalUnits
-      OR			decimals = decimalUnits
-      SWAP1			decimals = decimalUnits
-      SSTORE			decimals = decimalUnits
-      POP			decimals = decimalUnits
-    tag2: 
-      JUMPDEST		function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      POP			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      POP			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      POP			function IOU(string tokenName, string tokenSymbol, uint8 decimalUnits) {...
-      PUSH #[$00000000…00000000]		contract IOU {...
-      DUP1			contract IOU {...
-      PUSH [$00000000…00000000]		contract IOU {...
-      PUSH 0		contract IOU {...
-      CODECOPY			contract IOU {...
-      PUSH 0		contract IOU {...
-      RETURN			contract IOU {...
-    .data:
-      0: 
-      .code:
-        PUSH 60		contract IOU {...
-        PUSH 40		contract IOU {...
-        MSTORE			contract IOU {...
-        PUSH 0		contract IOU {...
-        CALLDATALOAD			contract IOU {...
-        PUSH 100000000000000000000000000000000000000000000000000000000		contract IOU {...
-        SWAP1			contract IOU {...
-        DIV			contract IOU {...
-        DUP1			contract IOU {...
-        PUSH 6FDDE03		contract IOU {...
-        EQ			contract IOU {...
-        PUSH [tag2]		contract IOU {...
-        JUMPI			contract IOU {...
-        DUP1			contract IOU {...
-        PUSH 313CE567		contract IOU {...
-        EQ			contract IOU {...
-        PUSH [tag3]		contract IOU {...
-        JUMPI			contract IOU {...
-        DUP1			contract IOU {...
-        PUSH 70A08231		contract IOU {...
-        EQ			contract IOU {...
-        PUSH [tag4]		contract IOU {...
-        JUMPI			contract IOU {...
-        DUP1			contract IOU {...
-        PUSH 95D89B41		contract IOU {...
-        EQ			contract IOU {...
-        PUSH [tag5]		contract IOU {...
-        JUMPI			contract IOU {...
-        DUP1			contract IOU {...
-        PUSH BEABACC8		contract IOU {...
-        EQ			contract IOU {...
-        PUSH [tag6]		contract IOU {...
-        JUMPI			contract IOU {...
-        PUSH [tag1]		contract IOU {...
-        JUMP			contract IOU {...
-      tag1: 
-        JUMPDEST		contract IOU {...
-        STOP			contract IOU {...
-      tag2: 
-        JUMPDEST		string public name
-        PUSH [tag7]		string public name
-        PUSH 4		string public name
-        DUP1			string public name
-        POP			string public name
-        POP			string public name
-        PUSH [tag8]		string public name
-        JUMP			string public name
-      tag7: 
-        JUMPDEST		string public name
-        PUSH 40		string public name
-        MLOAD			string public name
-        DUP1			string public name
-        DUP1			string public name
-        PUSH 20		string public name
-        ADD			string public name
-        DUP3			string public name
-        DUP2			string public name
-        SUB			string public name
-        DUP3			string public name
-        MSTORE			string public name
-        DUP4			string public name
-        DUP2			string public name
-        DUP2			string public name
-        MLOAD			string public name
-        DUP2			string public name
-        MSTORE			string public name
-        PUSH 20		string public name
-        ADD			string public name
-        SWAP2			string public name
-        POP			string public name
-        DUP1			string public name
-        MLOAD			string public name
-        SWAP1			string public name
-        PUSH 20		string public name
-        ADD			string public name
-        SWAP1			string public name
-        DUP1			string public name
-        DUP4			string public name
-        DUP4			string public name
-        DUP3			string public name
-        SWAP1			string public name
-        PUSH 0		string public name
-        PUSH 4		string public name
-        PUSH 20		string public name
-        DUP5			string public name
-        PUSH 1F		string public name
-        ADD			string public name
-        DIV			string public name
-        PUSH F		string public name
-        MUL			string public name
-        PUSH 3		string public name
-        ADD			string public name
-        CALL			string public name
-        POP			string public name
-        SWAP1			string public name
-        POP			string public name
-        SWAP1			string public name
-        DUP2			string public name
-        ADD			string public name
-        SWAP1			string public name
-        PUSH 1F		string public name
-        AND			string public name
-        DUP1			string public name
-        ISZERO			string public name
-        PUSH [tag9]		string public name
-        JUMPI			string public name
-        DUP1			string public name
-        DUP3			string public name
-        SUB			string public name
-        DUP1			string public name
-        MLOAD			string public name
-        PUSH 1		string public name
-        DUP4			string public name
-        PUSH 20		string public name
-        SUB			string public name
-        PUSH 100		string public name
-        EXP			string public name
-        SUB			string public name
-        NOT			string public name
-        AND			string public name
-        DUP2			string public name
-        MSTORE			string public name
-        PUSH 20		string public name
-        ADD			string public name
-        SWAP2			string public name
-        POP			string public name
-      tag9: 
-        JUMPDEST		string public name
-        POP			string public name
-        SWAP3			string public name
-        POP			string public name
-        POP			string public name
-        POP			string public name
-        PUSH 40		string public name
-        MLOAD			string public name
-        DUP1			string public name
-        SWAP2			string public name
-        SUB			string public name
-        SWAP1			string public name
-        RETURN			string public name
-      tag3: 
-        JUMPDEST		uint8 public decimals
-        PUSH [tag10]		uint8 public decimals
-        PUSH 4		uint8 public decimals
-        DUP1			uint8 public decimals
-        POP			uint8 public decimals
-        POP			uint8 public decimals
-        PUSH [tag11]		uint8 public decimals
-        JUMP			uint8 public decimals
-      tag10: 
-        JUMPDEST		uint8 public decimals
-        PUSH 40		uint8 public decimals
-        MLOAD			uint8 public decimals
-        DUP1			uint8 public decimals
-        DUP3			uint8 public decimals
-        PUSH FF		uint8 public decimals
-        AND			uint8 public decimals
-        DUP2			uint8 public decimals
-        MSTORE			uint8 public decimals
-        PUSH 20		uint8 public decimals
-        ADD			uint8 public decimals
-        SWAP2			uint8 public decimals
-        POP			uint8 public decimals
-        POP			uint8 public decimals
-        PUSH 40		uint8 public decimals
-        MLOAD			uint8 public decimals
-        DUP1			uint8 public decimals
-        SWAP2			uint8 public decimals
-        SUB			uint8 public decimals
-        SWAP1			uint8 public decimals
-        RETURN			uint8 public decimals
-      tag4: 
-        JUMPDEST		mapping (address => uint256) public balanceOf
-        PUSH [tag12]		mapping (address => uint256) public balanceOf
-        PUSH 4		mapping (address => uint256) public balanceOf
-        DUP1			mapping (address => uint256) public balanceOf
-        DUP1			mapping (address => uint256) public balanceOf
-        CALLDATALOAD			mapping (address => uint256) public balanceOf
-        SWAP1			mapping (address => uint256) public balanceOf
-        PUSH 20		mapping (address => uint256) public balanceOf
-        ADD			mapping (address => uint256) public balanceOf
-        SWAP1			mapping (address => uint256) public balanceOf
-        SWAP2			mapping (address => uint256) public balanceOf
-        SWAP1			mapping (address => uint256) public balanceOf
-        POP			mapping (address => uint256) public balanceOf
-        POP			mapping (address => uint256) public balanceOf
-        PUSH [tag13]		mapping (address => uint256) public balanceOf
-        JUMP			mapping (address => uint256) public balanceOf
-      tag12: 
-        JUMPDEST		mapping (address => uint256) public balanceOf
-        PUSH 40		mapping (address => uint256) public balanceOf
-        MLOAD			mapping (address => uint256) public balanceOf
-        DUP1			mapping (address => uint256) public balanceOf
-        DUP3			mapping (address => uint256) public balanceOf
-        DUP2			mapping (address => uint256) public balanceOf
-        MSTORE			mapping (address => uint256) public balanceOf
-        PUSH 20		mapping (address => uint256) public balanceOf
-        ADD			mapping (address => uint256) public balanceOf
-        SWAP2			mapping (address => uint256) public balanceOf
-        POP			mapping (address => uint256) public balanceOf
-        POP			mapping (address => uint256) public balanceOf
-        PUSH 40		mapping (address => uint256) public balanceOf
-        MLOAD			mapping (address => uint256) public balanceOf
-        DUP1			mapping (address => uint256) public balanceOf
-        SWAP2			mapping (address => uint256) public balanceOf
-        SUB			mapping (address => uint256) public balanceOf
-        SWAP1			mapping (address => uint256) public balanceOf
-        RETURN			mapping (address => uint256) public balanceOf
-      tag5: 
-        JUMPDEST		string public symbol
-        PUSH [tag14]		string public symbol
-        PUSH 4		string public symbol
-        DUP1			string public symbol
-        POP			string public symbol
-        POP			string public symbol
-        PUSH [tag15]		string public symbol
-        JUMP			string public symbol
-      tag14: 
-        JUMPDEST		string public symbol
-        PUSH 40		string public symbol
-        MLOAD			string public symbol
-        DUP1			string public symbol
-        DUP1			string public symbol
-        PUSH 20		string public symbol
-        ADD			string public symbol
-        DUP3			string public symbol
-        DUP2			string public symbol
-        SUB			string public symbol
-        DUP3			string public symbol
-        MSTORE			string public symbol
-        DUP4			string public symbol
-        DUP2			string public symbol
-        DUP2			string public symbol
-        MLOAD			string public symbol
-        DUP2			string public symbol
-        MSTORE			string public symbol
-        PUSH 20		string public symbol
-        ADD			string public symbol
-        SWAP2			string public symbol
-        POP			string public symbol
-        DUP1			string public symbol
-        MLOAD			string public symbol
-        SWAP1			string public symbol
-        PUSH 20		string public symbol
-        ADD			string public symbol
-        SWAP1			string public symbol
-        DUP1			string public symbol
-        DUP4			string public symbol
-        DUP4			string public symbol
-        DUP3			string public symbol
-        SWAP1			string public symbol
-        PUSH 0		string public symbol
-        PUSH 4		string public symbol
-        PUSH 20		string public symbol
-        DUP5			string public symbol
-        PUSH 1F		string public symbol
-        ADD			string public symbol
-        DIV			string public symbol
-        PUSH F		string public symbol
-        MUL			string public symbol
-        PUSH 3		string public symbol
-        ADD			string public symbol
-        CALL			string public symbol
-        POP			string public symbol
-        SWAP1			string public symbol
-        POP			string public symbol
-        SWAP1			string public symbol
-        DUP2			string public symbol
-        ADD			string public symbol
-        SWAP1			string public symbol
-        PUSH 1F		string public symbol
-        AND			string public symbol
-        DUP1			string public symbol
-        ISZERO			string public symbol
-        PUSH [tag16]		string public symbol
-        JUMPI			string public symbol
-        DUP1			string public symbol
-        DUP3			string public symbol
-        SUB			string public symbol
-        DUP1			string public symbol
-        MLOAD			string public symbol
-        PUSH 1		string public symbol
-        DUP4			string public symbol
-        PUSH 20		string public symbol
-        SUB			string public symbol
-        PUSH 100		string public symbol
-        EXP			string public symbol
-        SUB			string public symbol
-        NOT			string public symbol
-        AND			string public symbol
-        DUP2			string public symbol
-        MSTORE			string public symbol
-        PUSH 20		string public symbol
-        ADD			string public symbol
-        SWAP2			string public symbol
-        POP			string public symbol
-      tag16: 
-        JUMPDEST		string public symbol
-        POP			string public symbol
-        SWAP3			string public symbol
-        POP			string public symbol
-        POP			string public symbol
-        POP			string public symbol
-        PUSH 40		string public symbol
-        MLOAD			string public symbol
-        DUP1			string public symbol
-        SWAP2			string public symbol
-        SUB			string public symbol
-        SWAP1			string public symbol
-        RETURN			string public symbol
-      tag6: 
-        JUMPDEST		function transfer(address _from, address _to, uint256 _value) {...
-        PUSH [tag17]		function transfer(address _from, address _to, uint256 _value) {...
-        PUSH 4		function transfer(address _from, address _to, uint256 _value) {...
-        DUP1			function transfer(address _from, address _to, uint256 _value) {...
-        DUP1			function transfer(address _from, address _to, uint256 _value) {...
-        CALLDATALOAD			function transfer(address _from, address _to, uint256 _value) {...
-        SWAP1			function transfer(address _from, address _to, uint256 _value) {...
-        PUSH 20		function transfer(address _from, address _to, uint256 _value) {...
-        ADD			function transfer(address _from, address _to, uint256 _value) {...
-        SWAP1			function transfer(address _from, address _to, uint256 _value) {...
-        SWAP2			function transfer(address _from, address _to, uint256 _value) {...
-        SWAP1			function transfer(address _from, address _to, uint256 _value) {...
-        DUP1			function transfer(address _from, address _to, uint256 _value) {...
-        CALLDATALOAD			function transfer(address _from, address _to, uint256 _value) {...
-        SWAP1			function transfer(address _from, address _to, uint256 _value) {...
-        PUSH 20		function transfer(address _from, address _to, uint256 _value) {...
-        ADD			function transfer(address _from, address _to, uint256 _value) {...
-        SWAP1			function transfer(address _from, address _to, uint256 _value) {...
-        SWAP2			function transfer(address _from, address _to, uint256 _value) {...
-        SWAP1			function transfer(address _from, address _to, uint256 _value) {...
-        DUP1			function transfer(address _from, address _to, uint256 _value) {...
-        CALLDATALOAD			function transfer(address _from, address _to, uint256 _value) {...
-        SWAP1			function transfer(address _from, address _to, uint256 _value) {...
-        PUSH 20		function transfer(address _from, address _to, uint256 _value) {...
-        ADD			function transfer(address _from, address _to, uint256 _value) {...
-        SWAP1			function transfer(address _from, address _to, uint256 _value) {...
-        SWAP2			function transfer(address _from, address _to, uint256 _value) {...
-        SWAP1			function transfer(address _from, address _to, uint256 _value) {...
-        POP			function transfer(address _from, address _to, uint256 _value) {...
-        POP			function transfer(address _from, address _to, uint256 _value) {...
-        PUSH [tag18]		function transfer(address _from, address _to, uint256 _value) {...
-        JUMP			function transfer(address _from, address _to, uint256 _value) {...
-      tag17: 
-        JUMPDEST		function transfer(address _from, address _to, uint256 _value) {...
-        STOP			function transfer(address _from, address _to, uint256 _value) {...
-      tag8: 
-        JUMPDEST		string public name
-        PUSH 1		string public name
-        PUSH 0		string public name
-        POP			string public name
-        DUP1			string public name
-        SLOAD			string public name
-        PUSH 1		string public name
-        DUP2			string public name
-        PUSH 1		string public name
-        AND			string public name
-        ISZERO			string public name
-        PUSH 100		string public name
-        MUL			string public name
-        SUB			string public name
-        AND			string public name
-        PUSH 2		string public name
-        SWAP1			string public name
-        DIV			string public name
-        DUP1			string public name
-        PUSH 1F		string public name
-        ADD			string public name
-        PUSH 20		string public name
-        DUP1			string public name
-        SWAP2			string public name
-        DIV			string public name
-        MUL			string public name
-        PUSH 20		string public name
-        ADD			string public name
-        PUSH 40		string public name
-        MLOAD			string public name
-        SWAP1			string public name
-        DUP2			string public name
-        ADD			string public name
-        PUSH 40		string public name
-        MSTORE			string public name
-        DUP1			string public name
-        SWAP3			string public name
-        SWAP2			string public name
-        SWAP1			string public name
-        DUP2			string public name
-        DUP2			string public name
-        MSTORE			string public name
-        PUSH 20		string public name
-        ADD			string public name
-        DUP3			string public name
-        DUP1			string public name
-        SLOAD			string public name
-        PUSH 1		string public name
-        DUP2			string public name
-        PUSH 1		string public name
-        AND			string public name
-        ISZERO			string public name
-        PUSH 100		string public name
-        MUL			string public name
-        SUB			string public name
-        AND			string public name
-        PUSH 2		string public name
-        SWAP1			string public name
-        DIV			string public name
-        DUP1			string public name
-        ISZERO			string public name
-        PUSH [tag19]		string public name
-        JUMPI			string public name
-        DUP1			string public name
-        PUSH 1F		string public name
-        LT			string public name
-        PUSH [tag20]		string public name
-        JUMPI			string public name
-        PUSH 100		string public name
-        DUP1			string public name
-        DUP4			string public name
-        SLOAD			string public name
-        DIV			string public name
-        MUL			string public name
-        DUP4			string public name
-        MSTORE			string public name
-        SWAP2			string public name
-        PUSH 20		string public name
-        ADD			string public name
-        SWAP2			string public name
-        PUSH [tag19]		string public name
-        JUMP			string public name
-      tag20: 
-        JUMPDEST		string public name
-        DUP3			string public name
-        ADD			string public name
-        SWAP2			string public name
-        SWAP1			string public name
-        PUSH 0		string public name
-        MSTORE			string public name
-        PUSH 20		string public name
-        PUSH 0		string public name
-        SHA3			string public name
-        SWAP1			string public name
-      tag21: 
-        JUMPDEST		string public name
-        DUP2			string public name
-        SLOAD			string public name
-        DUP2			string public name
-        MSTORE			string public name
-        SWAP1			string public name
-        PUSH 1		string public name
-        ADD			string public name
-        SWAP1			string public name
-        PUSH 20		string public name
-        ADD			string public name
-        DUP1			string public name
-        DUP4			string public name
-        GT			string public name
-        PUSH [tag21]		string public name
-        JUMPI			string public name
-        DUP3			string public name
-        SWAP1			string public name
-        SUB			string public name
-        PUSH 1F		string public name
-        AND			string public name
-        DUP3			string public name
-        ADD			string public name
-        SWAP2			string public name
-      tag19: 
-        JUMPDEST		string public name
-        POP			string public name
-        POP			string public name
-        POP			string public name
-        POP			string public name
-        POP			string public name
-        DUP2			string public name
-        JUMP	[out]		string public name
-      tag15: 
-        JUMPDEST		string public symbol
-        PUSH 2		string public symbol
-        PUSH 0		string public symbol
-        POP			string public symbol
-        DUP1			string public symbol
-        SLOAD			string public symbol
-        PUSH 1		string public symbol
-        DUP2			string public symbol
-        PUSH 1		string public symbol
-        AND			string public symbol
-        ISZERO			string public symbol
-        PUSH 100		string public symbol
-        MUL			string public symbol
-        SUB			string public symbol
-        AND			string public symbol
-        PUSH 2		string public symbol
-        SWAP1			string public symbol
-        DIV			string public symbol
-        DUP1			string public symbol
-        PUSH 1F		string public symbol
-        ADD			string public symbol
-        PUSH 20		string public symbol
-        DUP1			string public symbol
-        SWAP2			string public symbol
-        DIV			string public symbol
-        MUL			string public symbol
-        PUSH 20		string public symbol
-        ADD			string public symbol
-        PUSH 40		string public symbol
-        MLOAD			string public symbol
-        SWAP1			string public symbol
-        DUP2			string public symbol
-        ADD			string public symbol
-        PUSH 40		string public symbol
-        MSTORE			string public symbol
-        DUP1			string public symbol
-        SWAP3			string public symbol
-        SWAP2			string public symbol
-        SWAP1			string public symbol
-        DUP2			string public symbol
-        DUP2			string public symbol
-        MSTORE			string public symbol
-        PUSH 20		string public symbol
-        ADD			string public symbol
-        DUP3			string public symbol
-        DUP1			string public symbol
-        SLOAD			string public symbol
-        PUSH 1		string public symbol
-        DUP2			string public symbol
-        PUSH 1		string public symbol
-        AND			string public symbol
-        ISZERO			string public symbol
-        PUSH 100		string public symbol
-        MUL			string public symbol
-        SUB			string public symbol
-        AND			string public symbol
-        PUSH 2		string public symbol
-        SWAP1			string public symbol
-        DIV			string public symbol
-        DUP1			string public symbol
-        ISZERO			string public symbol
-        PUSH [tag22]		string public symbol
-        JUMPI			string public symbol
-        DUP1			string public symbol
-        PUSH 1F		string public symbol
-        LT			string public symbol
-        PUSH [tag23]		string public symbol
-        JUMPI			string public symbol
-        PUSH 100		string public symbol
-        DUP1			string public symbol
-        DUP4			string public symbol
-        SLOAD			string public symbol
-        DIV			string public symbol
-        MUL			string public symbol
-        DUP4			string public symbol
-        MSTORE			string public symbol
-        SWAP2			string public symbol
-        PUSH 20		string public symbol
-        ADD			string public symbol
-        SWAP2			string public symbol
-        PUSH [tag22]		string public symbol
-        JUMP			string public symbol
-      tag23: 
-        JUMPDEST		string public symbol
-        DUP3			string public symbol
-        ADD			string public symbol
-        SWAP2			string public symbol
-        SWAP1			string public symbol
-        PUSH 0		string public symbol
-        MSTORE			string public symbol
-        PUSH 20		string public symbol
-        PUSH 0		string public symbol
-        SHA3			string public symbol
-        SWAP1			string public symbol
-      tag24: 
-        JUMPDEST		string public symbol
-        DUP2			string public symbol
-        SLOAD			string public symbol
-        DUP2			string public symbol
-        MSTORE			string public symbol
-        SWAP1			string public symbol
-        PUSH 1		string public symbol
-        ADD			string public symbol
-        SWAP1			string public symbol
-        PUSH 20		string public symbol
-        ADD			string public symbol
-        DUP1			string public symbol
-        DUP4			string public symbol
-        GT			string public symbol
-        PUSH [tag24]		string public symbol
-        JUMPI			string public symbol
-        DUP3			string public symbol
-        SWAP1			string public symbol
-        SUB			string public symbol
-        PUSH 1F		string public symbol
-        AND			string public symbol
-        DUP3			string public symbol
-        ADD			string public symbol
-        SWAP2			string public symbol
-      tag22: 
-        JUMPDEST		string public symbol
-        POP			string public symbol
-        POP			string public symbol
-        POP			string public symbol
-        POP			string public symbol
-        POP			string public symbol
-        DUP2			string public symbol
-        JUMP	[out]		string public symbol
-      tag11: 
-        JUMPDEST		uint8 public decimals
-        PUSH 3		uint8 public decimals
-        PUSH 0		uint8 public decimals
-        SWAP1			uint8 public decimals
-        SLOAD			uint8 public decimals
-        SWAP1			uint8 public decimals
-        PUSH 100		uint8 public decimals
-        EXP			uint8 public decimals
-        SWAP1			uint8 public decimals
-        DIV			uint8 public decimals
-        PUSH FF		uint8 public decimals
-        AND			uint8 public decimals
-        DUP2			uint8 public decimals
-        JUMP	[out]		uint8 public decimals
-      tag13: 
-        JUMPDEST		mapping (address => uint256) public balanceOf
-        PUSH 4		mapping (address => uint256) public balanceOf
-        PUSH 0		mapping (address => uint256) public balanceOf
-        POP			mapping (address => uint256) public balanceOf
-        PUSH 20		mapping (address => uint256) public balanceOf
-        MSTORE			mapping (address => uint256) public balanceOf
-        DUP1			mapping (address => uint256) public balanceOf
-        PUSH 0		mapping (address => uint256) public balanceOf
-        MSTORE			mapping (address => uint256) public balanceOf
-        PUSH 40		mapping (address => uint256) public balanceOf
-        PUSH 0		mapping (address => uint256) public balanceOf
-        SHA3			mapping (address => uint256) public balanceOf
-        PUSH 0		mapping (address => uint256) public balanceOf
-        SWAP2			mapping (address => uint256) public balanceOf
-        POP			mapping (address => uint256) public balanceOf
-        SWAP1			mapping (address => uint256) public balanceOf
-        POP			mapping (address => uint256) public balanceOf
-        SLOAD			mapping (address => uint256) public balanceOf
-        DUP2			mapping (address => uint256) public balanceOf
-        JUMP	[out]		mapping (address => uint256) public balanceOf
-      tag18: 
-        JUMPDEST		function transfer(address _from, address _to, uint256 _value) {...
-        PUSH 0		owner
-        PUSH 0		owner
-        SWAP1			owner
-        SLOAD			owner
-        SWAP1			owner
-        PUSH 100		owner
-        EXP			owner
-        SWAP1			owner
-        DIV			owner
-        PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		owner
-        AND			owner
-        PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		msg.sender != owner
-        AND			msg.sender != owner
-        CALLER			msg.sender
-        PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		msg.sender != owner
-        AND			msg.sender != owner
-        EQ			msg.sender != owner
-        ISZERO			msg.sender != owner
-        ISZERO			if(msg.sender != owner) throw
-        PUSH [tag26]		if(msg.sender != owner) throw
-        JUMPI			if(msg.sender != owner) throw
-        PUSH [ErrorTag]		throw
-        JUMP			throw
-      tag26: 
-        JUMPDEST		if(msg.sender != owner) throw
-        DUP1			_value
-        PUSH 4		balanceOf
-        PUSH 0		balanceOf
-        POP			balanceOf
-        PUSH 0		balanceOf[_from]
-        DUP6			_from
-        PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		balanceOf[_from]
-        AND			balanceOf[_from]
-        DUP2			balanceOf[_from]
-        MSTORE			balanceOf[_from]
-        PUSH 20		balanceOf[_from]
-        ADD			balanceOf[_from]
-        SWAP1			balanceOf[_from]
-        DUP2			balanceOf[_from]
-        MSTORE			balanceOf[_from]
-        PUSH 20		balanceOf[_from]
-        ADD			balanceOf[_from]
-        PUSH 0		balanceOf[_from]
-        SHA3			balanceOf[_from]
-        PUSH 0		balanceOf[_from]
-        DUP3			balanceOf[_from] -= _value
-        DUP3			balanceOf[_from] -= _value
-        DUP3			balanceOf[_from] -= _value
-        POP			balanceOf[_from] -= _value
-        SLOAD			balanceOf[_from] -= _value
-        SUB			balanceOf[_from] -= _value
-        SWAP3			balanceOf[_from] -= _value
-        POP			balanceOf[_from] -= _value
-        POP			balanceOf[_from] -= _value
-        DUP2			balanceOf[_from] -= _value
-        SWAP1			balanceOf[_from] -= _value
-        SSTORE			balanceOf[_from] -= _value
-        POP			balanceOf[_from] -= _value
-        DUP1			_value
-        PUSH 4		balanceOf
-        PUSH 0		balanceOf
-        POP			balanceOf
-        PUSH 0		balanceOf[_to]
-        DUP5			_to
-        PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		balanceOf[_to]
-        AND			balanceOf[_to]
-        DUP2			balanceOf[_to]
-        MSTORE			balanceOf[_to]
-        PUSH 20		balanceOf[_to]
-        ADD			balanceOf[_to]
-        SWAP1			balanceOf[_to]
-        DUP2			balanceOf[_to]
-        MSTORE			balanceOf[_to]
-        PUSH 20		balanceOf[_to]
-        ADD			balanceOf[_to]
-        PUSH 0		balanceOf[_to]
-        SHA3			balanceOf[_to]
-        PUSH 0		balanceOf[_to]
-        DUP3			balanceOf[_to] += _value
-        DUP3			balanceOf[_to] += _value
-        DUP3			balanceOf[_to] += _value
-        POP			balanceOf[_to] += _value
-        SLOAD			balanceOf[_to] += _value
-        ADD			balanceOf[_to] += _value
-        SWAP3			balanceOf[_to] += _value
-        POP			balanceOf[_to] += _value
-        POP			balanceOf[_to] += _value
-        DUP2			balanceOf[_to] += _value
-        SWAP1			balanceOf[_to] += _value
-        SSTORE			balanceOf[_to] += _value
-        POP			balanceOf[_to] += _value
-        DUP2			_to
-        PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		Transfer(msg.sender, _to, _value)
-        AND			Transfer(msg.sender, _to, _value)
-        CALLER			msg.sender
-        PUSH FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF		Transfer(msg.sender, _to, _value)
-        AND			Transfer(msg.sender, _to, _value)
-        PUSH DDF252AD1BE2C89B69C2B068FC378DAA952BA7F163C4A11628F55A4DF523B3EF		Transfer(msg.sender, _to, _value)
-        DUP4			_value
-        PUSH 40		Transfer(msg.sender, _to, _value)
-        MLOAD			Transfer(msg.sender, _to, _value)
-        DUP1			Transfer(msg.sender, _to, _value)
-        DUP3			Transfer(msg.sender, _to, _value)
-        DUP2			Transfer(msg.sender, _to, _value)
-        MSTORE			Transfer(msg.sender, _to, _value)
-        PUSH 20		Transfer(msg.sender, _to, _value)
-        ADD			Transfer(msg.sender, _to, _value)
-        SWAP2			Transfer(msg.sender, _to, _value)
-        POP			Transfer(msg.sender, _to, _value)
-        POP			Transfer(msg.sender, _to, _value)
-        PUSH 40		Transfer(msg.sender, _to, _value)
-        MLOAD			Transfer(msg.sender, _to, _value)
-        DUP1			Transfer(msg.sender, _to, _value)
-        SWAP2			Transfer(msg.sender, _to, _value)
-        SUB			Transfer(msg.sender, _to, _value)
-        SWAP1			Transfer(msg.sender, _to, _value)
-        LOG3			Transfer(msg.sender, _to, _value)
-      tag25: 
-        JUMPDEST		function transfer(address _from, address _to, uint256 _value) {...
-        POP			function transfer(address _from, address _to, uint256 _value) {...
-        POP			function transfer(address _from, address _to, uint256 _value) {...
-        POP			function transfer(address _from, address _to, uint256 _value) {...
-        JUMP	[out]		function transfer(address _from, address _to, uint256 _value) {...

@@ -1,4 +1,0 @@
-contract bar {
-	 function(){
-	 }
-}
