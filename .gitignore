@@ -1,3 +1,9 @@
 tmp/
 tmp
 *.pyc
+contract_data
+*.sol
+*.json
+*.disasm
+*.report
+.DS_Store
