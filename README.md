@@ -2,7 +2,7 @@
 
 **Note: The tool is currently under development, please report any bugs you may find.**
 
-## Quick Run
+## Quick Start
 
 A container with the dependencies set up and the blockchain snapshot installed can be found [here](https://hub.docker.com/r/hrishioa/oyente/).
 
