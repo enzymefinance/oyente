@@ -2,6 +2,7 @@ import json
 import glob
 from tqdm import tqdm
 import os
+import sys
 
 contract_dir = 'contract_data' 
 
@@ -21,7 +22,7 @@ print "Running analysis..."
 
 contracts = cjson.keys()
 
-if len(sys.argv)>3:
+if len(sys.argv)>=3:
 	cores = int(sys.argv[1])
 	job = int(sys.argv[2])
 	contracts = contracts[(len(contracts)/cores)*job:(len(contracts)/cores)*(job+1)]
