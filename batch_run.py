@@ -18,7 +18,16 @@ results = {}
 missed = []
 
 print "Running analysis..."
-for c in tqdm(cjson):
+
+contracts = cjson.keys()
+
+if len(sys.argv)>3:
+	cores = int(sys.argv[1])
+	job = int(sys.argv[2])
+	contracts = contracts[(len(contracts)/cores)*job:(len(contracts)/cores)*(job+1)]
+	print "Job %d: Running on %d contracts..." % (job, len(contracts))
+
+for c in tqdm(contracts):
 	with open('tmp.evm','w') as of:
 		# print "Out: "+cjson[c][1][2:]
 		of.write(cjson[c][1][2:]+"\0")
