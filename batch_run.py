@@ -45,6 +45,6 @@ for c in tqdm(contracts):
 		of.write(json.dumps(results,indent=1))
 	with open('missed.json', 'w') as of:
 		of.write(json.dumps(missed,indent=1))
-	urllib2.urlopen('https://dweet.io/dweet/for/oyente-%d-%d?completed=%d&missed=%d&remaining=%d' % (job,cores,len(results),len(missed),len(contracts)-len(results)-len(missed))
+	urllib2.urlopen('https://dweet.io/dweet/for/oyente-%d-%d?completed=%d&missed=%d&remaining=%d' % (job,cores,len(results),len(missed),len(contracts)-len(results)-len(missed)))
 
 print "Completed."
