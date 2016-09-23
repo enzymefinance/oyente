@@ -23,7 +23,7 @@ TIMEOUT = 1000
 UNIT_TEST = 0
 
 # timeout to run symbolic execution (in secs)
-GLOBAL_TIMEOUT = 1800
+GLOBAL_TIMEOUT = 300
 
 # print path conditions
 PRINT_PATHS = 0
