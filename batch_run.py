@@ -23,6 +23,11 @@ print "Running analysis..."
 
 contracts = cjson.keys()
 
+if os.path.isfile('results.json'):
+	old_res = json.loads(open('results.json').read())
+	old_res = old_res.keys()
+	contracts = [c for c in contracts if c not in old_res]
+
 cores=0
 job=0
 
