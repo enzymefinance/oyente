@@ -84,7 +84,7 @@ def get_all_vars(list_of_storage_exprs):
     return ret_vars
 
 
-# rename variables to distinguish variables in two different paths.
+# Rename variables to distinguish variables in two different paths.
 # e.g. Ia_store_0 in path i becomes Ia_store_0_old if Ia_store_0 is modified
 # else we must keep Ia_store_0 if its not modified
 def rename_vars(pcs, global_states):
@@ -115,7 +115,7 @@ def rename_vars(pcs, global_states):
     # replace variable in storage expression
     for storage_addr in global_states:
         expr = global_states[storage_addr]
-        # stupid z3 4.1 makes me add this line
+        # z3 4.1 makes me add this line
         if is_expr(expr):
             list_vars = get_vars(expr)
             for var in list_vars:
@@ -139,7 +139,7 @@ def rename_vars(pcs, global_states):
     return ret_pcs, ret_gs
 
 
-#split a file into smaller files
+# split a file into smaller files
 def split_dicts(filename, nsub = 500):
     with open(filename) as json_file:
         c = json.load(json_file)

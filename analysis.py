@@ -60,7 +60,6 @@ def check_reentrancy_bug(path_conditions_and_vars, global_state):
     print "Reentrancy_bug? " + str(ret_val) + "\n"
     global reported
     if not reported:
-        # print "Writing %s to %s" % (cur_file, reentrancy_report_file)
         with open(reentrancy_report_file, 'a') as r_report:
             r_report.write('\n'+cur_file)
         reported = True
@@ -83,19 +82,10 @@ def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_
     analysis["gas_mem"] = GCOST["Gmemory"] * length + (length ** 2) // 512
 
     if opcode == "CALL":
-        print "THIS IS A CALLLLLLLLLL"
-        print str(path_conditions_and_vars)
-        print "\n This is the global state"
-        print str(global_state)
-        print str(mem)
         recipient = stack[1]
         transfer_amount = stack[2]
-        print "\nCALL params\n"
-        print str(recipient) + "\n"
-        print str(transfer_amount) + "\n"
         reentrancy_result = check_reentrancy_bug(path_conditions_and_vars, global_state)
         analysis["reentrancy_bug"].append(reentrancy_result)
-        print "Added "+str(reentrancy_result)
         if isinstance(transfer_amount, (int, long)) and transfer_amount == 0:
             return
         if not isinstance(recipient, (int, long)):
@@ -152,7 +142,6 @@ def is_feasible(prev_pc, gstate, curr_pc):
         var = gen.gen_owner_store_var(storage_address)
         if var in vars_mapping:
             new_pc.append(vars_mapping[var] == gstate[storage_address])
-    # if PRINT_MODE: print "Final path condition: ", new_pc
     solver = Solver()
     solver.push()
     solver.add(new_pc)

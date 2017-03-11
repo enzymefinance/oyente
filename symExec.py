@@ -111,7 +111,6 @@ def main():
         raise
         print "Exception - "+str(e)
         print "Time out"
-        # print "Running time " + str(time.time()-start)
     signal.alarm(0)
 
     if REPORT_MODE:
@@ -243,7 +242,7 @@ def detect_data_concurrency():
                     break
     if PRINT_MODE: print "data conccureny in storage " + str(concurrency_addr)
 
-# detect if any change in a storage address will result in a different
+# Detect if any change in a storage address will result in a different
 # flow of money. Currently I implement this detection by
 # considering if a path condition contains
 # a variable which is a storage address.
@@ -462,7 +461,6 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         display_analysis(analysis)
         global total_no_of_paths
         total_no_of_paths += 1
-        # global_pc.append(path_conditions_and_vars["path_condition"])
         reentrancy_all_paths.append(analysis["reentrancy_bug"])
         if analysis["money_flow"] not in money_flow_all_paths:
             money_flow_all_paths.append(analysis["money_flow"])
@@ -474,8 +472,6 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
             if analysis["sstore"] not in data_flow_all_paths[1]:
                 data_flow_all_paths[1].append(analysis["sstore"])
         compare_stack_unit_test(stack)
-        # if PRINT_MODE: print "Path condition = " + str(path_conditions_and_vars["path_condition"])
-        # raw_input("Press Enter to continue...\n")
     elif jump_type[start] == "unconditional":  # executing "JUMP"
         successor = vertices[start].get_jump_target()
         stack1 = list(stack)
@@ -996,7 +992,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
     elif instr_parts[0] == "CALLDATACOPY":  # Copy input data to memory
-        # Don't know how to simulate this yet
+        #  TODO: Don't know how to simulate this yet
         if len(stack) > 2:
             stack.pop(0)
             stack.pop(0)
@@ -1004,7 +1000,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "CODECOPY":  # Copy code running in current env to memory
-        # Don't know how to simulate this yet
+        #  TODO: Don't know how to simulate this yet
         # Need an example to test
         if len(stack) > 2:
             stack.pop(0)
@@ -1231,7 +1227,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "JUMPI":
-        # WE need to prepare two branches
+        # We need to prepare two branches
         if len(stack) > 1:
             target_address = stack.pop(0)
             vertices[start].set_jump_target(target_address)
@@ -1248,7 +1244,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "PC":
-        # this is not hard, but tedious. Let's skip it for now
+        # TODO: this is not hard, but tedious. Let's skip it for now
         raise Exception('Must implement PC now')
     elif instr_parts[0] == "MSIZE":
         msize = 32 * global_state["miu_i"]
@@ -1308,7 +1304,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     #  f0s: System Operations
     #
     elif instr_parts[0] == "CALL":
-        # DOTO: Need to handle miu_i
+        # TODO: Need to handle miu_i
         if len(stack) > 6:
             outgas = stack.pop(0)
             recipient = stack.pop(0)
@@ -1369,7 +1365,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "CALLCODE":
-        # DOTO: Need to handle miu_i
+        # TODO: Need to handle miu_i
         if len(stack) > 6:
             outgas = stack.pop(0)
             stack.pop(0) # this is not used as recipient
@@ -1405,7 +1401,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "RETURN":
-        # DOTO: Need to handle miu_i
+        # TODO: Need to handle miu_i
         if len(stack) > 1:
             stack.pop(0)
             stack.pop(0)

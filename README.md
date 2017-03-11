@@ -10,7 +10,7 @@ To open the container, install docker and run:
 
 ```docker pull hrishioa/oyente && docker run -i -t hrishioa/oyente```
 
-To evaluate the greeter contract Inside the container, run:
+To evaluate the greeter contract inside the container, run:
 
 ```cd /home/oyente/oyente && source ../dependencies/venv/bin/activate && python oyente.py greeter.sol```
 
@@ -33,7 +33,7 @@ The accompanying paper explaining the bugs detected by the tool can be found [he
 
 ## Miscellaneous Utilities
 
-A collection of the utilities that were developed for the paper are in `Misc_Utils`. Use them at your own risk - they have mostly been disposable.
+A collection of the utilities that were developed for the paper are in `misc_utils`. Use them at your own risk - they have mostly been disposable.
 
 1. `generate-graphs.py` - Contains a number of functions to get statistics from contracts.
 2. `get_source.py` - The *get_contract_code* function can be used to retrieve contract source from [EtherScan](https://etherscan.io)
