@@ -6,16 +6,27 @@ import sys
 import global_params
 import argparse
 
-try:
-	import z3
-	import z3util
-except:
-	print "Error: Z3 is not available. Please install z3 from https://github.com/Z3Prover/z3."
-	exit(0)
-
 def cmd_exists(cmd):
     return subprocess.call("type " + cmd, shell=True, 
         stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
+
+def has_dependencies_installed():
+	try:
+		import z3
+		import z3util
+	except:
+		print "Error: Z3 is not available. Please install z3 from https://github.com/Z3Prover/z3."
+		return False
+
+	if not cmd_exists("disasm"):
+		print "disasm is missing. Please install go-ethereum and make sure disasm is in the path."
+		return False
+
+	if not cmd_exists("solc"):
+		print "solc is missing. Please install the solidity compiler and make sure solc is in the path."
+		return False
+
+	return True
 
 def main():
 	# TODO: Implement -o switch.
@@ -42,8 +53,7 @@ def main():
 	global_params.DEBUG_MODE = 1 if args.debug else 0
 	global_params.IGNORE_EXCEPTIONS = 1 if args.error else 0
 
-	if not cmd_exists("disasm"):
-		print "disasm is missing. Please install go-ethereum and make sure disasm is in the path."
+	if not has_dependencies_installed():
 		return
 
 	if args.bytecode:
@@ -65,10 +75,6 @@ def main():
 
 		os.system('rm %s.disasm' % (args.source))
 
-		return
-
-	if not cmd_exists("solc"):
-		print "solc is missing. Please install the solidity compiler and make sure solc is in the path."
 		return
 
 	# Compile first
