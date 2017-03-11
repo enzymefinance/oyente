@@ -142,7 +142,6 @@ def is_feasible(prev_pc, gstate, curr_pc):
         var = gen.gen_owner_store_var(storage_address)
         if var in vars_mapping:
             new_pc.append(vars_mapping[var] == gstate[storage_address])
-    # if PRINT_MODE: print "Final path condition: ", new_pc
     solver = Solver()
     solver.push()
     solver.add(new_pc)

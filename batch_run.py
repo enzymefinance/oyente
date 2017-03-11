@@ -39,7 +39,6 @@ if len(sys.argv)>=3:
 
 for c in tqdm(contracts):
 	with open('tmp.evm','w') as of:
-		# print "Out: "+cjson[c][1][2:]
 		of.write(cjson[c][1][2:]+"\0")
 	os.system('python oyente.py tmp.evm -j -b')
 	try:
