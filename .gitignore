@@ -3,6 +3,8 @@ tmp
 *.pyc
 contract_data
 *.sol
+*.evm
+*.log
 *.json
 *.disasm
 *.report
