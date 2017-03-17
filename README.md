@@ -1,6 +1,6 @@
 # Oyente
 
-**Note: The tool is currently under development, please report any bugs you may find.**
+**Note: The project has been moved to the new repo https://github.com/melonproject/oyente**
 
 ## Quick Start
 
