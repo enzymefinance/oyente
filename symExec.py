@@ -11,6 +11,7 @@ import time
 from global_params import *
 import sys
 import atexit
+import logging
 
 results = {}
 
@@ -70,20 +71,38 @@ log_file = open(sys.argv[1] + '.log', "w")
 # A simple function to compare the end stack with the expected stack
 # configurations specified in a test file
 def compare_stack_unit_test(stack):
-    if UNIT_TEST != 1:
+    if UNIT_TEST == 0:
         return
-    try:
-        size = int(result_file.readline())
-        content = result_file.readline().strip('\n')
-        if size == len(stack) and str(stack) == content:
-            if PRINT_MODE: print "PASSED UNIT-TEST"
-        else:
+    elif UNIT_TEST == 1:
+        try:
+            size = int(result_file.readline())
+            content = result_file.readline().strip('\n')
+            if size == len(stack) and str(stack) == content:
+                if PRINT_MODE: print "PASSED UNIT-TEST"
+            else:
+                if PRINT_MODE: print "FAILED UNIT-TEST"
+                if PRINT_MODE: print "Expected size %d, Resulted size %d" % (size, len(stack))
+                if PRINT_MODE: print "Expected content %s \nResulted content %s" % (content, str(stack))
+        except Exception as e:
             if PRINT_MODE: print "FAILED UNIT-TEST"
-            if PRINT_MODE: print "Expected size %d, Resulted size %d" % (size, len(stack))
-            if PRINT_MODE: print "Expected content %s \nResulted content %s" % (content, str(stack))
-    except Exception as e:
-        if PRINT_MODE: print "FAILED UNIT-TEST"
-        if PRINT_MODE: print e.message
+            if PRINT_MODE: print e.message
+
+    elif UNIT_TEST == 2:
+        with open('result', 'w') as result_file:
+            key = global_state['Ia'].keys()[0]
+            value = str(global_state['Ia'][key])
+
+            try:
+                key = str(long(key))
+                value = str(long(value))
+                result_file.write(key);
+                result_file.write('\n')
+                result_file.write(value)
+            except:
+                logging.exception("Storage key or value is not a number")
+                exit(1)
+            finally:
+                result_file.close()
 
 
 def handler(signum, frame):
@@ -114,9 +133,9 @@ def main():
     signal.alarm(0)
 
     if REPORT_MODE:
-        rfile.write(str(total_no_of_paths) + "\n")    
+        rfile.write(str(total_no_of_paths) + "\n")
     detect_money_concurrency()
-    detect_time_dependency()    
+    detect_time_dependency()
     stop = time.time()
     if REPORT_MODE:
         rfile.write(str(stop-start))
@@ -1510,7 +1529,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
 
     else:
         if PRINT_MODE: print "UNKNOWN INSTRUCTION: " + instr_parts[0]
-        raise Exception('UNKNOWN INSTRUCTION' + instr_parts[0])
+        if UNIT_TEST == 2: exit(1)
+        raise Exception('UNKNOWN INSTRUCTION: ' + instr_parts[0])
 
     print_state(start, stack, mem, global_state)
 
@@ -1526,7 +1546,7 @@ def check_callstack_attack(disasm):
                 if disasm[j][1] == 'ISZERO':
                     error = False
                     break
-            if error == True: return True                
+            if error == True: return True
     return False
 
 def run_callstack_attack():

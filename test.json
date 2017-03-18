@@ -1,0 +1,19 @@
+{
+      "maps": [
+                {
+                              "id": "blabla",
+                              "iscategorical": "0"
+                          },
+                {
+                              "id": "blabla",
+                              "iscategorical": "0"
+                          }
+            ],
+        "masks": {
+                  "id": "valore"
+              },
+        "om_points": "value",
+        "parameters": {
+                  "id": "valore"
+              }
+}

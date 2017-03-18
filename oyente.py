@@ -7,7 +7,7 @@ import global_params
 import argparse
 
 def cmd_exists(cmd):
-    return subprocess.call("type " + cmd, shell=True, 
+    return subprocess.call("type " + cmd, shell=True,
         stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
 
 def has_dependencies_installed():
@@ -71,10 +71,12 @@ def main():
 
 		# TODO: Do this as an import and run, instead of shell call and hacky fix
 
-		os.system('python symExec.py %s.disasm %d %d %d %d %d %d %d %d %d %d %s' % (args.source, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, args.source+".json" if args.json else ""))
+		cmd = os.system('python symExec.py %s.disasm %d %d %d %d %d %d %d %d %d %d %s' % (args.source, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, args.source+".json" if args.json else ""))
 
-		os.system('rm %s.disasm' % (args.source))
+                exit_code = os.WEXITSTATUS(cmd)
+                os.system('rm %s.disasm' % (args.source))
 
+                if exit_code == 1: exit(1)
 		return
 
 	# Compile first
