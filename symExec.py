@@ -634,6 +634,73 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
+    elif instr_parts[1] == "SDIV":
+        minInt = -2 ** 255
+        if len(stack) > 1:
+            first = stack.pop(0)
+            second = stack.pop(0)
+            if isinstance(second, (int, long)):
+                # second is not symbolic
+                if second == 0:
+                    computed = 0
+                else:
+                    if isinstance(first, (int, long)):
+                        # both are not symbolic
+                        if first == minInt and second == -1:
+                            computed = minInt
+                        else:
+                            computed = first / second
+                    else:
+                        # first is symbolic and second is not symbolic
+                        solver.push()
+                        solver.add(Not(first == minInt))
+                        if solver.check() == unsat:
+                            # it is provable that second is indeed equal to -1
+                            if second == -1:
+                                computed = minInt
+                            else:
+                                second = BitVecVal(second, 256)
+                                computed = first / second
+                        else:
+                            second = BitVecVal(second, 256)
+                            computed = first / second
+                        solver.pop()
+            else:
+                # second is symbolic
+                solver.push()
+                solver.add(Not(second == 0))
+                if solver.check() == unsat:
+                    # it is provable that second is indeed equal to zero
+                    computed = 0
+                else:
+                    solver.push()
+                    solver.add(Not(second == -1))
+                    if solver.check() == unsat:
+                        if isinstance(first, (int, long)):
+                            # first is not symbolic and second is symbolic
+                            if first == minInt:
+                                computed = minInt
+                            else:
+                                first = BitVecVal(first, 256)
+                                computed = first / second
+                        else:
+                            # both are symbolic
+                            solver.push()
+                            solver.add(Not(first == minInt))
+                            if solver.check() == unsat:
+                                computed == minInt
+                            else:
+                                computed = first / second
+                            solver.pop()
+                    else:
+                        if isinstance(first, (int, long)):
+                            first = BitVecVal(first, 256)
+                        computed = first / second
+                    solver.pop()
+                solver.pop()
+            stack.insert(0, computed)
+        else:
+            raise ValueError('STACK underflow')
     elif instr_parts[0] == "MOD":
         if len(stack) > 1:
             first = stack.pop(0)
