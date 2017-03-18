@@ -613,11 +613,24 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 1:
             first = stack.pop(0)
             second = stack.pop(0)
-            if isinstance(first, (int, long)) and not isinstance(second, (int, long)):
-                first = BitVecVal(first, 256)
-            elif not isinstance(first, (int, long)) and isinstance(second, (int, long)):
-                second = BitVecVal(second, 256)
-            computed = first / second
+            if isinstance(second, (int, long)):
+                if second == 0:
+                    computed = 0
+                else:
+                    if not isinstance(first, (int, long)):
+                        second = BitVecVal(second, 256)
+                    computed = first / second
+            else:
+                solver.push()
+                solver.add(Not(second == 0))
+                if solver.check() == unsat:
+                    # it is provable that second is indeed equal to zero
+                    computed = 0
+                else:
+                    if isinstance(first, (int, long)):
+                        first = BitVecVal(first, 256)
+                    computed = first / second
+                solver.pop()
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
