@@ -12,8 +12,7 @@ def execute_vm(bytecode_content):
         code_file.close()
     cmd = os.system('python oyente.py -b code')
     exit_code = os.WEXITSTATUS(cmd)
-    if exit_code == 1: return False
-    return True
+    return exit_code
 
 def run_test(testname, params):
     try:
@@ -22,7 +21,8 @@ def run_test(testname, params):
     except:
         return JSON_STRUCTURE_NOT_MATCH
 
-    if execute_vm(exek['code'][2:]) == False: return NOT_YET_HANDLED_OPCODE
+    exit_code = execute_vm(exek['code'][2:])
+    if exit_code != 0: return exit_code
 
     for address in post:
         try:
@@ -33,7 +33,6 @@ def run_test(testname, params):
             storage_value = decode_hex(storage_value)
         except:
             print "Storage is much likely to be empty in json test file"
-            print "Storage", post
             return STORAGE_EMPTY
 
     with open('result', 'r') as result_file:

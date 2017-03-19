@@ -1,6 +1,8 @@
-PASS = "pass"
-FAIL = "fail"
-STORAGE_EMPTY = "storage empty"
-NOT_YET_HANDLED_OPCODE = "not yet handled opcode"
-JSON_STRUCTURE_NOT_MATCH = "json test file structure not match"
-TIME_OUT = "time out"
+PASS = 100
+FAIL = 101
+STORAGE_EMPTY = 102
+NOT_YET_HANDLED_OPCODE = 103
+JSON_STRUCTURE_NOT_MATCH = 104
+NOT_A_NUMBER = 105
+TIME_OUT = 106
+UNKOWN_INSTRUCTION = 107

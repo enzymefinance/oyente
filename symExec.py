@@ -9,6 +9,7 @@ from utils import *
 from math import *
 import time
 from global_params import *
+from global_test_params import *
 import sys
 import atexit
 import logging
@@ -97,10 +98,9 @@ def compare_storage_unit_test(global_state):
             result_file.write(value)
         except:
             logging.exception("Storage key or value is not a number")
-            exit(1)
+            exit(NOT_A_NUMBER)
         finally:
             result_file.close()
-
 
 def handler(signum, frame):
     raise Exception("timeout")
@@ -124,6 +124,7 @@ def main():
         if PRINT_MODE:
             print "Done Symbolic execution"
     except Exception as e:
+        if UNIT_TEST == 2: exit(TIME_OUT)
         raise
         print "Exception - "+str(e)
         print "Time out"
@@ -1001,6 +1002,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "BYTE":
+        if UNIT_TEST == 2: exit(NOT_YET_HANDLED_OPCODE)
         raise ValueError('BYTE is not yet handled')
     #
     # 20s: SHA3
@@ -1528,7 +1530,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
 
     else:
         if PRINT_MODE: print "UNKNOWN INSTRUCTION: " + instr_parts[0]
-        if UNIT_TEST == 2: exit(1)
+        if UNIT_TEST == 2: exit(UNKOWN_INSTRUCTION)
         raise Exception('UNKNOWN INSTRUCTION: ' + instr_parts[0])
 
     print_state(start, stack, mem, global_state)
