@@ -38,7 +38,7 @@ def display_analysis(analysis):
 # Return true if it does, false otherwise
 def check_reentrancy_bug(path_conditions_and_vars, global_state):
     path_condition = path_conditions_and_vars["path_condition"]
-    new_path_condition = [] 
+    new_path_condition = []
     for expr in path_condition:
         list_vars = get_vars(expr)
         for var in list_vars:
@@ -64,7 +64,7 @@ def check_reentrancy_bug(path_conditions_and_vars, global_state):
             r_report.write('\n'+cur_file)
         reported = True
     return ret_val
-    
+
 def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_and_vars):
     gas_increment = get_ins_cost(opcode)
     if opcode in ("LOG0", "LOG1", "LOG2", "LOG3", "LOG4"):
@@ -90,7 +90,7 @@ def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_
             return
         if not isinstance(recipient, (int, long)):
             recipient = simplify(recipient)
-        analysis["money_flow"].append(("Ia", str(recipient), transfer_amount))        
+        analysis["money_flow"].append(("Ia", str(recipient), transfer_amount))
     elif opcode == "SUICIDE":
         recipient = stack[0]
         if not isinstance(recipient, (int, long)):
@@ -164,7 +164,7 @@ def is_false_positive(i, j, all_gs, path_conditions):
     pathi = path_conditions[i]
     pathj = path_conditions[j]
     statei = all_gs[i]
-    
+
     # rename global variables in path i
     set_of_pcs, statei = rename_vars(pathi, statei)
     if PRINT_MODE: print "Set of PCs after renaming global vars" + str(set_of_pcs)
