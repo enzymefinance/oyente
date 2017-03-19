@@ -71,38 +71,35 @@ log_file = open(sys.argv[1] + '.log', "w")
 # A simple function to compare the end stack with the expected stack
 # configurations specified in a test file
 def compare_stack_unit_test(stack):
-    if UNIT_TEST == 0:
-        return
-    elif UNIT_TEST == 1:
-        try:
-            size = int(result_file.readline())
-            content = result_file.readline().strip('\n')
-            if size == len(stack) and str(stack) == content:
-                if PRINT_MODE: print "PASSED UNIT-TEST"
-            else:
-                if PRINT_MODE: print "FAILED UNIT-TEST"
-                if PRINT_MODE: print "Expected size %d, Resulted size %d" % (size, len(stack))
-                if PRINT_MODE: print "Expected content %s \nResulted content %s" % (content, str(stack))
-        except Exception as e:
+    try:
+        size = int(result_file.readline())
+        content = result_file.readline().strip('\n')
+        if size == len(stack) and str(stack) == content:
+            if PRINT_MODE: print "PASSED UNIT-TEST"
+        else:
             if PRINT_MODE: print "FAILED UNIT-TEST"
-            if PRINT_MODE: print e.message
+            if PRINT_MODE: print "Expected size %d, Resulted size %d" % (size, len(stack))
+            if PRINT_MODE: print "Expected content %s \nResulted content %s" % (content, str(stack))
+    except Exception as e:
+        if PRINT_MODE: print "FAILED UNIT-TEST"
+        if PRINT_MODE: print e.message
 
-    elif UNIT_TEST == 2:
-        with open('result', 'w') as result_file:
-            key = global_state['Ia'].keys()[0]
-            value = str(global_state['Ia'][key])
+def compare_storage_unit_test(global_state):
+    with open('result', 'w') as result_file:
+        key = global_state['Ia'].keys()[0]
+        value = str(global_state['Ia'][key])
 
-            try:
-                key = str(long(key))
-                value = str(long(value))
-                result_file.write(key);
-                result_file.write('\n')
-                result_file.write(value)
-            except:
-                logging.exception("Storage key or value is not a number")
-                exit(1)
-            finally:
-                result_file.close()
+        try:
+            key = str(long(key))
+            value = str(long(value))
+            result_file.write(key);
+            result_file.write('\n')
+            result_file.write(value)
+        except:
+            logging.exception("Storage key or value is not a number")
+            exit(1)
+        finally:
+            result_file.close()
 
 
 def handler(signum, frame):
@@ -490,7 +487,9 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
                 data_flow_all_paths[0].append(analysis["sload"])
             if analysis["sstore"] not in data_flow_all_paths[1]:
                 data_flow_all_paths[1].append(analysis["sstore"])
-        compare_stack_unit_test(stack)
+        if UNIT_TEST == 1: compare_stack_unit_test(stack)
+        if UNIT_TEST == 2: compare_storage_unit_test(global_state)
+
     elif jump_type[start] == "unconditional":  # executing "JUMP"
         successor = vertices[start].get_jump_target()
         stack1 = list(stack)
