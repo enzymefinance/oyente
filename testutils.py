@@ -1,5 +1,4 @@
 import os
-import subprocess
 from global_test_params import *
 from global_params import *
 
