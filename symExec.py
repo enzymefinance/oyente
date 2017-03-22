@@ -993,12 +993,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     elif instr_parts[0] == "NOT":
         if len(stack) > 0:
             first = stack.pop(0)
-            if isinstance(first, (int, long)):
-                complement = -1 - first
-                stack.insert(0, complement)
-            else:
-                sym_expression = (~ first)
-                stack.insert(0, sym_expression)
+            computed = ~ first
+            stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "BYTE":
