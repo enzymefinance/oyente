@@ -916,7 +916,17 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "BYTE":
-        raise ValueError('BYTE is not yet handled')
+        if len(stack) > 1:
+            byte_no = stack.pop(0)
+            word = stack.pop(0)
+            if isinstance(byte_no, (int, long)) and not isinstance(word, (int, long)):
+                word = BitVecVal(word, 256)
+            if isinstance(word, (int, long)) and not isinstance(byte_no, (int, long)):
+                byte_no = BitVecVal(byte_no, 256)
+            byte = word & (255 << (8 * (32 - byte_no)))
+            stack.insert(0, byte)
+        else:
+            raise ValueError('STACK underflow')
     #
     # 20s: SHA3
     #
