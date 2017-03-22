@@ -993,7 +993,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     elif instr_parts[0] == "NOT":
         if len(stack) > 0:
             first = stack.pop(0)
-            computed = ~ first
+            computed = (~first) & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
