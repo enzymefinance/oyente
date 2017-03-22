@@ -9,8 +9,10 @@ from utils import *
 from math import *
 import time
 from global_params import *
+from global_test_params import *
 import sys
 import atexit
+import logging
 
 results = {}
 
@@ -70,8 +72,6 @@ log_file = open(sys.argv[1] + '.log', "w")
 # A simple function to compare the end stack with the expected stack
 # configurations specified in a test file
 def compare_stack_unit_test(stack):
-    if UNIT_TEST != 1:
-        return
     try:
         size = int(result_file.readline())
         content = result_file.readline().strip('\n')
@@ -85,6 +85,22 @@ def compare_stack_unit_test(stack):
         if PRINT_MODE: print "FAILED UNIT-TEST"
         if PRINT_MODE: print e.message
 
+def compare_storage_unit_test(global_state):
+    with open('result', 'w') as result_file:
+        key = global_state['Ia'].keys()[0]
+        value = str(global_state['Ia'][key])
+
+        try:
+            key = str(long(key))
+            value = str(long(value))
+            result_file.write(key);
+            result_file.write('\n')
+            result_file.write(value)
+        except:
+            logging.exception("Storage key or value is not a number")
+            exit(NOT_A_NUMBER)
+        finally:
+            result_file.close()
 
 def handler(signum, frame):
     raise Exception("timeout")
@@ -108,15 +124,16 @@ def main():
         if PRINT_MODE:
             print "Done Symbolic execution"
     except Exception as e:
+        if UNIT_TEST == 2: exit(TIME_OUT)
         raise
         print "Exception - "+str(e)
         print "Time out"
     signal.alarm(0)
 
     if REPORT_MODE:
-        rfile.write(str(total_no_of_paths) + "\n")    
+        rfile.write(str(total_no_of_paths) + "\n")
     detect_money_concurrency()
-    detect_time_dependency()    
+    detect_time_dependency()
     stop = time.time()
     if REPORT_MODE:
         rfile.write(str(stop-start))
@@ -471,7 +488,9 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
                 data_flow_all_paths[0].append(analysis["sload"])
             if analysis["sstore"] not in data_flow_all_paths[1]:
                 data_flow_all_paths[1].append(analysis["sstore"])
-        compare_stack_unit_test(stack)
+        if UNIT_TEST == 1: compare_stack_unit_test(stack)
+        if UNIT_TEST == 2: compare_storage_unit_test(global_state)
+
     elif jump_type[start] == "unconditional":  # executing "JUMP"
         successor = vertices[start].get_jump_target()
         stack1 = list(stack)
@@ -630,6 +649,73 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     if isinstance(first, (int, long)):
                         first = BitVecVal(first, 256)
                     computed = first / second
+                solver.pop()
+            stack.insert(0, computed)
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[1] == "SDIV":
+        minInt = -2 ** 255
+        if len(stack) > 1:
+            first = stack.pop(0)
+            second = stack.pop(0)
+            if isinstance(second, (int, long)):
+                # second is not symbolic
+                if second == 0:
+                    computed = 0
+                else:
+                    if isinstance(first, (int, long)):
+                        # both are not symbolic
+                        if first == minInt and second == -1:
+                            computed = minInt
+                        else:
+                            computed = first / second
+                    else:
+                        # first is symbolic and second is not symbolic
+                        solver.push()
+                        solver.add(Not(first == minInt))
+                        if solver.check() == unsat:
+                            # it is provable that second is indeed equal to -1
+                            if second == -1:
+                                computed = minInt
+                            else:
+                                second = BitVecVal(second, 256)
+                                computed = first / second
+                        else:
+                            second = BitVecVal(second, 256)
+                            computed = first / second
+                        solver.pop()
+            else:
+                # second is symbolic
+                solver.push()
+                solver.add(Not(second == 0))
+                if solver.check() == unsat:
+                    # it is provable that second is indeed equal to zero
+                    computed = 0
+                else:
+                    solver.push()
+                    solver.add(Not(second == -1))
+                    if solver.check() == unsat:
+                        if isinstance(first, (int, long)):
+                            # first is not symbolic and second is symbolic
+                            if first == minInt:
+                                computed = minInt
+                            else:
+                                first = BitVecVal(first, 256)
+                                computed = first / second
+                        else:
+                            # both are symbolic
+                            solver.push()
+                            solver.add(Not(first == minInt))
+                            if solver.check() == unsat:
+                                computed == minInt
+                            else:
+                                computed = first / second
+                            solver.pop()
+                    else:
+                        if isinstance(first, (int, long)):
+                            first = BitVecVal(first, 256)
+                        computed = first / second
+                    solver.pop()
                 solver.pop()
             stack.insert(0, computed)
         else:
@@ -1453,7 +1539,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
 
     else:
         if PRINT_MODE: print "UNKNOWN INSTRUCTION: " + instr_parts[0]
-        raise Exception('UNKNOWN INSTRUCTION' + instr_parts[0])
+        if UNIT_TEST == 2: exit(UNKOWN_INSTRUCTION)
+        raise Exception('UNKNOWN INSTRUCTION: ' + instr_parts[0])
 
     print_state(start, stack, mem, global_state)
 
@@ -1469,7 +1556,7 @@ def check_callstack_attack(disasm):
                 if disasm[j][1] == 'ISZERO':
                     error = False
                     break
-            if error == True: return True                
+            if error == True: return True
     return False
 
 def run_callstack_attack():
