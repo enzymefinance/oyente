@@ -1000,12 +1000,14 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     elif instr_parts[0] == "BYTE":
         if len(stack) > 1:
             byte_no = stack.pop(0)
+            byte_no_from_left = 32 - byte_no - 1
             word = stack.pop(0)
-            if isinstance(byte_no, (int, long)) and not isinstance(word, (int, long)):
+            if isinstance(byte_no_from_left, (int, long)) and not isinstance(word, (int, long)):
                 word = BitVecVal(word, 256)
-            if isinstance(word, (int, long)) and not isinstance(byte_no, (int, long)):
-                byte_no = BitVecVal(byte_no, 256)
-            byte = word & (255 << (8 * (32 - byte_no)))
+            if isinstance(word, (int, long)) and not isinstance(byte_no_from_left, (int, long)):
+                byte_no_from_left = BitVecVal(byte_no_from_left, 256)
+            byte = word & (255 << (8 * byte_no_from_left))
+            byte = byte >> (8 * byte_no_from_left) 
             stack.insert(0, byte)
         else:
             raise ValueError('STACK underflow')
