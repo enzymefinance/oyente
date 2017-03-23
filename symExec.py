@@ -16,6 +16,7 @@ import logging
 
 results = {}
 
+UNSIGNED_BOUND_NUMBER = 2**256 - 1
 
 if len(sys.argv) >= 12:
     IGNORE_EXCEPTIONS = int(sys.argv[2])
@@ -615,7 +616,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 first = BitVecVal(first, 256)
             elif not isinstance(first, (int, long)) and isinstance(second, (int, long)):
                 second = BitVecVal(second, 256)
-            computed = first * second
+            computed = first * second & UNSIGNED_BOUND_NUMBER
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
@@ -733,7 +734,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 else:
                     if not isinstance(first, (int, long)):
                         second = BitVecVal(second, 256)  # Make second a bitvector
-                    computed = first % second
+                    computed = first % second & UNSIGNED_BOUND_NUMBER
             else:
                 solver.push()
                 solver.add(Not(second == 0))
@@ -996,7 +997,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     elif instr_parts[0] == "NOT":
         if len(stack) > 0:
             first = stack.pop(0)
-            computed = (~first) & 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+            computed = (~first) & UNSIGNED_BOUND_NUMBER
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
