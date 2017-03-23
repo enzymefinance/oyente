@@ -87,22 +87,23 @@ def compare_stack_unit_test(stack):
 
 def compare_storage_unit_test(global_state):
     with open('result', 'w') as result_file:
-        key = global_state['Ia'].keys()[0]
-        value = str(global_state['Ia'][key])
-
-        try:
-            key = str(long(key))
-            value = str(long(value))
-            result_file.write(key);
-            result_file.write('\n')
-            result_file.write(value)
-        except:
-            logging.exception("Storage key or value is not a number")
-            exit(NOT_A_NUMBER)
-        finally:
-            result_file.close()
+        for key in global_state['Ia']:
+            value = global_state['Ia'][key]
+            try:
+                key = str(long(key))
+                value = str(long(value))
+                result_file.write(key);
+                result_file.write(' ')
+                result_file.write(value)
+                result_file.write('\n')
+            except:
+                logging.exception("Storage key or value is not a number")
+                result_file.close()
+                exit(NOT_A_NUMBER)
+        result_file.close()
 
 def handler(signum, frame):
+    if UNIT_TEST == 2: exit(TIME_OUT)
     raise Exception("timeout")
 
 def main():
@@ -124,7 +125,9 @@ def main():
         if PRINT_MODE:
             print "Done Symbolic execution"
     except Exception as e:
-        if UNIT_TEST == 2: exit(TIME_OUT)
+        if UNIT_TEST == 2:
+            logging.exception(e)
+            exit(EXCEPTION)
         raise
         print "Exception - "+str(e)
         print "Time out"
@@ -653,7 +656,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[1] == "SDIV":
+    elif instr_parts[0] == "SDIV":
         minInt = -2 ** 255
         if len(stack) > 1:
             first = stack.pop(0)
@@ -1007,7 +1010,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             if isinstance(word, (int, long)) and not isinstance(byte_no_from_left, (int, long)):
                 byte_no_from_left = BitVecVal(byte_no_from_left, 256)
             byte = word & (255 << (8 * byte_no_from_left))
-            byte = byte >> (8 * byte_no_from_left) 
+            byte = byte >> (8 * byte_no_from_left)
             stack.insert(0, byte)
         else:
             raise ValueError('STACK underflow')
@@ -1537,7 +1540,9 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
 
     else:
         if PRINT_MODE: print "UNKNOWN INSTRUCTION: " + instr_parts[0]
-        if UNIT_TEST == 2: exit(UNKOWN_INSTRUCTION)
+        if UNIT_TEST == 2:
+            logging.exception("Unkown instruction: %s" % instr_parts[0])
+            exit(UNKOWN_INSTRUCTION)
         raise Exception('UNKNOWN INSTRUCTION: ' + instr_parts[0])
 
     print_state(start, stack, mem, global_state)

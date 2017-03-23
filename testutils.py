@@ -26,24 +26,33 @@ def run_test(testname, params):
 
     for address in post:
         try:
+            storage_data = {}
             storage = post[address]['storage']
-            storage_key = storage.keys()[0].encode('utf-8')
-            storage_value = storage[storage_key].encode('utf-8')
-            storage_key = decode_hex(storage_key)
-            storage_value = decode_hex(storage_value)
+            if not storage: raise
+            for storage_key in storage:
+                storage_value = storage[storage_key]
+                storage_key = storage_key.encode('utf-8')
+                storage_value = storage_value.encode('utf-8')
+                storage_key = decode_hex(storage_key)
+                storage_value = decode_hex(storage_value)
+                storage_data[storage_key] = storage_value
         except:
             print "Storage is much likely to be empty in json test file"
             return STORAGE_EMPTY
 
+    result = PASS
     with open('result', 'r') as result_file:
-        key = result_file.readline()
-        value = result_file.readline()
+        for line in result_file:
+            key, value = line.split(' ')
+            key, value = long(key), long(value)
 
-        key, value = long(key), long(value)
-
-        if key == storage_key and value == storage_value: return PASS
-        else:
-            print "Storage is", key, value
-            print "Storage should be: ", storage_key, storage_value
-        result_file.close()
-        return FAIL
+            try:
+                if value != storage_data[key]:
+                    result = FAIL
+                    print "Storage is", key, value
+                    print "Storage should be: ", storage_key, storage_value
+            except:
+                print key, value
+                print storage_data
+                result = FAIL
+    return result
