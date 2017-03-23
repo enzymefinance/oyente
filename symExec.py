@@ -602,9 +602,14 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             # Type conversion is needed when they are mismatched
             if isinstance(first, (int, long)) and not isinstance(second, (int, long)):
                 first = BitVecVal(first, 256)
+                computed = first + second
             elif not isinstance(first, (int, long)) and isinstance(second, (int, long)):
                 second = BitVecVal(second, 256)
-            computed = first + second
+                computed = first + second
+            else:
+                # both are real and we need to manually modulus with 2 ** 256
+                # if both are symbolic z3 takes care of modulus automatically
+                computed = (first + second) % (2 ** 256)
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
@@ -626,9 +631,12 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             second = stack.pop(0)
             if isinstance(first, (int, long)) and not isinstance(second, (int, long)):
                 first = BitVecVal(first, 256)
+                computed = first - second
             elif not isinstance(first, (int, long)) and isinstance(second, (int, long)):
                 second = BitVecVal(second, 256)
-            computed = first - second
+                computed = first - second
+            else:
+                computed = (first - second) % (2 ** 256)
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
