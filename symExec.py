@@ -1007,7 +1007,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             byte_no_from_left = 32 - byte_no - 1
             word = stack.pop(0)
 
-            if byte_no >= 32: stack.insert(0, 0); return
+            if byte_no >= 32 or byte_no < 0: stack.insert(0, 0); return
 
             if isinstance(byte_no_from_left, (int, long)) and not isinstance(word, (int, long)):
                 word = BitVecVal(word, 256)
