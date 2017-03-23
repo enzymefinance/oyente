@@ -19,7 +19,7 @@ def print_exit_code_footer(exit_code):
 
 def main():
     test_dir = 'tests'
-    files = glob.glob(test_dir+'/vmBitwiseLogicOperationTest.json')
+    files = glob.glob(test_dir+'/vmArithmeticTest.json')
     fixtures = {}
     num_tests = num_passes =  num_fails = num_storage_empts = num_nyh_ops = \
     num_not_matches = num_not_a_numbers = num_time_outs = num_unkown_instrs = \

@@ -7,6 +7,7 @@ from basicblock import BasicBlock
 from analysis import *
 from utils import *
 from math import *
+from arithmetic_utils import *
 import time
 from global_params import *
 from global_test_params import *
@@ -736,24 +737,31 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 1:
             first = stack.pop(0)
             second = stack.pop(0)
-            if isinstance(second, (int, long)):
+            if isinstance(first, (int, long)) and isinstance(second, (int, long)):
+                # handle for real value variables
                 if second == 0:
                     computed = 0
                 else:
-                    if not isinstance(first, (int, long)):
-                        second = BitVecVal(second, 256)  # Make second a bitvector
+                    first = to_unsigned(first)
+                    second = to_unsigned(second)
                     computed = first % second & UNSIGNED_BOUND_NUMBER
+
             else:
+                # handle for symbolic variables
+                if isinstance(first, (int, long)):
+                    first = BitVecVal(first, 256)  # Make first as a bitvector
+                if isinstance(second, (int, long)):
+                    second = BitVecVal(second, 256) # Make second as a bitvector
+
                 solver.push()
                 solver.add(Not(second == 0))
                 if solver.check() == unsat:
                     # it is provable that second is indeed equal to zero
                     computed = 0
                 else:
-                    if isinstance(first, (int, long)):
-                        first = BitVecVal(first, 256)  # Make first a bitvector
-                    computed = first % second
+                    computed = URem(first % second)
                 solver.pop()
+
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
@@ -761,24 +769,41 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 1:
             first = stack.pop(0)
             second = stack.pop(0)
-            if isinstance(second, (int, long)):
+            if isinstance(first, (int, long)) and isinstance(second, (int, long)):
+                # handle for real value variables
                 if second == 0:
                     computed = 0
                 else:
-                    if not isinstance(first, (int, long)):
-                        second = BitVecVal(second, 256)  # Make second a bitvector
-                    computed = first % second  # This is not yet faithful
+                    first = to_signed(first)
+                    second = to_signed(second)
+                    sign = -1 if first < 0 else 1
+                    computed = sign * (abs(first) % abs(second))
             else:
+                # handle for symbolic variables
+                if isinstance(first, (int, long)):
+                    first = BitVecVal(first, 256)  # Make first as a bitvector
+                if isinstance(second, (int, long)):
+                    second = BitVecVal(second, 256) # Make second as a bitvector
+
                 solver.push()
                 solver.add(Not(second == 0))
                 if solver.check() == unsat:
                     # it is provable that second is indeed equal to zero
                     computed = 0
                 else:
-                    if isinstance(first, (int, long)):
-                        first = BitVecVal(first, 256)  # Make first a bitvector
-                    computed = first % second  # This is not yet faithful
+                    z3_abs = lambda x: If(x >= 0, x, -x)
+                    first = z3_abs(first)
+                    second = z3_abs(second)
+
+                    solver.push()
+                    solver.add(first < 0) # check sign of first element
+                    sign = BitVecVal(-1, 256) if solver.check() == sat \
+                        else BitVecVal(1, 256)
+                    solver.pop()
+
+                    computed = sign * (first % second)
                 solver.pop()
+
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
@@ -798,6 +823,9 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                             first = BitVecVal(first, 256)
                         if isinstance(second, (int, long)):
                             second = BitVecVal(second, 256)
+                    first = to_unsigned(first)
+                    second = to_unsigned(second)
+                    third = to_unsigned(third)
                     computed = (first + second) % third
             else:
                 solver.push()
@@ -893,6 +921,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             first = stack.pop(0)
             second = stack.pop(0)
             if isinstance(first, (int, long)) and isinstance(second, (int, long)):
+                first = to_unsigned(first)
+                second = to_unsigned(second)
                 if first < second:
                     stack.insert(0, 1)
                 else:
@@ -907,6 +937,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             first = stack.pop(0)
             second = stack.pop(0)
             if isinstance(first, (int, long)) and isinstance(second, (int, long)):
+                first = to_unsigned(first)
+                second = to_unsigned(second)
                 if first > second:
                     stack.insert(0, 1)
                 else:
@@ -921,6 +953,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             first = stack.pop(0)
             second = stack.pop(0)
             if isinstance(first, (int, long)) and isinstance(second, (int, long)):
+                first = to_signed(first)
+                second = to_signed(second)
                 if first < second:
                     stack.insert(0, 1)
                 else:
@@ -935,6 +969,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             first = stack.pop(0)
             second = stack.pop(0)
             if isinstance(first, (int, long)) and isinstance(second, (int, long)):
+                first = to_signed(first)
+                second = to_signed(second)
                 if first > second:
                     stack.insert(0, 1)
                 else:
