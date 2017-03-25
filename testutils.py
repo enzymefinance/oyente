@@ -1,6 +1,7 @@
 import os
 from global_test_params import *
 from global_params import *
+from arithmetic_utils import *
 
 def decode_hex(code):
     return long(code, 0)
@@ -44,7 +45,7 @@ def run_test(testname, params):
     with open('result', 'r') as result_file:
         for line in result_file:
             key, value = line.split(' ')
-            key, value = long(key), long(value)
+            key, value = to_unsigned(long(key)), to_unsigned(long(value))
 
             try:
                 if value != storage_data[key]:
