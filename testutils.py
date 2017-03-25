@@ -26,20 +26,17 @@ def run_test(testname, params):
     if exit_code != 0: return exit_code
 
     for address in post:
-        try:
-            storage_data = {}
-            storage = post[address]['storage']
-            if not storage: raise
-            for storage_key in storage:
-                storage_value = storage[storage_key]
-                storage_key = storage_key.encode('utf-8')
-                storage_value = storage_value.encode('utf-8')
-                storage_key = decode_hex(storage_key)
-                storage_value = decode_hex(storage_value)
-                storage_data[storage_key] = storage_value
-        except:
-            print "Storage is much likely to be empty in json test file"
-            return STORAGE_EMPTY
+        storage = post[address]['storage']
+        storage_data = {}
+        for storage_key in storage:
+            storage_value = storage[storage_key]
+            storage_key = storage_key.encode('utf-8')
+            storage_value = storage_value.encode('utf-8')
+            storage_key = decode_hex(storage_key)
+            storage_value = decode_hex(storage_value)
+            storage_data[storage_key] = storage_value
+
+    if os.stat('result').st_size <= 0: return EMPTY_RESULT
 
     result = PASS
     with open('result', 'r') as result_file:
@@ -47,13 +44,15 @@ def run_test(testname, params):
             key, value = line.split(' ')
             key, value = to_unsigned(long(key)), to_unsigned(long(value))
 
-            try:
-                if value != storage_data[key]:
+            if value == 0 and key not in storage_data: return PASS
+            else:
+                try:
+                    if value != storage_data[key]:
+                        result = FAIL
+                        print "Storage is", key, value
+                        print "Storage should be: ", key, storage_data[key]
+                except:
+                    print key, value
+                    print storage_data
                     result = FAIL
-                    print "Storage is", key, value
-                    print "Storage should be: ", storage_key, storage_value
-            except:
-                print key, value
-                print storage_data
-                result = FAIL
     return result

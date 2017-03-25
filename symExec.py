@@ -6,7 +6,7 @@ from tokenize import NUMBER, NAME, NEWLINE
 from basicblock import BasicBlock
 from analysis import *
 from utils import *
-from math import *
+import math
 from arithmetic_utils import *
 import time
 from global_params import *
@@ -897,7 +897,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             exponent = stack.pop(0)
             # Type conversion is needed when they are mismatched
             if isinstance(base, (int, long)) and isinstance(exponent, (int, long)):
-                computed = base ** exponent
+                computed = pow(base, exponent, 2**256)
             else:
                 # The computed value is unknown, this is because power is
                 # not supported in bit-vector theory
@@ -909,24 +909,25 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     elif instr_parts[0] == "SIGNEXTEND":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
-            index = stack.pop(0)
-            content = stack.pop(0)
-            new_var_name = gen.gen_arbitrary_var()
-            new_var = BitVec(new_var_name, 256)
-            path_conditions_and_vars[new_var_name] = new_var
-            stack.insert(0, new_var)
-            '''
-            if isinstance(index, (int, long)):
-                t = 256 - 8 * (index + 1)
-                if isinstance(content, (int, long)):
-                    # TODO
-                else:
-                    for i in range(0, 255):
-
+            first = stack.pop(0)
+            second = stack.pop(0)
+            if isinstance(first, (int, long)) and isinstance(second, (int, long)):
+                computed = second
+                if first < 32 and first >= 0:
+                    sign_bit_index = 256 - 8 * (first + 1)
+                    sign_bit_mask = 1 << 8 * (first + 1) - 1
+                    sign_extend_mask = ( (2**(sign_bit_index + 1) ) - 1) << (8 * first + 7)
+                    if second & sign_bit_mask:
+                        computed = second | sign_extend_mask
+                    else:
+                        sign_extend_mask = ~sign_extend_mask
+                        computed = second & sign_extend_mask
+                stack.insert(0, computed)
             else:
-                # DON'T KNOW WHAT could be the resulting value
-                # we then create a new symbolic variable
-            '''
+                new_var_name = gen.gen_arbitrary_var()
+                new_var = BitVec(new_var_name, 256)
+                path_conditions_and_vars[new_var_name] = new_var
+                stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
     #
@@ -1078,14 +1079,14 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             byte_no_from_left = 32 - byte_no - 1
             word = stack.pop(0)
 
-            if byte_no >= 32 or byte_no < 0: stack.insert(0, 0); return
-
-            if isinstance(byte_no_from_left, (int, long)) and not isinstance(word, (int, long)):
-                word = BitVecVal(word, 256)
-            if isinstance(word, (int, long)) and not isinstance(byte_no_from_left, (int, long)):
-                byte_no_from_left = BitVecVal(byte_no_from_left, 256)
-            byte = word & (255 << (8 * byte_no_from_left))
-            byte = byte >> (8 * byte_no_from_left)
+            byte = 0
+            if byte_no < 32 and byte_no >= 0:
+                if isinstance(byte_no_from_left, (int, long)) and not isinstance(word, (int, long)):
+                    word = BitVecVal(word, 256)
+                if isinstance(word, (int, long)) and not isinstance(byte_no_from_left, (int, long)):
+                    byte_no_from_left = BitVecVal(byte_no_from_left, 256)
+                byte = word & (255 << (8 * byte_no_from_left))
+                byte = byte >> (8 * byte_no_from_left)
             stack.insert(0, byte)
         else:
             raise ValueError('STACK underflow')
@@ -1288,7 +1289,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             address = stack.pop(0)
             current_miu_i = global_state["miu_i"]
             if isinstance(address, (int, long)) and address in mem:
-                temp = long(ceil((address + 32) / float(32)))
+                temp = long(math.ceil((address + 32) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
                 value = mem[address]
@@ -1332,7 +1333,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             stored_value = stack.pop(0)
             current_miu_i = global_state["miu_i"]
             if isinstance(stored_address, (int, long)):
-                temp = long(ceil((stored_address + 32) / float(32)))
+                temp = long(math.ceil((stored_address + 32) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
                 mem[stored_address] = stored_value  # note that the stored_value could be symbolic
@@ -1370,7 +1371,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             stored_value = temp_value % 256  # get the least byte
             current_miu_i = global_state["miu_i"]
             if isinstance(stored_address, (int, long)):
-                temp = long(ceil((stored_address + 1) / float(32)))
+                temp = long(math.ceil((stored_address + 1) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
                 mem[stored_address] = stored_value  # note that the stored_value could be symbolic
@@ -1684,7 +1685,6 @@ def run_callstack_attack():
 
     print "\t  CallStack Attack: \t %s" % result
     results['callstack'] = result
-
 
 def print_state(block_address, stack, mem, global_state):
     if PRINT_MODE: print "STACK: " + str(stack)
