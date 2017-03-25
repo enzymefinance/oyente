@@ -6,27 +6,27 @@ from global_test_params import *
 def status(exit_code):
     if exit_code == 100: return "pass"
     if exit_code == 101: return "fail"
-    if exit_code == 102: return "storage empty"
-    if exit_code == 103: return "not yet handled opcode"
-    if exit_code == 104: return "json test file structure not match"
-    if exit_code == 105: return "not a number"
-    if exit_code == 106: return "time out"
-    if exit_code == 107: return "unkown instruction"
-    if exit_code == 108: return "exception"
+    if exit_code == 102: return "not yet handled opcode"
+    if exit_code == 103: return "json test file structure not match"
+    if exit_code == 104: return "not a number"
+    if exit_code == 105: return "time out"
+    if exit_code == 106: return "unkown instruction"
+    if exit_code == 107: return "exception"
+    if exit_code == 108: return "empty result"
 
 def print_exit_code_footer(exit_code):
     print "===============%s!====================" % status(exit_code).upper()
 
 def main():
     test_dir = 'tests'
-    files = glob.glob(test_dir+'/vmArithmeticTest.json')
+    files = glob.glob(test_dir+'/vmBitwiseLogicOperationTest.json')
     fixtures = {}
-    num_tests = num_passes =  num_fails = num_storage_empts = num_nyh_ops = \
+    num_tests = num_passes =  num_fails = num_nyh_ops = \
     num_not_matches = num_not_a_numbers = num_time_outs = num_unkown_instrs = \
-    num_exceptions = 0
+    num_exceptions = num_empty_res = 0
 
-    fails, storage_empts, nyh_ops, not_matchs, not_a_numbers, time_outs, \
-    unkown_instrs, exceptions = [], [], [], [], [], [], [], []
+    fails, nyh_ops, not_matchs, not_a_numbers, time_outs, \
+    unkown_instrs, exceptions, empty_res = [], [], [], [], [], [], [], []
 
     for f in files:
         fixtures.update(json.loads(open(f).read()))
@@ -47,9 +47,6 @@ def main():
         elif exit_code == FAIL:
             fails.append(testname)
             num_fails += 1
-        elif exit_code == STORAGE_EMPTY:
-            storage_empts.append(testname)
-            num_storage_empts += 1
         elif exit_code == NOT_YET_HANDLED_OPCODE:
             nyh_ops.append(testname)
             num_nyh_ops += 1
@@ -68,6 +65,9 @@ def main():
         elif exit_code == EXCEPTION:
             exceptions.append(testname)
             num_exceptions += 1
+        elif exit_code == EMPTY_RESULT:
+            empty_res.append(testname)
+            num_empty_res += 1
 
     print "Done!"
     print "Total: ", num_tests
@@ -75,8 +75,6 @@ def main():
     print "Pass: ", num_passes
     print
     print "Fail: ", num_fails, fails
-    print
-    print "Storage empty: ", num_storage_empts, storage_empts
     print
     print "Not yet handled opcode: ", num_nyh_ops, nyh_ops
     print
@@ -89,6 +87,8 @@ def main():
     print "Unkown instruction: ", num_unkown_instrs, unkown_instrs
     print
     print "Exception: ", num_exceptions, exceptions
+    print
+    print "Empty result: ", num_empty_res, empty_res
 
 if __name__ == '__main__':
     main()

@@ -1,5 +1,5 @@
 from opcodes import *
-from math import *
+import math
 from z3 import *
 from z3util import *
 from vargenerator import *
@@ -70,7 +70,7 @@ def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_
     if opcode in ("LOG0", "LOG1", "LOG2", "LOG3", "LOG4"):
         gas_increment += GCOST["Glogdata"] * stack[1]
     elif opcode == "EXP" and isinstance(stack[1], (int, long)) and stack[1] > 0:
-        gas_increment += GCOST["Gexpbyte"] * (1 + floor(log(stack[1], 256)))
+        gas_increment += GCOST["Gexpbyte"] * (1 + math.floor(math.log(stack[1], 256)))
     elif opcode == "SSTORE":
         # TODO
         pass
