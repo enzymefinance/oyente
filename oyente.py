@@ -68,7 +68,8 @@ def main():
 
 		with open(args.source+'.disasm', 'w') as of:
 			of.write(disasm_out)
-
+		
+		
 		# TODO: Do this as an import and run, instead of shell call and hacky fix
 
 		cmd = os.system('python symExec.py %s.disasm %d %d %d %d %d %d %d %d %d %d %s' % (args.source, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, args.source+".json" if args.json else ""))
@@ -106,16 +107,18 @@ def main():
 		with open(cname+'.evm.disasm', 'w') as of:
 			of.write(disasm_out)
 
+		with open(cname+'.evm', 'w') as of:
+			of.write(bin_str)
+
+
 		# TODO: Do this as an import and run, instead of shell call and hacky fix
 
 		os.system('python symExec.py %s.evm.disasm %d %d %d %d %d %d %d %d %d %d %s' % (cname, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, cname+".json" if args.json else ""))
 
-		if args.evm:
-			with open(cname+'.evm','w') as of:
-				of.write(bin_str)
-
+		if not args.evm:
+			os.system('rm %s.evm' % (cname))
 		os.system('rm %s.evm.disasm' % (cname))
-
+		
 
 if __name__ == '__main__':
 	main()
