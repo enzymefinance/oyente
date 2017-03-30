@@ -2,6 +2,7 @@ import json
 import glob
 import testutils as testutils
 from global_test_params import *
+import os
 
 def status(exit_code):
     if exit_code == 100: return "pass"
@@ -40,7 +41,7 @@ def main():
         print "===============Loading: %s====================" % testname
         num_tests += 1
         testname = testname.encode('utf-8')
-        exit_code = testutils.run_test(testname, testdata)
+        exit_code = testutils.run_test(testdata)
         print_exit_code_footer(exit_code)
         if exit_code == PASS:
             num_passes += 1
@@ -89,6 +90,8 @@ def main():
     print "Exception: ", num_exceptions, exceptions
     print
     print "Empty result: ", num_empty_res, empty_res
+    os.remove('storage')
+    os.remove('memory')
 
 if __name__ == '__main__':
     main()
