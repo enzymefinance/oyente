@@ -87,22 +87,25 @@ def compare_stack_unit_test(stack):
         if PRINT_MODE: print "FAILED UNIT-TEST"
         if PRINT_MODE: print e.message
 
-def compare_storage_unit_test(global_state):
-    with open('result', 'w') as result_file:
-        for key in global_state['Ia']:
-            value = global_state['Ia'][key]
+def write_result_to_file(filename, result):
+    with open(filename, 'w') as of:
+        for key in result:
+            value = result[key]
             try:
                 key = str(long(key))
                 value = str(long(value))
-                result_file.write(key);
-                result_file.write(' ')
-                result_file.write(value)
-                result_file.write('\n')
+                of.write(key)
+                of.write(' ')
+                of.write(value)
+                of.write('\n')
             except:
                 logging.exception("Storage key or value is not a number")
-                result_file.close()
+                of.close()
                 exit(NOT_A_NUMBER)
-        result_file.close()
+
+def compare_storage_and_memory_unit_test(global_state, mem):
+    write_result_to_file('storage', global_state['Ia'])
+    write_result_to_file('memory', mem)
 
 def handler(signum, frame):
     if UNIT_TEST == 2: exit(TIME_OUT)
@@ -494,7 +497,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
             if analysis["sstore"] not in data_flow_all_paths[1]:
                 data_flow_all_paths[1].append(analysis["sstore"])
         if UNIT_TEST == 1: compare_stack_unit_test(stack)
-        if UNIT_TEST == 2: compare_storage_unit_test(global_state)
+        if UNIT_TEST == 2: compare_storage_and_memory_unit_test(global_state, mem)
 
     elif jump_type[start] == "unconditional":  # executing "JUMP"
         successor = vertices[start].get_jump_target()

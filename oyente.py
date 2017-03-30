@@ -114,7 +114,7 @@ def main():
 			with open(cname+'.evm','w') as of:
 				of.write(bin_str)
 
-		os.system('rm %s.evm.disasm' % (cname))
+                os.system('rm %s.evm.disasm' % (cname))
 
 
 if __name__ == '__main__':
