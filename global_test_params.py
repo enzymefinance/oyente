@@ -1,3 +1,5 @@
+CANT_EVALUATE = 0 # symbolic process execute successfully but cant evaluate resutl
+ERR_EXECUTION = 1 # Error when executing symbolic
 PASS = 100
 FAIL = 101
 NOT_YET_HANDLED_OPCODE = 102

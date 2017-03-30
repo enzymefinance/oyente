@@ -1,10 +1,14 @@
 import json
 import glob
+import os
+import pickle
 import testutils as testutils
 from global_test_params import *
 import os
 
 def status(exit_code):
+    if exit_code == 0: return "Successful execution but cant evaluate result"
+    if exit_code == 1: return "Error on execution"
     if exit_code == 100: return "pass"
     if exit_code == 101: return "fail"
     if exit_code == 102: return "not yet handled opcode"
@@ -20,14 +24,15 @@ def print_exit_code_footer(exit_code):
 
 def main():
     test_dir = 'tests'
-    files = glob.glob(test_dir+'/vmBitwiseLogicOperationTest.json')
+    files = glob.glob(test_dir+'/vmArithmeticTest.json')
     fixtures = {}
     num_tests = num_passes =  num_fails = num_nyh_ops = \
-    num_not_matches = num_not_a_numbers = num_time_outs = num_unkown_instrs = \
-    num_exceptions = num_empty_res = 0
+        num_not_matches = num_not_a_numbers = num_time_outs = num_unkown_instrs = \
+        num_exceptions = num_empty_res = num_err_exec = num_cant_eval = 0
 
     fails, nyh_ops, not_matchs, not_a_numbers, time_outs, \
-    unkown_instrs, exceptions, empty_res = [], [], [], [], [], [], [], []
+        unkown_instrs, exceptions, empty_res, err_exec, \
+        cant_eval = [], [], [], [], [], [], [], [], [], []
 
     for f in files:
         fixtures.update(json.loads(open(f).read()))
@@ -36,6 +41,12 @@ def main():
     print "                  *************                      "
     print "                      Start                          "
     for testname, testdata in list(fixtures.items()):
+        test_case = {
+            'test_name': testname,
+            'test_data': testdata
+        }
+        pickle.dump(test_case, open("current_test.pickle", "wb"))
+
         print
         print
         print "===============Loading: %s====================" % testname
@@ -69,6 +80,12 @@ def main():
         elif exit_code == EMPTY_RESULT:
             empty_res.append(testname)
             num_empty_res += 1
+        elif exit_code == ERR_EXECUTION:
+            err_exec.append(testname)
+            num_err_exec += 1
+        elif exit_code == CANT_EVALUATE:
+            cant_eval.append(testname)
+            num_cant_eval += 1
 
     print "Done!"
     print "Total: ", num_tests
@@ -90,8 +107,20 @@ def main():
     print "Exception: ", num_exceptions, exceptions
     print
     print "Empty result: ", num_empty_res, empty_res
-    os.remove('storage')
-    os.remove('memory')
+    print
+    print "Error execution:", num_err_exec, err_exec
+    print
+    print "Cant evaluate", num_cant_eval, cant_eval
+
+    remove_temporary_files()
+
+
+def remove_temporary_files():
+    if os.path.isfile("./code"): os.system("rm code")
+    if os.path.isfile("./current_test.pickle"): os.system("rm current_test.pickle")
+    if os.path.isfile("./result"): os.system("rm result")
+    if os.path.isfile("./storage"): os.system("rm storage")
+    if os.path.isfile("./memory"): os.system("rm memory")
 
 if __name__ == '__main__':
     main()

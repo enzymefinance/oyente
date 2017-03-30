@@ -14,6 +14,7 @@ from global_test_params import *
 import sys
 import atexit
 import logging
+import pickle
 
 results = {}
 
@@ -104,11 +105,33 @@ def write_result_to_file(filename, result):
                 exit(NOT_A_NUMBER)
 
 def compare_storage_and_memory_unit_test(global_state, mem):
-    write_result_to_file('storage', global_state['Ia'])
-    write_result_to_file('memory', mem)
+
+    if UNIT_TEST == 2: # test real value variable
+        write_result_to_file('storage', global_state['Ia'])
+        write_result_to_file('memory', mem)
+
+    if UNIT_TEST == 3: # test symbolic variable
+        test_case = pickle.load(open("current_test.pickle", "rb"))
+        test_name, test_data = test_case['test_name'], test_case['test_data']
+        test_storage = test_data['post'].values()[0]['storage']
+        if not test_storage:
+            test_storage = {'0': '0'}
+
+        for key, value in test_storage.items():
+            key, value = long(key, 0), long(value, 0)
+            try:
+                symExec_result = global_state['Ia'][str(key)]
+            except:
+                exit(EMPTY_RESULT)
+
+            s = Solver()
+            s.add(symExec_result == BitVecVal(value, 256))
+            if s.check() == unsat: # Unsatisfy
+                exit(FAIL)
+        exit(PASS)
 
 def handler(signum, frame):
-    if UNIT_TEST == 2: exit(TIME_OUT)
+    if UNIT_TEST == 2 or UNIT_TEST == 3: exit(TIME_OUT)
     raise Exception("timeout")
 
 def main():
@@ -130,7 +153,7 @@ def main():
         if PRINT_MODE:
             print "Done Symbolic execution"
     except Exception as e:
-        if UNIT_TEST == 2:
+        if UNIT_TEST == 2 or UNIT_TEST == 3:
             logging.exception(e)
             exit(EXCEPTION)
         raise
@@ -497,7 +520,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
             if analysis["sstore"] not in data_flow_all_paths[1]:
                 data_flow_all_paths[1].append(analysis["sstore"])
         if UNIT_TEST == 1: compare_stack_unit_test(stack)
-        if UNIT_TEST == 2: compare_storage_and_memory_unit_test(global_state, mem)
+        if UNIT_TEST == 2 or UNIT_TEST == 3: compare_storage_and_memory_unit_test(global_state, mem)
 
     elif jump_type[start] == "unconditional":  # executing "JUMP"
         successor = vertices[start].get_jump_target()
@@ -773,7 +796,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     # it is provable that second is indeed equal to zero
                     computed = 0
                 else:
-                    computed = URem(first % second)
+                    computed = URem(first, second)
                 solver.pop()
 
             stack.insert(0, computed)
@@ -806,15 +829,16 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     # it is provable that second is indeed equal to zero
                     computed = 0
                 else:
-                    z3_abs = lambda x: If(x >= 0, x, -x)
-                    first = z3_abs(first)
-                    second = z3_abs(second)
 
                     solver.push()
                     solver.add(first < 0) # check sign of first element
                     sign = BitVecVal(-1, 256) if solver.check() == sat \
                         else BitVecVal(1, 256)
                     solver.pop()
+
+                    z3_abs = lambda x: If(x >= 0, x, -x)
+                    first = z3_abs(first)
+                    second = z3_abs(second)
 
                     computed = sign * (first % second)
                 solver.pop()
@@ -1492,6 +1516,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         global_state["pc"] = global_state["pc"] + 1 + position
         pushed_value = int(instr_parts[1], 16)
         stack.insert(0, pushed_value)
+        if UNIT_TEST == 3: # test evm symbolic
+            stack[0] = BitVecVal(stack[0], 256)
     #
     #  80s: Duplication Operations
     #
@@ -1662,7 +1688,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
 
     else:
         if PRINT_MODE: print "UNKNOWN INSTRUCTION: " + instr_parts[0]
-        if UNIT_TEST == 2:
+        if UNIT_TEST == 2 or UNIT_TEST == 3:
             logging.exception("Unkown instruction: %s" % instr_parts[0])
             exit(UNKOWN_INSTRUCTION)
         raise Exception('UNKNOWN INSTRUCTION: ' + instr_parts[0])
