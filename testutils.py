@@ -95,8 +95,11 @@ def run_test(params):
     exek = params['exec']
     exit_code = execute_vm(exek['code'][2:])
 
-    storage_status = compare_storage(params, exit_code)
-    mem_status = compare_memory(params, exit_code)
-    if storage_status != PASS: return storage_status
-    if mem_status != PASS: return mem_status
-    return PASS
+    if UNIT_TEST == 2:
+        storage_status = compare_storage(params, exit_code)
+        mem_status = compare_memory(params, exit_code)
+        if storage_status != PASS: return storage_status
+        if mem_status != PASS: return mem_status
+        return PASS
+
+    if UNIT_TEST == 3: return exit_code
