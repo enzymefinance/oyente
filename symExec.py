@@ -1197,6 +1197,11 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             stack.pop(0)
         else:
             raise ValueError('STACK underflow')
+    elif instr_parts[0] == "CODESIZE":
+	with open(sys.argv[1][:-7], 'r') as evm_file:
+	    evm = evm_file.read()[:-1]
+	    code_size = len(evm)/2
+            stack.insert(0, code_size)
     elif instr_parts[0] == "CODECOPY":  # Copy code running in current env to memory
         #  TODO: Don't know how to simulate this yet
         # Need an example to test
