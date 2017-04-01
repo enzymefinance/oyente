@@ -18,7 +18,7 @@ and you are done!
 
 ## Dependencies
 
-1. solc and disasm from [go-ethereum](https://github.com/ethereum/go-ethereum)
+1. solc and disasm from [go-ethereum](https://github.com/ethereum/go-ethereum) version 1.5.4
 2. [z3](https://github.com/Z3Prover/z3/releases) Theorem Prover
 
 ## Evaluating Ethereum Contracts
