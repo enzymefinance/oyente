@@ -74,12 +74,12 @@ def main():
 
 		cmd = os.system('python symExec.py %s.disasm %d %d %d %d %d %d %d %d %d %d %s' % (args.source, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, args.source+".json" if args.json else ""))
 
-        os.system('rm %s.disasm' % (args.source))
+		os.system('rm %s.disasm' % (args.source))
 
-        if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
-            exit_code = os.WEXITSTATUS(cmd)
-            if exit_code != 0: exit(exit_code)
-        return
+		if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
+			exit_code = os.WEXITSTATUS(cmd)
+			if exit_code != 0: exit(exit_code)
+		return
 
 	# Compile first
 
