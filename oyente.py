@@ -42,6 +42,7 @@ def main():
 	parser.add_argument("-d", "--debug", help="Enable debug .log file.", action="store_true")
 	parser.add_argument("-v", "--verbose", help="Verbose output, print everything.", action="store_true")
 	parser.add_argument("-r", "--report", help="Create .report file.", action="store_true")
+	parser.add_argument("-gb", "--globalblockchain", help="Integrate with the global ethereum blockchain", action="store_true")
 	args = parser.parse_args()
 
 	if args.timeout:
@@ -52,6 +53,7 @@ def main():
 	global_params.REPORT_MODE = 1 if args.report else 0
 	global_params.DEBUG_MODE = 1 if args.debug else 0
 	global_params.IGNORE_EXCEPTIONS = 1 if args.error else 0
+	global_params.USE_GLOBAL_BLOCKCHAIN = 1 if args.globalblockchain else 0
 
 	if not has_dependencies_installed():
 		return
@@ -72,7 +74,7 @@ def main():
 		
 		# TODO: Do this as an import and run, instead of shell call and hacky fix
 
-		cmd = os.system('python symExec.py %s.disasm %d %d %d %d %d %d %d %d %d %d %s' % (args.source, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, args.source+".json" if args.json else ""))
+		cmd = os.system('python symExec.py %s.disasm %d %d %d %d %d %d %d %d %d %d %d %s' % (args.source, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, global_params.USE_GLOBAL_BLOCKCHAIN, args.source+".json" if args.json else ""))
 
 		os.system('rm %s.disasm' % (args.source))
 
@@ -113,7 +115,7 @@ def main():
 
 		# TODO: Do this as an import and run, instead of shell call and hacky fix
 
-		os.system('python symExec.py %s.evm.disasm %d %d %d %d %d %d %d %d %d %d %s' % (cname, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, cname+".json" if args.json else ""))
+		os.system('python symExec.py %s.evm.disasm %d %d %d %d %d %d %d %d %d %d %d %s' % (cname, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, global_params.USE_GLOBAL_BLOCKCHAIN, cname+".json" if args.json else ""))
 
 		if args.evm:
 			with open(cname+'.evm','w') as of:
