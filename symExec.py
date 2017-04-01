@@ -15,12 +15,13 @@ import sys
 import atexit
 import logging
 import pickle
+from ethereum_data import getBalance
 
 results = {}
 
 UNSIGNED_BOUND_NUMBER = 2**256 - 1
 
-if len(sys.argv) >= 12:
+if len(sys.argv) >= 13:
     IGNORE_EXCEPTIONS = int(sys.argv[2])
     REPORT_MODE = int(sys.argv[3])
     PRINT_MODE = int(sys.argv[4])
@@ -31,6 +32,7 @@ if len(sys.argv) >= 12:
     UNIT_TEST = int(sys.argv[9])
     GLOBAL_TIMEOUT = int(sys.argv[10])
     PRINT_PATHS = int(sys.argv[11])
+    USE_GLOBAL_BLOCKCHAIN = int(sys.argv[12])
 
 if REPORT_MODE:
     report_file = sys.argv[1] + '.report'
@@ -71,6 +73,12 @@ if UNIT_TEST == 1:
 
 
 log_file = open(sys.argv[1] + '.log', "w")
+
+def isSymbolic(value):
+    return not isinstance(value, (int, long))
+
+def isReal(value):
+    return isinstance(value, (int, long))
 
 # A simple function to compare the end stack with the expected stack
 # configurations specified in a test file
@@ -180,10 +188,10 @@ def main():
 
 def closing_message():
     print "\t====== Analysis Completed ======"
-    if len(sys.argv) > 12:
-        with open(sys.argv[12], 'w') as of:
+    if len(sys.argv) > 13:
+        with open(sys.argv[13], 'w') as of:
             of.write(json.dumps(results,indent=1))
-        print "Wrote results to %s." % sys.argv[12]
+        print "Wrote results to %s." % sys.argv[13]
 
 atexit.register(closing_message)
 
@@ -1148,13 +1156,16 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             address = stack.pop(0)
-            new_var_name = gen.gen_balance_var()
-            if new_var_name in path_conditions_and_vars:
-                new_var = path_conditions_and_vars[new_var_name]
+            if isReal(address) and USE_GLOBAL_BLOCKCHAIN:
+                new_var = getBalance(address)
             else:
-                new_var = BitVec(new_var_name, 256)
-                path_conditions_and_vars[new_var_name] = new_var
-            if isinstance(address, (int, long)):
+                new_var_name = gen.gen_balance_var()
+                if new_var_name in path_conditions_and_vars:
+                    new_var = path_conditions_and_vars[new_var_name]
+                else:
+                    new_var = BitVec(new_var_name, 256)
+                    path_conditions_and_vars[new_var_name] = new_var
+            if isReal(address):
                 hashed_address = "concrete_address_" + str(address)
             else:
                 hashed_address = str(address)
