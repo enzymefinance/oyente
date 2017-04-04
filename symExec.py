@@ -135,6 +135,8 @@ def compare_storage_and_memory_unit_test(global_state, mem):
             s = Solver()
             s.add(symExec_result == BitVecVal(value, 256))
             if s.check() == unsat: # Unsatisfy
+                print "Storage is :", key, simplify(global_state['Ia'][str(key)])
+                print "Storage should be: ", key, value
                 exit(FAIL)
         exit(PASS)
 
@@ -688,90 +690,62 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if isinstance(second, (int, long)):
+            if contains_only_concrete_values([first, second]):
                 if second == 0:
                     computed = 0
                 else:
-                    if not isinstance(first, (int, long)):
-                        second = BitVecVal(second, 256)
+                    first = to_unsigned(first)
+                    second = to_unsigned(second)
                     computed = first / second
             else:
+                first = to_symbolic(first)
+                second = to_symbolic(second)
                 solver.push()
-                solver.add(Not(second == 0))
-                if solver.check() == unsat:
-                    # it is provable that second is indeed equal to zero
+                solver.add(second == 0)
+                if solver.check() == sat:
                     computed = 0
                 else:
-                    if isinstance(first, (int, long)):
-                        first = BitVecVal(first, 256)
-                    computed = first / second
+                    computed = UDiv(first, second)
                 solver.pop()
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "SDIV":
-        minInt = -2 ** 255
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if isinstance(second, (int, long)):
-                # second is not symbolic
+            if contains_only_concrete_values([first, second]):
+                first = to_signed(first)
+                second = to_signed(second)
                 if second == 0:
                     computed = 0
+                elif first == -2**255 and second == -1:
+                    computed = -2**255
                 else:
-                    if isinstance(first, (int, long)):
-                        # both are not symbolic
-                        if first == minInt and second == -1:
-                            computed = minInt
-                        else:
-                            computed = first / second
-                    else:
-                        # first is symbolic and second is not symbolic
-                        solver.push()
-                        solver.add(Not(first == minInt))
-                        if solver.check() == unsat:
-                            # it is provable that second is indeed equal to -1
-                            if second == -1:
-                                computed = minInt
-                            else:
-                                second = BitVecVal(second, 256)
-                                computed = first / second
-                        else:
-                            second = BitVecVal(second, 256)
-                            computed = first / second
-                        solver.pop()
+                    sign = -1 if (first / second) < 0 else 1
+                    computed = sign * ( abs(first) / abs(second) )
             else:
-                # second is symbolic
+                first = to_symbolic(first)
+                second = to_symbolic(second)
                 solver.push()
-                solver.add(Not(second == 0))
-                if solver.check() == unsat:
-                    # it is provable that second is indeed equal to zero
+                solver.add(second == 0)
+                if solver.check() == sat:
                     computed = 0
                 else:
                     solver.push()
-                    solver.add(Not(second == -1))
-                    if solver.check() == unsat:
-                        if isinstance(first, (int, long)):
-                            # first is not symbolic and second is symbolic
-                            if first == minInt:
-                                computed = minInt
-                            else:
-                                first = BitVecVal(first, 256)
-                                computed = first / second
-                        else:
-                            # both are symbolic
-                            solver.push()
-                            solver.add(Not(first == minInt))
-                            if solver.check() == unsat:
-                                computed == minInt
-                            else:
-                                computed = first / second
-                            solver.pop()
+                    solver.add( And(first == -2**255, second == -1 ))
+                    if solver.check() == sat:
+                        computed = -2**255
                     else:
-                        if isinstance(first, (int, long)):
-                            first = BitVecVal(first, 256)
-                        computed = first / second
+                        solver.push()
+                        solver.add(first / second < 0)
+                        sign = -1 if solver.check() == sat else 1
+                        z3_abs = lambda x: If(x >= 0, x, -x)
+                        first = z3_abs(first)
+                        second = z3_abs(second)
+                        computed = sign * (first / second)
+                        solver.pop()
                     solver.pop()
                 solver.pop()
             stack.insert(0, computed)
@@ -860,33 +834,25 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             first = stack.pop(0)
             second = stack.pop(0)
             third = stack.pop(0)
-            if isinstance(third, (int, long)):
+
+            if contains_only_concrete_values([first, second, third]):
                 if third == 0:
                     computed = 0
                 else:
-                    if not (isinstance(first, (int, long)) and isinstance(second, (int, long))):
-                        # there is one guy that is a symbolic expression
-                        third = BitVecVal(third, 256)
-                        if isinstance(first, (int, long)):
-                            first = BitVecVal(first, 256)
-                        if isinstance(second, (int, long)):
-                            second = BitVecVal(second, 256)
-                    first = to_unsigned(first)
-                    second = to_unsigned(second)
-                    third = to_unsigned(third)
                     computed = (first + second) % third
             else:
+                first = to_symbolic(first)
+                second = to_symbolic(second)
                 solver.push()
-                solver.add(Not(third == 0))
-                if solver.check() == unsat:
-                    # it is provable that second is indeed equal to zero
+                solver.add(third == 0)
+                if solver.check() == sat:
                     computed = 0
                 else:
-                    if isinstance(first, (int, long)):
-                        first = BitVecVal(first, 256)
-                    if isinstance(second, (int, long)):
-                        second = BitVecVal(second, 256)
+                    first = ZeroExt(256, first)
+                    second = ZeroExt(256, second)
+                    third = ZeroExt(256, third)
                     computed = (first + second) % third
+                    computed = Extract(255, 0, computed)
                 solver.pop()
             stack.insert(0, computed)
         else:
@@ -897,30 +863,25 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             first = stack.pop(0)
             second = stack.pop(0)
             third = stack.pop(0)
-            if isinstance(third, (int, long)):
+
+            if contains_only_concrete_values([first, second, third]):
                 if third == 0:
                     computed = 0
                 else:
-                    if not (isinstance(first, (int, long)) and isinstance(second, (int, long))):
-                        # there is one guy that is a symbolic expression
-                        third = BitVecVal(third, 256)
-                        if isinstance(first, (int, long)):
-                            first = BitVecVal(first, 256)
-                        if isinstance(second, (int, long)):
-                            second = BitVecVal(second, 256)
                     computed = (first * second) % third
             else:
+                first = to_symbolic(first)
+                second = to_symbolic(second)
                 solver.push()
-                solver.add(Not(third == 0))
-                if solver.check() == unsat:
-                    # it is provable that second is indeed equal to zero
+                solver.add(third == 0)
+                if solver.check() == sat:
                     computed = 0
                 else:
-                    if isinstance(first, (int, long)):
-                        first = BitVecVal(first, 256)
-                    if isinstance(second, (int, long)):
-                        second = BitVecVal(second, 256)
-                    computed = (first * second) % third
+                    first = ZeroExt(256, first)
+                    second = ZeroExt(256, second)
+                    third = ZeroExt(256, third)
+                    computed = URem(first * second, third)
+                    computed = Extract(255, 0, computed)
                 solver.pop()
             stack.insert(0, computed)
         else:
@@ -1739,6 +1700,17 @@ def print_state(block_address, stack, mem, global_state):
     if PRINT_MODE: print "STACK: " + str(stack)
     if PRINT_MODE: print "MEM: " + str(mem)
     if PRINT_MODE: print "GLOBAL STATE: " + str(global_state)
+
+def contains_only_concrete_values(stack):
+    for element in stack:
+        if not isinstance(element, (int, long)):
+            return False
+    return True
+
+def to_symbolic(number):
+    if isinstance(number, (int, long)):
+        return BitVecVal(number, 256)
+    return number
 
 if __name__ == '__main__':
     main()
