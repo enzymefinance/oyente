@@ -135,6 +135,8 @@ def compare_storage_and_memory_unit_test(global_state, mem):
             s = Solver()
             s.add(symExec_result == BitVecVal(value, 256))
             if s.check() == unsat: # Unsatisfy
+                print "Storage is :", key, simplify(global_state['Ia'][str(key)])
+                print "Storage should be: ", key, value
                 exit(FAIL)
         exit(PASS)
 
@@ -860,33 +862,25 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             first = stack.pop(0)
             second = stack.pop(0)
             third = stack.pop(0)
-            if isinstance(third, (int, long)):
+
+            if contains_only_concrete_values([first, second, third]):
                 if third == 0:
                     computed = 0
                 else:
-                    if not (isinstance(first, (int, long)) and isinstance(second, (int, long))):
-                        # there is one guy that is a symbolic expression
-                        third = BitVecVal(third, 256)
-                        if isinstance(first, (int, long)):
-                            first = BitVecVal(first, 256)
-                        if isinstance(second, (int, long)):
-                            second = BitVecVal(second, 256)
-                    first = to_unsigned(first)
-                    second = to_unsigned(second)
-                    third = to_unsigned(third)
                     computed = (first + second) % third
             else:
+                first = to_symbolic(first)
+                second = to_symbolic(second)
                 solver.push()
-                solver.add(Not(third == 0))
+                solver.add( Not(third == 0) )
                 if solver.check() == unsat:
-                    # it is provable that second is indeed equal to zero
                     computed = 0
                 else:
-                    if isinstance(first, (int, long)):
-                        first = BitVecVal(first, 256)
-                    if isinstance(second, (int, long)):
-                        second = BitVecVal(second, 256)
+                    first = ZeroExt(256, first)
+                    second = ZeroExt(256, second)
+                    third = ZeroExt(256, third)
                     computed = (first + second) % third
+                    computed = Extract(255, 0, computed)
                 solver.pop()
             stack.insert(0, computed)
         else:
@@ -897,30 +891,25 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             first = stack.pop(0)
             second = stack.pop(0)
             third = stack.pop(0)
-            if isinstance(third, (int, long)):
+
+            if contains_only_concrete_values([first, second, third]):
                 if third == 0:
                     computed = 0
                 else:
-                    if not (isinstance(first, (int, long)) and isinstance(second, (int, long))):
-                        # there is one guy that is a symbolic expression
-                        third = BitVecVal(third, 256)
-                        if isinstance(first, (int, long)):
-                            first = BitVecVal(first, 256)
-                        if isinstance(second, (int, long)):
-                            second = BitVecVal(second, 256)
                     computed = (first * second) % third
             else:
+                first = to_symbolic(first)
+                second = to_symbolic(second)
                 solver.push()
-                solver.add(Not(third == 0))
+                solver.add( Not(third == 0) )
                 if solver.check() == unsat:
-                    # it is provable that second is indeed equal to zero
                     computed = 0
                 else:
-                    if isinstance(first, (int, long)):
-                        first = BitVecVal(first, 256)
-                    if isinstance(second, (int, long)):
-                        second = BitVecVal(second, 256)
-                    computed = (first * second) % third
+                    first = ZeroExt(256, first)
+                    second = ZeroExt(256, second)
+                    third = ZeroExt(256, third)
+                    computed = URem(first * second, third)
+                    computed = Extract(255, 0, computed)
                 solver.pop()
             stack.insert(0, computed)
         else:
@@ -1739,6 +1728,17 @@ def print_state(block_address, stack, mem, global_state):
     if PRINT_MODE: print "STACK: " + str(stack)
     if PRINT_MODE: print "MEM: " + str(mem)
     if PRINT_MODE: print "GLOBAL STATE: " + str(global_state)
+
+def contains_only_concrete_values(stack):
+    for element in stack:
+        if isSymbolic(element):
+            return False
+    return True
+
+def to_symbolic(number):
+    if isReal(number):
+        return BitVecVal(number, 256)
+    return number
 
 if __name__ == '__main__':
     main()
