@@ -1,5 +1,6 @@
 from z3 import *
 from vargenerator import *
+from ethereum_data import *
 import tokenize
 import signal
 from tokenize import NUMBER, NAME, NEWLINE
@@ -15,7 +16,6 @@ import sys
 import atexit
 import logging
 import pickle
-from ethereum_data import getBalance
 
 results = {}
 
@@ -40,6 +40,8 @@ if REPORT_MODE:
 
 count_unresolved_jumps = 0
 gen = Generator()  # to generate names for symbolic variables
+if USE_GLOBAL_BLOCKCHAIN:
+    data_source = EthereumData()
 
 end_ins_dict = {}  # capturing the last statement of each basic block
 instructions = {}  # capturing all the instructions, keys are corresponding addresses
@@ -1121,7 +1123,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             global_state["pc"] = global_state["pc"] + 1
             address = stack.pop(0)
             if isReal(address) and USE_GLOBAL_BLOCKCHAIN:
-                new_var = getBalance(address)
+                new_var = data_source.getBalance(address)
             else:
                 new_var_name = gen.gen_balance_var()
                 if new_var_name in path_conditions_and_vars:
