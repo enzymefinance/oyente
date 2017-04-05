@@ -115,7 +115,6 @@ def write_result_to_file(filename, result):
                 exit(NOT_A_NUMBER)
 
 def compare_storage_and_memory_unit_test(global_state, mem):
-
     if UNIT_TEST == 2: # test real value variable
         write_result_to_file('storage', global_state['Ia'])
         write_result_to_file('memory', mem)
@@ -1464,6 +1463,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     elif instr_parts[0] == "JUMP":
         if len(stack) > 0:
             target_address = stack.pop(0)
+            if isSymbolic(target_address):
+                target_address = int( str( simplify(target_address) ) )
             vertices[start].set_jump_target(target_address)
             if target_address not in edges[start]:
                 edges[start].append(target_address)
@@ -1473,6 +1474,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         # We need to prepare two branches
         if len(stack) > 1:
             target_address = stack.pop(0)
+            if isSymbolic(target_address):
+                target_address = int( str( simplify(target_address) ) )
             vertices[start].set_jump_target(target_address)
             flag = stack.pop(0)
             branch_expression = (BitVecVal(0, 1) == BitVecVal(1, 1))
