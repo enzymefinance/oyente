@@ -706,8 +706,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 first = to_symbolic(first)
                 second = to_symbolic(second)
                 solver.push()
-                solver.add(second == 0)
-                if solver.check() == sat:
+                solver.add( Not (second == 0) )
+                if solver.check() == unsat:
                     computed = 0
                 else:
                     computed = UDiv(first, second)
@@ -1217,7 +1217,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             stack.pop(0)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "GASPRICE":  # get address of currently executing account
+    elif instr_parts[0] == "GASPRICE":
         global_state["pc"] = global_state["pc"] + 1
         new_var_name = gen.gen_gas_price_var()
         if new_var_name in path_conditions_and_vars:
@@ -1226,6 +1226,17 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             new_var = BitVec(new_var_name, 256)
             path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
+    elif instr_parts[0] == "EXTCODESIZE":
+        if len(stack) > 1:
+            global_state["pc"] = global_state["pc"] + 1
+            address = stack.pop(0)
+            if isReal(address) and USE_GLOBAL_BLOCKCHAIN:
+                code = data_source.getCode(address)
+                stack.insert(len(code)/2)
+            else:
+                #not handled yet
+        else:
+            raise ValueError('STACK underflow')
     #
     #  40s: Block Information
     #
