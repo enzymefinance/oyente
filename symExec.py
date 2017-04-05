@@ -912,23 +912,33 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if isinstance(first, (int, long)) and isinstance(second, (int, long)):
-                computed = second
-                if first < 32 and first >= 0:
-                    sign_bit_index = 256 - 8 * (first + 1)
-                    sign_bit_mask = 1 << 8 * (first + 1) - 1
-                    sign_extend_mask = ( (2**(sign_bit_index + 1) ) - 1) << (8 * first + 7)
-                    if second & sign_bit_mask:
-                        computed = second | sign_extend_mask
-                    else:
-                        sign_extend_mask = ~sign_extend_mask
-                        computed = second & sign_extend_mask
-                stack.insert(0, computed)
+            if contains_only_concrete_values([first, second]):
+                if first >= 32 or first < 0:
+                    computed = second
+                else:
+                   signbit_index_from_right = 8 * first + 7
+                   if second & (1 << signbit_index_from_right):
+                       computed = second | (2 ** 256 - (1 << signbit_index_from_right) )
+                   else:
+                       computed = second & ( (1 << signbit_index_from_right) - 1 )
             else:
-                new_var_name = gen.gen_arbitrary_var()
-                new_var = BitVec(new_var_name, 256)
-                path_conditions_and_vars[new_var_name] = new_var
-                stack.insert(0, new_var)
+                first = to_symbolic(first)
+                second = to_symbolic(second)
+                solver.push()
+                solver.add( Not( Or(first >= 32, first < 0 ) ) )
+                if solver.check() == unsat:
+                    computed = second
+                else:
+                    signbit_index_from_right = 8 * first + 7
+                    solver.push()
+                    solver.add( second & (1 << signbit_index_from_right) == 0 )
+                    if solver.check() == unsat:
+                        computed = second | ( 2 ** 256 - (1 << signbit_index_from_right) )
+                    else:
+                        computed = second & ( (1 << signbit_index_from_right) - 1 )
+                    solver.pop()
+                solver.pop()
+            stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
     #
@@ -1076,19 +1086,27 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     elif instr_parts[0] == "BYTE":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
-            byte_no = stack.pop(0)
-            byte_no_from_left = 32 - byte_no - 1
-            word = stack.pop(0)
+            first = stack.pop(0)
+            byte_index = 32 - first - 1
+            second = stack.pop(0)
 
-            byte = 0
-            if byte_no < 32 and byte_no >= 0:
-                if isinstance(byte_no_from_left, (int, long)) and not isinstance(word, (int, long)):
-                    word = BitVecVal(word, 256)
-                if isinstance(word, (int, long)) and not isinstance(byte_no_from_left, (int, long)):
-                    byte_no_from_left = BitVecVal(byte_no_from_left, 256)
-                byte = word & (255 << (8 * byte_no_from_left))
-                byte = byte >> (8 * byte_no_from_left)
-            stack.insert(0, byte)
+            if contains_only_concrete_values([first, second]):
+                if first >= 32 or first < 0:
+                    computed = 0
+                else:
+                    computed = second & (255 << (8 * byte_index))
+                    computed = computed >> (8 * byte_index)
+            else:
+                first = to_symbolic(first)
+                second = to_symbolic(second)
+                solver.push()
+                solver.add( Not (Or( first >= 32, first < 0 ) ) )
+                if solver.check() == unsat:
+                    computed = 0
+                else:
+                    computed = second & (255 << (8 * byte_index))
+                    computed = computed >> (8 * byte_no_from_left)
+            stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
     #
