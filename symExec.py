@@ -1252,6 +1252,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 stack.insert(0, len(code)/2)
             else:
                 #not handled yet
+                stack.insert(0, 0)
         else:
             raise ValueError('STACK underflow')
     #
