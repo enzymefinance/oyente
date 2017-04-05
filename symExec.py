@@ -1232,7 +1232,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             address = stack.pop(0)
             if isReal(address) and USE_GLOBAL_BLOCKCHAIN:
                 code = data_source.getCode(address)
-                stack.insert(len(code)/2)
+                stack.insert(0, len(code)/2)
             else:
                 #not handled yet
         else:
