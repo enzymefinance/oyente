@@ -706,8 +706,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 first = to_symbolic(first)
                 second = to_symbolic(second)
                 solver.push()
-                solver.add(second == 0)
-                if solver.check() == sat:
+                solver.add( Not (second == 0) )
+                if solver.check() == unsat:
                     computed = 0
                 else:
                     computed = UDiv(first, second)
