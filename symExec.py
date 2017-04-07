@@ -11,7 +11,7 @@ import math
 from arithmetic_utils import *
 import time
 from global_params import *
-from global_test_params import *
+from test_evm.global_test_params import *
 import sys
 import atexit
 import logging
@@ -98,51 +98,10 @@ def compare_stack_unit_test(stack):
         if PRINT_MODE: print "FAILED UNIT-TEST"
         if PRINT_MODE: print e.message
 
-def write_result_to_file(filename, result):
-    with open(filename, 'w') as of:
-        for key in result:
-            value = result[key]
-            try:
-                key = str(long(key))
-                value = str(long(value))
-                of.write(key)
-                of.write(' ')
-                of.write(value)
-                of.write('\n')
-            except:
-                logging.exception("Storage key or value is not a number")
-                of.close()
-                exit(NOT_A_NUMBER)
-
 def compare_storage_and_memory_unit_test(global_state, mem):
-    if UNIT_TEST == 2: # test real value variable
-        write_result_to_file('storage', global_state['Ia'])
-        write_result_to_file('memory', mem)
-
-    if UNIT_TEST == 3: # test symbolic variable
-        test_case = pickle.load(open("current_test.pickle", "rb"))
-        test_name, test_data = test_case['test_name'], test_case['test_data']
-        test_storage = test_data['post'].values()[0]['storage']
-        if not test_storage:
-            test_storage = {'0': '0'}
-
-        for key, value in test_storage.items():
-            key, value = long(key, 0), long(value, 0)
-            try:
-                symExec_result = global_state['Ia'][str(key)]
-            except:
-                exit(EMPTY_RESULT)
-
-            s = Solver()
-            s.add(symExec_result == BitVecVal(value, 256))
-            if s.check() == unsat: # Unsatisfy
-                if isSymbolic(global_state['Ia'][str(key)]):
-                    print "Storage is :", key, simplify(global_state['Ia'][str(key)])
-                else:
-                    print "Storage is :", key, global_state['Ia'][str(key)]
-                print "Storage should be: ", key, value
-                exit(FAIL)
-        exit(PASS)
+    unit_test = pickle.load(open("current_test.pickle", "rb"))
+    test_status = unit_test.compare_with_symExec_result(global_state, mem)
+    exit(test_status)
 
 def handler(signum, frame):
     if UNIT_TEST == 2 or UNIT_TEST == 3: exit(TIME_OUT)
@@ -156,7 +115,7 @@ def main():
     print "Running, please wait..."
 
 
-    print "\t============ Results ==========="
+    if UNIT_TEST == 1: print "\t============ Results ==========="
 
     if PRINT_MODE:
         print "Checking for Callstack attack..."
@@ -189,11 +148,11 @@ def main():
     if PRINT_MODE:
         print "Results for Reentrancy Bug: " + str(reentrancy_all_paths)
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
-    print "\t  Reentrancy bug exists: %s" % str(reentrancy_bug_found)
+    if UNIT_TEST == 1: print "\t  Reentrancy bug exists: %s" % str(reentrancy_bug_found)
     results['reentrancy'] = reentrancy_bug_found
 
 def closing_message():
-    print "\t====== Analysis Completed ======"
+    if UNIT_TEST ==1: print "\t====== Analysis Completed ======"
     if len(sys.argv) > 13:
         with open(sys.argv[13], 'w') as of:
             of.write(json.dumps(results,indent=1))
@@ -232,7 +191,7 @@ def detect_time_dependency():
             is_dependant = True
             break
 
-    print "\t  Time Dependency: \t %s" % is_dependant
+    if UNIT_TEST == 1: print "\t  Time Dependency: \t %s" % is_dependant
     results['time_dependency'] = is_dependant
 
     if REPORT_MODE:
@@ -272,10 +231,10 @@ def detect_money_concurrency():
     # if PRINT_MODE: print "All false positive cases: ", false_positive
     if PRINT_MODE: print "Concurrency in paths: ", concurrency_paths
     if len(concurrency_paths) > 0:
-        print "\t  Concurrency found in paths: %s" + str(concurrency_paths)
+        if UNIT_TEST == 1: print "\t  Concurrency found in paths: %s" + str(concurrency_paths)
         results['concurrency'] = True
     else:
-        print "\t  Concurrency Bug: \t False"
+        if UNIT_TEST == 1: print "\t  Concurrency Bug: \t False"
         results['concurrency'] = False
     if REPORT_MODE:
         rfile.write("number of path: " + str(n) + "\n")
@@ -1731,7 +1690,7 @@ def run_callstack_attack():
 
     result = check_callstack_attack(instructions)
 
-    print "\t  CallStack Attack: \t %s" % result
+    if UNIT_TEST == 1: print "\t  CallStack Attack: \t %s" % result
     results['callstack'] = result
 
 def print_state(block_address, stack, mem, global_state):
