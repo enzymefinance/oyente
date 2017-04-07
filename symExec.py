@@ -82,6 +82,9 @@ def isSymbolic(value):
 def isReal(value):
     return isinstance(value, (int, long))
 
+def isTesting():
+    return UNIT_TEST != 0
+
 # A simple function to compare the end stack with the expected stack
 # configurations specified in a test file
 def compare_stack_unit_test(stack):
@@ -115,7 +118,7 @@ def main():
     print "Running, please wait..."
 
 
-    if UNIT_TEST == 1: print "\t============ Results ==========="
+    if not isTesting(): print "\t============ Results ==========="
 
     if PRINT_MODE:
         print "Checking for Callstack attack..."
@@ -148,7 +151,7 @@ def main():
     if PRINT_MODE:
         print "Results for Reentrancy Bug: " + str(reentrancy_all_paths)
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
-    if UNIT_TEST == 1: print "\t  Reentrancy bug exists: %s" % str(reentrancy_bug_found)
+    if not isTesting(): print "\t  Reentrancy bug exists: %s" % str(reentrancy_bug_found)
     results['reentrancy'] = reentrancy_bug_found
 
 def closing_message():
@@ -191,7 +194,7 @@ def detect_time_dependency():
             is_dependant = True
             break
 
-    if UNIT_TEST == 1: print "\t  Time Dependency: \t %s" % is_dependant
+    if not isTesting(): print "\t  Time Dependency: \t %s" % is_dependant
     results['time_dependency'] = is_dependant
 
     if REPORT_MODE:
@@ -231,10 +234,10 @@ def detect_money_concurrency():
     # if PRINT_MODE: print "All false positive cases: ", false_positive
     if PRINT_MODE: print "Concurrency in paths: ", concurrency_paths
     if len(concurrency_paths) > 0:
-        if UNIT_TEST == 1: print "\t  Concurrency found in paths: %s" + str(concurrency_paths)
+        if not isTesting(): print "\t  Concurrency found in paths: %s" + str(concurrency_paths)
         results['concurrency'] = True
     else:
-        if UNIT_TEST == 1: print "\t  Concurrency Bug: \t False"
+        if not isTesting(): print "\t  Concurrency Bug: \t False"
         results['concurrency'] = False
     if REPORT_MODE:
         rfile.write("number of path: " + str(n) + "\n")
@@ -1690,7 +1693,7 @@ def run_callstack_attack():
 
     result = check_callstack_attack(instructions)
 
-    if UNIT_TEST == 1: print "\t  CallStack Attack: \t %s" % result
+    if not isTesting(): print "\t  CallStack Attack: \t %s" % result
     results['callstack'] = result
 
 def print_state(block_address, stack, mem, global_state):
