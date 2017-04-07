@@ -1104,7 +1104,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     computed = 0
                 else:
                     computed = second & (255 << (8 * byte_index))
-                    computed = computed >> (8 * byte_no_from_left)
+                    computed = computed >> (8 * byte_index)
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
