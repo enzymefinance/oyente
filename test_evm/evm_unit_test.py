@@ -83,3 +83,10 @@ class EvmUnitTest(object):
             if s.check() == unsat: # Unsatisfy
                 return FAIL
         return PASS
+
+    def is_exception_case(self): # no post field in data
+        try:
+            post = self.data['post']
+            return False
+        except:
+            return True
