@@ -47,6 +47,9 @@ def main():
         pickle.dump(current_test, open("current_test.pickle", "wb"))
 
         exit_code = current_test.run_test()
+        # Special case when symExec run into exception but it is correct result
+        if exit_code == EXCEPTION and current_test.is_exception_case():
+            exit_code = PASS
 
         print "===============%s!====================" % status(exit_code).upper()
 
