@@ -21,7 +21,7 @@ results = {}
 
 UNSIGNED_BOUND_NUMBER = 2**256 - 1
 
-if len(sys.argv) >= 13:
+if len(sys.argv) >= 14:
     IGNORE_EXCEPTIONS = int(sys.argv[2])
     REPORT_MODE = int(sys.argv[3])
     PRINT_MODE = int(sys.argv[4])
@@ -33,6 +33,7 @@ if len(sys.argv) >= 13:
     GLOBAL_TIMEOUT = int(sys.argv[10])
     PRINT_PATHS = int(sys.argv[11])
     USE_GLOBAL_BLOCKCHAIN = int(sys.argv[12])
+    DEPTH_LIMIT = int(sys.argv[13])
 
 if REPORT_MODE:
     report_file = sys.argv[1] + '.report'
@@ -68,7 +69,7 @@ CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 
 if UNIT_TEST == 1:
     try:
-        result_file = open(sys.argv[13], 'r')
+        result_file = open(sys.argv[14], 'r')
     except:
         if PRINT_MODE: print "Could not open result file for unit test"
         exit()
@@ -156,10 +157,10 @@ def main():
 
 def closing_message():
     if UNIT_TEST ==1: print "\t====== Analysis Completed ======"
-    if len(sys.argv) > 13:
-        with open(sys.argv[13], 'w') as of:
+    if len(sys.argv) > 14:
+        with open(sys.argv[14], 'w') as of:
             of.write(json.dumps(results,indent=1))
-        print "Wrote results to %s." % sys.argv[13]
+        print "Wrote results to %s." % sys.argv[14]
 
 atexit.register(closing_message)
 
@@ -446,15 +447,15 @@ def full_sym_exec():
     # executing, starting from beginning
     stack = []
     path_conditions_and_vars = {"path_condition" : []}
-    visited = []
+    visited, depth = [], 0
     mem = {}
     global_state = get_init_global_state(path_conditions_and_vars)  # this is init global state for this particular execution
     analysis = init_analysis()
-    return sym_exec_block(0, visited, stack, mem, global_state, path_conditions_and_vars, analysis)
+    return sym_exec_block(0, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis)
 
 
 # Symbolically executing a block from the start address
-def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and_vars, analysis):
+def sym_exec_block(start, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis):
     if start < 0:
         if PRINT_MODE: print "ERROR: UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH"
         return ["ERROR"]
@@ -478,10 +479,12 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
 
     # Mark that this basic block in the visited blocks
     visited.append(start)
+    depth += 1
 
     # Go to next Basic Block(s)
-    if jump_type[start] == "terminal":
+    if jump_type[start] == "terminal" or depth > DEPTH_LIMIT:
         if PRINT_MODE: print "TERMINATING A PATH ..."
+        # print "Start: ", start, ",Depth: ", depth
         display_analysis(analysis)
         global total_no_of_paths
         total_no_of_paths += 1
@@ -507,7 +510,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         visited1 = list(visited)
         path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
         analysis1 = my_copy_dict(analysis)
-        sym_exec_block(successor, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+        sym_exec_block(successor, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
     elif jump_type[start] == "falls_to":  # just follow to the next basic block
         successor = vertices[start].get_falls_to()
         stack1 = list(stack)
@@ -517,7 +520,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
         visited1 = list(visited)
         path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
         analysis1 = my_copy_dict(analysis)
-        sym_exec_block(successor, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+        sym_exec_block(successor, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
     elif jump_type[start] == "conditional":  # executing "JUMPI"
 
         # A choice point, we proceed with depth first search
@@ -542,7 +545,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
                 path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
                 path_conditions_and_vars1["path_condition"].append(branch_expression)
                 analysis1 = my_copy_dict(analysis)
-                sym_exec_block(left_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+                sym_exec_block(left_branch, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
         except Exception as e:
             log_file.write(str(e))
             print "Exception - "+str(e)
@@ -574,7 +577,7 @@ def sym_exec_block(start, visited, stack, mem, global_state, path_conditions_and
                 path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
                 path_conditions_and_vars1["path_condition"].append(negated_branch_expression)
                 analysis1 = my_copy_dict(analysis)
-                sym_exec_block(right_branch, visited1, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+                sym_exec_block(right_branch, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
         except Exception as e:
             log_file.write(str(e))
             if str(e) == "timeout":
