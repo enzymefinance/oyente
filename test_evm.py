@@ -2,7 +2,7 @@ import json
 import glob
 import os
 import pickle
-from global_test_params import *
+from test_evm.global_test_params import *
 from test_evm.evm_unit_test import EvmUnitTest
 
 def status(exit_code):
