@@ -97,7 +97,14 @@ def main():
     solc_p = subprocess.Popen(shlex.split(solc_cmd % args.source), stdout = subprocess.PIPE, stderr=FNULL)
     solc_out = solc_p.communicate()
 
-    for (cname, bin_str) in re.findall(r"\n======= (.*?) =======\nBinary of the runtime part: \n(.*?)\n", solc_out[0]):
+    binary_regex = r"\n======= (.*?) =======\nBinary of the runtime part: \n(.*?)\n"
+    matches = re.findall(binary_regex, solc_out[0])
+
+    if len(matches) == 0:
+        print "Solidity compilation failed"
+        exit()
+
+    for (cname, bin_str) in matches:
         print "Contract %s:" % cname
         bin_str += "\0"
 
