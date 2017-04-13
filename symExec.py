@@ -102,9 +102,9 @@ def compare_stack_unit_test(stack):
         if PRINT_MODE: print "FAILED UNIT-TEST"
         if PRINT_MODE: print e.message
 
-def compare_storage_and_memory_unit_test(global_state, mem):
+def compare_storage_and_memory_unit_test(global_state, mem, analysis):
     unit_test = pickle.load(open("current_test.pickle", "rb"))
-    test_status = unit_test.compare_with_symExec_result(global_state, mem)
+    test_status = unit_test.compare_with_symExec_result(global_state, mem, analysis)
     exit(test_status)
 
 def handler(signum, frame):
@@ -516,7 +516,6 @@ def sym_exec_block(start, visited, depth, stack, mem, global_state, path_conditi
     # Go to next Basic Block(s)
     if jump_type[start] == "terminal" or depth > DEPTH_LIMIT:
         if PRINT_MODE: print "TERMINATING A PATH ..."
-        # print "Start: ", start, ",Depth: ", depth
         display_analysis(analysis)
         global total_no_of_paths
         total_no_of_paths += 1
@@ -531,7 +530,7 @@ def sym_exec_block(start, visited, depth, stack, mem, global_state, path_conditi
             if analysis["sstore"] not in data_flow_all_paths[1]:
                 data_flow_all_paths[1].append(analysis["sstore"])
         if UNIT_TEST == 1: compare_stack_unit_test(stack)
-        if UNIT_TEST == 2 or UNIT_TEST == 3: compare_storage_and_memory_unit_test(global_state, mem)
+        if UNIT_TEST == 2 or UNIT_TEST == 3: compare_storage_and_memory_unit_test(global_state, mem, analysis)
 
     elif jump_type[start] == "unconditional":  # executing "JUMP"
         successor = vertices[start].get_jump_target()
@@ -630,7 +629,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     # collecting the analysis result by calling this skeletal function
     # this should be done before symbolically executing the instruction,
     # since SE will modify the stack and mem
-    update_analysis(analysis, instr_parts[0], stack, mem, global_state, path_conditions_and_vars)
+    update_analysis(analysis, instr_parts[0], stack, mem, global_state, path_conditions_and_vars, solver)
 
     if PRINT_MODE: print "=============================="
     if PRINT_MODE: print "EXECUTING: " + instr

@@ -17,6 +17,7 @@ def status(exit_code):
     if exit_code == 106: return "Unkown instruction"
     if exit_code == 107: return "Exception"
     if exit_code == 108: return "Empty result"
+    if exit_code == 109: return "Incorrect gas tracked"
 
 
 def main():
@@ -26,11 +27,11 @@ def main():
 
     num_tests = num_passes =  num_fails = num_nyh_ops = \
         num_not_matches = num_not_a_numbers = num_time_outs = num_unkown_instrs = \
-        num_exceptions = num_empty_res = num_err_exec = num_cant_eval = 0
+        num_exceptions = num_empty_res = num_err_exec = num_cant_eval = num_incorrect_gas = 0
 
     fails, nyh_ops, not_matchs, not_a_numbers, time_outs, \
         unkown_instrs, exceptions, empty_res, err_exec, \
-        cant_eval = [], [], [], [], [], [], [], [], [], []
+        cant_eval, incorrect_gas = [], [], [], [], [], [], [], [], [], [], []
 
     for f in files:
         test_cases.update(json.loads(open(f).read()))
@@ -87,6 +88,9 @@ def main():
         elif exit_code == CANT_EVALUATE:
             cant_eval.append(testname)
             num_cant_eval += 1
+        elif exit_code == INCORRECT_GAS:
+            incorrect_gas.append(testname)
+            num_incorrect_gas += 1
 
     print "Done!"
     print "Total: ", num_tests
@@ -112,6 +116,8 @@ def main():
     print "Error execution:", num_err_exec, err_exec
     print
     print "Cant evaluate", num_cant_eval, cant_eval
+    print
+    print "Incorrect gas tracked", num_incorrect_gas, incorrect_gas
 
     remove_temporary_files()
 

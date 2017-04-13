@@ -94,19 +94,21 @@ GCOST = {
     "Glow": 5,
     "Gmid": 8,
     "Ghigh": 10,
-    "Gext": 20,
+    "Gextcode": 20,
+    "Gbalance": 400,
     "Gsload": 50,
     "Gjumpdest": 1,
     "Gsset": 20000,
     "Gsreset": 5000,
-    "Rsclear": -15000,
-    "Rsuicide": -24000,
+    "Rsclear": 15000,
+    "Rsuicide": 24000,
+    "Gsuicide": 5000,
     "Gcreate": 32000,
     "Gcodedeposit": 200,
     "Gcall": 40,
     "Gcallvalue": 9000,
     "Gcallstipend": 2300,
-    "Gcallnewaccount": 25000,
+    "Gnewaccount": 25000,
     "Gexp": 10,
     "Gexpbyte": 10,
     "Gmemory": 3,
@@ -119,10 +121,11 @@ GCOST = {
     "Glogtopic": 375,
     "Gsha3": 30,
     "Gsha3word": 6,
-    "Gcopy": 3
+    "Gcopy": 3,
+    "Gblockhash": 20
 }
 
-Wzero = ("STOP", "SUICIDE", "RETURN", "SSTORE")
+Wzero = ("STOP", "RETURN")
 
 Wbase = ("ADDRESS", "ORIGIN", "CALLER", "CALLVALUE", "CALLDATASIZE",
          "CODESIZE", "GASPRICE", "COINBASE", "TIMESTAMP", "NUMBER",
@@ -136,9 +139,9 @@ Wlow = ("MUL", "DIV", "SDIV", "MOD", "SMOD", "SIGNEXTEND")
 
 Wmid = ("ADDMOD", "MULMOD", "JUMP")
 
-Whigh = ("EXP", "JUMPI")
+Whigh = ("JUMPI")
 
-Wext = ("BALANCE", "EXTCODESIZE", "BLOCKHASH")
+Wext = ("EXTCODESIZE")
 
 def get_opcode(opcode):
     if opcode in opcodes:
@@ -174,7 +177,9 @@ def get_ins_cost(opcode):
     elif opcode in Whigh:
         return GCOST["Ghigh"]
     elif opcode in Wext:
-        return GCOST["Gext"]
+        return GCOST["Gextcode"]
+    elif opcode == "EXP":
+        return GCOST["Gexp"]
     elif opcode == "SLOAD":
         return GCOST["Gsload"]
     elif opcode == "JUMPDEST":
@@ -189,10 +194,11 @@ def get_ins_cost(opcode):
         num_topics = int(opcode[3:])
         return GCOST["Glog"] + num_topics * GCOST["Glogtopic"]
     elif opcode == "EXTCODECOPY":
-        return GCOST["Gext"]
+        return GCOST["Gextcode"]
     elif opcode in ("CALLDATACOPY", "CODECOPY"):
         return GCOST["Gverylow"]
-    else:
-        print "WARNING: UNKNOWN OPCODE"
+    elif opcode == "BALANCE":
+        return GCOST["Gbalance"]
+    elif opcode == "BLOCKHASH":
+        return GCOST["Gblockhash"]
     return 0
-
