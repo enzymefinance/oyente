@@ -28,6 +28,10 @@ def has_dependencies_installed():
 
     return True
 
+def removeSwarmHash(evm):
+	evm_without_hash = re.sub(r"a165627a7a72305820\S{64}0029$", "", evm)
+	return evm_without_hash
+
 def main():
     # TODO: Implement -o switch.
 
@@ -65,8 +69,15 @@ def main():
 
     if args.bytecode:
         disasm_out = ""
+        processed_evm_file = args.source + '.1' 
         try:
-            disasm_p = subprocess.Popen(["evm", "disasm", args.source], stdout=subprocess.PIPE)
+            with open(args.source) as f:
+                evm = f.read()
+
+            with open(processed_evm_file, 'w') as f:
+                f.write(removeSwarmHash(evm))
+
+            disasm_p = subprocess.Popen(["evm", "disasm", processed_evm_file], stdout=subprocess.PIPE)
             disasm_out = disasm_p.communicate()[0]
             
         except:
@@ -83,6 +94,7 @@ def main():
         cmd = os.system('python symExec.py %s.disasm %d %d %d %d %d %d %d %d %d %d %d %d %s' % (args.source, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, global_params.USE_GLOBAL_BLOCKCHAIN, global_params.DEPTH_LIMIT, args.source+".json" if args.json else ""))
 
         os.system('rm %s.disasm' % (args.source))
+        os.system('rm %s' % (processed_evm_file))
 
         if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
             exit_code = os.WEXITSTATUS(cmd)
@@ -109,7 +121,7 @@ def main():
         print "Contract %s:" % cname
 
         with open(cname+'.evm', 'w') as of:
-            of.write(bin_str)
+            of.write(removeSwarmHash(bin_str))
 
 
         disasm_out = ""
