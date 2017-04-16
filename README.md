@@ -18,7 +18,7 @@ and you are done!
 
 ## Dependencies
 
-1. solc v0.4.6 and evm from [go-ethereum](https://github.com/ethereum/go-ethereum) version 1.6.0
+1. solc v0.4.7 and evm from [go-ethereum](https://github.com/ethereum/go-ethereum) version 1.6.0
 2. [z3](https://github.com/Z3Prover/z3/releases) Theorem Prover
 3. [Requests](https://github.com/kennethreitz/requests/) library
 
