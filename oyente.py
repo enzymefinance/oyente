@@ -18,7 +18,7 @@ def has_dependencies_installed():
         print "Error: Z3 is not available. Please install z3 from https://github.com/Z3Prover/z3."
         return False
 
-    if not cmd_exists("disasm"):
+    if not cmd_exists("evm"):
         print "disasm is missing. Please install go-ethereum and make sure disasm is in the path."
         return False
 
@@ -66,8 +66,9 @@ def main():
     if args.bytecode:
         disasm_out = ""
         try:
-            disasm_p = subprocess.Popen(shlex.split('disasm'), stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-            disasm_out = disasm_p.communicate(input=open(args.source).read())[0]
+            disasm_p = subprocess.Popen(["evm", "disasm", args.source], stdout=subprocess.PIPE)
+            disasm_out = disasm_p.communicate()[0]
+            
         except:
             print "Disassembly failed."
 
@@ -106,13 +107,15 @@ def main():
 
     for (cname, bin_str) in matches:
         print "Contract %s:" % cname
-        bin_str += "\0"
+
+        with open(cname+'.evm', 'w') as of:
+            of.write(bin_str)
+
 
         disasm_out = ""
         try:
-            disasm_p = subprocess.Popen(shlex.split('disasm'), stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-            disasm_out = disasm_p.communicate(input=bin_str)[0]
-
+            disasm_p = subprocess.Popen(["evm", "disasm", cname+'.evm'], stdout=subprocess.PIPE)
+            disasm_out = disasm_p.communicate()[0]
         except:
             print "Disassembly failed."
 
@@ -120,9 +123,6 @@ def main():
 
         with open(cname+'.evm.disasm', 'w') as of:
             of.write(disasm_out)
-
-        with open(cname+'.evm', 'w') as of:
-            of.write(bin_str)
 
 
         # TODO: Do this as an import and run, instead of shell call and hacky fix
