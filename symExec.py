@@ -165,20 +165,13 @@ def closing_message():
 atexit.register(closing_message)
 
 def change_format():
-    with open(sys.argv[1], 'r') as disasm_file:
-        file_contents = disasm_file.read()
-        file_contents = file_contents.replace(":", "")
-
-    with open(sys.argv[1], 'w') as disasm_file:
-        disasm_file.write(file_contents)
-    
     with open(sys.argv[1]) as disasm_file:
         file_contents = disasm_file.readlines()
-        #file_contents = [x.lstrip("0") for x in file_contents]
         i = 0
         firstLine = file_contents[0].strip('\n')
         for line in file_contents:
             line = line.replace('SELFDESTRUCT', 'SUICIDE')
+            line = line.replace(':','')
             lineParts = line.split(' ')
             try: # removing initial zeroes
                 lineParts[0] = str(int(lineParts[0]))
@@ -188,7 +181,7 @@ def change_format():
             lineParts[-1] = lineParts[-1].strip('\n')    
             try: # adding arrow if last is a number
                 lastInt = lineParts[-1] 
-                if(int(lastInt,16) or int(lastInt,16) == 0):
+                if(int(lastInt,16) or int(lastInt,16) == 0) and len(lineParts) > 2:
                     lineParts[-1] = "=>"
                     lineParts.append(lastInt)
             except Exception as e:
@@ -200,9 +193,6 @@ def change_format():
         
     with open(sys.argv[1], 'w') as disasm_file:
        disasm_file.write("\n".join(file_contents))
-
-    with open(sys.argv[1], 'r') as disasm_file:
-        file_contents = disasm_file.read()
         
 
 def build_cfg_and_analyze():
