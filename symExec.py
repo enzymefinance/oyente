@@ -171,6 +171,7 @@ def change_format():
         firstLine = file_contents[0].strip('\n')
         for line in file_contents:
             line = line.replace('SELFDESTRUCT', 'SUICIDE')
+            line = line.replace('Missing opcode', 'INVALID')
             line = line.replace(':','')
             lineParts = line.split(' ')
             try: # removing initial zeroes
@@ -622,6 +623,9 @@ def sym_exec_block(start, visited, depth, stack, mem, global_state, path_conditi
 # Symbolically executing an instruction
 def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_vars, analysis):
     instr_parts = str.split(instr, ' ')
+
+    if instr_parts[0] == "INVALID":
+        return
 
     # collecting the analysis result by calling this skeletal function
     # this should be done before symbolically executing the instruction,
