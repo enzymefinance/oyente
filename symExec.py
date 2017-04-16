@@ -1732,7 +1732,6 @@ def check_callstack_attack(disasm):
 
 def run_callstack_attack():
     disasm_data = open(sys.argv[1]).read()
-    #instr_pattern = r"([\d]+) +([A-Z]+)([\d]?){1}(?: +(?:=> )?(\d+)?)?"
     instr_pattern = r"([\d]+): ([A-Z]+)([\d]?)(?: 0x)?(\S+)?"
     instructions = re.findall(instr_pattern, disasm_data)
     result = check_callstack_attack(instructions)
