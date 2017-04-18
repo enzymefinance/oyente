@@ -39,7 +39,7 @@ if len(sys.argv)>=3:
 
 for c in tqdm(contracts):
 	with open('tmp.evm','w') as of:
-		of.write(cjson[c][1][2:]+"\0")
+		of.write(cjson[c][1][2:])
 	os.system('python oyente.py tmp.evm -j -b')
 	try:
 		results[c] = json.loads(open('tmp.evm.json').read())
