@@ -34,6 +34,7 @@ if len(sys.argv) >= 14:
     PRINT_PATHS = int(sys.argv[11])
     USE_GLOBAL_BLOCKCHAIN = int(sys.argv[12])
     DEPTH_LIMIT = int(sys.argv[13])
+    GAS_LIMIT = int(sys.argv[14])
 
 if REPORT_MODE:
     report_file = sys.argv[1] + '.report'
@@ -69,7 +70,7 @@ CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 
 if UNIT_TEST == 1:
     try:
-        result_file = open(sys.argv[14], 'r')
+        result_file = open(sys.argv[15], 'r')
     except:
         if PRINT_MODE: print "Could not open result file for unit test"
         exit()
@@ -157,10 +158,10 @@ def main():
 
 def closing_message():
     if UNIT_TEST ==1: print "\t====== Analysis Completed ======"
-    if len(sys.argv) > 14:
-        with open(sys.argv[14], 'w') as of:
+    if len(sys.argv) > 15:
+        with open(sys.argv[15], 'w') as of:
             of.write(json.dumps(results,indent=1))
-        print "Wrote results to %s." % sys.argv[14]
+        print "Wrote results to %s." % sys.argv[15]
 
 atexit.register(closing_message)
 
@@ -179,9 +180,9 @@ def change_format():
 
             except:
                 lineParts[0] = lineParts[0]
-            lineParts[-1] = lineParts[-1].strip('\n')    
+            lineParts[-1] = lineParts[-1].strip('\n')
             try: # adding arrow if last is a number
-                lastInt = lineParts[-1] 
+                lastInt = lineParts[-1]
                 if(int(lastInt,16) or int(lastInt,16) == 0) and len(lineParts) > 2:
                     lineParts[-1] = "=>"
                     lineParts.append(lastInt)
@@ -191,10 +192,10 @@ def change_format():
             i = i + 1
         file_contents[0] = firstLine
         file_contents[-1] += '\n'
-        
+
     with open(sys.argv[1], 'w') as disasm_file:
        disasm_file.write("\n".join(file_contents))
-        
+
 
 def build_cfg_and_analyze():
     change_format()
@@ -495,8 +496,9 @@ def sym_exec_block(start, visited, depth, stack, mem, global_state, path_conditi
     if PRINT_MODE: print "\nDEBUG: Reach block address %d \n" % start
     if PRINT_MODE: print "STACK: " + str(stack)
 
-    if start in visited:
-        if PRINT_MODE: print "Seeing a loop. Terminating this path ... "
+    current_gas_used = analysis["gas"]
+    if  current_gas_used > GAS_LIMIT:
+        if PRINT_MODE: print "Run out of gas. Terminating this path ... "
         return stack
 
     # Execute every instruction, one at a time
