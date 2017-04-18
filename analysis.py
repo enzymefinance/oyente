@@ -40,6 +40,8 @@ def check_reentrancy_bug(path_conditions_and_vars, global_state):
     path_condition = path_conditions_and_vars["path_condition"]
     new_path_condition = []
     for expr in path_condition:
+        if not is_expr(expr):
+            continue
         list_vars = get_vars(expr)
         for var in list_vars:
             var_name = var.decl().name()
