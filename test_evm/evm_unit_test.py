@@ -23,6 +23,12 @@ class EvmUnitTest(object):
         else:
             return memory
 
+    def gas_info(self):
+        gas_limit = long(self.data['exec']['gas'], 0)
+        gas_remaining = long(self.data['gas'], 0)
+        return (gas_limit, gas_remaining)
+
+
     def run_test(self):
         return self._execute_vm(self.bytecode())
 
@@ -38,15 +44,17 @@ class EvmUnitTest(object):
             code_file.write('\n')
             code_file.close()
 
-    def compare_with_symExec_result(self, global_state, mem):
-        if UNIT_TEST == 2: return self.compare_real_value(global_state, mem)
+    def compare_with_symExec_result(self, global_state, mem, analysis):
+        if UNIT_TEST == 2: return self.compare_real_value(global_state, mem, analysis)
         if UNIT_TEST == 3: return self.compare_symbolic(global_state)
 
-    def compare_real_value(self, global_state, mem):
+    def compare_real_value(self, global_state, mem, analysis):
         storage_status = self._compare_storage_value(global_state)
         mem_status = self._compare_memory_value(mem)
+        gas_status = self._compare_gas_value(analysis)
         if storage_status != PASS: return storage_status
         if mem_status != PASS: return mem_status
+        if gas_status != PASS: return gas_status
         return PASS
 
     def _compare_storage_value(self, global_state):
@@ -70,6 +78,15 @@ class EvmUnitTest(object):
             return FAIL
         return PASS
 
+    def _compare_gas_value(self, analysis):
+        gas_used = analysis['gas']
+        gas_limit, gas_remaining = self.gas_info()
+        if gas_used == gas_limit - gas_remaining:
+            return PASS
+        else:
+            return INCORRECT_GAS
+
+
     def compare_symbolic(self, global_state):
         for key, value in self.storage().items():
             key, value = long(key, 0), long(value, 0)
@@ -84,9 +101,10 @@ class EvmUnitTest(object):
                 return FAIL
         return PASS
 
-    def is_exception_case(self): # no post field in data
+    def is_exception_case(self): # no post, gas field in data
         try:
             post = self.data['post']
+            gas = self.data['gas']
             return False
         except:
             return True

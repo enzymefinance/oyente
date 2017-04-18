@@ -32,3 +32,5 @@ PRINT_PATHS = 0
 
 # depth limit for DFS
 DEPTH_LIMIT = 100000
+
+GAS_LIMIT = 4000000

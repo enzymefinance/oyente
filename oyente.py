@@ -48,6 +48,7 @@ def main():
     parser.add_argument("-r", "--report", help="Create .report file.", action="store_true")
     parser.add_argument("-gb", "--globalblockchain", help="Integrate with the global ethereum blockchain", action="store_true")
     parser.add_argument("-dl", "--depthlimit", help="Limit DFS depth", action="store", dest="depth_limit", type=int)
+    parser.add_argument("-gl", "--gaslimit", help="Limit Gas", action="store", dest="gas_limit", type=int)
 
     args = parser.parse_args()
 
@@ -63,13 +64,15 @@ def main():
 
     if args.depth_limit:
         global_params.DEPTH_LIMIT = args.depth_limit
+    if args.gas_limit:
+        global_params.GAS_LIMIT = args.gas_limit
 
     if not has_dependencies_installed():
         return
 
     if args.bytecode:
         disasm_out = ""
-        processed_evm_file = args.source + '.1' 
+        processed_evm_file = args.source + '.1'
         try:
             with open(args.source) as f:
                 evm = f.read()
@@ -79,7 +82,7 @@ def main():
 
             disasm_p = subprocess.Popen(["evm", "disasm", processed_evm_file], stdout=subprocess.PIPE)
             disasm_out = disasm_p.communicate()[0]
-            
+
         except:
             print "Disassembly failed."
 
@@ -91,7 +94,11 @@ def main():
 
         # TODO: Do this as an import and run, instead of shell call and hacky fix
 
-        cmd = os.system('python symExec.py %s.disasm %d %d %d %d %d %d %d %d %d %d %d %d %s' % (args.source, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, global_params.USE_GLOBAL_BLOCKCHAIN, global_params.DEPTH_LIMIT, args.source+".json" if args.json else ""))
+        cmd = os.system('python symExec.py %s.disasm %d %d %d %d %d %d %d %d %d %d %d %d %d %s' % \
+            (args.source, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, \
+            global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, \
+            global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, global_params.USE_GLOBAL_BLOCKCHAIN, \
+            global_params.DEPTH_LIMIT, global_params.GAS_LIMIT, args.source+".json" if args.json else ""))
 
         os.system('rm %s.disasm' % (args.source))
         os.system('rm %s' % (processed_evm_file))
@@ -139,7 +146,11 @@ def main():
 
         # TODO: Do this as an import and run, instead of shell call and hacky fix
 
-        os.system('python symExec.py %s.evm.disasm %d %d %d %d %d %d %d %d %d %d %d %d %s' % (cname, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, global_params.USE_GLOBAL_BLOCKCHAIN, global_params.DEPTH_LIMIT, cname+".json" if args.json else ""))
+        os.system('python symExec.py %s.evm.disasm %d %d %d %d %d %d %d %d %d %d %d %d %d %s' % \
+            (cname, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, \
+            global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, \
+            global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, global_params.USE_GLOBAL_BLOCKCHAIN, \
+            global_params.DEPTH_LIMIT, global_params.GAS_LIMIT,  cname+".json" if args.json else ""))
 
         if args.evm:
             with open(cname+'.evm','w') as of:

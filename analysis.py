@@ -65,21 +65,87 @@ def check_reentrancy_bug(path_conditions_and_vars, global_state):
         reported = True
     return ret_val
 
-def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_and_vars):
-    gas_increment = get_ins_cost(opcode)
+def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
+    gas_increment = get_ins_cost(opcode) # base cost
+    gas_memory = analysis["gas_mem"]
+    # In some opcodes, gas cost is not only depend on opcode itself but also current state of evm
+    # For symbolic variables, we only add base cost part for simplicity
     if opcode in ("LOG0", "LOG1", "LOG2", "LOG3", "LOG4"):
         gas_increment += GCOST["Glogdata"] * stack[1]
     elif opcode == "EXP" and isinstance(stack[1], (int, long)) and stack[1] > 0:
         gas_increment += GCOST["Gexpbyte"] * (1 + math.floor(math.log(stack[1], 256)))
+    elif opcode == "EXTCODECOPY" and isinstance(stack[2], (int, long)):
+        gas_increment += GCOST["Gcopy"] * math.ceil(stack[2] / 32)
+    elif opcode in ("CALLDATACOPY", "CODECOPY") and isinstance(stack[3], (int, long)):
+        gas_increment += GCOST["Gcopy"] * math.ceil(stack[3] / 32)
     elif opcode == "SSTORE":
-        # TODO
-        pass
+        if isinstance(stack[1], (int, long)):
+            try:
+                storage_value = global_state['Ia'][str(stack[0])]
+                # when we change storage value from zero to non-zero
+                if storage_value == 0 and stack[1] != 0:
+                    gas_increment += GCOST["Gsset"]
+                else:
+                    gas_increment += GCOST["Gsreset"]
+            except: # when storage address at considered key is empty
+                if stack[1] != 0:
+                    gas_increment += GCOST["Gsset"]
+                elif stack[1] == 0:
+                    gas_increment += GCOST["Gsreset"]
+        else:
+            try:
+                storage_value = global_state['Ia'][str(stack[0])]
+                solver.push()
+                solver.add(Not( And(storage_value == 0, stack[1] != 0) ))
+                if solver.check() == unsat:
+                    gas_increment += GCOST["Gsset"]
+                else:
+                    gas_increment += GCOST["Gsreset"]
+                solver.pop()
+            except:
+                solver.push()
+                solver.add(Not( stack[1] != 0 ))
+                if solver.check() == unsat:
+                    gas_increment += GCOST["Gsset"]
+                else:
+                    gas_increment += GCOST["Gsreset"]
+                solver.pop()
+    elif opcode == "SUICIDE":
+        if isinstance(stack[1], (int, long)):
+            address = stack[1] % 2**160
+            if address not in global_state:
+                gas_increment += GCOST["Gnewaccount"]
+        else:
+            address = str(stack[1])
+            if address not in global_state:
+                gas_increment += GCOST["Gnewaccount"]
+    elif opcode in ("CALL", "CALLCODE", "DELEGATECALL"):
+        # Not fully correct yet
+        gas_increment += GCOST["Gcall"]
+        if isinstance(stack[2], (int, long)):
+            if stack[2] != 0:
+                gas_increment += GCOST["Gcallvalue"]
+        else:
+            solver.push()
+            solver.add(Not (stack[2] != 0))
+            if solver.check() == unsat:
+                gas_increment += GCOST["Gcallvalue"]
+            solver.pop()
+    elif opcode == "SHA3" and isinstance(stack[1], (int, long)):
+        pass # Not handle
 
-    analysis["gas"] = analysis["gas"] + gas_increment
 
-    # I DON'T THINK THIS FORMULA IS CORRECT YET
-    length = len(mem.keys())
-    analysis["gas_mem"] = GCOST["Gmemory"] * length + (length ** 2) // 512
+    #Calculate gas memory, add it to total gas used
+    length = len(mem.keys()) # number of memory words
+    new_gas_memory = GCOST["Gmemory"] * length + (length ** 2) // 512
+    gas_increment += new_gas_memory - gas_memory
+
+    return (gas_increment, new_gas_memory)
+
+def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_and_vars, solver):
+    gas_increment, gas_memory = calculate_gas(opcode, stack, mem, global_state, analysis, solver)
+    analysis["gas"] += gas_increment
+    analysis["gas_mem"] = gas_memory
 
     if opcode == "CALL":
         recipient = stack[1]
