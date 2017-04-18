@@ -18,9 +18,10 @@ and you are done!
 
 ## Dependencies
 
-1. solc v0.4.10 and evm from [go-ethereum](https://github.com/ethereum/go-ethereum) version 1.6.0
-2. [z3](https://github.com/Z3Prover/z3/releases) Theorem Prover
-3. [Requests](https://github.com/kennethreitz/requests/) library
+1. solc v0.4.10
+2. evm from [go-ethereum](https://github.com/ethereum/go-ethereum) version 1.6.0. Simply use `make all` for go-ethereum and add the build/bin folder to your environment PATH.
+3. [z3](https://github.com/Z3Prover/z3/releases) Theorem Prover (tested version 4.4.1).
+4. [Requests](https://github.com/kennethreitz/requests/) library
 
 ## Evaluating Ethereum Contracts
 
