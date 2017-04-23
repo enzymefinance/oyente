@@ -16,12 +16,13 @@ import sys
 import atexit
 import logging
 import pickle
+import json
 
 results = {}
 
 UNSIGNED_BOUND_NUMBER = 2**256 - 1
 
-if len(sys.argv) >= 14:
+if len(sys.argv) >= 15:
     IGNORE_EXCEPTIONS = int(sys.argv[2])
     REPORT_MODE = int(sys.argv[3])
     PRINT_MODE = int(sys.argv[4])
@@ -35,6 +36,7 @@ if len(sys.argv) >= 14:
     USE_GLOBAL_BLOCKCHAIN = int(sys.argv[12])
     DEPTH_LIMIT = int(sys.argv[13])
     GAS_LIMIT = int(sys.argv[14])
+    USE_INPUT_STATE = int(sys.argv[15])
 
 if REPORT_MODE:
     report_file = sys.argv[1] + '.report'
@@ -158,10 +160,10 @@ def main():
 
 def closing_message():
     if UNIT_TEST ==1: print "\t====== Analysis Completed ======"
-    if len(sys.argv) > 15:
-        with open(sys.argv[15], 'w') as of:
+    if len(sys.argv) > 16:
+        with open(sys.argv[16], 'w') as of:
             of.write(json.dumps(results,indent=1))
-        print "Wrote results to %s." % sys.argv[15]
+        print "Wrote results to %s." % sys.argv[16]
 
 atexit.register(closing_message)
 
@@ -445,17 +447,39 @@ def add_falls_to():
 
 
 def get_init_global_state(path_conditions_and_vars):
-    global_state = { "balance" : {} , "pc": 0}
-    for new_var_name in ("Is", "Ia"):
-        if new_var_name not in path_conditions_and_vars:
-            new_var = BitVec(new_var_name, 256)
-            path_conditions_and_vars[new_var_name] = new_var
+    global_state = { "balance" : {} , "pc": 0 }
+    init_is = init_ia = deposited_value = sender_address = receiver_address = None
 
-    deposited_value = BitVec("Iv", 256)
+    if USE_INPUT_STATE:
+        with open('state.json') as f:
+            state = json.loads(f.read())
+            if state["Is"]["balance"]:
+                init_is = int(state["Is"]["balance"], 16)
+            if state["Ia"]["balance"]:
+                init_ia = int(state["Ia"]["balance"], 16)
+            if state["exec"]["value"]:
+                deposited_value = int(state["exec"]["value"], 16)
+            if state["Is"]["address"]:
+                sender_address = int(state["Is"]["address"], 16)
+            if state["Ia"]["address"]:
+                receiver_address = int(state["Ia"]["address"], 16)
+
+    if not sender_address:
+        sender_address = BitVec("Is", 256)
+    path_conditions_and_vars["Is"] = sender_address
+
+    if not receiver_address:
+        receiver_address = BitVec("Ia", 256)
+    path_conditions_and_vars["Ia"] = receiver_address
+
+    if not deposited_value:
+        deposited_value = BitVec("Iv", 256)
     path_conditions_and_vars["Iv"] = deposited_value
 
-    init_is = BitVec("init_Is", 256)
-    init_ia = BitVec("init_Ia", 256)
+    if not init_is:
+        init_is = BitVec("init_Is", 256)
+    if not init_ia:
+        init_ia = BitVec("init_Ia", 256)
 
     constraint = (deposited_value >= BitVecVal(0, 256))
     path_conditions_and_vars["path_condition"].append(constraint)
