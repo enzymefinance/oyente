@@ -463,6 +463,10 @@ def get_init_global_state(path_conditions_and_vars):
                 sender_address = int(state["Is"]["address"], 16)
             if state["Ia"]["address"]:
                 receiver_address = int(state["Ia"]["address"], 16)
+            if state["exec"]["gasPrice"]:
+                gas_price = int(state["exec"]["gasPrice"], 16)
+            if state["exec"]["origin"]:
+                origin = int(state["exec"]["origin"], 16)
 
     if not sender_address:
         sender_address = BitVec("Is", 256)
@@ -493,9 +497,24 @@ def get_init_global_state(path_conditions_and_vars):
     global_state["balance"]["Is"] = (init_is - deposited_value)
     global_state["balance"]["Ia"] = (init_ia + deposited_value)
 
+    if not gas_price:
+        new_var_name = gen.gen_gas_price_var()
+        gas_price = BitVec(new_var_name, 256)
+        path_conditions_and_vars[new_var_name] = gas_price
+
+    if not origin:
+        new_var_name = gen.gen_origin_var()
+        origin = BitVec(new_var_name, 256)
+        path_conditions_and_vars[new_var_name] = origin
+
     # the state of the current current contract
     global_state["Ia"] = {}
     global_state["miu_i"] = 0
+    global_state["value"] = deposited_value
+    global_state["sender_address"] = sender_address
+    global_state["receiver_address"] = receiver_address
+    global_state["gas_price"] = gas_price
+    global_state["origin"] = origin
 
     return global_state
 
@@ -1153,13 +1172,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     #
     elif instr_parts[0] == "ADDRESS":  # get address of currently executing account
         global_state["pc"] = global_state["pc"] + 1
-        new_var_name = gen.gen_address_var()
-        if new_var_name in path_conditions_and_vars:
-            new_var = path_conditions_and_vars[new_var_name]
-        else:
-            new_var = BitVec(new_var_name, 256)
-            path_conditions_and_vars[new_var_name] = new_var
-        stack.insert(0, new_var)
+        stack.insert(0, path_conditions_and_vars["Ia"])
     elif instr_parts[0] == "BALANCE":
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
@@ -1184,31 +1197,13 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     elif instr_parts[0] == "CALLER":  # get caller address
         # that is directly responsible for this execution
         global_state["pc"] = global_state["pc"] + 1
-        new_var_name = gen.gen_caller_var()
-        if new_var_name in path_conditions_and_vars:
-            new_var = path_conditions_and_vars[new_var_name]
-        else:
-            new_var = BitVec(new_var_name, 256)
-            path_conditions_and_vars[new_var_name] = new_var
-        stack.insert(0, new_var)
+        stack.insert(0, global_state["sender_address"])
     elif instr_parts[0] == "ORIGIN":  # get execution origination address
         global_state["pc"] = global_state["pc"] + 1
-        new_var_name = gen.gen_origin_var()
-        if new_var_name in path_conditions_and_vars:
-            new_var = path_conditions_and_vars[new_var_name]
-        else:
-            new_var = BitVec(new_var_name, 256)
-            path_conditions_and_vars[new_var_name] = new_var
-        stack.insert(0, new_var)
+        stack.insert(0, global_state["origin"])
     elif instr_parts[0] == "CALLVALUE":  # get value of this transaction
         global_state["pc"] = global_state["pc"] + 1
-        new_var_name = "Iv"
-        if new_var_name in path_conditions_and_vars:
-            new_var = path_conditions_and_vars[new_var_name]
-        else:
-            new_var = BitVec(new_var_name, 256)
-            path_conditions_and_vars[new_var_name] = new_var
-        stack.insert(0, new_var)
+        stack.insert(0, global_state["value"])
     elif instr_parts[0] == "CALLDATALOAD":  # from input data from environment
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
@@ -1261,13 +1256,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "GASPRICE":
         global_state["pc"] = global_state["pc"] + 1
-        new_var_name = gen.gen_gas_price_var()
-        if new_var_name in path_conditions_and_vars:
-            new_var = path_conditions_and_vars[new_var_name]
-        else:
-            new_var = BitVec(new_var_name, 256)
-            path_conditions_and_vars[new_var_name] = new_var
-        stack.insert(0, new_var)
+        stack.insert(0, global_state["gas_price"])
     elif instr_parts[0] == "EXTCODESIZE":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
