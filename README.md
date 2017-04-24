@@ -6,24 +6,63 @@
 
 A container with the dependencies set up and the blockchain snapshot installed can be found [here](https://hub.docker.com/r/hrishioa/oyente/).
 
+Note - [This](https://github.com/melonproject/oyente/tree/290f1ae1bbb295b8e61cbf0eed93dbde6f287e69) is the version of Oyente that is shipped with the docker container. If you want to run the most recent version, follow the full installation instructions [below](#full-install). 
+
 To open the container, install docker and run:
 
-```docker pull hrishioa/oyente && docker run -i -t hrishioa/oyente```
+```
+docker pull hrishioa/oyente && docker run -i -t hrishioa/oyente
+```
 
 To evaluate the greeter contract inside the container, run:
 
-```cd /home/oyente/oyente && source ../dependencies/venv/bin/activate && python oyente.py -s greeter.sol```
+```
+cd /home/oyente/oyente && source ../dependencies/venv/bin/activate && python oyente.py -s greeter.sol
+```
 
 and you are done!
 
-## Dependencies
+## Full install
 
-1. solc v0.4.10
-2. evm from [go-ethereum](https://github.com/ethereum/go-ethereum) version 1.6.0. Simply use `make all` for go-ethereum and add the build/bin folder to your environment PATH.
-3. [z3](https://github.com/Z3Prover/z3/releases) Theorem Prover (tested version 4.4.1).
-4. [Requests](https://github.com/kennethreitz/requests/) library
+### Install the following dependencies
+#### solc v0.4.10
+```
+$ sudo add-apt-repository ppa:ethereum/ethereum
+$ sudo apt-get update
+$ sudo apt-get install solc
+```
 
-## Evaluating Ethereum Contracts
+#### evm from [go-ethereum](https://github.com/ethereum/go-ethereum) version 1.6.0. 
+
+1. https://geth.ethereum.org/downloads/ or
+2. By from PPA if your using Ubuntu
+```
+$ sudo apt-get install software-properties-common
+$ sudo add-apt-repository -y ppa:ethereum/ethereum
+$ sudo apt-get update
+$ sudo apt-get install ethereum
+```
+
+#### [z3](https://github.com/Z3Prover/z3/releases) Theorem Prover version 4.4.1.
+
+Download the [source code of version z3-4.4.1](https://github.com/Z3Prover/z3/releases/tag/z3-4.4.1)
+
+Install z3 using Python bindings
+
+```
+$ python scripts/mk_make.py --python
+$ cd build
+$ make
+$ sudo make install
+```
+
+#### [Requests](https://github.com/kennethreitz/requests/) library
+
+```
+pip install requests
+```
+
+### Evaluating Ethereum Contracts
 
 ```
 #evaluate a local contract
