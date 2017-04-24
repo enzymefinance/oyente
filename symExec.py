@@ -136,9 +136,8 @@ def main():
         if UNIT_TEST == 2 or UNIT_TEST == 3:
             logging.exception(e)
             exit(EXCEPTION)
-        raise
         print "Exception - "+str(e)
-        print "Time out"
+        raise e
     signal.alarm(0)
 
     if REPORT_MODE:
