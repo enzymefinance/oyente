@@ -5,9 +5,9 @@ import os
 import sys
 import urllib2
 
-contract_dir = 'contract_data' 
+contract_dir = 'contract_data'
 
-cfiles = glob.glob(contract_dir+'/contract*.json')
+cfiles = glob.glob(contract_dir+'/contract1.json')
 
 cjson = {}
 
