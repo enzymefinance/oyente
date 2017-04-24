@@ -448,7 +448,7 @@ def add_falls_to():
 
 def get_init_global_state(path_conditions_and_vars):
     global_state = { "balance" : {} , "pc": 0 }
-    init_is = init_ia = deposited_value = sender_address = receiver_address = gas_price = origin = None
+    init_is = init_ia = deposited_value = sender_address = receiver_address = gas_price = origin = currentCoinbase = currentTimestamp = currentNumber = currentDifficulty = currentGasLimit = None
 
     if USE_INPUT_STATE:
         with open('state.json') as f:
@@ -467,7 +467,18 @@ def get_init_global_state(path_conditions_and_vars):
                 gas_price = int(state["exec"]["gasPrice"], 16)
             if state["exec"]["origin"]:
                 origin = int(state["exec"]["origin"], 16)
+            if state["env"]["currentCoinbase"]:
+                currentCoinbase = int(state["env"]["currentCoinbase"], 16)
+            if state["env"]["currentTimestamp"]:
+                currentTimestamp = int(state["env"]["currentTimestamp"], 16)
+            if state["env"]["currentNumber"]:
+                currentNumber = int(state["env"]["currentNumber"], 16)
+            if state["env"]["currentDifficulty"]:
+                currentDifficulty = int(state["env"]["currentDifficulty"], 16)
+            if state["env"]["currentGasLimit"]:
+                currentGasLimit = int(state["env"]["currentGasLimit"], 16)
 
+    # for some weird reason these 3 vars are stored in path_conditions insteaad of global_state
     if not sender_address:
         sender_address = BitVec("Is", 256)
     path_conditions_and_vars["Is"] = sender_address
@@ -507,6 +518,31 @@ def get_init_global_state(path_conditions_and_vars):
         origin = BitVec(new_var_name, 256)
         path_conditions_and_vars[new_var_name] = origin
 
+    if not currentCoinbase:
+        new_var_name = "IH_c"
+        currentCoinbase = BitVec(new_var_name, 256)
+        path_conditions_and_vars[new_var_name] = currentCoinbase
+
+    if not currentTimestamp:
+        new_var_name = "IH_s"
+        currentTimestamp = BitVec(new_var_name, 256)
+        path_conditions_and_vars[new_var_name] = currentTimestamp
+
+    if not currentNumber:
+        new_var_name = "IH_i"
+        currentNumber = BitVec(new_var_name, 256)
+        path_conditions_and_vars[new_var_name] = currentNumber
+
+    if not currentDifficulty:
+        new_var_name = "IH_d"
+        currentDifficulty = BitVec(new_var_name, 256)
+        path_conditions_and_vars[new_var_name] = currentDifficulty
+
+    if not currentGasLimit:
+        new_var_name = "IH_l"
+        currentGasLimit = BitVec(new_var_name, 256)
+        path_conditions_and_vars[new_var_name] = currentGasLimit
+
     # the state of the current current contract
     global_state["Ia"] = {}
     global_state["miu_i"] = 0
@@ -515,6 +551,11 @@ def get_init_global_state(path_conditions_and_vars):
     global_state["receiver_address"] = receiver_address
     global_state["gas_price"] = gas_price
     global_state["origin"] = origin
+    global_state["currentCoinbase"] = currentCoinbase
+    global_state["currentTimestamp"] = currentTimestamp 
+    global_state["currentNumber"] = currentNumber
+    global_state["currentDifficulty"] = currentDifficulty
+    global_state["currentGasLimit"] = currentGasLimit
 
     return global_state
 
@@ -1287,49 +1328,19 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "COINBASE":  # information from block header
         global_state["pc"] = global_state["pc"] + 1
-        new_var_name = "IH_c"
-        if new_var_name in path_conditions_and_vars:
-            new_var = path_conditions_and_vars[new_var_name]
-        else:
-            new_var = BitVec(new_var_name, 256)
-            path_conditions_and_vars[new_var_name] = new_var
-        stack.insert(0, new_var)
+        stack.insert(0, global_state["currentCoinbase"])
     elif instr_parts[0] == "TIMESTAMP":  # information from block header
         global_state["pc"] = global_state["pc"] + 1
-        new_var_name = "IH_s"
-        if new_var_name in path_conditions_and_vars:
-            new_var = path_conditions_and_vars[new_var_name]
-        else:
-            new_var = BitVec(new_var_name, 256)
-            path_conditions_and_vars[new_var_name] = new_var
-        stack.insert(0, new_var)
+        stack.insert(0, global_state["currentTimestamp"])
     elif instr_parts[0] == "NUMBER":  # information from block header
         global_state["pc"] = global_state["pc"] + 1
-        new_var_name = "IH_i"
-        if new_var_name in path_conditions_and_vars:
-            new_var = path_conditions_and_vars[new_var_name]
-        else:
-            new_var = BitVec(new_var_name, 256)
-            path_conditions_and_vars[new_var_name] = new_var
-        stack.insert(0, new_var)
+        stack.insert(0, global_state["currentNumber"])
     elif instr_parts[0] == "DIFFICULTY":  # information from block header
         global_state["pc"] = global_state["pc"] + 1
-        new_var_name = "IH_d"
-        if new_var_name in path_conditions_and_vars:
-            new_var = path_conditions_and_vars[new_var_name]
-        else:
-            new_var = BitVec(new_var_name, 256)
-            path_conditions_and_vars[new_var_name] = new_var
-        stack.insert(0, new_var)
+        stack.insert(0, global_state["currentDifficulty"])
     elif instr_parts[0] == "GASLIMIT":  # information from block header
         global_state["pc"] = global_state["pc"] + 1
-        new_var_name = "IH_l"
-        if new_var_name in path_conditions_and_vars:
-            new_var = path_conditions_and_vars[new_var_name]
-        else:
-            new_var = BitVec(new_var_name, 256)
-            path_conditions_and_vars[new_var_name] = new_var
-        stack.insert(0, new_var)
+        stack.insert(0, global_state["currentGasLimit"])
     #
     #  50s: Stack, Memory, Storage, and Flow Information
     #
