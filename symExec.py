@@ -448,7 +448,7 @@ def add_falls_to():
 
 def get_init_global_state(path_conditions_and_vars):
     global_state = { "balance" : {} , "pc": 0 }
-    init_is = init_ia = deposited_value = sender_address = receiver_address = None
+    init_is = init_ia = deposited_value = sender_address = receiver_address = gas_price = origin = None
 
     if USE_INPUT_STATE:
         with open('state.json') as f:
