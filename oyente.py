@@ -5,6 +5,7 @@ import re
 import sys
 import global_params
 import argparse
+import requests
 
 def cmd_exists(cmd):
     return subprocess.call("type " + cmd, shell=True,
@@ -36,8 +37,12 @@ def main():
     # TODO: Implement -o switch.
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("source", type=str, help="Solidity file name by default, bytecode if -e is enabled. Use stdin to read from stdin.")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("-s", "--source", type=str, help="local source file name. Solidity by default. Use -b to process evm instead. Use stdin to read from stdin.")
+    group.add_argument("-ru", "--remoteURL", type=str, help="Get contract from remote URL. Solidity by default. Use -b to process evm instead.", dest="remote_URL")
+
     parser.add_argument("-b", "--bytecode", help="read bytecode in source instead of solidity file.", action="store_true")
+
     parser.add_argument("-j", "--json", help="Redirect results to a json file.", action="store_true")
     parser.add_argument("-e", "--evm", help="Do not remove the .evm file.", action="store_true")
     parser.add_argument("-p", "--paths", help="Print path condition information.", action="store_true")
@@ -71,6 +76,14 @@ def main():
 
     if not has_dependencies_installed():
         return
+
+    if args.remote_URL:
+        r = requests.get(args.remote_URL)
+        code = r.text
+        filename = "remote_contract.evm" if args.bytecode else "remote_contract.sol"
+        args.source = filename
+        with open(filename, 'w') as f:
+            f.write(code)
 
     if args.bytecode:
         disasm_out = ""

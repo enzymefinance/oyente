@@ -12,7 +12,7 @@ To open the container, install docker and run:
 
 To evaluate the greeter contract inside the container, run:
 
-```cd /home/oyente/oyente && source ../dependencies/venv/bin/activate && python oyente.py greeter.sol```
+```cd /home/oyente/oyente && source ../dependencies/venv/bin/activate && python oyente.py -s greeter.sol```
 
 and you are done!
 
@@ -25,7 +25,14 @@ and you are done!
 
 ## Evaluating Ethereum Contracts
 
-```python oyente.py <contract filename>```
+```
+#evaluate a local contract
+python oyente.py -s <contract filename>
+
+#evaluate a remote contract
+python oyente.py -ru https://gist.githubusercontent.com/loiluu/d0eb34d473e421df12b38c12a7423a61/raw/2415b3fb782f5d286777e0bcebc57812ce3786da/puzzle.sol
+
+```
 
 And that's it! Run ```python oyente.py --help``` for a list of options.
 
