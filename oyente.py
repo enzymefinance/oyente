@@ -49,7 +49,7 @@ def main():
     parser.add_argument("-gb", "--globalblockchain", help="Integrate with the global ethereum blockchain", action="store_true")
     parser.add_argument("-dl", "--depthlimit", help="Limit DFS depth", action="store", dest="depth_limit", type=int)
     parser.add_argument("-gl", "--gaslimit", help="Limit Gas", action="store", dest="gas_limit", type=int)
-    parser.add_argument("-s", "--state", help="Get input state from state.json", action="store_true")
+    parser.add_argument("-st", "--state", help="Get input state from state.json", action="store_true")
 
     args = parser.parse_args()
 
