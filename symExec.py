@@ -156,6 +156,7 @@ def main():
     if not isTesting(): print "\t  Reentrancy bug exists: %s" % str(reentrancy_bug_found)
     results['reentrancy'] = reentrancy_bug_found
 
+    
 # this function, first looking for jumpdest address of the function_signature,
 # then print all program paths which contain the jumpdest address
 def print_path_containt_signature(function_signature):
@@ -1517,6 +1518,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         stack.insert(0, new_var)
     elif instr_parts[0] == "JUMPDEST":
         # Literally do nothing
+        if global_state["pc"] not in analysis["jumpdest"]:
+            analysis["jumpdest"].append(global_state["pc"])
         global_state["pc"] = global_state["pc"] + 1
         pass
     #
