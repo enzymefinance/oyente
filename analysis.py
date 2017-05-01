@@ -24,7 +24,8 @@ def init_analysis():
         "money_flow": [("Is", "Ia", "Iv")],  # (source, destination, amount)
         "sload": [],
         "sstore": {},
-        "reentrancy_bug":[]
+        "reentrancy_bug":[],
+        "jumpdest":[]
     }
     return analysis
 
