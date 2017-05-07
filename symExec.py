@@ -62,6 +62,7 @@ data_flow_all_paths = [[], []] # store all storage addresses
 path_conditions = [] # store the path condition corresponding to each path in money_flow_all_paths
 all_gs = [] # store global variables, e.g. storage, balance of all paths
 total_no_of_paths = 0
+jumpdest_all_paths = {"jumpdests":[], "path_conditions":[]} #store jumpdest of all program path and its conditions
 
 c_name = sys.argv[1]
 if(len(c_name) > 5):
@@ -161,6 +162,36 @@ def main():
     if not isTesting(): print "\t  Reentrancy bug exists: %s" % str(reentrancy_bug_found)
     results['reentrancy'] = reentrancy_bug_found
 
+    
+# this function, first looking for jumpdest address of the function_signature,
+# then print all program paths which contain the jumpdest address
+def print_path_containt_signature(function_signature):
+    with open(sys.argv[1], 'r') as disasm_file:
+        disasm_file.readline()  # Remove first line
+        tokens = tokenize.generate_tokens(disasm_file.readline)
+        # take the jumpdest of function_signature
+        token = next(tokens, None)
+        while not token is None and token[1] != function_signature:
+            token = next(tokens, None)
+        if token is None:
+            return
+        while not token is None and not token[1].startswith("PUSH", 0):
+            token = next(tokens, None)
+        token = next(tokens, None)
+        while not token is None and token[1] in "=>":
+            token = next(tokens, None)
+        pushed_value = ""
+        while not token is None and token[0] != NEWLINE:
+            pushed_value += token[1]
+            token = next(tokens, None)
+        function_jumpdest = int(pushed_value, 16)    
+        print "function_jumpdest: ", function_jumpdest 
+
+        for i in range(total_no_of_paths):
+            if function_jumpdest in jumpdest_all_paths["jumpdests"][i]:
+                print "Found function at path: ", i
+                print jumpdest_all_paths["path_conditions"][i]
+    
 def closing_message():
     if UNIT_TEST ==1: print "\t====== Analysis Completed ======"
     if len(sys.argv) > 17:
@@ -620,6 +651,8 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
         global total_no_of_paths
         total_no_of_paths += 1
         reentrancy_all_paths.append(analysis["reentrancy_bug"])
+        jumpdest_all_paths["jumpdests"].append(analysis["jumpdest"])
+        jumpdest_all_paths["path_conditions"].append(path_conditions_and_vars["path_condition"])
         if analysis["money_flow"] not in money_flow_all_paths:
             money_flow_all_paths.append(analysis["money_flow"])
             path_conditions.append(path_conditions_and_vars["path_condition"])
@@ -1562,6 +1595,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         stack.insert(0, new_var)
     elif instr_parts[0] == "JUMPDEST":
         # Literally do nothing
+        if global_state["pc"] not in analysis["jumpdest"]:
+            analysis["jumpdest"].append(global_state["pc"])
         global_state["pc"] = global_state["pc"] + 1
         pass
     #
