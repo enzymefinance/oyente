@@ -44,6 +44,7 @@ def main():
     parser.add_argument("-r", "--report", help="Create .report file.", action="store_true")
     parser.add_argument("-gb", "--globalblockchain", help="Integrate with the global ethereum blockchain", action="store_true")
     parser.add_argument("-dl", "--depthlimit", help="Limit DFS depth", action="store", dest="depth_limit", type=int)
+    parser.add_argument("--erc20", help="ERC20 Contract", action="store_true")
 
     args = parser.parse_args()
 
@@ -56,6 +57,7 @@ def main():
     global_params.DEBUG_MODE = 1 if args.debug else 0
     global_params.IGNORE_EXCEPTIONS = 1 if args.error else 0
     global_params.USE_GLOBAL_BLOCKCHAIN = 1 if args.globalblockchain else 0
+    global_params.ERC20 = 1 if args.erc20 else 0
 
     if args.depth_limit:
         global_params.DEPTH_LIMIT = args.depth_limit
@@ -78,8 +80,8 @@ def main():
 
 
         # TODO: Do this as an import and run, instead of shell call and hacky fix
-
-        cmd = os.system('python symExec.py %s.disasm %d %d %d %d %d %d %d %d %d %d %d %d %s' % (args.source, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, global_params.USE_GLOBAL_BLOCKCHAIN, global_params.DEPTH_LIMIT, args.source+".json" if args.json else ""))
+        
+        cmd = os.system('python symExec.py %s.disasm %d %d %d %d %d %d %d %d %d %d %d %d %d %s' % (args.source, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, global_params.USE_GLOBAL_BLOCKCHAIN, global_params.DEPTH_LIMIT, global_params.ERC20, args.source+".json" if args.json else ""))
 
         os.system('rm %s.disasm' % (args.source))
 
@@ -127,7 +129,7 @@ def main():
 
         # TODO: Do this as an import and run, instead of shell call and hacky fix
 
-        os.system('python symExec.py %s.evm.disasm %d %d %d %d %d %d %d %d %d %d %d %d %s' % (cname, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, global_params.USE_GLOBAL_BLOCKCHAIN, global_params.DEPTH_LIMIT, cname+".json" if args.json else ""))
+        os.system('python symExec.py %s.evm.disasm %d %d %d %d %d %d %d %d %d %d %d %d %d %s' % (cname, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, global_params.USE_GLOBAL_BLOCKCHAIN, global_params.DEPTH_LIMIT, global_params.ERC20, cname+".json" if args.json else ""))
 
         if args.evm:
             with open(cname+'.evm','w') as of:

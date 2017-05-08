@@ -21,7 +21,7 @@ results = {}
 
 UNSIGNED_BOUND_NUMBER = 2**256 - 1
 
-if len(sys.argv) >= 14:
+if len(sys.argv) >= 15:
     IGNORE_EXCEPTIONS = int(sys.argv[2])
     REPORT_MODE = int(sys.argv[3])
     PRINT_MODE = int(sys.argv[4])
@@ -34,6 +34,7 @@ if len(sys.argv) >= 14:
     PRINT_PATHS = int(sys.argv[11])
     USE_GLOBAL_BLOCKCHAIN = int(sys.argv[12])
     DEPTH_LIMIT = int(sys.argv[13])
+    ERC20 = int(sys.argv[14])
 
 if REPORT_MODE:
     report_file = sys.argv[1] + '.report'
@@ -70,7 +71,7 @@ CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 
 if UNIT_TEST == 1:
     try:
-        result_file = open(sys.argv[14], 'r')
+        result_file = open(sys.argv[15], 'r')
     except:
         if PRINT_MODE: print "Could not open result file for unit test"
         exit()
@@ -150,12 +151,15 @@ def main():
     if DATA_FLOW:
         detect_data_concurrency()
         detect_data_money_concurrency()
+    if ERC20:
+        print_path_containt_signature("a9059cbb") # transfer
+        print_path_containt_signature("a9059cbb") # transferFrom
     if PRINT_MODE:
         print "Results for Reentrancy Bug: " + str(reentrancy_all_paths)
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
     if not isTesting(): print "\t  Reentrancy bug exists: %s" % str(reentrancy_bug_found)
     results['reentrancy'] = reentrancy_bug_found
-
+    
     
 # this function, first looking for jumpdest address of the function_signature,
 # then print all program paths which contain the jumpdest address
@@ -188,10 +192,10 @@ def print_path_containt_signature(function_signature):
     
 def closing_message():
     if UNIT_TEST ==1: print "\t====== Analysis Completed ======"
-    if len(sys.argv) > 14:
-        with open(sys.argv[14], 'w') as of:
+    if len(sys.argv) > 15:
+        with open(sys.argv[15], 'w') as of:
             of.write(json.dumps(results,indent=1))
-        print "Wrote results to %s." % sys.argv[14]
+        print "Wrote results to %s." % sys.argv[15]
 
 atexit.register(closing_message)
 
