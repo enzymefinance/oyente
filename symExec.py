@@ -451,7 +451,7 @@ def add_falls_to():
 
 def get_init_global_state(path_conditions_and_vars):
     global_state = { "balance" : {} , "pc": 0 }
-    init_is = init_ia = deposited_value = sender_address = receiver_address = gas_price = origin = currentCoinbase = currentTimestamp = currentNumber = currentDifficulty = currentGasLimit = None
+    init_is = init_ia = deposited_value = sender_address = receiver_address = gas_price = origin = currentCoinbase = currentTimestamp = currentNumber = currentDifficulty = currentGasLimit = callData = None
 
     if USE_INPUT_STATE:
         with open('state.json') as f:
@@ -480,6 +480,10 @@ def get_init_global_state(path_conditions_and_vars):
                 currentDifficulty = int(state["env"]["currentDifficulty"], 16)
             if state["env"]["currentGasLimit"]:
                 currentGasLimit = int(state["env"]["currentGasLimit"], 16)
+            if state["exec"]["data"]:
+                callData = state["exec"]["data"]
+                if callData[:2] == "0x":
+                    callData = callData[2:]
 
     # for some weird reason these 3 vars are stored in path_conditions insteaad of global_state
     if not sender_address:
@@ -546,6 +550,11 @@ def get_init_global_state(path_conditions_and_vars):
         currentGasLimit = BitVec(new_var_name, 256)
         path_conditions_and_vars[new_var_name] = currentGasLimit
 
+    if not callData:
+        new_var_name = gen.gen_data_size()
+        callData = BitVec(new_var_name, 256)
+        path_conditions_and_vars[new_var_name] = callData  
+
     # the state of the current current contract
     global_state["Ia"] = {}
     global_state["miu_i"] = 0
@@ -559,6 +568,7 @@ def get_init_global_state(path_conditions_and_vars):
     global_state["currentNumber"] = currentNumber
     global_state["currentDifficulty"] = currentDifficulty
     global_state["currentGasLimit"] = currentGasLimit
+    global_state["callData"] = callData
 
     return global_state
 
@@ -1266,24 +1276,27 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             position = stack.pop(0)
-            new_var_name = gen.gen_data_var(position)
-            if new_var_name in path_conditions_and_vars:
-                new_var = path_conditions_and_vars[new_var_name]
+            if USE_INPUT_STATE and global_state["callData"]:
+                callData = global_state["callData"]
+                start = position * 2
+                end = start + 64
+                while (end > len(callData)):
+                    # append with zeros if insufficient length
+                    callData = callData + "0"
+                stack.insert(0, int(callData[start:end], 16))
             else:
-                new_var = BitVec(new_var_name, 256)
-                path_conditions_and_vars[new_var_name] = new_var
-            stack.insert(0, new_var)
+                new_var_name = gen.gen_data_var(position)
+                if new_var_name in path_conditions_and_vars:
+                    new_var = path_conditions_and_vars[new_var_name]
+                else:
+                    new_var = BitVec(new_var_name, 256)
+                    path_conditions_and_vars[new_var_name] = new_var
+                stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "CALLDATASIZE":  # from input data from environment
         global_state["pc"] = global_state["pc"] + 1
-        new_var_name = gen.gen_data_size()
-        if new_var_name in path_conditions_and_vars:
-            new_var = path_conditions_and_vars[new_var_name]
-        else:
-            new_var = BitVec(new_var_name, 256)
-            path_conditions_and_vars[new_var_name] = new_var
-        stack.insert(0, new_var)
+        stack.insert(0, len(global_state["callData"])/2)
     elif instr_parts[0] == "CALLDATACOPY":  # Copy input data to memory
         #  TODO: Don't know how to simulate this yet
         if len(stack) > 2:
