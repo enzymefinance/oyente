@@ -17,6 +17,7 @@ import atexit
 import logging
 import pickle
 import json
+import traceback
 from collections import namedtuple
 
 results = {}
@@ -141,6 +142,7 @@ def main():
             logging.exception(e)
             exit(EXCEPTION)
         print "Exception - "+str(e)
+        traceback.print_exc()
         raise e
     signal.alarm(0)
 
