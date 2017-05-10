@@ -7,7 +7,7 @@
     "currentTimestamp": "0x01"
   },
   "exec": {
-    "data": "0x",
+    "data": "0xff",
     "gas": "0x0186a0",
     "gasPrice": "0x5af3107a4000",
     "origin": "cd1722f3947def4cf144679da39c4c32bdc35681",
@@ -17,13 +17,11 @@
   "Is": {
   	"address": "0f572e5295c57f15886f9b263e2f6d2d6c7b5ec6",
     "balance": "0xd3c21bcecceda1000000",
-    "code": "0x6002600216600055",
     "storage": {}
   },
   "Ia": {
   	"address": "0f572e5295c57f15886f9b263e2f6d2d6c7b5ec6",
     "balance": "0xd3c21bcecceda1000000",
-    "code": "0x6002600216600055",
     "storage": {}
   }
 }
