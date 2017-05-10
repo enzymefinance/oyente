@@ -69,6 +69,7 @@ def main():
     parser.add_argument("-dl", "--depthlimit", help="Limit DFS depth", action="store", dest="depth_limit", type=int)
     parser.add_argument("-gl", "--gaslimit", help="Limit Gas", action="store", dest="gas_limit", type=int)
     parser.add_argument("-st", "--state", help="Get input state from state.json", action="store_true")
+    parser.add_argument("-ll", "--looplimit", help="Limit a number of loop", action="store", dest="loop_limit", type=int)
 
     args = parser.parse_args()
 
@@ -87,6 +88,8 @@ def main():
         global_params.DEPTH_LIMIT = args.depth_limit
     if args.gas_limit:
         global_params.GAS_LIMIT = args.gas_limit
+    if args.loop_limit:
+        global_params.LOOP_LIMIT = args.loop_limit
 
     if not has_dependencies_installed():
         return
@@ -123,11 +126,12 @@ def main():
 
         # TODO: Do this as an import and run, instead of shell call and hacky fix
 
-        cmd = os.system('python symExec.py %s.disasm %d %d %d %d %d %d %d %d %d %d %d %d %d %d %s' % \
+        cmd = os.system('python symExec.py %s.disasm %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %s' % \
             (args.source, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, \
             global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, \
             global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, global_params.USE_GLOBAL_BLOCKCHAIN, \
-            global_params.DEPTH_LIMIT, global_params.GAS_LIMIT, global_params.INPUT_STATE, args.source+".json" if args.json else ""))
+            global_params.DEPTH_LIMIT, global_params.GAS_LIMIT, global_params.INPUT_STATE, global_params.LOOP_LIMIT, \
+            args.source+".json" if args.json else ""))
 
         os.system('rm %s.disasm' % (args.source))
         os.system('rm %s' % (processed_evm_file))
@@ -175,11 +179,12 @@ def main():
 
         # TODO: Do this as an import and run, instead of shell call and hacky fix
 
-        os.system('python symExec.py %s.evm.disasm %d %d %d %d %d %d %d %d %d %d %d %d %d %d %s' % \
+        os.system('python symExec.py %s.evm.disasm %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %s' % \
             (cname, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, \
             global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, \
             global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, global_params.USE_GLOBAL_BLOCKCHAIN, \
-            global_params.DEPTH_LIMIT, global_params.GAS_LIMIT, global_params.INPUT_STATE, cname+".json" if args.json else ""))
+            global_params.DEPTH_LIMIT, global_params.GAS_LIMIT, global_params.INPUT_STATE, global_params.LOOP_LIMIT, \
+            cname+".json" if args.json else ""))
 
         if args.evm:
             with open(cname+'.evm','w') as of:

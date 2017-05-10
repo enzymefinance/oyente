@@ -17,12 +17,13 @@ import atexit
 import logging
 import pickle
 import json
+from collections import namedtuple
 
 results = {}
 
 UNSIGNED_BOUND_NUMBER = 2**256 - 1
 
-if len(sys.argv) >= 15:
+if len(sys.argv) >= 16:
     IGNORE_EXCEPTIONS = int(sys.argv[2])
     REPORT_MODE = int(sys.argv[3])
     PRINT_MODE = int(sys.argv[4])
@@ -37,6 +38,7 @@ if len(sys.argv) >= 15:
     DEPTH_LIMIT = int(sys.argv[13])
     GAS_LIMIT = int(sys.argv[14])
     USE_INPUT_STATE = int(sys.argv[15])
+    LOOP_LIMIT = int(sys.argv[16])
 
 if REPORT_MODE:
     report_file = sys.argv[1] + '.report'
@@ -51,7 +53,9 @@ end_ins_dict = {}  # capturing the last statement of each basic block
 instructions = {}  # capturing all the instructions, keys are corresponding addresses
 jump_type = {}  # capturing the "jump type" of each basic block
 vertices = {}
+Edge = namedtuple("Edge", ["v1", "v2"]) # Factory Function for tuples is used as dictionary key
 edges = {}
+visited_edges = {}
 money_flow_all_paths = []
 reentrancy_all_paths =[]
 data_flow_all_paths = [[], []] # store all storage addresses
@@ -72,7 +76,7 @@ CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 
 if UNIT_TEST == 1:
     try:
-        result_file = open(sys.argv[15], 'r')
+        result_file = open(sys.argv[16], 'r')
     except:
         if PRINT_MODE: print "Could not open result file for unit test"
         exit()
@@ -159,10 +163,10 @@ def main():
 
 def closing_message():
     if UNIT_TEST ==1: print "\t====== Analysis Completed ======"
-    if len(sys.argv) > 16:
-        with open(sys.argv[16], 'w') as of:
+    if len(sys.argv) > 17:
+        with open(sys.argv[17], 'w') as of:
             of.write(json.dumps(results,indent=1))
-        print "Wrote results to %s." % sys.argv[16]
+        print "Wrote results to %s." % sys.argv[17]
 
 atexit.register(closing_message)
 
@@ -560,7 +564,7 @@ def get_init_global_state(path_conditions_and_vars):
     global_state["gas_price"] = gas_price
     global_state["origin"] = origin
     global_state["currentCoinbase"] = currentCoinbase
-    global_state["currentTimestamp"] = currentTimestamp 
+    global_state["currentTimestamp"] = currentTimestamp
     global_state["currentNumber"] = currentNumber
     global_state["currentDifficulty"] = currentDifficulty
     global_state["currentGasLimit"] = currentGasLimit
@@ -577,39 +581,50 @@ def full_sym_exec():
     mem = {}
     global_state = get_init_global_state(path_conditions_and_vars)  # this is init global state for this particular execution
     analysis = init_analysis()
-    return sym_exec_block(0, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis)
+    return sym_exec_block(0, 0, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis)
 
 
 # Symbolically executing a block from the start address
-def sym_exec_block(start, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis):
-    if start < 0:
+def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis):
+    if block < 0:
         if PRINT_MODE: print "ERROR: UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH"
         return ["ERROR"]
 
-    if PRINT_MODE: print "\nDEBUG: Reach block address %d \n" % start
+    if PRINT_MODE: print "\nDEBUG: Reach block address %d \n" % block
     if PRINT_MODE: print "STACK: " + str(stack)
 
+    current_edge = Edge(pre_block, block)
+    if visited_edges.has_key(current_edge):
+        updated_count_number = visited_edges[current_edge] + 1
+        visited_edges.update({current_edge: updated_count_number})
+    else:
+        visited_edges.update({current_edge: 1})
+
+    if visited_edges[current_edge] > LOOP_LIMIT:
+        if PRINT_MODE: print "Overcome a number of loop limit. Terminating this path ..."
+        return stack
+
     current_gas_used = analysis["gas"]
-    if  current_gas_used > GAS_LIMIT:
+    if  current_gas_used > GAS_LIMIT :
         if PRINT_MODE: print "Run out of gas. Terminating this path ... "
         return stack
 
     # Execute every instruction, one at a time
     try:
-        block_ins = vertices[start].get_instructions()
+        block_ins = vertices[block].get_instructions()
     except KeyError:
         if PRINT_MODE: print "This path results in an exception, possibly an invalid jump address"
         return ["ERROR"]
 
     for instr in block_ins:
-        sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_vars, analysis)
+        sym_exec_ins(block, instr, stack, mem, global_state, path_conditions_and_vars, analysis)
 
     # Mark that this basic block in the visited blocks
-    visited.append(start)
+    visited.append(block)
     depth += 1
 
     # Go to next Basic Block(s)
-    if jump_type[start] == "terminal" or depth > DEPTH_LIMIT:
+    if jump_type[block] == "terminal" or depth > DEPTH_LIMIT:
         if PRINT_MODE: print "TERMINATING A PATH ..."
         display_analysis(analysis)
         global total_no_of_paths
@@ -627,8 +642,8 @@ def sym_exec_block(start, visited, depth, stack, mem, global_state, path_conditi
         if UNIT_TEST == 1: compare_stack_unit_test(stack)
         if UNIT_TEST == 2 or UNIT_TEST == 3: compare_storage_and_memory_unit_test(global_state, mem, analysis)
 
-    elif jump_type[start] == "unconditional":  # executing "JUMP"
-        successor = vertices[start].get_jump_target()
+    elif jump_type[block] == "unconditional":  # executing "JUMP"
+        successor = vertices[block].get_jump_target()
         stack1 = list(stack)
         mem1 = dict(mem)
         global_state1 = my_copy_dict(global_state)
@@ -636,9 +651,9 @@ def sym_exec_block(start, visited, depth, stack, mem, global_state, path_conditi
         visited1 = list(visited)
         path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
         analysis1 = my_copy_dict(analysis)
-        sym_exec_block(successor, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
-    elif jump_type[start] == "falls_to":  # just follow to the next basic block
-        successor = vertices[start].get_falls_to()
+        sym_exec_block(successor, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+    elif jump_type[block] == "falls_to":  # just follow to the next basic block
+        successor = vertices[block].get_falls_to()
         stack1 = list(stack)
         mem1 = dict(mem)
         global_state1 = my_copy_dict(global_state)
@@ -646,12 +661,12 @@ def sym_exec_block(start, visited, depth, stack, mem, global_state, path_conditi
         visited1 = list(visited)
         path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
         analysis1 = my_copy_dict(analysis)
-        sym_exec_block(successor, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
-    elif jump_type[start] == "conditional":  # executing "JUMPI"
+        sym_exec_block(successor, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+    elif jump_type[block] == "conditional":  # executing "JUMPI"
 
         # A choice point, we proceed with depth first search
 
-        branch_expression = vertices[start].get_branch_expression()
+        branch_expression = vertices[block].get_branch_expression()
 
         if PRINT_MODE: print "Branch expression: " + str(branch_expression)
 
@@ -662,7 +677,7 @@ def sym_exec_block(start, visited, depth, stack, mem, global_state, path_conditi
             if solver.check() == unsat:
                 if PRINT_MODE: print "INFEASIBLE PATH DETECTED"
             else:
-                left_branch = vertices[start].get_jump_target()
+                left_branch = vertices[block].get_jump_target()
                 stack1 = list(stack)
                 mem1 = dict(mem)
                 global_state1 = my_copy_dict(global_state)
@@ -671,7 +686,7 @@ def sym_exec_block(start, visited, depth, stack, mem, global_state, path_conditi
                 path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
                 path_conditions_and_vars1["path_condition"].append(branch_expression)
                 analysis1 = my_copy_dict(analysis)
-                sym_exec_block(left_branch, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+                sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
         except Exception as e:
             log_file.write(str(e))
             print "Exception - "+str(e)
@@ -694,7 +709,7 @@ def sym_exec_block(start, visited, depth, stack, mem, global_state, path_conditi
                 # the else branch
                 if PRINT_MODE: print "INFEASIBLE PATH DETECTED"
             else:
-                right_branch = vertices[start].get_falls_to()
+                right_branch = vertices[block].get_falls_to()
                 stack1 = list(stack)
                 mem1 = dict(mem)
                 global_state1 = my_copy_dict(global_state)
@@ -703,14 +718,17 @@ def sym_exec_block(start, visited, depth, stack, mem, global_state, path_conditi
                 path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
                 path_conditions_and_vars1["path_condition"].append(negated_branch_expression)
                 analysis1 = my_copy_dict(analysis)
-                sym_exec_block(right_branch, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+                sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
         except Exception as e:
             log_file.write(str(e))
             if str(e) == "timeout":
                 raise e
         solver.pop()  # POP SOLVER CONTEXT
-
+        updated_count_number = visited_edges[current_edge] - 1
+        visited_edges.update({current_edge: updated_count_number})
     else:
+        updated_count_number = visited_edges[current_edge] - 1
+        visited_edges.update({current_edge: updated_count_number})
         raise Exception('Unknown Jump-Type')
 
 
