@@ -486,6 +486,11 @@ def get_init_global_state(path_conditions_and_vars):
                 callData = state["exec"]["data"]
                 if callData[:2] == "0x":
                     callData = callData[2:]
+            if state["Ia"]["storage"]:
+                storage_dict = state["Ia"]["storage"]
+                global_state["Ia"] = {}
+                for key in storage_dict:
+                    global_state["Ia"][int(key, 16)] = int(storage_dict[key], 16)
 
     # for some weird reason these 3 vars are stored in path_conditions insteaad of global_state
     if not sender_address:
@@ -553,7 +558,8 @@ def get_init_global_state(path_conditions_and_vars):
         path_conditions_and_vars[new_var_name] = currentGasLimit
 
     # the state of the current current contract
-    global_state["Ia"] = {}
+    if "Ia" not in global_state:
+        global_state["Ia"] = {}
     global_state["miu_i"] = 0
     global_state["value"] = deposited_value
     global_state["sender_address"] = sender_address

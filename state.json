@@ -16,12 +16,13 @@
   "gas": "0x013874",
   "Is": {
   	"address": "0f572e5295c57f15886f9b263e2f6d2d6c7b5ec6",
-    "balance": "0xd3c21bcecceda1000000",
-    "storage": {}
+    "balance": "0xd3c21bcecceda1000000"
   },
   "Ia": {
   	"address": "0f572e5295c57f15886f9b263e2f6d2d6c7b5ec6",
     "balance": "0xd3c21bcecceda1000000",
-    "storage": {}
+    "storage": {
+      "0x00": "0x2222"
+    }
   }
 }
