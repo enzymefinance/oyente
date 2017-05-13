@@ -1,0 +1,4 @@
+<%= form_tag({controller: :home, action: :upload}, multipart: true) do %>
+  <%= file_field_tag 'coding_file', required: true %>
+  <%= submit_tag 'Submit' %>
+<% end %>
