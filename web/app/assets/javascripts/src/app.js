@@ -18,6 +18,7 @@ var Config = require('./app/config')
 var Editor = require('./app/editor')
 var Renderer = require('./app/renderer')
 var Compiler = require('./app/compiler')
+var OyenteAnalyzer = require('./app/oyente-analyzer')
 var ExecutionContext = require('./app/execution-context')
 var UniversalDApp = require('./universal-dapp.js')
 var Debugger = require('./app/debugger')
@@ -33,10 +34,14 @@ var contractTab = require('./app/contract-tab.js')
 var settingsTab = require('./app/settings-tab.js')
 var analysisTab = require('./app/analysis-tab.js')
 var debuggerTab = require('./app/debugger-tab.js')
+var oyenteTab = require('./app/oyente-tab.js')
 var filesTab = require('./app/files-tab.js')
 /* ----------------------------------------------
         TABS - Righthand pannel
 ---------------------------------------------- */
+var oyenteView = oyenteTab()
+document.querySelector('#optionViews').appendChild(oyenteView)
+
 var contractView = contractTab()
 document.querySelector('#optionViews').appendChild(contractView)
 
@@ -950,6 +955,24 @@ var run = function () {
       compiler.loadVersion(false, url)
     }
   }
+
+  // ----------------- Oyente analyzer --------
+  var analyzer = new OyenteAnalyzer()
+
+  function runAnalyzer () {
+    if (transactionDebugger.isActive) return
+    editorSyncFile()
+    var currentFile = config.get('currentFile')
+    if (currentFile) {
+      var target = currentFile
+      var source = files.get(target)
+      analyzer.analyze(source)
+    }
+  }
+
+  $('#analyzer').click(function () {
+    runAnalyzer()
+  })
 
   // set default
   $('#optimize').attr('checked', (queryParams.get().optimize === 'true'))

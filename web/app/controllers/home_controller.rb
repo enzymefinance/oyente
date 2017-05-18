@@ -5,10 +5,10 @@ class HomeController < ApplicationController
   end
 
   def upload
-    filepath = Rails.root.join('public', 'uploads', upload_io.original_filename)
+    filepath = Rails.root.join('public', 'uploads', 'tmp.sol')
 
     File.open(filepath, 'wb') do |file|
-      file.write(upload_io.read)
+      file.write(upload_io)
     end
 
     @output = `python #{ENV['OYENTE']}/oyente.py -s #{filepath}`
@@ -21,11 +21,6 @@ class HomeController < ApplicationController
   end
 
   def check_file
-    if upload_io.nil?
-      redirect_to root_url
-    else
-      extname = File.extname(upload_io.original_filename)
-      redirect_to root_url unless extname == ".sol"
-    end
+    redirect_to root_url if upload_io.nil? || upload_io.class.name != "String"
   end
 end
