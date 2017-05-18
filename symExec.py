@@ -1303,11 +1303,11 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             stack.insert(0, len(global_state["callData"])/2)
         else:
             new_var_name = gen.gen_data_size()
-            if new_var_name in path_conditions_and_vars:        
-                new_var = path_conditions_and_vars[new_var_name]        
-            else:      
-                new_var = BitVec(new_var_name, 256)     
-                path_conditions_and_vars[new_var_name] = new_var        
+            if new_var_name in path_conditions_and_vars:
+                new_var = path_conditions_and_vars[new_var_name]
+            else:
+                new_var = BitVec(new_var_name, 256)
+                path_conditions_and_vars[new_var_name] = new_var
             stack.insert(0, new_var)
     elif instr_parts[0] == "CALLDATACOPY":  # Copy input data to memory
         #  TODO: Don't know how to simulate this yet

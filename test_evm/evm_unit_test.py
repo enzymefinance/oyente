@@ -34,7 +34,7 @@ class EvmUnitTest(object):
 
     def _execute_vm(self, bytecode):
         self._create_bytecode_file(bytecode)
-        cmd = os.system('python oyente.py -b bytecode')
+        cmd = os.system('python oyente.py -b -s bytecode')
         exit_code = os.WEXITSTATUS(cmd)
         return exit_code
 

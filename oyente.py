@@ -178,9 +178,9 @@ def main():
 
 
         # TODO: Do this as an import and run, instead of shell call and hacky fix
-
-        os.system('python symExec.py %s.evm.disasm %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %s' % \
-            (cname, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, \
+        filepath = os.path.join(os.path.dirname(__file__), 'symExec.py')
+        os.system('python %s %s.evm.disasm %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %s' % \
+            (filepath, cname, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, \
             global_params.DATA_FLOW, global_params.DEBUG_MODE, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, \
             global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, global_params.USE_GLOBAL_BLOCKCHAIN, \
             global_params.DEPTH_LIMIT, global_params.GAS_LIMIT, global_params.INPUT_STATE, global_params.LOOP_LIMIT, \
