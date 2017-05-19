@@ -6,6 +6,7 @@ var $ = require('jquery')
 var base64 = require('js-base64').Base64
 var swarmgw = require('swarmgw')
 var csjs = require('csjs-inject')
+var yo = require('yo-yo')
 
 var QueryParams = require('./app/query-params')
 var queryParams = new QueryParams()
@@ -956,7 +957,7 @@ var run = function () {
     }
   }
 
-  // ----------------- Oyente analyzer --------
+  // ----------------- Oyente analyzer --------------------
   var analyzer = new OyenteAnalyzer()
 
   function runAnalyzer () {
@@ -973,6 +974,66 @@ var run = function () {
   $('#analyzer').click(function () {
     runAnalyzer()
   })
+
+  // ----------------- Oyente optionSelector ---------------
+  var css = csjs`
+  .crow {
+    margin-top: 1em;
+    display: flex;
+  }
+  .small_item {
+    flex-basis: 15%;
+    text-align: right;
+    margin-right: 5px;
+  }
+  .large_item {
+    flex-basis: 75%;
+  }
+  .remove_item {
+    cursor: pointer;
+  }
+  `
+
+  var selectedOpts = []
+
+  $('#optionSelector').on('change', function () {
+    var val = $(this).val()
+    var option = yo`
+      <div class="oyente-opt ${css.crow}" data-label="${val}">
+        <div class="${css.small_item}">
+          <div>${val}:</div>
+        </div>
+        <div class="${css.large_item}"><input type="${typeInput(val)}"></div>
+        <span class="remove-item ${css.remove_item}"><i class="fa fa-close" aria-hidden="true"></i></span>
+      </div>
+    `
+    if ( selectedOpts.indexOf(val) !== -1) return
+
+    selectedOpts.push(val)
+    $('#oyente-options').append(option)
+  })
+
+  $('#oyente-options').on('click', '.remove-item', function () {
+    var opt_label = $(this).parent().data('label')
+    var ind = selectedOpts.indexOf(opt_label)
+    if (ind !== -1) {
+      selectedOpts.splice(ind, 1)
+    }
+
+    $(this).parent().remove()
+
+    if ( selectedOpts.length == 0 ) {
+      $('#optionSelector option[disabled]').prop('selected', true)
+    }
+  })
+
+  function typeInput (option_label) {
+    var opt_type_number = ['timeout', 'depthlimit', 'gaslimit', 'looplimit']
+    if ( opt_type_number.indexOf(option_label) !== -1 ) {
+      return "number"
+    }
+    return "text"
+  }
 
   // set default
   $('#optimize').attr('checked', (queryParams.get().optimize === 'true'))
