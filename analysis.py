@@ -68,6 +68,8 @@ def check_reentrancy_bug(path_conditions_and_vars, global_state):
     return ret_val
 
 def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
+    if type(stack) == bool:
+	print stack
     gas_increment = get_ins_cost(opcode) # base cost
     gas_memory = analysis["gas_mem"]
     # In some opcodes, gas cost is not only depend on opcode itself but also current state of evm
@@ -116,7 +118,7 @@ def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
                 else:
                     gas_increment += GCOST["Gsreset"]
                 solver.pop()
-    elif opcode == "SUICIDE" and len(stack > 1):
+    elif opcode == "SUICIDE" and len(stack) > 1:
         if isinstance(stack[1], (int, long)):
             address = stack[1] % 2**160
             if address not in global_state:
