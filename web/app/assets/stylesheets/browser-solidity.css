@@ -306,7 +306,7 @@ body {
     font-weight: bold;
 }
 
-#header #versionSelector {
+#header #versionSelector, #optionSelector {
     text-decoration: none;
     background-color: #C6CFF7;
     cursor: pointer;

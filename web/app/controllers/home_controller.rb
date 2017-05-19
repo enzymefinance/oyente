@@ -1,26 +1,30 @@
 class HomeController < ApplicationController
-  before_action :check_file, only: :upload
-
   def index
   end
 
-  def upload
+  def analyze
     filepath = Rails.root.join('public', 'uploads', 'tmp.sol')
 
     File.open(filepath, 'wb') do |file|
-      file.write(upload_io)
+      file.write(oyente_params[:sources])
     end
 
-    @output = `python #{ENV['OYENTE']}/oyente.py -s #{filepath}`
+    @output = `python #{ENV['OYENTE']}/oyente.py -s #{filepath} #{options} `
     FileUtils.rm_r Dir.glob('public/uploads/*')
   end
 
   private
-  def upload_io
-    params[:coding_file]
+  def oyente_params
+    params.require(:data).permit(:source, :timeout, :depthlimit, :gaslimit, :looplimit)
   end
 
-  def check_file
-    redirect_to root_url if upload_io.nil? || upload_io.class.name != "String"
+  def options
+    opts = ""
+    oyente_params.each do |opt, val|
+      unless opt == "source"
+        opts += "--#{opt} #{val}"
+      end
+    end
+    return opts
   end
 end

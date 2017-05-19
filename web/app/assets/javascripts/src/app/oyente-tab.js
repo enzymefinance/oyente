@@ -13,6 +13,14 @@ var css = csjs`
     margin-top: 1em;
     display: flex;
   }
+  .options {
+    margin-top: 1em;
+    display: block;
+  }
+  .select extends ${styles.dropdown} {
+    float: left;
+    max-width: 90%;
+  }
   .button extends ${styles.button} {
     background-color: #C6CFF7;
     width: 100%;
@@ -28,10 +36,20 @@ module.exports = oyenteTab
 
 function oyenteTab () {
   return yo`
-    <div class="${css.oyenteTabView} "id="oyenteView">
+    <div class="${css.oyenteTabView}" id="oyenteView">
       <div class="${css.crow}">
-        <div class="${css.button} "id="analyzer" title="Analyze source code's security">Analyse</div>
+        <div class="${css.button}" id="analyzer" title="Analyze source code's security">Analyze</div>
       </div>
+      <div class="${css.crow}">
+        <select class="${css.select}" id="optionSelector" name="">
+          <option selected disabled>Select options</option>
+          <option value="timeout">timeout, type=int, help=Timeout for Z3.</option>
+          <option value="depthlimit">depthlimit, help=Limit DFS depth, action=store, dest=depth_limit, type=int</option>
+          <option value="gaslimit">gaslimit, help=Limit Gas, action=store, dest=gas_limit, type=int</option>
+          <option value="looplimit">looplimit, help=Limit a number of loop, action=store, dest=loop_limit, type=int</option>
+        </select>
+      </div>
+      <div class="${css.options}" id="oyente-options"></div>
       <div id="analysis" class="${css.result}" hidden></div>
     </div>
   `
