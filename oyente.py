@@ -28,8 +28,8 @@ def has_dependencies_installed():
         cmd = subprocess.Popen(["evm", "--version"], stdout = subprocess.PIPE)
         cmd_out = cmd.communicate()[0].strip()
         version = re.findall(r"evm version (\d*.\d*.\d*)", cmd_out)[0]
-        if version != '1.6.0':
-            print "Warning: You are using evm version %s. The supported version is 1.6.0" % version
+        if version != '1.6.1':
+            print "Warning: You are using evm version %s. The supported version is 1.6.1" % version
 
     if not cmd_exists("solc"):
         print "solc is missing. Please install the solidity compiler and make sure solc is in the path."

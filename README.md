@@ -32,7 +32,7 @@ $ sudo apt-get update
 $ sudo apt-get install solc
 ```
 
-#### evm from [go-ethereum](https://github.com/ethereum/go-ethereum) version 1.6.0. 
+#### evm from [go-ethereum](https://github.com/ethereum/go-ethereum) version 1.6.1. 
 
 1. https://geth.ethereum.org/downloads/ or
 2. By from PPA if your using Ubuntu
