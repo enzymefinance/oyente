@@ -141,7 +141,6 @@ def main():
         if UNIT_TEST == 2 or UNIT_TEST == 3:
             logging.exception(e)
             exit(EXCEPTION)
-        print "Exception - "+str(e)
         traceback.print_exc()
         raise e
     signal.alarm(0)
@@ -692,7 +691,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
                 sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
         except Exception as e:
             log_file.write(str(e))
-            print "Exception - "+str(e)
+            traceback.print_exc()
             if not IGNORE_EXCEPTIONS:
                 if str(e) == "timeout":
                     raise e
