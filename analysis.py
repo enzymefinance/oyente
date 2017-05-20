@@ -116,7 +116,7 @@ def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
                 else:
                     gas_increment += GCOST["Gsreset"]
                 solver.pop()
-    elif opcode == "SUICIDE" and len(stack > 1):
+    elif opcode == "SUICIDE" and len(stack) > 1:
         if isinstance(stack[1], (int, long)):
             address = stack[1] % 2**160
             if address not in global_state:
