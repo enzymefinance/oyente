@@ -62,6 +62,12 @@ $ sudo make install
 pip install requests
 ```
 
+#### [web3](https://github.com/pipermerriam/web3.py) library
+
+```
+pip install web3
+```
+
 ### Evaluating Ethereum Contracts
 
 ```
