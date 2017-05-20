@@ -761,10 +761,10 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             first = stack.pop(0)
             second = stack.pop(0)
             # Type conversion is needed when they are mismatched
-            if isinstance(first, (int, long)) and not isinstance(second, (int, long)):
+            if isReal(first) and isSymbolic(second):
                 first = BitVecVal(first, 256)
                 computed = first + second
-            elif not isinstance(first, (int, long)) and isinstance(second, (int, long)):
+            elif isSymbolic(first) and isReal(second):
                 second = BitVecVal(second, 256)
                 computed = first + second
             else:
@@ -779,9 +779,9 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if isinstance(first, (int, long)) and not isinstance(second, (int, long)):
+            if isReal(first) and isSymbolic(second):
                 first = BitVecVal(first, 256)
-            elif not isinstance(first, (int, long)) and isinstance(second, (int, long)):
+            elif isSymbolic(first) and isReal(second):
                 second = BitVecVal(second, 256)
             computed = first * second & UNSIGNED_BOUND_NUMBER
             stack.insert(0, computed)
@@ -792,10 +792,10 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if isinstance(first, (int, long)) and not isinstance(second, (int, long)):
+            if isReal(first) and isSymbolic(second):
                 first = BitVecVal(first, 256)
                 computed = first - second
-            elif not isinstance(first, (int, long)) and isinstance(second, (int, long)):
+            elif isSymbolic(first) and isReal(second):
                 second = BitVecVal(second, 256)
                 computed = first - second
             else:
@@ -874,8 +874,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if isinstance(first, (int, long)) and isinstance(second, (int, long)):
-                # handle for real value variables
+            if contains_only_concrete_values([first, second]):
                 if second == 0:
                     computed = 0
                 else:
@@ -884,11 +883,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     computed = first % second & UNSIGNED_BOUND_NUMBER
 
             else:
-                # handle for symbolic variables
-                if isinstance(first, (int, long)):
-                    first = BitVecVal(first, 256)  # Make first as a bitvector
-                if isinstance(second, (int, long)):
-                    second = BitVecVal(second, 256) # Make second as a bitvector
+                first = to_symbolic(first)
+                second = to_symbolic(second)
 
                 solver.push()
                 solver.add(Not(second == 0))
@@ -907,8 +903,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if isinstance(first, (int, long)) and isinstance(second, (int, long)):
-                # handle for real value variables
+            if contains_only_concrete_values([first, second]):
                 if second == 0:
                     computed = 0
                 else:
@@ -917,11 +912,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     sign = -1 if first < 0 else 1
                     computed = sign * (abs(first) % abs(second))
             else:
-                # handle for symbolic variables
-                if isinstance(first, (int, long)):
-                    first = BitVecVal(first, 256)  # Make first as a bitvector
-                if isinstance(second, (int, long)):
-                    second = BitVecVal(second, 256) # Make second as a bitvector
+                first = to_symbolic(first)
+                second = to_symbolic(second)
 
                 solver.push()
                 solver.add(Not(second == 0))
@@ -1010,7 +1002,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             base = stack.pop(0)
             exponent = stack.pop(0)
             # Type conversion is needed when they are mismatched
-            if isinstance(base, (int, long)) and isinstance(exponent, (int, long)):
+            if contains_only_concrete_values([base, exponent]):
                 computed = pow(base, exponent, 2**256)
             else:
                 # The computed value is unknown, this is because power is
@@ -1062,7 +1054,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if isinstance(first, (int, long)) and isinstance(second, (int, long)):
+            if contains_only_concrete_values([first, second]):
                 first = to_unsigned(first)
                 second = to_unsigned(second)
                 if first < second:
@@ -1079,7 +1071,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if isinstance(first, (int, long)) and isinstance(second, (int, long)):
+            if contains_only_concrete_values([first, second]):
                 first = to_unsigned(first)
                 second = to_unsigned(second)
                 if first > second:
@@ -1096,7 +1088,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if isinstance(first, (int, long)) and isinstance(second, (int, long)):
+            if contains_only_concrete_values([first, second]):
                 first = to_signed(first)
                 second = to_signed(second)
                 if first < second:
@@ -1113,7 +1105,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if isinstance(first, (int, long)) and isinstance(second, (int, long)):
+            if contains_only_concrete_values([first, second]):
                 first = to_signed(first)
                 second = to_signed(second)
                 if first > second:
@@ -1130,7 +1122,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if isinstance(first, (int, long)) and isinstance(second, (int, long)):
+            if contains_only_concrete_values([first, second]):
                 if first == second:
                     stack.insert(0, 1)
                 else:
@@ -1147,7 +1139,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
-            if isinstance(first, (int, long)):
+            if isReal(first):
                 if first == 0:
                     stack.insert(0, 1)
                 else:
@@ -1396,7 +1388,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             global_state["pc"] = global_state["pc"] + 1
             address = stack.pop(0)
             current_miu_i = global_state["miu_i"]
-            if isinstance(address, (int, long)) and address in mem:
+            if isReal(address) and address in mem:
                 temp = long(math.ceil((address + 32) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
@@ -1406,7 +1398,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 if PRINT_MODE: print "current_miu_i: " + str(current_miu_i)
             else:
                 temp = ((address + 31) / 32) + 1
-                if isinstance(current_miu_i, (int, long)):
+                if isReal(current_miu_i):
                     current_miu_i = BitVecVal(current_miu_i, 256)
                 expression = current_miu_i < temp
                 solver.push()
@@ -1425,7 +1417,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     new_var = BitVec(new_var_name, 256)
                     path_conditions_and_vars[new_var_name] = new_var
                 stack.insert(0, new_var)
-                if isinstance(address, (int, long)):
+                if isReal(address):
                     mem[address] = new_var
                 else:
                     mem[str(address)] = new_var
@@ -1440,7 +1432,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             stored_address = stack.pop(0)
             stored_value = stack.pop(0)
             current_miu_i = global_state["miu_i"]
-            if isinstance(stored_address, (int, long)):
+            if isReal(stored_address):
                 temp = long(math.ceil((stored_address + 32) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
@@ -1450,7 +1442,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             else:
                 if PRINT_MODE: print "Debugging... temp " + str(stored_address)
                 temp = ((stored_address + 31) / 32) + 1
-                if isinstance(current_miu_i, (int, long)):
+                if isReal(current_miu_i):
                     current_miu_i = BitVecVal(current_miu_i, 256)
                 if PRINT_MODE: print "current_miu_i: " + str(current_miu_i)
                 expression = current_miu_i < temp
@@ -1478,14 +1470,14 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             temp_value = stack.pop(0)
             stored_value = temp_value % 256  # get the least byte
             current_miu_i = global_state["miu_i"]
-            if isinstance(stored_address, (int, long)):
+            if isReal(stored_address):
                 temp = long(math.ceil((stored_address + 1) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
                 mem[stored_address] = stored_value  # note that the stored_value could be symbolic
             else:
                 temp = (stored_address / 32) + 1
-                if isinstance(current_miu_i, (int, long)):
+                if isReal(current_miu_i):
                     current_miu_i = BitVecVal(current_miu_i, 256)
                 expression = current_miu_i < temp
                 solver.push()
@@ -1506,7 +1498,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             address = stack.pop(0)
-            if isinstance(address, (int, long)):
+            if isReal(address):
                 if address in global_state["Ia"]:
                     value = global_state["Ia"][address]
                     stack.insert(0, value)
@@ -1520,7 +1512,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     new_var = BitVec(new_var_name, 256)
                     path_conditions_and_vars[new_var_name] = new_var
                 stack.insert(0, new_var)
-                if isinstance(address, (int, long)):
+                if isReal(address):
                     global_state["Ia"][address] = new_var
                 else:
                     global_state["Ia"][str(address)] = new_var
@@ -1531,7 +1523,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             global_state["pc"] = global_state["pc"] + 1
             stored_address = stack.pop(0)
             stored_value = stack.pop(0)
-            if isinstance(stored_address, (int, long)):
+            if isReal(stored_address):
                 global_state["Ia"][stored_address] = stored_value  # note that the stored_value could be unknown
             else:
                 global_state["Ia"].clear()  # very conservative
@@ -1557,7 +1549,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             vertices[start].set_jump_target(target_address)
             flag = stack.pop(0)
             branch_expression = (BitVecVal(0, 1) == BitVecVal(1, 1))
-            if isinstance(flag, (int, long)):
+            if isReal(flag):
                 if flag != 0:
                     branch_expression = True
             else:
@@ -1651,7 +1643,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             # in the paper, it is shaky when the size of data output is
             # min of stack[6] and the | o |
 
-            if isinstance(transfer_amount, (int, long)):
+            if isReal(transfer_amount):
                 if transfer_amount == 0:
                     stack.insert(0, 1)   # x = 0
                     return
@@ -1685,7 +1677,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     global_state["balance"]["Is"] = new_balance_is
                 else:
                     solver.pop()
-                    if isinstance(recipient, (int, long)):
+                    if isReal(recipient):
                         new_address_name = "concrete_address_" + str(recipient)
                     else:
                         new_address_name = gen.gen_arbitrary_address_var()
@@ -1713,7 +1705,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             # in the paper, it is shaky when the size of data output is
             # min of stack[6] and the | o |
 
-            if isinstance(transfer_amount, (int, long)):
+            if isReal(transfer_amount):
                 if transfer_amount == 0:
                     stack.insert(0, 1)   # x = 0
                     return
@@ -1751,7 +1743,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         recipient = stack.pop(0)
         transfer_amount = global_state["balance"]["Ia"]
         global_state["balance"]["Ia"] = 0
-        if isinstance(recipient, (int, long)):
+        if isReal(recipient):
             new_address_name = "concrete_address_" + str(recipient)
         else:
             new_address_name = gen.gen_arbitrary_address_var()
