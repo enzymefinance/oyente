@@ -117,6 +117,7 @@ def main():
 
         except:
             print "Disassembly failed."
+	    exit()
 
         # Run symExec
 
