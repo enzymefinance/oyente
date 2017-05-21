@@ -6,6 +6,8 @@ from vargenerator import *
 from utils import *
 from global_params import *
 from subprocess import Popen
+import logging
+log = logging.getLogger(__name__)
 
 # THIS IS TO DEFINE A SKELETON FOR ANALYSIS
 # FOR NEW TYPE OF ANALYSIS: add necessary details to the skeleton functions
@@ -32,7 +34,7 @@ def init_analysis():
 # Money flow: (source, destination, amount)
 
 def display_analysis(analysis):
-    if PRINT_MODE: print "Money flow: " + str(analysis["money_flow"])
+    logging.debug("Money flow: " + str(analysis["money_flow"]))
 
 # Check if this call has the Reentrancy bug
 # Return true if it does, false otherwise
@@ -50,7 +52,7 @@ def check_reentrancy_bug(path_conditions_and_vars, global_state):
                 storage_key = var_name.split("Ia_store_")[1]
                 if storage_key in global_state["Ia"]:
                     new_path_condition.append(var == global_state["Ia"][storage_key])
-    print "\n =>>>>>> New PC: " + str(new_path_condition) + " \n"
+    log.info("=>>>>>> New PC: " + str(new_path_condition))
 
     solver = Solver()
     solver.push()
@@ -59,7 +61,7 @@ def check_reentrancy_bug(path_conditions_and_vars, global_state):
     # if it is not feasible to re-execute the call, its not a bug
     ret_val = not (solver.check() == unsat)
     solver.pop()
-    print "Reentrancy_bug? " + str(ret_val) + "\n"
+    log.info("Reentrancy_bug? " + str(ret_val))
     global reported
     if not reported:
         with open(reentrancy_report_file, 'a') as r_report:
@@ -183,12 +185,12 @@ def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_
             if len(stack) > 1:
                 stored_address = stack[0]
                 stored_value = stack[1]
-                if PRINT_MODE: print type(stored_address)
+                log.debug(type(stored_address))
                 # a temporary fix, not a good one.
                 # TODO move to z3 4.4.2 in which BitVecRef is hashable
                 if not isinstance(stored_address, (int, long)):
                     stored_address = str(stored_address)
-                if PRINT_MODE: print "storing value " + str(stored_value) + " to address " + str(stored_address)
+                log.debug("storing value " + str(stored_value) + " to address " + str(stored_address))
                 if stored_address in analysis["sstore"]:
                     # recording the new values of the item in storage
                     analysis["sstore"][stored_address].append(stored_value)
@@ -239,8 +241,8 @@ def is_false_positive(i, j, all_gs, path_conditions):
 
     # rename global variables in path i
     set_of_pcs, statei = rename_vars(pathi, statei)
-    if PRINT_MODE: print "Set of PCs after renaming global vars" + str(set_of_pcs)
-    if PRINT_MODE: print "Global state values in path " + str(i) + " after renaming: " + str(statei)
+    log.debug("Set of PCs after renaming global vars" + str(set_of_pcs))
+    log.debug("Global state values in path " + str(i) + " after renaming: " + str(statei))
     if is_feasible(set_of_pcs, statei, pathj):
         return 0
     else:

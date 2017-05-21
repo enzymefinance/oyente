@@ -6,6 +6,7 @@ import sys
 import global_params
 import argparse
 import requests
+import logging
 
 def cmd_exists(cmd):
     return subprocess.call("type " + cmd, shell=True,
@@ -16,30 +17,30 @@ def has_dependencies_installed():
         import z3
         import z3util
         if z3.get_version_string() != '4.4.1':
-            print "Warning: You are using an untested version of z3. 4.4.1 is the officially tested version"
+            logging.warning("You are using an untested version of z3. 4.4.1 is the officially tested version")
     except:
-        print "Error: Z3 is not available. Please install z3 from https://github.com/Z3Prover/z3."
+        logging.critical("Z3 is not available. Please install z3 from https://github.com/Z3Prover/z3.")
         return False
 
     if not cmd_exists("evm"):
-        print "Please install evm from go-ethereum and make sure it is in the path."
+        logging.critical("Please install evm from go-ethereum and make sure it is in the path.")
         return False
     else:
         cmd = subprocess.Popen(["evm", "--version"], stdout = subprocess.PIPE)
         cmd_out = cmd.communicate()[0].strip()
         version = re.findall(r"evm version (\d*.\d*.\d*)", cmd_out)[0]
         if version != '1.6.1':
-            print "Warning: You are using evm version %s. The supported version is 1.6.1" % version
+            logging.warning("You are using evm version %s. The supported version is 1.6.1" % version)
 
     if not cmd_exists("solc"):
-        print "solc is missing. Please install the solidity compiler and make sure solc is in the path."
+        logging.critical("solc is missing. Please install the solidity compiler and make sure solc is in the path.")
         return False
     else:
         cmd = subprocess.Popen(["solc", "--version"], stdout = subprocess.PIPE)
         cmd_out = cmd.communicate()[0].strip()
         version = re.findall(r"Version: (\d*.\d*.\d*)", cmd_out)[0]
         if version != '0.4.10':
-            print "Warning: You are using solc version %s, The supported version is 0.4.10" % version
+            logging.warning("You are using solc version %s, The supported version is 0.4.10" % version)
 
     return True
 
@@ -76,8 +77,11 @@ def main():
     if args.timeout:
         global_params.TIMEOUT = args.timeout
 
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
     global_params.PRINT_PATHS = 1 if args.paths else 0
-    global_params.PRINT_MODE = 1 if args.verbose else 0
     global_params.REPORT_MODE = 1 if args.report else 0
     global_params.DEBUG_MODE = 1 if args.debug else 0
     global_params.IGNORE_EXCEPTIONS = 1 if args.error else 0
@@ -116,8 +120,8 @@ def main():
             disasm_out = disasm_p.communicate()[0]
 
         except:
-            print "Disassembly failed."
-	    exit()
+            logging.critical("Disassembly failed.")
+            exit()
 
         # Run symExec
 
@@ -155,11 +159,11 @@ def main():
     matches = re.findall(binary_regex, solc_out[0])
 
     if len(matches) == 0:
-        print "Solidity compilation failed"
+        logging.critical("Solidity compilation failed")
         exit()
 
     for (cname, bin_str) in matches:
-        print "Contract %s:" % cname
+        logging.info("Contract %s:" % cname)
 
         with open(cname+'.evm', 'w') as of:
             of.write(removeSwarmHash(bin_str))
@@ -170,7 +174,8 @@ def main():
             disasm_p = subprocess.Popen(["evm", "disasm", cname+'.evm'], stdout=subprocess.PIPE)
             disasm_out = disasm_p.communicate()[0]
         except:
-            print "Disassembly failed."
+            logging.critical("Disassembly failed.")
+            exit()
 
         # Run symExec
 

@@ -14,11 +14,21 @@ from global_params import *
 from test_evm.global_test_params import *
 import sys
 import atexit
-import logging
 import pickle
 import json
 import traceback
 from collections import namedtuple
+
+import logging
+# once this is run as an imported module, logging conf can be used like this
+# we need to load it via a hack till then
+# log = logging.getLogger(__name__)
+
+if PRINT_MODE:
+    logging.basicConfig(level=logging.DEBUG)
+else:
+    logging.basicConfig(level=logging.INFO)
+log = logging.getLogger()
 
 results = {}
 
@@ -79,7 +89,7 @@ if UNIT_TEST == 1:
     try:
         result_file = open(sys.argv[16], 'r')
     except:
-        if PRINT_MODE: print "Could not open result file for unit test"
+        log.critical("Could not open result file for unit test")
         exit()
 
 
@@ -101,14 +111,14 @@ def compare_stack_unit_test(stack):
         size = int(result_file.readline())
         content = result_file.readline().strip('\n')
         if size == len(stack) and str(stack) == content:
-            if PRINT_MODE: print "PASSED UNIT-TEST"
+            log.debug("PASSED UNIT-TEST")
         else:
-            if PRINT_MODE: print "FAILED UNIT-TEST"
-            if PRINT_MODE: print "Expected size %d, Resulted size %d" % (size, len(stack))
-            if PRINT_MODE: print "Expected content %s \nResulted content %s" % (content, str(stack))
+            log.warning("FAILED UNIT-TEST")
+            log.warning("Expected size %d, Resulted size %d" % (size, len(stack)))
+            log.warning("Expected content %s \nResulted content %s" % (content, str(stack)))
     except Exception as e:
-        if PRINT_MODE: print "FAILED UNIT-TEST"
-        if PRINT_MODE: print e.message
+        log.warning("FAILED UNIT-TEST")
+        log.warning(e.message)
 
 def compare_storage_and_memory_unit_test(global_state, mem, analysis):
     unit_test = pickle.load(open("current_test.pickle", "rb"))
@@ -124,22 +134,20 @@ def main():
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(GLOBAL_TIMEOUT)
 
-    print "Running, please wait..."
+    log.info("Running, please wait...")
 
 
-    if not isTesting(): print "\t============ Results ==========="
+    if not isTesting(): log.info("\t============ Results ===========")
 
-    if PRINT_MODE:
-        print "Checking for Callstack attack..."
+    log.debug("Checking for Callstack attack...")
     run_callstack_attack()
 
     try:
         build_cfg_and_analyze()
-        if PRINT_MODE:
-            print "Done Symbolic execution"
+        log.debug("Done Symbolic execution")
     except Exception as e:
         if UNIT_TEST == 2 or UNIT_TEST == 3:
-            logging.exception(e)
+            log.exception(e)
             exit(EXCEPTION)
         traceback.print_exc()
         raise e
@@ -156,18 +164,17 @@ def main():
     if DATA_FLOW:
         detect_data_concurrency()
         detect_data_money_concurrency()
-    if PRINT_MODE:
-        print "Results for Reentrancy Bug: " + str(reentrancy_all_paths)
+    log.debug("Results for Reentrancy Bug: " + str(reentrancy_all_paths))
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
-    if not isTesting(): print "\t  Reentrancy bug exists: %s" % str(reentrancy_bug_found)
+    if not isTesting(): log.info("\t  Reentrancy bug exists: %s" % str(reentrancy_bug_found))
     results['reentrancy'] = reentrancy_bug_found
 
 def closing_message():
-    if UNIT_TEST ==1: print "\t====== Analysis Completed ======"
+    if UNIT_TEST ==1: log.info("\t====== Analysis Completed ======")
     if len(sys.argv) > 17:
         with open(sys.argv[17], 'w') as of:
             of.write(json.dumps(results,indent=1))
-        print "Wrote results to %s." % sys.argv[17]
+        log.info("Wrote results to %s." % sys.argv[17])
 
 atexit.register(closing_message)
 
@@ -234,7 +241,7 @@ def detect_time_dependency():
             is_dependant = True
             break
 
-    if not isTesting(): print "\t  Time Dependency: \t %s" % is_dependant
+    if not isTesting(): log.info("\t  Time Dependency: \t %s" % is_dependant)
     results['time_dependency'] = is_dependant
 
     if REPORT_MODE:
@@ -251,8 +258,8 @@ def detect_time_dependency():
 def detect_money_concurrency():
     n = len(money_flow_all_paths)
     for i in range(n):
-        if PRINT_MODE: print "Path " + str(i) + ": " + str(money_flow_all_paths[i])
-        if PRINT_MODE: print all_gs[i]
+        log.debug("Path " + str(i) + ": " + str(money_flow_all_paths[i]))
+        log.debug(all_gs[i])
     i = 0
     false_positive = []
     concurrency_paths = []
@@ -272,12 +279,12 @@ def detect_money_concurrency():
                     false_positive.append([i-1, j])
 
     # if PRINT_MODE: print "All false positive cases: ", false_positive
-    if PRINT_MODE: print "Concurrency in paths: ", concurrency_paths
+    log.debug("Concurrency in paths: ", concurrency_paths)
     if len(concurrency_paths) > 0:
-        if not isTesting(): print "\t  Concurrency found in paths: %s" + str(concurrency_paths)
+        if not isTesting(): log.info("\t  Concurrency found in paths: %s" + str(concurrency_paths))
         results['concurrency'] = True
     else:
-        if not isTesting(): print "\t  Concurrency Bug: \t False"
+        if not isTesting(): log.info("\t  Concurrency Bug: \t False")
         results['concurrency'] = False
     if REPORT_MODE:
         rfile.write("number of path: " + str(n) + "\n")
@@ -304,7 +311,7 @@ def detect_data_concurrency():
                     if not addr in concurrency_addr:
                         concurrency_addr.append(addr)
                     break
-    if PRINT_MODE: print "data conccureny in storage " + str(concurrency_addr)
+    log.debug("data conccureny in storage " + str(concurrency_addr))
 
 # Detect if any change in a storage address will result in a different
 # flow of money. Currently I implement this detection by
@@ -325,13 +332,13 @@ def detect_data_money_concurrency():
                 var_name = gen.gen_owner_store_var(addr)
                 if var_name in set_vars:
                     concurrency_addr.append(var_name)
-    if PRINT_MODE: print "Concurrency in data that affects money flow: " + str(set(concurrency_addr))
+    log.debug("Concurrency in data that affects money flow: " + str(set(concurrency_addr)))
 
 
 def print_cfg():
     for block in vertices.values():
         block.display()
-    if PRINT_MODE: print str(edges)
+    log.debug(str(edges))
 
 
 # 1. Parse the disassembled file
@@ -354,7 +361,7 @@ def collect_vertices(tokens):
                     is_new_line = True
                     current_line_content += push_val + ' '
                     instructions[current_ins_address] = current_line_content
-                    if PRINT_MODE: print current_line_content
+                    log.debug(current_line_content)
                     current_line_content = ""
                     wait_for_push = False
                     break
@@ -370,7 +377,7 @@ def collect_vertices(tokens):
             try:
                 current_ins_address = int(tok_string)
             except ValueError:
-                if PRINT_MODE: print "ERROR when parsing row %d col %d" % (srow, scol)
+                log.critical("ERROR when parsing row %d col %d" % (srow, scol))
                 quit()
             is_new_line = False
             if is_new_block:
@@ -379,7 +386,7 @@ def collect_vertices(tokens):
             continue
         elif tok_type == NEWLINE:
             is_new_line = True
-            if PRINT_MODE: print current_line_content
+            log.debug(current_line_content)
             instructions[current_ins_address] = current_line_content
             current_line_content = ""
             continue
@@ -407,8 +414,8 @@ def collect_vertices(tokens):
             current_line_content += tok_string + " "
 
     if current_block not in end_ins_dict:
-        if PRINT_MODE: print "current block: %d" % current_block
-        if PRINT_MODE: print "last line: %d" % current_ins_address
+        log.debug("current block: %d" % current_block)
+        log.debug("last line: %d" % current_ins_address)
         end_ins_dict[current_block] = current_ins_address
 
     if current_block not in jump_type:
@@ -589,11 +596,11 @@ def full_sym_exec():
 # Symbolically executing a block from the start address
 def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis):
     if block < 0:
-        if PRINT_MODE: print "ERROR: UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH"
+        log.debug("UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH")
         return ["ERROR"]
 
-    if PRINT_MODE: print "\nDEBUG: Reach block address %d \n" % block
-    if PRINT_MODE: print "STACK: " + str(stack)
+    log.debug("Reach block address %d \n" % block)
+    log.debug("STACK: " + str(stack))
 
     current_edge = Edge(pre_block, block)
     if visited_edges.has_key(current_edge):
@@ -603,19 +610,19 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
         visited_edges.update({current_edge: 1})
 
     if visited_edges[current_edge] > LOOP_LIMIT:
-        if PRINT_MODE: print "Overcome a number of loop limit. Terminating this path ..."
+        log.debug("Overcome a number of loop limit. Terminating this path ...")
         return stack
 
     current_gas_used = analysis["gas"]
     if  current_gas_used > GAS_LIMIT :
-        if PRINT_MODE: print "Run out of gas. Terminating this path ... "
+        log.debug("Run out of gas. Terminating this path ... ")
         return stack
 
     # Execute every instruction, one at a time
     try:
         block_ins = vertices[block].get_instructions()
     except KeyError:
-        if PRINT_MODE: print "This path results in an exception, possibly an invalid jump address"
+        log.debug("This path results in an exception, possibly an invalid jump address")
         return ["ERROR"]
 
     for instr in block_ins:
@@ -627,7 +634,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
 
     # Go to next Basic Block(s)
     if jump_type[block] == "terminal" or depth > DEPTH_LIMIT:
-        if PRINT_MODE: print "TERMINATING A PATH ..."
+        log.debug("TERMINATING A PATH ...")
         display_analysis(analysis)
         global total_no_of_paths
         total_no_of_paths += 1
@@ -670,14 +677,14 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
 
         branch_expression = vertices[block].get_branch_expression()
 
-        if PRINT_MODE: print "Branch expression: " + str(branch_expression)
+        log.debug("Branch expression: " + str(branch_expression))
 
         solver.push()  # SET A BOUNDARY FOR SOLVER
         solver.add(branch_expression)
 
         try:
             if solver.check() == unsat:
-                if PRINT_MODE: print "INFEASIBLE PATH DETECTED"
+                log.debug("INFEASIBLE PATH DETECTED")
             else:
                 left_branch = vertices[block].get_jump_target()
                 stack1 = list(stack)
@@ -702,14 +709,14 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
         negated_branch_expression = Not(branch_expression)
         solver.add(negated_branch_expression)
 
-        if PRINT_MODE: print "Negated branch expression: " + str(negated_branch_expression)
+        log.debug("Negated branch expression: " + str(negated_branch_expression))
 
         try:
             if solver.check() == unsat:
                 # Note that this check can be optimized. I.e. if the previous check succeeds,
                 # no need to check for the negated condition, but we can immediately go into
                 # the else branch
-                if PRINT_MODE: print "INFEASIBLE PATH DETECTED"
+                log.debug("INFEASIBLE PATH DETECTED")
             else:
                 right_branch = vertices[block].get_falls_to()
                 stack1 = list(stack)
@@ -746,8 +753,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     # since SE will modify the stack and mem
     update_analysis(analysis, instr_parts[0], stack, mem, global_state, path_conditions_and_vars, solver)
 
-    if PRINT_MODE: print "=============================="
-    if PRINT_MODE: print "EXECUTING: " + instr
+    log.debug("==============================")
+    log.debug("EXECUTING: " + instr)
 
     #
     #  0s: Stop and Arithmetic Operations
@@ -1394,8 +1401,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     current_miu_i = temp
                 value = mem[address]
                 stack.insert(0, value)
-                if PRINT_MODE: print "temp: " + str(temp)
-                if PRINT_MODE: print "current_miu_i: " + str(current_miu_i)
+                log.debug("temp: " + str(temp))
+                log.debug("current_miu_i: " + str(current_miu_i))
             else:
                 temp = ((address + 31) / 32) + 1
                 if isReal(current_miu_i):
@@ -1421,8 +1428,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     mem[address] = new_var
                 else:
                     mem[str(address)] = new_var
-                if PRINT_MODE: print "temp: " + str(temp)
-                if PRINT_MODE: print "current_miu_i: " + str(current_miu_i)
+                log.debug("temp: " + str(temp))
+                log.debug("current_miu_i: " + str(current_miu_i))
             global_state["miu_i"] = current_miu_i
         else:
             raise ValueError('STACK underflow')
@@ -1437,16 +1444,16 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 if temp > current_miu_i:
                     current_miu_i = temp
                 mem[stored_address] = stored_value  # note that the stored_value could be symbolic
-                if PRINT_MODE: print "temp: " + str(temp)
-                if PRINT_MODE: print "current_miu_i: " + str(current_miu_i)
+                log.debug("temp: " + str(temp))
+                log.debug("current_miu_i: " + str(current_miu_i))
             else:
-                if PRINT_MODE: print "Debugging... temp " + str(stored_address)
+                log.debug("temp: " + str(stored_address))
                 temp = ((stored_address + 31) / 32) + 1
                 if isReal(current_miu_i):
                     current_miu_i = BitVecVal(current_miu_i, 256)
-                if PRINT_MODE: print "current_miu_i: " + str(current_miu_i)
+                log.debug("current_miu_i: " + str(current_miu_i))
                 expression = current_miu_i < temp
-                if PRINT_MODE: print "Expression: " + str(expression)
+                log.debug("Expression: " + str(expression))
                 solver.push()
                 solver.add(expression)
                 if solver.check() != unsat:
@@ -1458,8 +1465,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 solver.pop()
                 mem.clear()  # very conservative
                 mem[str(stored_address)] = stored_value
-                if PRINT_MODE: print "temp: " + str(temp)
-                if PRINT_MODE: print "current_miu_i: " + str(current_miu_i)
+                log.debug("temp: " + str(temp))
+                log.debug("current_miu_i: " + str(current_miu_i))
             global_state["miu_i"] = current_miu_i
         else:
             raise ValueError('STACK underflow')
@@ -1620,7 +1627,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     #
     elif instr_parts[0] in ("LOG0", "LOG1", "LOG2", "LOG3", "LOG4"):
         global_state["pc"] = global_state["pc"] + 1
-        # We do not simulate these logging operations
+        # We do not simulate these log operations
         num_of_pops = 2 + int(instr_parts[0][3:])
         while num_of_pops > 0:
             stack.pop(0)
@@ -1759,9 +1766,9 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         return
 
     else:
-        if PRINT_MODE: print "UNKNOWN INSTRUCTION: " + instr_parts[0]
+        log.debug("UNKNOWN INSTRUCTION: " + instr_parts[0])
         if UNIT_TEST == 2 or UNIT_TEST == 3:
-            logging.exception("Unkown instruction: %s" % instr_parts[0])
+            log.critical("Unkown instruction: %s" % instr_parts[0])
             exit(UNKOWN_INSTRUCTION)
         raise Exception('UNKNOWN INSTRUCTION: ' + instr_parts[0])
 
@@ -1788,13 +1795,13 @@ def run_callstack_attack():
     instructions = re.findall(instr_pattern, disasm_data)
     result = check_callstack_attack(instructions)
 
-    if not isTesting(): print "\t  CallStack Attack: \t %s" % result
+    if not isTesting(): log.info("\t  CallStack Attack: \t %s" % result)
     results['callstack'] = result
 
 def print_state(block_address, stack, mem, global_state):
-    if PRINT_MODE: print "STACK: " + str(stack)
-    if PRINT_MODE: print "MEM: " + str(mem)
-    if PRINT_MODE: print "GLOBAL STATE: " + str(global_state)
+    log.debug("STACK: " + str(stack))
+    log.debug("MEM: " + str(mem))
+    log.debug("GLOBAL STATE: " + str(global_state))
 
 def contains_only_concrete_values(stack):
     for element in stack:
