@@ -39,17 +39,16 @@ if len(sys.argv) >= 16:
     REPORT_MODE = int(sys.argv[3])
     PRINT_MODE = int(sys.argv[4])
     DATA_FLOW = int(sys.argv[5])
-    DEBUG_MODE = int(sys.argv[6])
-    CHECK_CONCURRENCY_FP = int(sys.argv[7])
-    TIMEOUT = int(sys.argv[8])
-    UNIT_TEST = int(sys.argv[9])
-    GLOBAL_TIMEOUT = int(sys.argv[10])
-    PRINT_PATHS = int(sys.argv[11])
-    USE_GLOBAL_BLOCKCHAIN = int(sys.argv[12])
-    DEPTH_LIMIT = int(sys.argv[13])
-    GAS_LIMIT = int(sys.argv[14])
-    USE_INPUT_STATE = int(sys.argv[15])
-    LOOP_LIMIT = int(sys.argv[16])
+    CHECK_CONCURRENCY_FP = int(sys.argv[6])
+    TIMEOUT = int(sys.argv[7])
+    UNIT_TEST = int(sys.argv[8])
+    GLOBAL_TIMEOUT = int(sys.argv[9])
+    PRINT_PATHS = int(sys.argv[10])
+    USE_GLOBAL_BLOCKCHAIN = int(sys.argv[11])
+    DEPTH_LIMIT = int(sys.argv[12])
+    GAS_LIMIT = int(sys.argv[13])
+    USE_INPUT_STATE = int(sys.argv[14])
+    LOOP_LIMIT = int(sys.argv[15])
 
 if REPORT_MODE:
     report_file = sys.argv[1] + '.report'
@@ -87,7 +86,7 @@ CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 
 if UNIT_TEST == 1:
     try:
-        result_file = open(sys.argv[16], 'r')
+        result_file = open(sys.argv[15], 'r')
     except:
         log.critical("Could not open result file for unit test")
         exit()
@@ -171,10 +170,10 @@ def main():
 
 def closing_message():
     if UNIT_TEST ==1: log.info("\t====== Analysis Completed ======")
-    if len(sys.argv) > 17:
-        with open(sys.argv[17], 'w') as of:
+    if len(sys.argv) > 16:
+        with open(sys.argv[16], 'w') as of:
             of.write(json.dumps(results,indent=1))
-        log.info("Wrote results to %s." % sys.argv[17])
+        log.info("Wrote results to %s." % sys.argv[16])
 
 atexit.register(closing_message)
 
@@ -227,11 +226,11 @@ def detect_time_dependency():
     is_dependant = False
     index = 0
     if PRINT_PATHS:
-        print "ALL PATH CONDITIONS"
+        log.info("ALL PATH CONDITIONS")
     for cond in path_conditions:
         index += 1
         if PRINT_PATHS:
-            print "PATH " + str(index) + ": " + str(cond)
+            log.info("PATH " + str(index) + ": " + str(cond))
         list_vars = []
         for expr in cond:
             if is_expr(expr):
