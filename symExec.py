@@ -86,7 +86,7 @@ CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 
 if UNIT_TEST == 1:
     try:
-        result_file = open(sys.argv[15], 'r')
+        result_file = open(sys.argv[16], 'r')
     except:
         log.critical("Could not open result file for unit test")
         exit()
