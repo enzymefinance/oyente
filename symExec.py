@@ -179,7 +179,6 @@ def results_for_web():
     if not results.has_key("concurrency"):
         results["concurrency"] = False
 
-    print "================Results=============="
     print "Callstack Attack:", results['callstack']
     print "Time Dependency:", results['time_dependency']
     print "Reentrancy bug:", results['reentrancy']

@@ -1,6 +1,7 @@
 'use strict'
 
 var $ = require('jquery')
+var yo = require('yo-yo')
 
 function getOptions () {
   var data = {}
@@ -20,15 +21,32 @@ function Analyzer () {
     var data = getOptions()
     data['source'] = source
 
+    var loading = yo`
+      <span>
+        <i class="fa fa-cog fa-spin fa-fw">  </i>
+        Analyzing ...
+      </span>
+    `
+    $('#analyzer').html(loading)
+    $('#analysis').empty().hide()
+
+
     $.ajax({
       type: 'POST',
       url: 'home/analyze',
       data: { 'data': data },
       dataType: 'json',
       success: function (response) {
-        $('#analysis').empty()
+        var finish = yo`
+          <span>
+            <i class="fa fa-search" aria-hidden="true">  </i>
+            Analyze
+          </span>
+        `
+        $('#analyzer').html(finish)
+
         $('#analysis').append(response.result)
-        $('#analysis').show()
+        $('#analysis').fadeIn()
       }
     })
   }
