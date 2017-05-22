@@ -30,6 +30,9 @@ GLOBAL_TIMEOUT = 2
 # print path conditions
 PRINT_PATHS = 0
 
+# WEB = 1 means that we are using Oyente for web service
+WEB = 0
+
 # depth limit for DFS
 DEPTH_LIMIT = 100000
 

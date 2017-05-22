@@ -34,7 +34,7 @@ results = {}
 
 UNSIGNED_BOUND_NUMBER = 2**256 - 1
 
-if len(sys.argv) >= 16:
+if len(sys.argv) >= 17:
     IGNORE_EXCEPTIONS = int(sys.argv[2])
     REPORT_MODE = int(sys.argv[3])
     PRINT_MODE = int(sys.argv[4])
@@ -49,6 +49,7 @@ if len(sys.argv) >= 16:
     GAS_LIMIT = int(sys.argv[13])
     USE_INPUT_STATE = int(sys.argv[14])
     LOOP_LIMIT = int(sys.argv[15])
+    WEB =int(sys.argv[16])
 
 if REPORT_MODE:
     report_file = sys.argv[1] + '.report'
@@ -86,7 +87,7 @@ CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 
 if UNIT_TEST == 1:
     try:
-        result_file = open(sys.argv[16], 'r')
+        result_file = open(sys.argv[17], 'r')
     except:
         log.critical("Could not open result file for unit test")
         exit()
@@ -168,14 +169,33 @@ def main():
     if not isTesting(): log.info("\t  Reentrancy bug exists: %s" % str(reentrancy_bug_found))
     results['reentrancy'] = reentrancy_bug_found
 
+def results_for_web():
+    if not results.has_key("callstack"):
+        results["callstack"] = False
+    if not results.has_key("time_dependency"):
+        results["time_dependency"] = False
+    if not results.has_key("reentrancy"):
+        results["reentrancy"] = False
+    if not results.has_key("concurrency"):
+        results["concurrency"] = False
+
+    print "================Results=============="
+    print "Callstack Attack:", results['callstack']
+    print "Time Dependency:", results['time_dependency']
+    print "Reentrancy bug:", results['reentrancy']
+    print "Concurrency:", results['concurrency']
+
+
 def closing_message():
     if UNIT_TEST ==1: log.info("\t====== Analysis Completed ======")
-    if len(sys.argv) > 16:
-        with open(sys.argv[16], 'w') as of:
+    if len(sys.argv) > 17:
+        with open(sys.argv[17], 'w') as of:
             of.write(json.dumps(results,indent=1))
-        log.info("Wrote results to %s." % sys.argv[16])
+        log.info("Wrote results to %s." % sys.argv[17])
 
 atexit.register(closing_message)
+if WEB:
+    atexit.register(results_for_web)
 
 def change_format():
     with open(sys.argv[1]) as disasm_file:

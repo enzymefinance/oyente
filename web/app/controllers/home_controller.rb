@@ -9,7 +9,7 @@ class HomeController < ApplicationController
       file.write(oyente_params[:source])
     end
 
-    @output = `python #{ENV['OYENTE']}/oyente.py -s #{filepath} #{options} `
+    @output = `python #{ENV['OYENTE']}/oyente.py -s #{filepath} -w #{options} `
     FileUtils.rm_r Dir.glob('public/uploads/*')
   end
 

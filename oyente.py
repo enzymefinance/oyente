@@ -70,6 +70,7 @@ def main():
     parser.add_argument("-gl", "--gaslimit", help="Limit Gas", action="store", dest="gas_limit", type=int)
     parser.add_argument("-st", "--state", help="Get input state from state.json", action="store_true")
     parser.add_argument("-ll", "--looplimit", help="Limit a number of loop", action="store", dest="loop_limit", type=int)
+    parser.add_argument("-w", "--web", help="Run Oyente for web service", action="store_true")
 
     args = parser.parse_args()
 
@@ -85,6 +86,7 @@ def main():
     global_params.IGNORE_EXCEPTIONS = 1 if args.error else 0
     global_params.USE_GLOBAL_BLOCKCHAIN = 1 if args.globalblockchain else 0
     global_params.INPUT_STATE = 1 if args.state else 0
+    global_params.WEB = 1 if args.web else 0
 
     if args.depth_limit:
         global_params.DEPTH_LIMIT = args.depth_limit
@@ -129,12 +131,12 @@ def main():
 
         # TODO: Do this as an import and run, instead of shell call and hacky fix
 
-        cmd = os.system('python symExec.py %s.disasm %d %d %d %d %d %d %d %d %d %d %d %d %d %d %s' % \
+        cmd = os.system('python symExec.py %s.disasm %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %s' % \
             (args.source, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, \
             global_params.DATA_FLOW, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, \
             global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, global_params.USE_GLOBAL_BLOCKCHAIN, \
             global_params.DEPTH_LIMIT, global_params.GAS_LIMIT, global_params.INPUT_STATE, global_params.LOOP_LIMIT, \
-            args.source+".json" if args.json else ""))
+            global_params.WEB, args.source+".json" if args.json else ""))
 
         os.system('rm %s.disasm' % (args.source))
         os.system('rm %s' % (processed_evm_file))
@@ -183,12 +185,12 @@ def main():
 
         # TODO: Do this as an import and run, instead of shell call and hacky fix
         filepath = os.path.join(os.path.dirname(__file__), 'symExec.py')
-        os.system('python %s %s.evm.disasm %d %d %d %d %d %d %d %d %d %d %d %d %d %d %s' % \
+        os.system('python %s %s.evm.disasm %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %s' % \
             (filepath, cname, global_params.IGNORE_EXCEPTIONS, global_params.REPORT_MODE, global_params.PRINT_MODE, \
             global_params.DATA_FLOW, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, \
             global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, global_params.USE_GLOBAL_BLOCKCHAIN, \
             global_params.DEPTH_LIMIT, global_params.GAS_LIMIT, global_params.INPUT_STATE, global_params.LOOP_LIMIT, \
-            cname+".json" if args.json else ""))
+            global_params.WEB, cname+".json" if args.json else ""))
 
         if args.evm:
             with open(cname+'.evm','w') as of:
