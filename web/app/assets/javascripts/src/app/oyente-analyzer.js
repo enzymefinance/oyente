@@ -22,7 +22,7 @@ function Analyzer () {
 
     $.ajax({
       type: 'POST',
-      url: 'http://localhost:3000/home/analyze',
+      url: 'home/analyze',
       data: { 'data': data },
       dataType: 'json',
       success: function (response) {

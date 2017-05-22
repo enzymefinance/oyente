@@ -6,7 +6,7 @@ class HomeController < ApplicationController
     filepath = Rails.root.join('public', 'uploads', 'tmp.sol')
 
     File.open(filepath, 'wb') do |file|
-      file.write(oyente_params[:sources])
+      file.write(oyente_params[:source])
     end
 
     @output = `python #{ENV['OYENTE']}/oyente.py -s #{filepath} #{options} `

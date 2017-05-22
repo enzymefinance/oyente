@@ -1,3 +1,3 @@
 if Rails.env.development?
-  ENV['OYENTE'] = '/home/luong/Workspace/blockchain/oyente'
+  ENV['OYENTE'] = '/home/ngotungson/Docker/share/oyente'
 end
