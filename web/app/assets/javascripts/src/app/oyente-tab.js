@@ -37,15 +37,6 @@ module.exports = oyenteTab
 function oyenteTab () {
   return yo`
     <div class="${css.oyenteTabView}" id="oyenteView">
-      <div class="${css.crow}">
-        <select class="${css.select}" id="optionSelector" name="">
-          <option selected disabled>Select options</option>
-          <option value="Z3_timeout">Timeout for Z3.</option>
-          <option value="Depth_limit">Limit DFS depth</option>
-          <option value="Gas_limit">Limit Gas</option>
-          <option value="Loop_limit">Limit a number of loop</option>
-        </select>
-      </div>
       <div class="${css.options}" id="oyente-options"></div>
       <div class="${css.crow}">
         <div class="${css.button}" id="analyzer" title="Analyze source code's security">

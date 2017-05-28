@@ -989,67 +989,32 @@ var run = function () {
   .large_item {
     flex-basis: 75%;
   }
-  .remove_item {
-    cursor: pointer;
-  }
   `
 
-  var selectedOpts = ["Z3_timeout", "Depth_limit", "Gas_limit", "Loop_limit"]
-  var defaultValues = {
-    "Z3_timeout": 2,
-    "Depth_limit": 1000,
-    "Gas_limit": 4000000,
-    "Loop_limit": 100
-  }
+  var options = [
+    {"label": "Z3_timeout", "attribute": "timeout", "default_value": 2},
+    {"label": "Depth_limit", "attribute": "depthlimit", "default_value": 1000},
+    {"label": "Gas_limit", "attribute": "gaslimit", "default_value": 4000000},
+    {"label": "Loop_limit", "attribute": "looplimit", "default_value": 100}
+  ]
 
+  for (var i in options) {
+    var opt = options[i]
+    var label = opt["label"]
+    var attribute = opt["attribute"]
+    var val = opt["default_value"]
 
-  $(document).ready(function() {
-    for (var i in selectedOpts) {
-      var val = selectedOpts[i]
-      var option = yo`
-        <div class="oyente-opt ${css.crow}" data-label="${val}">
-          <div class="${css.small_item}">
-            <div>${val}:</div>
-          </div>
-          <div class="${css.large_item}"><input type="${typeInput(val)}" value="${defaultValues[val]}"></div>
-          <span class="remove-item ${css.remove_item}"><i class="fa fa-close" aria-hidden="true"></i></span>
-        </div>
-      `
-
-      $('#oyente-options').append(option)
-    }
-  })
-
-  $('#optionSelector').on('change', function () {
-    var val = $(this).val()
     var option = yo`
-      <div class="oyente-opt ${css.crow}" data-label="${val}">
+      <div class="oyente-opt ${css.crow}" data-label="${attribute}">
         <div class="${css.small_item}">
-          <div>${val}:</div>
+          <div>${label}:</div>
         </div>
-        <div class="${css.large_item}"><input type="${typeInput(val)}" value="${defaultValues[val]}"></div>
-        <span class="remove-item ${css.remove_item}"><i class="fa fa-close" aria-hidden="true"></i></span>
+        <div class="${css.large_item}"><input type="${typeInput(label)}" value="${val}"></div>
       </div>
     `
-    if ( selectedOpts.indexOf(val) !== -1) return
 
-    selectedOpts.push(val)
     $('#oyente-options').append(option)
-  })
-
-  $('#oyente-options').on('click', '.remove-item', function () {
-    var opt_label = $(this).parent().data('label')
-    var ind = selectedOpts.indexOf(opt_label)
-    if (ind !== -1) {
-      selectedOpts.splice(ind, 1)
-    }
-
-    $(this).parent().remove()
-
-    if ( selectedOpts.length == 0 ) {
-      $('#optionSelector option[disabled]').prop('selected', true)
-    }
-  })
+  }
 
   function typeInput (option_label) {
     var opt_type_number = ['Z3_timeout', 'Depth_limit', 'Gas_limit', 'Loop_limit']
