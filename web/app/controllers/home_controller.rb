@@ -3,13 +3,17 @@ class HomeController < ApplicationController
   end
 
   def analyze
-    filepath = Rails.root.join('public', 'uploads', 'tmp.sol')
+    upload_path = Rails.root.join('public', 'uploads')
+    filepath = upload_path.join('tmp.sol')
+
+    Dir.mkdir(upload_path) unless Dir.exists?(upload_path)
 
     File.open(filepath, 'wb') do |file|
       file.write(oyente_params[:source])
     end
 
-    @output = `python #{ENV['OYENTE']}/oyente.py -s #{filepath} -w #{options} `
+    @output = `python #{ENV['OYENTE']}/oyente.py -s #{filepath} -w#{options} `
+
     FileUtils.rm_r Dir.glob('public/uploads/*')
   end
 
@@ -22,7 +26,7 @@ class HomeController < ApplicationController
     opts = ""
     oyente_params.each do |opt, val|
       unless opt == "source"
-        opts += "--#{opt} #{val}"
+        opts += " --#{opt} #{val}"
       end
     end
     return opts
