@@ -992,10 +992,10 @@ var run = function () {
   `
 
   var options = [
-    {"label": "Z3_timeout", "attribute": "timeout", "default_value": 2},
-    {"label": "Depth_limit", "attribute": "depthlimit", "default_value": 1000},
-    {"label": "Gas_limit", "attribute": "gaslimit", "default_value": 4000000},
-    {"label": "Loop_limit", "attribute": "looplimit", "default_value": 100}
+    {"label": "Z3_timeout", "attribute": "timeout", "default_value": 2, "title": "help=Limit DFS depth, action=store, dest=depth_limit, type=int", "unit": "seconds"},
+    {"label": "Depth_limit", "attribute": "depthlimit", "default_value": 1000, "title": "help=Limit DFS depth, action=store, dest=depth_limit, type=int"},
+    {"label": "Gas_limit", "attribute": "gaslimit", "default_value": 4000000, "title": "help=Limit Gas, action=store, dest=gas_limit, type=int"},
+    {"label": "Loop_limit", "attribute": "looplimit", "default_value": 100, "title": "help=Limit a number of loop, action=store, dest=loop_limit, type=int"}
   ]
 
   for (var i in options) {
@@ -1003,13 +1003,15 @@ var run = function () {
     var label = opt["label"]
     var attribute = opt["attribute"]
     var val = opt["default_value"]
+    var title = opt["title"]
+    var unit = opt["unit"]
 
     var option = yo`
       <div class="oyente-opt ${css.crow}" data-label="${attribute}">
         <div class="${css.small_item}">
           <div>${label}:</div>
         </div>
-        <div class="${css.large_item}"><input type="${typeInput(label)}" value="${val}"></div>
+        <div class="${css.large_item}"><input type="${typeInput(label)}" value="${val}" title="${title}"><span> ${unit}</span></div>
       </div>
     `
 
