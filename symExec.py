@@ -33,22 +33,21 @@ log = logging.getLogger()
 UNSIGNED_BOUND_NUMBER = 2**256 - 1
 CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 
-if len(sys.argv) >= 17:
-    IGNORE_EXCEPTIONS = int(sys.argv[2])
-    REPORT_MODE = int(sys.argv[3])
-    PRINT_MODE = int(sys.argv[4])
-    DATA_FLOW = int(sys.argv[5])
-    CHECK_CONCURRENCY_FP = int(sys.argv[6])
-    TIMEOUT = int(sys.argv[7])
-    UNIT_TEST = int(sys.argv[8])
-    GLOBAL_TIMEOUT = int(sys.argv[9])
-    PRINT_PATHS = int(sys.argv[10])
-    USE_GLOBAL_BLOCKCHAIN = int(sys.argv[11])
-    DEPTH_LIMIT = int(sys.argv[12])
-    GAS_LIMIT = int(sys.argv[13])
-    USE_INPUT_STATE = int(sys.argv[14])
-    LOOP_LIMIT = int(sys.argv[15])
-    WEB =int(sys.argv[16])
+IGNORE_EXCEPTIONS = int(sys.argv[2])
+REPORT_MODE = int(sys.argv[3])
+PRINT_MODE = int(sys.argv[4])
+DATA_FLOW = int(sys.argv[5])
+CHECK_CONCURRENCY_FP = int(sys.argv[6])
+TIMEOUT = int(sys.argv[7])
+UNIT_TEST = int(sys.argv[8])
+GLOBAL_TIMEOUT = int(sys.argv[9])
+PRINT_PATHS = int(sys.argv[10])
+USE_GLOBAL_BLOCKCHAIN = int(sys.argv[11])
+DEPTH_LIMIT = int(sys.argv[12])
+GAS_LIMIT = int(sys.argv[13])
+USE_INPUT_STATE = int(sys.argv[14])
+LOOP_LIMIT = int(sys.argv[15])
+WEB = int(sys.argv[16])
 
 c_name = sys.argv[1]
 set_cur_file(c_name[4:] if len(c_name) > 5 else c_name)
@@ -76,9 +75,12 @@ path_conditions = [] # store the path condition corresponding to each path in mo
 all_gs = [] # store global variables, e.g. storage, balance of all paths
 total_no_of_paths = 0
 
-# Z3 solver
-solver = Solver()
-solver.set("timeout", TIMEOUT)
+
+def initGlobalVars():
+    global solver
+    # Z3 solver
+    solver = Solver()
+    solver.set("timeout", TIMEOUT)
 
 def check_unit_test_file():
     if UNIT_TEST == 1:
@@ -124,6 +126,7 @@ def handler(signum, frame):
 
 def main():
     check_unit_test_file()
+    initGlobalVars()
     start = time.time()
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(GLOBAL_TIMEOUT)
@@ -608,6 +611,7 @@ def full_sym_exec():
 
 # Symbolically executing a block from the start address
 def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis):
+    global solver
     if block < 0:
         log.debug("UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH")
         return ["ERROR"]
@@ -756,6 +760,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
 
 # Symbolically executing an instruction
 def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_vars, analysis):
+    global solver
     instr_parts = str.split(instr, ' ')
 
     if instr_parts[0] == "INVALID":
