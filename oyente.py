@@ -15,7 +15,7 @@ def cmd_exists(cmd):
 def has_dependencies_installed():
     try:
         import z3
-        import z3util
+        import z3.z3util
         if z3.get_version_string() != '4.4.1':
             logging.warning("You are using an untested version of z3. 4.4.1 is the officially tested version")
     except:
