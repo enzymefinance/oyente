@@ -187,10 +187,10 @@ def results_for_web():
 
 def closing_message():
     if UNIT_TEST ==1: log.info("\t====== Analysis Completed ======")
-    if len(sys.argv) > 17:
-        with open(sys.argv[17], 'w') as of:
+    if len(sys.argv) > 18:
+        with open(sys.argv[18], 'w') as of:
             of.write(json.dumps(results,indent=1))
-        log.info("Wrote results to %s." % sys.argv[17])
+        log.info("Wrote results to %s." % sys.argv[18])
 
 atexit.register(closing_message)
 if WEB:
