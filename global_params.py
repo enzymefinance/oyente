@@ -19,7 +19,7 @@ CHECK_CONCURRENCY_FP = 0
 # Timeout for z3
 TIMEOUT = 1000
 
-# Set this flag to 1 if we want to do unit test
+# Set this flag to 1 if we want to do unit test from file unit_test.json 
 # Set this flag to 2 if we want to do evm real value unit test
 # Set this flag to 3 if we want to do evm symbolic unit test
 UNIT_TEST = 0
