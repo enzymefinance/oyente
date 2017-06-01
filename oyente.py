@@ -87,6 +87,7 @@ def main():
     global_params.USE_GLOBAL_BLOCKCHAIN = 1 if args.globalblockchain else 0
     global_params.INPUT_STATE = 1 if args.state else 0
     global_params.WEB = 1 if args.web else 0
+    global_params.STORE_RESULT = 1 if args.json else 0
 
     if args.depth_limit:
         global_params.DEPTH_LIMIT = args.depth_limit
@@ -136,7 +137,7 @@ def main():
             global_params.DATA_FLOW, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, \
             global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, global_params.USE_GLOBAL_BLOCKCHAIN, \
             global_params.DEPTH_LIMIT, global_params.GAS_LIMIT, global_params.INPUT_STATE, global_params.LOOP_LIMIT, \
-            global_params.WEB, args.source+".json" if args.json else ""))
+            global_params.WEB, global_params.STORE_RESULT))
 
         os.system('rm %s.disasm' % (args.source))
         os.system('rm %s' % (processed_evm_file))
@@ -190,7 +191,7 @@ def main():
             global_params.DATA_FLOW, global_params.CHECK_CONCURRENCY_FP, global_params.TIMEOUT, \
             global_params.UNIT_TEST, global_params.GLOBAL_TIMEOUT, global_params.PRINT_PATHS, global_params.USE_GLOBAL_BLOCKCHAIN, \
             global_params.DEPTH_LIMIT, global_params.GAS_LIMIT, global_params.INPUT_STATE, global_params.LOOP_LIMIT, \
-            global_params.WEB, cname+".json" if args.json else ""))
+            global_params.WEB, global_params.STORE_RESULT))
 
         if args.evm:
             with open(cname+'.evm','w') as of:

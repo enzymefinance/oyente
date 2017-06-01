@@ -187,9 +187,11 @@ def results_for_web():
 
 def closing_message():
     if UNIT_TEST ==1: log.info("\t====== Analysis Completed ======")
-    with open(sys.argv[17], 'w') as of:
-        of.write(json.dumps(results,indent=1))
-    log.info("Wrote results to %s." % sys.argv[17])
+    if STORE_RESULT:
+        result_file = sys.argv[2] + '.json'
+        with open(result_file , 'w') as of:
+            of.write(json.dumps(results,indent=1))
+        log.info("Wrote results to %s." % result_file)
 
 atexit.register(closing_message)
 if WEB:

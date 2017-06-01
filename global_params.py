@@ -33,6 +33,9 @@ PRINT_PATHS = 0
 # WEB = 1 means that we are using Oyente for web service
 WEB = 0
 
+# Redirect results to a json file.
+STORE_RESULT = 0
+
 # depth limit for DFS
 DEPTH_LIMIT = 100000
 
