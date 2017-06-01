@@ -2,7 +2,7 @@
 # later on we may want to return more meaningful output: e.g. if the concurrency changes
 # the amount of money or the recipient.
 from z3 import *
-from z3util import get_vars
+from z3.z3util import get_vars
 import json
 import mmap
 import os

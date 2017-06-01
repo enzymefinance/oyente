@@ -1,7 +1,7 @@
 from opcodes import *
 import math
 from z3 import *
-from z3util import *
+from z3.z3util import *
 from vargenerator import *
 from utils import *
 from global_params import *
