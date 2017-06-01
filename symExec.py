@@ -30,9 +30,8 @@ else:
     logging.basicConfig(level=logging.INFO)
 log = logging.getLogger()
 
-results = {}
-
 UNSIGNED_BOUND_NUMBER = 2**256 - 1
+CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 
 if len(sys.argv) >= 17:
     IGNORE_EXCEPTIONS = int(sys.argv[2])
@@ -51,15 +50,18 @@ if len(sys.argv) >= 17:
     LOOP_LIMIT = int(sys.argv[15])
     WEB =int(sys.argv[16])
 
+c_name = sys.argv[1]
+set_cur_file(c_name[4:] if len(c_name) > 5 else c_name)
+log_file = open(c_name + '.log', "w")
 if REPORT_MODE:
-    report_file = sys.argv[1] + '.report'
-    rfile = open(report_file, 'w')
+    rfile = open(c_name + '.report', 'w')
 
 count_unresolved_jumps = 0
 gen = Generator()  # to generate names for symbolic variables
 if USE_GLOBAL_BLOCKCHAIN:
     data_source = EthereumData()
 
+results = {}
 end_ins_dict = {}  # capturing the last statement of each basic block
 instructions = {}  # capturing all the instructions, keys are corresponding addresses
 jump_type = {}  # capturing the "jump type" of each basic block
@@ -74,26 +76,17 @@ path_conditions = [] # store the path condition corresponding to each path in mo
 all_gs = [] # store global variables, e.g. storage, balance of all paths
 total_no_of_paths = 0
 
-c_name = sys.argv[1]
-if(len(c_name) > 5):
-    c_name = c_name[4:]
-set_cur_file(c_name)
-
 # Z3 solver
 solver = Solver()
 solver.set("timeout", TIMEOUT)
 
-CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
-
-if UNIT_TEST == 1:
-    try:
-        result_file = open('unit_test.json', 'r')
-    except:
-        log.critical("Could not open result file for unit test")
-        exit()
-
-
-log_file = open(sys.argv[1] + '.log', "w")
+def check_unit_test_file():
+    if UNIT_TEST == 1:
+        try:
+            result_file = open('unit_test.json', 'r')
+        except:
+            log.critical("Could not open result file for unit test")
+            exit()
 
 def isSymbolic(value):
     return not isinstance(value, (int, long))
@@ -130,6 +123,7 @@ def handler(signum, frame):
     raise Exception("timeout")
 
 def main():
+    check_unit_test_file()
     start = time.time()
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(GLOBAL_TIMEOUT)
@@ -198,7 +192,7 @@ if WEB:
     atexit.register(results_for_web)
 
 def change_format():
-    with open(sys.argv[1]) as disasm_file:
+    with open(c_name) as disasm_file:
         file_contents = disasm_file.readlines()
         i = 0
         firstLine = file_contents[0].strip('\n')
@@ -225,13 +219,13 @@ def change_format():
         file_contents[0] = firstLine
         file_contents[-1] += '\n'
 
-    with open(sys.argv[1], 'w') as disasm_file:
+    with open(c_name, 'w') as disasm_file:
        disasm_file.write("\n".join(file_contents))
 
 
 def build_cfg_and_analyze():
     change_format()
-    with open(sys.argv[1], 'r') as disasm_file:
+    with open(c_name, 'r') as disasm_file:
         disasm_file.readline()  # Remove first line
         tokens = tokenize.generate_tokens(disasm_file.readline)
         collect_vertices(tokens)
@@ -264,7 +258,7 @@ def detect_time_dependency():
     results['time_dependency'] = is_dependant
 
     if REPORT_MODE:
-        file_name = sys.argv[1].split("/")[len(sys.argv[1].split("/"))-1].split(".")[0]
+        file_name = c_name.split("/")[len(c_name.split("/"))-1].split(".")[0]
         report_file = file_name + '.report'
         with open(report_file, 'w') as rfile:
             if is_dependant:
@@ -1336,10 +1330,10 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "CODESIZE":
-        if sys.argv[1].endswith('.disasm'):
-            evm_file_name = sys.argv[1][:-7]
+        if c_name.endswith('.disasm'):
+            evm_file_name = c_name[:-7]
         else:
-            evm_file_name = sys.argv[1]
+            evm_file_name = c_name
         with open(evm_file_name, 'r') as evm_file:
            evm = evm_file.read()[:-1]
            code_size = len(evm)/2
@@ -1809,7 +1803,7 @@ def check_callstack_attack(disasm):
     return False
 
 def run_callstack_attack():
-    disasm_data = open(sys.argv[1]).read()
+    disasm_data = open(c_name).read()
     instr_pattern = r"([\d]+): ([A-Z]+)([\d]?)(?: 0x)?(\S+)?"
     instructions = re.findall(instr_pattern, disasm_data)
     result = check_callstack_attack(instructions)
