@@ -49,38 +49,68 @@ USE_INPUT_STATE = int(sys.argv[14])
 LOOP_LIMIT = int(sys.argv[15])
 WEB = int(sys.argv[16])
 
-c_name = sys.argv[1]
-set_cur_file(c_name[4:] if len(c_name) > 5 else c_name)
-log_file = open(c_name + '.log', "w")
-if REPORT_MODE:
-    rfile = open(c_name + '.report', 'w')
-
-count_unresolved_jumps = 0
-gen = Generator()  # to generate names for symbolic variables
-if USE_GLOBAL_BLOCKCHAIN:
-    data_source = EthereumData()
-
-results = {}
-end_ins_dict = {}  # capturing the last statement of each basic block
-instructions = {}  # capturing all the instructions, keys are corresponding addresses
-jump_type = {}  # capturing the "jump type" of each basic block
-vertices = {}
-Edge = namedtuple("Edge", ["v1", "v2"]) # Factory Function for tuples is used as dictionary key
-edges = {}
-visited_edges = {}
-money_flow_all_paths = []
-reentrancy_all_paths =[]
-data_flow_all_paths = [[], []] # store all storage addresses
-path_conditions = [] # store the path condition corresponding to each path in money_flow_all_paths
-all_gs = [] # store global variables, e.g. storage, balance of all paths
-total_no_of_paths = 0
-
 
 def initGlobalVars():
     global solver
     # Z3 solver
     solver = Solver()
     solver.set("timeout", TIMEOUT)
+
+    global results
+    results = {}
+
+    global end_ins_dict # capturing the last statement of each basic block
+    end_ins_dict = {}
+
+    global instructions # capturing all the instructions, keys are corresponding addresses
+    instructions = {}
+
+    global jump_type  # capturing the "jump type" of each basic block
+    jump_type = {}
+
+    global vertices
+    vertices = {}
+
+    global edges
+    edges = {}
+
+    global visited_edges
+    visited_edges = {}
+
+    global money_flow_all_paths
+    money_flow_all_paths = []
+
+    global reentrancy_all_paths
+    reentrancy_all_paths =[]
+
+    global data_flow_all_paths
+    data_flow_all_paths = [[], []] # store all storage addresses
+
+    global path_conditions
+    path_conditions = [] # store the path condition corresponding to each path in money_flow_all_paths
+
+    global all_gs
+    all_gs = [] # store global variables, e.g. storage, balance of all paths
+
+    global total_no_of_paths
+    total_no_of_paths = 0
+
+    global gen
+    gen = Generator()  # to generate names for symbolic variables
+
+    global data_source
+    if USE_GLOBAL_BLOCKCHAIN:
+        data_source = EthereumData()
+
+    global c_name
+    c_name = sys.argv[1]
+
+    global log_file
+    log_file = open(c_name + '.log', "w")
+
+    global rfile
+    if REPORT_MODE:
+        rfile = open(c_name + '.report', 'w')
 
 def check_unit_test_file():
     if UNIT_TEST == 1:
@@ -127,12 +157,14 @@ def handler(signum, frame):
 def main():
     check_unit_test_file()
     initGlobalVars()
+    set_cur_file(c_name[4:] if len(c_name) > 5 else c_name)
     start = time.time()
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(GLOBAL_TIMEOUT)
 
     log.info("Running, please wait...")
 
+    global results
 
     if not isTesting(): log.info("\t============ Results ===========")
 
@@ -167,6 +199,7 @@ def main():
     results['reentrancy'] = reentrancy_bug_found
 
 def results_for_web():
+    global results
     if not results.has_key("callstack"):
         results["callstack"] = False
     if not results.has_key("time_dependency"):
@@ -239,6 +272,7 @@ def build_cfg_and_analyze():
 
 # Detect if a money flow depends on the timestamp
 def detect_time_dependency():
+    global results
     TIMESTAMP_VAR = "IH_s"
     is_dependant = False
     index = 0
@@ -272,6 +306,7 @@ def detect_time_dependency():
 
 # detect if two paths send money to different people
 def detect_money_concurrency():
+    global results
     n = len(money_flow_all_paths)
     for i in range(n):
         log.debug("Path " + str(i) + ": " + str(money_flow_all_paths[i]))
@@ -361,6 +396,10 @@ def print_cfg():
 # 2. Then identify each basic block (i.e. one-in, one-out)
 # 3. Store them in vertices
 def collect_vertices(tokens):
+    global end_ins_dict
+    global instructions
+    global jump_type
+
     current_ins_address = 0
     last_ins_address = 0
     is_new_line = True
@@ -443,6 +482,8 @@ def collect_vertices(tokens):
 
 
 def construct_bb():
+    global vertices
+    global edges
     sorted_addresses = sorted(instructions.keys())
     size = len(sorted_addresses)
     for key in end_ins_dict:
@@ -464,6 +505,8 @@ def construct_static_edges():
 
 
 def add_falls_to():
+    global vertices
+    global edges
     key_list = sorted(jump_type.keys())
     length = len(key_list)
     for i, key in enumerate(key_list):
@@ -612,6 +655,12 @@ def full_sym_exec():
 # Symbolically executing a block from the start address
 def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis):
     global solver
+    global visited_edges
+    global money_flow_all_paths
+    global data_flow_all_paths
+    global path_conditions
+    global all_gs
+    Edge = namedtuple("Edge", ["v1", "v2"]) # Factory Function for tuples is used as dictionary key
     if block < 0:
         log.debug("UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH")
         return ["ERROR"]
@@ -761,6 +810,8 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
 # Symbolically executing an instruction
 def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_vars, analysis):
     global solver
+    global vertices
+    global edges
     instr_parts = str.split(instr, ' ')
 
     if instr_parts[0] == "INVALID":
@@ -1808,6 +1859,7 @@ def check_callstack_attack(disasm):
     return False
 
 def run_callstack_attack():
+    global results
     disasm_data = open(c_name).read()
     instr_pattern = r"([\d]+): ([A-Z]+)([\d]?)(?: 0x)?(\S+)?"
     instructions = re.findall(instr_pattern, disasm_data)
