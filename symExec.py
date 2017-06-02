@@ -75,11 +75,10 @@ path_conditions = [] # store the path condition corresponding to each path in mo
 all_gs = [] # store global variables, e.g. storage, balance of all paths
 total_no_of_paths = 0
 
-
 def initGlobalVars():
     global solver
     # Z3 solver
-    solver = Solver()
+    solver = Tactic("default").solver()
     solver.set("timeout", TIMEOUT)
 
 def check_unit_test_file():
