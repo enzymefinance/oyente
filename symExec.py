@@ -20,34 +20,10 @@ import traceback
 from collections import namedtuple
 
 import logging
-# once this is run as an imported module, logging conf can be used like this
-# we need to load it via a hack till then
-# log = logging.getLogger(__name__)
-
-if PRINT_MODE:
-    logging.basicConfig(level=logging.DEBUG)
-else:
-    logging.basicConfig(level=logging.INFO)
-log = logging.getLogger()
+log = logging.getLogger(__name__)
 
 UNSIGNED_BOUND_NUMBER = 2**256 - 1
 CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
-
-IGNORE_EXCEPTIONS = int(sys.argv[2])
-REPORT_MODE = int(sys.argv[3])
-PRINT_MODE = int(sys.argv[4])
-DATA_FLOW = int(sys.argv[5])
-CHECK_CONCURRENCY_FP = int(sys.argv[6])
-TIMEOUT = int(sys.argv[7])
-UNIT_TEST = int(sys.argv[8])
-GLOBAL_TIMEOUT = int(sys.argv[9])
-PRINT_PATHS = int(sys.argv[10])
-USE_GLOBAL_BLOCKCHAIN = int(sys.argv[11])
-DEPTH_LIMIT = int(sys.argv[12])
-GAS_LIMIT = int(sys.argv[13])
-USE_INPUT_STATE = int(sys.argv[14])
-LOOP_LIMIT = int(sys.argv[15])
-WEB = int(sys.argv[16])
 
 
 def initGlobalVars():
@@ -102,9 +78,6 @@ def initGlobalVars():
     if USE_GLOBAL_BLOCKCHAIN:
         data_source = EthereumData()
 
-    global c_name
-    c_name = sys.argv[1]
-
     global log_file
     log_file = open(c_name + '.log', "w")
 
@@ -154,7 +127,10 @@ def handler(signum, frame):
     if UNIT_TEST == 2 or UNIT_TEST == 3: exit(TIME_OUT)
     raise Exception("timeout")
 
-def main():
+def main(contract):
+    global c_name
+    c_name = contract
+
     check_unit_test_file()
     initGlobalVars()
     set_cur_file(c_name[4:] if len(c_name) > 5 else c_name)
@@ -520,7 +496,7 @@ def get_init_global_state(path_conditions_and_vars):
     global_state = { "balance" : {} , "pc": 0 }
     init_is = init_ia = deposited_value = sender_address = receiver_address = gas_price = origin = currentCoinbase = currentTimestamp = currentNumber = currentDifficulty = currentGasLimit = callData = None
 
-    if USE_INPUT_STATE:
+    if INPUT_STATE:
         with open('state.json') as f:
             state = json.loads(f.read())
             if state["Is"]["balance"]:
@@ -1346,7 +1322,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             position = stack.pop(0)
-            if USE_INPUT_STATE and global_state["callData"]:
+            if INPUT_STATE and global_state["callData"]:
                 callData = global_state["callData"]
                 start = position * 2
                 end = start + 64
@@ -1366,7 +1342,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "CALLDATASIZE":
         global_state["pc"] = global_state["pc"] + 1
-        if USE_INPUT_STATE and global_state["callData"]:
+        if INPUT_STATE and global_state["callData"]:
             stack.insert(0, len(global_state["callData"])/2)
         else:
             new_var_name = gen.gen_data_size()
