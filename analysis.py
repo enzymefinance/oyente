@@ -5,6 +5,7 @@ from z3.z3util import *
 from vargenerator import *
 from utils import *
 from subprocess import Popen
+import global_params
 import logging
 log = logging.getLogger(__name__)
 
@@ -170,7 +171,7 @@ def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_
             recipient = simplify(recipient)
         analysis["money_flow"].append(("Ia", str(recipient), "all_remaining"))
     # this is for data flow
-    elif DATA_FLOW:
+    elif global_params.DATA_FLOW:
         if opcode == "SLOAD":
             if len(stack) > 0:
                 address = stack[0]
