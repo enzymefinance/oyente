@@ -9,18 +9,17 @@ import traceback
 import signal
 import time
 import logging
-
+from collections import namedtuple
 from z3 import *
+
 from vargenerator import *
 from ethereum_data import *
-
 from basicblock import BasicBlock
 from analysis import *
-
 from arithmetic_utils import *
 from global_params import *
 from test_evm.global_test_params import *
-from collections import namedtuple
+
 
 log = logging.getLogger(__name__)
 
@@ -37,13 +36,16 @@ def initGlobalVars():
     global results
     results = {}
 
-    global end_ins_dict # capturing the last statement of each basic block
+    # capturing the last statement of each basic block
+    global end_ins_dict
     end_ins_dict = {}
 
-    global instructions # capturing all the instructions, keys are corresponding addresses
+    # capturing all the instructions, keys are corresponding addresses
+    global instructions
     instructions = {}
 
-    global jump_type  # capturing the "jump type" of each basic block
+    # capturing the "jump type" of each basic block
+    global jump_type
     jump_type = {}
 
     global vertices
@@ -68,14 +70,16 @@ def initGlobalVars():
     global path_conditions
     path_conditions = []
 
+    # store global variables, e.g. storage, balance of all paths
     global all_gs
-    all_gs = [] # store global variables, e.g. storage, balance of all paths
+    all_gs = []
 
     global total_no_of_paths
     total_no_of_paths = 0
 
+    # to generate names for symbolic variables
     global gen
-    gen = Generator()  # to generate names for symbolic variables
+    gen = Generator()
 
     global data_source
     if USE_GLOBAL_BLOCKCHAIN:
@@ -230,7 +234,7 @@ def change_format():
                 if(int(lastInt, 16) or int(lastInt, 16) == 0) and len(lineParts) > 2:
                     lineParts[-1] = "=>"
                     lineParts.append(lastInt)
-            except Exception as e:
+            except Exception:
                 pass
             file_contents[i] = ' '.join(lineParts)
             i = i + 1
@@ -912,7 +916,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 first = to_symbolic(first)
                 second = to_symbolic(second)
                 solver.push()
-                solver.add( Not(second == 0) )
+                solver.add(Not(second == 0))
                 if solver.check() == unsat:
                     computed = 0
                 else:

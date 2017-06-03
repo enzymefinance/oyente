@@ -18,8 +18,8 @@ def has_dependencies_installed():
     try:
         import z3
         import z3.z3util
-        if z3.get_version_string() != '4.4.1':
-            logging.warning("You are using an untested version of z3. 4.4.1 is the officially tested version")
+        if z3.get_version_string() != '4.5.0':
+            logging.warning("You are using an untested version of z3. 4.5.0 is the officially tested version")
     except:
         logging.critical("Z3 is not available. Please install z3 from https://github.com/Z3Prover/z3.")
         return False
