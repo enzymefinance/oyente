@@ -26,9 +26,14 @@ class HomeController < ApplicationController
     opts = ""
     oyente_params.each do |opt, val|
       unless opt == "source"
+        val = seconds_to_milliseconds(val) if opt == "timeout"
         opts += " --#{opt} #{val}"
       end
     end
     return opts
+  end
+
+  def seconds_to_milliseconds second
+    ( second.to_f * 1000 ).to_i
   end
 end
