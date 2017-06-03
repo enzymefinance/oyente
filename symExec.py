@@ -1832,7 +1832,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             exit(UNKOWN_INSTRUCTION)
         raise Exception('UNKNOWN INSTRUCTION: ' + instr_parts[0])
 
-    print_state(start, stack, mem, global_state)
+    print_state(stack, mem, global_state)
 
 def check_callstack_attack(disasm):
     problematic_instructions = ['CALL', 'CALLCODE']
@@ -1854,14 +1854,14 @@ def run_callstack_attack():
     global results
     disasm_data = open(c_name).read()
     instr_pattern = r"([\d]+): ([A-Z]+)([\d]?)(?: 0x)?(\S+)?"
-    instructions = re.findall(instr_pattern, disasm_data)
-    result = check_callstack_attack(instructions)
+    instr = re.findall(instr_pattern, disasm_data)
+    result = check_callstack_attack(instr)
 
     if not isTesting():
         log.info("\t  CallStack Attack: \t %s", result)
     results['callstack'] = result
 
-def print_state(block_address, stack, mem, global_state):
+def print_state(stack, mem, global_state):
     log.debug("STACK: " + str(stack))
     log.debug("MEM: " + str(mem))
     log.debug("GLOBAL STATE: " + str(global_state))
@@ -1878,4 +1878,4 @@ def to_symbolic(number):
     return number
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1])
