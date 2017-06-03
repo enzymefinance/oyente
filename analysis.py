@@ -4,7 +4,6 @@ from z3 import *
 from z3.z3util import *
 from vargenerator import *
 from utils import *
-from global_params import *
 from subprocess import Popen
 import logging
 log = logging.getLogger(__name__)

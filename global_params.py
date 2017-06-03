@@ -16,7 +16,7 @@ DEBUG_MODE = 1
 # check false positive in concurrency
 CHECK_CONCURRENCY_FP = 0
 
-# Timeout for z3
+# Timeout for z3 in ms
 TIMEOUT = 1000
 
 # Set this flag to 1 if we want to do unit test from file unit_test.json 
@@ -43,5 +43,8 @@ GAS_LIMIT = 4000000
 
 LOOP_LIMIT = 1000
 
+# Use a public blockchain to speed up the symbolic execution
 USE_GLOBAL_BLOCKCHAIN = 0
+
+# Take state data from state.json to speed up the symbolic execution
 INPUT_STATE = 0

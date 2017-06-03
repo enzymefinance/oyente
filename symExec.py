@@ -17,7 +17,8 @@ from ethereum_data import *
 from basicblock import BasicBlock
 from analysis import *
 from arithmetic_utils import *
-from global_params import *
+import global_params
+# from global_params import *
 from test_evm.global_test_params import *
 
 
@@ -31,7 +32,7 @@ def initGlobalVars():
     global solver
     # Z3 solver
     solver = Solver()
-    solver.set("timeout", TIMEOUT)
+    solver.set("timeout", global_params.TIMEOUT)
 
     global results
     results = {}
@@ -82,18 +83,18 @@ def initGlobalVars():
     gen = Generator()
 
     global data_source
-    if USE_GLOBAL_BLOCKCHAIN:
+    if global_params.USE_GLOBAL_BLOCKCHAIN:
         data_source = EthereumData()
 
     global log_file
     log_file = open(c_name + '.log', "w")
 
     global rfile
-    if REPORT_MODE:
+    if global_params.REPORT_MODE:
         rfile = open(c_name + '.report', 'w')
 
 def check_unit_test_file():
-    if UNIT_TEST == 1:
+    if global_params.UNIT_TEST == 1:
         try:
             open('unit_test.json', 'r')
         except:
@@ -107,7 +108,7 @@ def isReal(value):
     return isinstance(value, (int, long))
 
 def isTesting():
-    return UNIT_TEST != 0
+    return global_params.UNIT_TEST != 0
 
 # A simple function to compare the end stack with the expected stack
 # configurations specified in a test file
@@ -131,7 +132,7 @@ def compare_storage_and_memory_unit_test(global_state, mem, analysis):
     exit(test_status)
 
 def handler(signum, frame):
-    if UNIT_TEST == 2 or UNIT_TEST == 3:
+    if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
         exit(TIME_OUT)
     raise Exception("timeout")
 
@@ -144,7 +145,7 @@ def main(contract):
     set_cur_file(c_name[4:] if len(c_name) > 5 else c_name)
     start = time.time()
     signal.signal(signal.SIGALRM, handler)
-    signal.alarm(GLOBAL_TIMEOUT)
+    signal.alarm(global_params.GLOBAL_TIMEOUT)
 
     log.info("Running, please wait...")
 
@@ -160,22 +161,22 @@ def main(contract):
         build_cfg_and_analyze()
         log.debug("Done Symbolic execution")
     except Exception as e:
-        if UNIT_TEST == 2 or UNIT_TEST == 3:
+        if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
             log.exception(e)
             exit(EXCEPTION)
         traceback.print_exc()
         raise e
     signal.alarm(0)
 
-    if REPORT_MODE:
+    if global_params.REPORT_MODE:
         rfile.write(str(total_no_of_paths) + "\n")
     detect_money_concurrency()
     detect_time_dependency()
     stop = time.time()
-    if REPORT_MODE:
+    if global_params.REPORT_MODE:
         rfile.write(str(stop-start))
         rfile.close()
-    if DATA_FLOW:
+    if global_params.DATA_FLOW:
         detect_data_concurrency()
         detect_data_money_concurrency()
     log.debug("Results for Reentrancy Bug: " + str(reentrancy_all_paths))
@@ -203,14 +204,14 @@ def results_for_web():
 
 def closing_message():
     log.info("\t====== Analysis Completed ======")
-    if STORE_RESULT:
-        result_file = sys.argv[2] + '.json'
+    if global_params.STORE_RESULT:
+        result_file = c_name + '.json'
         with open(result_file, 'w') as of:
             of.write(json.dumps(results, indent=1))
         log.info("Wrote results to %s.", result_file)
 
 atexit.register(closing_message)
-if WEB:
+if global_params.WEB:
     atexit.register(results_for_web)
 
 def change_format():
@@ -262,11 +263,11 @@ def detect_time_dependency():
     TIMESTAMP_VAR = "IH_s"
     is_dependant = False
     index = 0
-    if PRINT_PATHS:
+    if global_params.PRINT_PATHS:
         log.info("ALL PATH CONDITIONS")
     for cond in path_conditions:
         index += 1
-        if PRINT_PATHS:
+        if global_params.PRINT_PATHS:
             log.info("PATH " + str(index) + ": " + str(cond))
         list_vars = []
         for expr in cond:
@@ -281,7 +282,7 @@ def detect_time_dependency():
         log.info("\t  Time Dependency: \t %s", is_dependant)
     results['time_dependency'] = is_dependant
 
-    if REPORT_MODE:
+    if global_params.REPORT_MODE:
         file_name = c_name.split("/")[len(c_name.split("/"))-1].split(".")[0]
         report_file = file_name + '.report'
         with open(report_file, 'w') as rfile:
@@ -311,7 +312,7 @@ def detect_money_concurrency():
                 continue
             if is_diff(flow, jflow):
                 concurrency_paths.append([i-1, j])
-                if CHECK_CONCURRENCY_FP and \
+                if global_params.CHECK_CONCURRENCY_FP and \
                         is_false_positive(i-1, j, all_gs, path_conditions) and \
                         is_false_positive(j, i-1, all_gs, path_conditions):
                     false_positive.append([i-1, j])
@@ -326,7 +327,7 @@ def detect_money_concurrency():
         if not isTesting():
             log.info("\t  Concurrency Bug: \t False")
         results['concurrency'] = False
-    if REPORT_MODE:
+    if global_params.REPORT_MODE:
         rfile.write("number of path: " + str(n) + "\n")
         # number of FP detected
         rfile.write(str(len(false_positive)) + "\n")
@@ -510,7 +511,7 @@ def get_init_global_state(path_conditions_and_vars):
     global_state = {"balance" : {}, "pc": 0}
     init_is = init_ia = deposited_value = sender_address = receiver_address = gas_price = origin = currentCoinbase = currentTimestamp = currentNumber = currentDifficulty = currentGasLimit = callData = None
 
-    if INPUT_STATE:
+    if global_params.INPUT_STATE:
         with open('state.json') as f:
             state = json.loads(f.read())
             if state["Is"]["balance"]:
@@ -666,12 +667,12 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
     else:
         visited_edges.update({current_edge: 1})
 
-    if visited_edges[current_edge] > LOOP_LIMIT:
+    if visited_edges[current_edge] > global_params.LOOP_LIMIT:
         log.debug("Overcome a number of loop limit. Terminating this path ...")
         return stack
 
     current_gas_used = analysis["gas"]
-    if  current_gas_used > GAS_LIMIT:
+    if  current_gas_used > global_params.GAS_LIMIT:
         log.debug("Run out of gas. Terminating this path ... ")
         return stack
 
@@ -690,7 +691,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
     depth += 1
 
     # Go to next Basic Block(s)
-    if jump_type[block] == "terminal" or depth > DEPTH_LIMIT:
+    if jump_type[block] == "terminal" or depth > global_params.DEPTH_LIMIT:
         log.debug("TERMINATING A PATH ...")
         display_analysis(analysis)
         global total_no_of_paths
@@ -700,14 +701,14 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
             money_flow_all_paths.append(analysis["money_flow"])
             path_conditions.append(path_conditions_and_vars["path_condition"])
             all_gs.append(copy_global_values(global_state))
-        if DATA_FLOW:
+        if global_params.DATA_FLOW:
             if analysis["sload"] not in data_flow_all_paths[0]:
                 data_flow_all_paths[0].append(analysis["sload"])
             if analysis["sstore"] not in data_flow_all_paths[1]:
                 data_flow_all_paths[1].append(analysis["sstore"])
-        if UNIT_TEST == 1:
+        if global_params.UNIT_TEST == 1:
             compare_stack_unit_test(stack)
-        if UNIT_TEST == 2 or UNIT_TEST == 3:
+        if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
             compare_storage_and_memory_unit_test(global_state, mem, analysis)
 
     elif jump_type[block] == "unconditional":  # executing "JUMP"
@@ -758,7 +759,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
         except Exception as e:
             log_file.write(str(e))
             traceback.print_exc()
-            if not IGNORE_EXCEPTIONS:
+            if not global_params.IGNORE_EXCEPTIONS:
                 if str(e) == "timeout":
                     raise e
 
@@ -1308,7 +1309,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             address = stack.pop(0)
-            if isReal(address) and USE_GLOBAL_BLOCKCHAIN:
+            if isReal(address) and global_params.USE_GLOBAL_BLOCKCHAIN:
                 new_var = data_source.getBalance(address)
             else:
                 new_var_name = gen.gen_balance_var()
@@ -1339,7 +1340,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             position = stack.pop(0)
-            if INPUT_STATE and global_state["callData"]:
+            if global_params.INPUT_STATE and global_state["callData"]:
                 callData = global_state["callData"]
                 start = position * 2
                 end = start + 64
@@ -1359,7 +1360,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "CALLDATASIZE":
         global_state["pc"] = global_state["pc"] + 1
-        if INPUT_STATE and global_state["callData"]:
+        if global_params.INPUT_STATE and global_state["callData"]:
             stack.insert(0, len(global_state["callData"])/2)
         else:
             new_var_name = gen.gen_data_size()
@@ -1404,7 +1405,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             address = stack.pop(0)
-            if isReal(address) and USE_GLOBAL_BLOCKCHAIN:
+            if isReal(address) and global_params.USE_GLOBAL_BLOCKCHAIN:
                 code = data_source.getCode(address)
                 stack.insert(0, len(code)/2)
             else:
@@ -1650,7 +1651,6 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     elif instr_parts[0] == "JUMPDEST":
         # Literally do nothing
         global_state["pc"] = global_state["pc"] + 1
-        pass
     #
     #  60s & 70s: Push Operations
     #
@@ -1659,7 +1659,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         global_state["pc"] = global_state["pc"] + 1 + position
         pushed_value = int(instr_parts[1], 16)
         stack.insert(0, pushed_value)
-        if UNIT_TEST == 3: # test evm symbolic
+        if global_params.UNIT_TEST == 3: # test evm symbolic
             stack[0] = BitVecVal(stack[0], 256)
     #
     #  80s: Duplication Operations
@@ -1831,7 +1831,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
 
     else:
         log.debug("UNKNOWN INSTRUCTION: " + instr_parts[0])
-        if UNIT_TEST == 2 or UNIT_TEST == 3:
+        if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
             log.critical("Unkown instruction: %s" % instr_parts[0])
             exit(UNKOWN_INSTRUCTION)
         raise Exception('UNKNOWN INSTRUCTION: ' + instr_parts[0])
