@@ -1,25 +1,27 @@
-from z3 import *
-from vargenerator import *
-from ethereum_data import *
 import tokenize
-import signal
 from tokenize import NUMBER, NAME, NEWLINE
-from basicblock import BasicBlock
-from analysis import *
-from utils import *
 import math
-from arithmetic_utils import *
-import time
-from global_params import *
-from test_evm.global_test_params import *
 import sys
 import atexit
 import pickle
 import json
 import traceback
+import signal
+import time
+import logging
+
+from z3 import *
+from vargenerator import *
+from ethereum_data import *
+
+from basicblock import BasicBlock
+from analysis import *
+
+from arithmetic_utils import *
+from global_params import *
+from test_evm.global_test_params import *
 from collections import namedtuple
 
-import logging
 log = logging.getLogger(__name__)
 
 UNSIGNED_BOUND_NUMBER = 2**256 - 1
@@ -57,13 +59,14 @@ def initGlobalVars():
     money_flow_all_paths = []
 
     global reentrancy_all_paths
-    reentrancy_all_paths =[]
+    reentrancy_all_paths = []
 
     global data_flow_all_paths
     data_flow_all_paths = [[], []] # store all storage addresses
 
+    # store the path condition corresponding to each path in money_flow_all_paths
     global path_conditions
-    path_conditions = [] # store the path condition corresponding to each path in money_flow_all_paths
+    path_conditions = []
 
     global all_gs
     all_gs = [] # store global variables, e.g. storage, balance of all paths
@@ -88,7 +91,7 @@ def initGlobalVars():
 def check_unit_test_file():
     if UNIT_TEST == 1:
         try:
-            result_file = open('unit_test.json', 'r')
+            open('unit_test.json', 'r')
         except:
             log.critical("Could not open result file for unit test")
             exit()
@@ -112,8 +115,8 @@ def compare_stack_unit_test(stack):
             log.debug("PASSED UNIT-TEST")
         else:
             log.warning("FAILED UNIT-TEST")
-            log.warning("Expected size %d, Resulted size %d" % (size, len(stack)))
-            log.warning("Expected content %s \nResulted content %s" % (content, str(stack)))
+            log.warning("Expected size %d, Resulted size %d", size, len(stack))
+            log.warning("Expected content %s \nResulted content %s", content, str(stack))
     except Exception as e:
         log.warning("FAILED UNIT-TEST")
         log.warning(e.message)
@@ -124,7 +127,8 @@ def compare_storage_and_memory_unit_test(global_state, mem, analysis):
     exit(test_status)
 
 def handler(signum, frame):
-    if UNIT_TEST == 2 or UNIT_TEST == 3: exit(TIME_OUT)
+    if UNIT_TEST == 2 or UNIT_TEST == 3:
+        exit(TIME_OUT)
     raise Exception("timeout")
 
 def main(contract):
@@ -142,7 +146,8 @@ def main(contract):
 
     global results
 
-    if not isTesting(): log.info("\t============ Results ===========")
+    if not isTesting():
+        log.info("\t============ Results ===========")
 
     log.debug("Checking for Callstack attack...")
     run_callstack_attack()
@@ -171,7 +176,8 @@ def main(contract):
         detect_data_money_concurrency()
     log.debug("Results for Reentrancy Bug: " + str(reentrancy_all_paths))
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
-    if not isTesting(): log.info("\t  Reentrancy bug exists: %s" % str(reentrancy_bug_found))
+    if not isTesting():
+        log.info("\t  Reentrancy bug exists: %s", str(reentrancy_bug_found))
     results['reentrancy'] = reentrancy_bug_found
 
 def results_for_web():
@@ -192,12 +198,12 @@ def results_for_web():
 
 
 def closing_message():
-    if UNIT_TEST ==1: log.info("\t====== Analysis Completed ======")
+    log.info("\t====== Analysis Completed ======")
     if STORE_RESULT:
         result_file = sys.argv[2] + '.json'
-        with open(result_file , 'w') as of:
-            of.write(json.dumps(results,indent=1))
-        log.info("Wrote results to %s." % result_file)
+        with open(result_file, 'w') as of:
+            of.write(json.dumps(results, indent=1))
+        log.info("Wrote results to %s.", result_file)
 
 atexit.register(closing_message)
 if WEB:
@@ -211,7 +217,7 @@ def change_format():
         for line in file_contents:
             line = line.replace('SELFDESTRUCT', 'SUICIDE')
             line = line.replace('Missing opcode', 'INVALID')
-            line = line.replace(':','')
+            line = line.replace(':', '')
             lineParts = line.split(' ')
             try: # removing initial zeroes
                 lineParts[0] = str(int(lineParts[0]))
@@ -221,7 +227,7 @@ def change_format():
             lineParts[-1] = lineParts[-1].strip('\n')
             try: # adding arrow if last is a number
                 lastInt = lineParts[-1]
-                if(int(lastInt,16) or int(lastInt,16) == 0) and len(lineParts) > 2:
+                if(int(lastInt, 16) or int(lastInt, 16) == 0) and len(lineParts) > 2:
                     lineParts[-1] = "=>"
                     lineParts.append(lastInt)
             except Exception as e:
@@ -232,7 +238,7 @@ def change_format():
         file_contents[-1] += '\n'
 
     with open(c_name, 'w') as disasm_file:
-       disasm_file.write("\n".join(file_contents))
+        disasm_file.write("\n".join(file_contents))
 
 
 def build_cfg_and_analyze():
@@ -267,7 +273,8 @@ def detect_time_dependency():
             is_dependant = True
             break
 
-    if not isTesting(): log.info("\t  Time Dependency: \t %s" % is_dependant)
+    if not isTesting():
+        log.info("\t  Time Dependency: \t %s", is_dependant)
     results['time_dependency'] = is_dependant
 
     if REPORT_MODE:
@@ -306,12 +313,14 @@ def detect_money_concurrency():
                     false_positive.append([i-1, j])
 
     # if PRINT_MODE: print "All false positive cases: ", false_positive
-    log.debug("Concurrency in paths: ", concurrency_paths)
+    log.debug("Concurrency in paths: ")
     if len(concurrency_paths) > 0:
-        if not isTesting(): log.info("\t  Concurrency found in paths: %s" + str(concurrency_paths))
+        if not isTesting():
+            log.info("\t  Concurrency found in paths: %s", str(concurrency_paths))
         results['concurrency'] = True
     else:
-        if not isTesting(): log.info("\t  Concurrency Bug: \t False")
+        if not isTesting():
+            log.info("\t  Concurrency Bug: \t False")
         results['concurrency'] = False
     if REPORT_MODE:
         rfile.write("number of path: " + str(n) + "\n")
@@ -408,7 +417,7 @@ def collect_vertices(tokens):
             try:
                 current_ins_address = int(tok_string)
             except ValueError:
-                log.critical("ERROR when parsing row %d col %d" % (srow, scol))
+                log.critical("ERROR when parsing row %d col %d", srow, scol)
                 quit()
             is_new_line = False
             if is_new_block:
@@ -423,7 +432,7 @@ def collect_vertices(tokens):
             continue
         elif tok_type == NAME:
             if tok_string == "JUMPDEST":
-                if not (last_ins_address in end_ins_dict):
+                if last_ins_address not in end_ins_dict:
                     end_ins_dict[current_block] = last_ins_address
                 current_block = current_ins_address
                 is_new_block = False
@@ -445,8 +454,8 @@ def collect_vertices(tokens):
             current_line_content += tok_string + " "
 
     if current_block not in end_ins_dict:
-        log.debug("current block: %d" % current_block)
-        log.debug("last line: %d" % current_ins_address)
+        log.debug("current block: %d", current_block)
+        log.debug("last line: %d", current_ins_address)
         end_ins_dict[current_block] = current_ins_address
 
     if current_block not in jump_type:
@@ -465,7 +474,8 @@ def construct_bb():
     for key in end_ins_dict:
         end_address = end_ins_dict[key]
         block = BasicBlock(key, end_address)
-        if key not in instructions: continue
+        if key not in instructions:
+            continue
         block.add_instruction(instructions[key])
         i = sorted_addresses.index(key) + 1
         while i < size and sorted_addresses[i] <= end_address:
@@ -493,7 +503,7 @@ def add_falls_to():
 
 
 def get_init_global_state(path_conditions_and_vars):
-    global_state = { "balance" : {} , "pc": 0 }
+    global_state = {"balance" : {}, "pc": 0}
     init_is = init_ia = deposited_value = sender_address = receiver_address = gas_price = origin = currentCoinbase = currentTimestamp = currentNumber = currentDifficulty = currentGasLimit = callData = None
 
     if INPUT_STATE:
@@ -623,7 +633,8 @@ def full_sym_exec():
     path_conditions_and_vars = {"path_condition" : []}
     visited, depth = [], 0
     mem = {}
-    global_state = get_init_global_state(path_conditions_and_vars)  # this is init global state for this particular execution
+    # this is init global state for this particular execution
+    global_state = get_init_global_state(path_conditions_and_vars)
     analysis = init_analysis()
     return sym_exec_block(0, 0, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis)
 
@@ -641,7 +652,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
         log.debug("UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH")
         return ["ERROR"]
 
-    log.debug("Reach block address %d \n" % block)
+    log.debug("Reach block address %d \n", block)
     log.debug("STACK: " + str(stack))
 
     current_edge = Edge(pre_block, block)
@@ -656,7 +667,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
         return stack
 
     current_gas_used = analysis["gas"]
-    if  current_gas_used > GAS_LIMIT :
+    if  current_gas_used > GAS_LIMIT:
         log.debug("Run out of gas. Terminating this path ... ")
         return stack
 
@@ -690,8 +701,10 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
                 data_flow_all_paths[0].append(analysis["sload"])
             if analysis["sstore"] not in data_flow_all_paths[1]:
                 data_flow_all_paths[1].append(analysis["sstore"])
-        if UNIT_TEST == 1: compare_stack_unit_test(stack)
-        if UNIT_TEST == 2 or UNIT_TEST == 3: compare_storage_and_memory_unit_test(global_state, mem, analysis)
+        if UNIT_TEST == 1:
+            compare_stack_unit_test(stack)
+        if UNIT_TEST == 2 or UNIT_TEST == 3:
+            compare_storage_and_memory_unit_test(global_state, mem, analysis)
 
     elif jump_type[block] == "unconditional":  # executing "JUMP"
         successor = vertices[block].get_jump_target()
@@ -1073,11 +1086,11 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 if first >= 32 or first < 0:
                     computed = second
                 else:
-                   signbit_index_from_right = 8 * first + 7
-                   if second & (1 << signbit_index_from_right):
-                       computed = second | (2 ** 256 - (1 << signbit_index_from_right) )
-                   else:
-                       computed = second & ( (1 << signbit_index_from_right) - 1 )
+                    signbit_index_from_right = 8 * first + 7
+                    if second & (1 << signbit_index_from_right):
+                        computed = second | (2 ** 256 - (1 << signbit_index_from_right))
+                    else:
+                        computed = second & ((1 << signbit_index_from_right) - 1 )
             else:
                 first = to_symbolic(first)
                 second = to_symbolic(second)
@@ -1088,11 +1101,11 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 else:
                     signbit_index_from_right = 8 * first + 7
                     solver.push()
-                    solver.add( second & (1 << signbit_index_from_right) == 0 )
+                    solver.add(second & (1 << signbit_index_from_right) == 0)
                     if solver.check() == unsat:
-                        computed = second | ( 2 ** 256 - (1 << signbit_index_from_right) )
+                        computed = second | (2 ** 256 - (1 << signbit_index_from_right))
                     else:
-                        computed = second & ( (1 << signbit_index_from_right) - 1 )
+                        computed = second & ((1 << signbit_index_from_right) - 1)
                     solver.pop()
                 solver.pop()
             stack.insert(0, computed)
@@ -1326,7 +1339,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 callData = global_state["callData"]
                 start = position * 2
                 end = start + 64
-                while (end > len(callData)):
+                while end > len(callData):
                     # append with zeros if insufficient length
                     callData = callData + "0"
                 stack.insert(0, int(callData[start:end], 16))
@@ -1367,9 +1380,9 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         else:
             evm_file_name = c_name
         with open(evm_file_name, 'r') as evm_file:
-           evm = evm_file.read()[:-1]
-           code_size = len(evm)/2
-           stack.insert(0, code_size)
+            evm = evm_file.read()[:-1]
+            code_size = len(evm)/2
+            stack.insert(0, code_size)
     elif instr_parts[0] == "CODECOPY":  # Copy code running in current env to memory
         #  TODO: Don't know how to simulate this yet
         # Need an example to test
@@ -1503,7 +1516,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 solver.add(expression)
                 if solver.check() != unsat:
                     # this means that it is possibly that current_miu_i < temp
-                    if expression == True:
+                    if expression:
                         current_miu_i = temp
                     else:
                         current_miu_i = If(expression,temp,current_miu_i)
@@ -1536,7 +1549,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 solver.add(expression)
                 if solver.check() != unsat:
                     # this means that it is possibly that current_miu_i < temp
-                    if expression == True:
+                    if expression:
                         current_miu_i = temp
                     else:
                         current_miu_i = If(expression,temp,current_miu_i)
@@ -1576,17 +1589,19 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             stored_address = stack.pop(0)
             stored_value = stack.pop(0)
             if isReal(stored_address):
-                global_state["Ia"][stored_address] = stored_value  # note that the stored_value could be unknown
+                # note that the stored_value could be unknown
+                global_state["Ia"][stored_address] = stored_value
             else:
                 global_state["Ia"].clear()  # very conservative
-                global_state["Ia"][str(stored_address)] = stored_value  # note that the stored_value could be unknown
+                # note that the stored_value could be unknown
+                global_state["Ia"][str(stored_address)] = stored_value
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "JUMP":
         if len(stack) > 0:
             target_address = stack.pop(0)
             if isSymbolic(target_address):
-                target_address = int( str( simplify(target_address) ) )
+                target_address = int(str(simplify(target_address)))
             vertices[start].set_jump_target(target_address)
             if target_address not in edges[start]:
                 edges[start].append(target_address)
@@ -1597,7 +1612,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 1:
             target_address = stack.pop(0)
             if isSymbolic(target_address):
-                target_address = int( str( simplify(target_address) ) )
+                target_address = int(str(simplify(target_address)))
             vertices[start].set_jump_target(target_address)
             flag = stack.pop(0)
             branch_expression = (BitVecVal(0, 1) == BitVecVal(1, 1))
@@ -1605,7 +1620,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 if flag != 0:
                     branch_expression = True
             else:
-                branch_expression = (0 != flag)
+                branch_expression = (flag != 0)
             vertices[start].set_branch_expression(branch_expression)
             if target_address not in edges[start]:
                 edges[start].append(target_address)
@@ -1831,7 +1846,8 @@ def check_callstack_attack(disasm):
                 if disasm[j][1] == 'ISZERO':
                     error = False
                     break
-            if error == True: return True
+            if error:
+                return True
     return False
 
 def run_callstack_attack():
@@ -1841,7 +1857,8 @@ def run_callstack_attack():
     instructions = re.findall(instr_pattern, disasm_data)
     result = check_callstack_attack(instructions)
 
-    if not isTesting(): log.info("\t  CallStack Attack: \t %s" % result)
+    if not isTesting():
+        log.info("\t  CallStack Attack: \t %s", result)
     results['callstack'] = result
 
 def print_state(block_address, stack, mem, global_state):
