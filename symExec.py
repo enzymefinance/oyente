@@ -146,6 +146,9 @@ def main(contract):
     start = time.time()
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(global_params.GLOBAL_TIMEOUT)
+    atexit.register(closing_message)
+    if global_params.WEB:
+        atexit.register(results_for_web)
 
     log.info("Running, please wait...")
 
@@ -185,6 +188,9 @@ def main(contract):
         log.info("\t  Reentrancy bug exists: %s", str(reentrancy_bug_found))
     results['reentrancy'] = reentrancy_bug_found
 
+
+
+
 def results_for_web():
     global results
     if not results.has_key("callstack"):
@@ -209,10 +215,6 @@ def closing_message():
         with open(result_file, 'w') as of:
             of.write(json.dumps(results, indent=1))
         log.info("Wrote results to %s.", result_file)
-
-atexit.register(closing_message)
-if global_params.WEB:
-    atexit.register(results_for_web)
 
 def change_format():
     with open(c_name) as disasm_file:
