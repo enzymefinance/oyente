@@ -992,10 +992,10 @@ var run = function () {
   `
 
   var options = [
-    {"label": "Z3_timeout", "attribute": "timeout", "default_value": 2, "title": "help=Limit DFS depth, action=store, dest=depth_limit, type=int", "unit": "seconds"},
-    {"label": "Depth_limit", "attribute": "depthlimit", "default_value": 1000, "title": "help=Limit DFS depth, action=store, dest=depth_limit, type=int"},
-    {"label": "Gas_limit", "attribute": "gaslimit", "default_value": 4000000, "title": "help=Limit Gas, action=store, dest=gas_limit, type=int"},
-    {"label": "Loop_limit", "attribute": "looplimit", "default_value": 100, "title": "help=Limit a number of loop, action=store, dest=loop_limit, type=int"}
+    {"label": "Z3 Timeout", "attribute": "timeout", "default_value": 2, "title": "Time limit for z3 to solve path constraints during symbolic execution.", "unit": "seconds"},
+    {"label": "Gas Limit", "attribute": "gaslimit", "default_value": 4000000, "title": ""},
+    {"label": "Depth Limit", "attribute": "depthlimit", "default_value": 1000, "title": "A depth limit for exploring states in symbolic execution. The analysis coverage improves as the depth limit increases, with the cost of longer execution time."},
+    {"label": "Loop Limit", "attribute": "looplimit", "default_value": 100, "title": "The maximum number of iterations that Oyente will follow when encounter a loop. Both the analysis accuracy and the run time rise as this value increases."}
   ]
 
   for (var i in options) {
@@ -1009,7 +1009,9 @@ var run = function () {
     var option = yo`
       <div class="oyente-opt ${css.crow}" data-label="${attribute}">
         <div class="${css.small_item}">
-          <div>${label}:</div>
+          <div>
+            <span class="hint--right hint--large hint--info hint--rounded" aria-label="${title}"> ${label}:</span>
+          </div>
         </div>
         <div class="${css.large_item}"><input type="${typeInput(label)}" value="${val}" title="${title}"><span> ${unit}</span></div>
       </div>
