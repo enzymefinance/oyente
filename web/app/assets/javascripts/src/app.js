@@ -983,7 +983,6 @@ var run = function () {
   }
   .small_item {
     flex-basis: 15%;
-    text-align: right;
     margin-right: 5px;
   }
   .large_item {
@@ -993,7 +992,7 @@ var run = function () {
 
   var options = [
     {"label": "Z3 Timeout", "attribute": "timeout", "default_value": 2, "title": "Time limit for z3 to solve path constraints during symbolic execution.", "unit": "seconds"},
-    {"label": "Gas Limit", "attribute": "gaslimit", "default_value": 4000000, "title": ""},
+    {"label": "Gas Limit", "attribute": "gaslimit", "default_value": 4000000, "title": "Gas is the name for the execution fee that senders of transactions need to pay for every operation made on an Ethereum blockchain"},
     {"label": "Depth Limit", "attribute": "depthlimit", "default_value": 1000, "title": "A depth limit for exploring states in symbolic execution. The analysis coverage improves as the depth limit increases, with the cost of longer execution time."},
     {"label": "Loop Limit", "attribute": "looplimit", "default_value": 100, "title": "The maximum number of iterations that Oyente will follow when encounter a loop. Both the analysis accuracy and the run time rise as this value increases."}
   ]
