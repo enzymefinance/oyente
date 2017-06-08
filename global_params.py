@@ -19,13 +19,13 @@ CHECK_CONCURRENCY_FP = 0
 # Timeout for z3 in ms
 TIMEOUT = 1000
 
-# Set this flag to 1 if we want to do unit test from file unit_test.json 
+# Set this flag to 1 if we want to do unit test from file unit_test.json
 # Set this flag to 2 if we want to do evm real value unit test
 # Set this flag to 3 if we want to do evm symbolic unit test
 UNIT_TEST = 0
 
 # timeout to run symbolic execution (in secs)
-GLOBAL_TIMEOUT = 2
+GLOBAL_TIMEOUT = 50
 
 # print path conditions
 PRINT_PATHS = 0

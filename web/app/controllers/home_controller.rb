@@ -19,7 +19,7 @@ class HomeController < ApplicationController
 
   private
   def oyente_params
-    params.require(:data).permit(:source, :timeout, :depthlimit, :gaslimit, :looplimit)
+    params.require(:data).permit(:source, :timeout, :global_timeout, :depthlimit, :gaslimit, :looplimit)
   end
 
   def options
@@ -27,6 +27,7 @@ class HomeController < ApplicationController
     oyente_params.each do |opt, val|
       unless opt == "source"
         val = seconds_to_milliseconds(val) if opt == "timeout"
+        opt = opt.gsub(/_/, '-')
         opts += " --#{opt} #{val}"
       end
     end
