@@ -511,7 +511,7 @@ def add_falls_to():
 
 def get_init_global_state(path_conditions_and_vars):
     global_state = {"balance" : {}, "pc": 0}
-    init_is = init_ia = deposited_value = sender_address = receiver_address = gas_price = origin = currentCoinbase = currentTimestamp = currentNumber = currentDifficulty = currentGasLimit = callData = None
+    init_is = init_ia = deposited_value = sender_address = receiver_address = gas_price = origin = currentCoinbase = currentNumber = currentDifficulty = currentGasLimit = callData = None
 
     if global_params.INPUT_STATE:
         with open('state.json') as f:
@@ -532,8 +532,6 @@ def get_init_global_state(path_conditions_and_vars):
                 origin = int(state["exec"]["origin"], 16)
             if state["env"]["currentCoinbase"]:
                 currentCoinbase = int(state["env"]["currentCoinbase"], 16)
-            if state["env"]["currentTimestamp"]:
-                currentTimestamp = int(state["env"]["currentTimestamp"], 16)
             if state["env"]["currentNumber"]:
                 currentNumber = int(state["env"]["currentNumber"], 16)
             if state["env"]["currentDifficulty"]:
@@ -594,11 +592,6 @@ def get_init_global_state(path_conditions_and_vars):
         new_var_name = "IH_c"
         currentCoinbase = BitVec(new_var_name, 256)
         path_conditions_and_vars[new_var_name] = currentCoinbase
-
-    if not currentTimestamp:
-        new_var_name = "IH_s"
-        currentTimestamp = BitVec(new_var_name, 256)
-        path_conditions_and_vars[new_var_name] = currentTimestamp
 
     if not currentNumber:
         new_var_name = "IH_i"

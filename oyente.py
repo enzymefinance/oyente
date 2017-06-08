@@ -106,7 +106,7 @@ def main():
         "-p", "--paths", help="Print path condition information.", action="store_true")
     parser.add_argument(
         "--error", help="Enable exceptions and print output. Monsters here.", action="store_true")
-    parser.add_argument("-t", "--timeout", type=int, help="Timeout for Z3.")
+    parser.add_argument("-t", "--timeout", type=int, help="Timeout for Z3 in ms.")
     parser.add_argument(
         "-v", "--verbose", help="Verbose output, print everything.", action="store_true")
     parser.add_argument(
@@ -119,7 +119,7 @@ def main():
                         action="store", dest="gas_limit", type=int)
     parser.add_argument(
         "-st", "--state", help="Get input state from state.json", action="store_true")
-    parser.add_argument("-ll", "--looplimit", help="Limit a number of loop",
+    parser.add_argument("-ll", "--looplimit", help="Limit number of loops",
                         action="store", dest="loop_limit", type=int)
     parser.add_argument(
         "-w", "--web", help="Run Oyente for web service", action="store_true")
