@@ -1011,9 +1011,7 @@ var run = function () {
     var option = yo`
       <div class="oyente-opt ${css.crow}" data-label="${attribute}">
         <div class="${css.small_item}">
-          <div>
-            <span class="hint--right hint--large hint--info hint--rounded" aria-label="${title}"> ${label}:</span>
-          </div>
+          <div>${label}:</div>
         </div>
         <div class="${css.large_item}"><input type="${typeInput(label)}" value="${val}" title="${title}"><span> ${unit}</span></div>
       </div>
