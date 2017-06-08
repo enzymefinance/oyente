@@ -106,11 +106,3 @@ In the container, run `batch_run.py` after activating the virtualenv. Results ar
 The benchmarks take a long time and a *lot* of RAM in any but the largest of clusters, beware.
 
 Some analytics regarding the number of contracts tested, number of contracts analysed etc. is collected when running this benchmark.
-
-#### Known Issues
-If you encounter the `unhashable instance` error, please add the following to your `class AstRef(Z3PPObject):` in `/usr/lib/python2.7/dist-packages/z3.py`:
-```
-def __hash__(self):
-        return self.hash()
-```
-The latest version of Z3 does support this, but some previous version does not.
