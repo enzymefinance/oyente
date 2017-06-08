@@ -1,6 +1,7 @@
 # Code Structure
 
-*oyente.py* 
+*oyente.py*
+
 This is the main entry point to the program. Oyente is able to analyze smart contracts via the following inputs 
 - solidity program
 - evm bytecode
@@ -14,6 +15,7 @@ The contracts are then disassembled into opcodes using the ```evm disasm``` comm
 After this, the symexec module is called with the disassembled file which carries out the analyses of the contracts for various vulnerabilities (TOD, timestamp-dependence, mishandled exceptions). 
 
 *symexec.py*
+
 The analysis starts off with the ```build_cfg_and_analyze``` function. We break up the disasm file created by oyente.py into tokens using the native tokenize python module. 
 
 The *collect_vertices* and *construct_bb* functions identify the basic blocks in the program and we store them as vertices. Basic blocks are identified by using opcodes like ```JUMPDEST```, ```STOP```, ```RETURN```, ```SUICIDE```, ```JUMP``` and ```JUMPI``` as separators. Each basic block is backed by an instance of BasicBlock class defined in basicblock.py
@@ -32,6 +34,7 @@ We find out if the ```path_conditions``` variable contains the symbolic variable
 - Concurrency bug
 
 *vargenerator.py*
+
 This is a utility class to provide unqiue symbolic variables required for analysis
 
 *analysis.py*
