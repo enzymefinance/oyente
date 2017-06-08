@@ -123,6 +123,7 @@ def main():
                         action="store", dest="loop_limit", type=int)
     parser.add_argument(
         "-w", "--web", help="Run Oyente for web service", action="store_true")
+    parser.add_argument("-glt", "--global-timeout", help="Timeout for symbolic execution", action="store", dest="global_timeout", type=int)
 
     args = parser.parse_args()
 
@@ -147,6 +148,8 @@ def main():
         global_params.GAS_LIMIT = args.gas_limit
     if args.loop_limit:
         global_params.LOOP_LIMIT = args.loop_limit
+    if args.global_timeout and args.global_timeout < global_params.GLOBAL_TIMEOUT:
+        global_params.GLOBAL_TIMEOUT = args.global_timeout
 
     if not has_dependencies_installed():
         return

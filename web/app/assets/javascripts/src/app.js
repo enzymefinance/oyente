@@ -993,7 +993,8 @@ var run = function () {
 
   var options = [
     {"label": "Z3 Timeout", "attribute": "timeout", "default_value": 2, "title": "Time limit for z3 to solve path constraints during symbolic execution.", "unit": "seconds"},
-    {"label": "Gas Limit", "attribute": "gaslimit", "default_value": 4000000, "title": ""},
+    {"label": "Global Timeout", "attribute": "global_timeout", "default_value": 20, "title": "Time limit to force Oyente to terminate. Maximum value is 50", "unit": "seconds"},
+    {"label": "Gas Limit", "attribute": "gaslimit", "default_value": 4000000, "title": "The maximum gas can be used to run Oyente"},
     {"label": "Depth Limit", "attribute": "depthlimit", "default_value": 1000, "title": "A depth limit for exploring states in symbolic execution. The analysis coverage improves as the depth limit increases, with the cost of longer execution time."},
     {"label": "Loop Limit", "attribute": "looplimit", "default_value": 100, "title": "The maximum number of iterations that Oyente will follow when encounter a loop. Both the analysis accuracy and the run time rise as this value increases."}
   ]
