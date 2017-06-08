@@ -55,6 +55,7 @@ def check_reentrancy_bug(path_conditions_and_vars, global_state):
     log.info("=>>>>>> New PC: " + str(new_path_condition))
 
     solver = Solver()
+    solver.set("timeout", global_params.TIMEOUT)
     solver.push()
     solver.add(path_condition)
     solver.add(new_path_condition)
@@ -217,6 +218,7 @@ def is_feasible(prev_pc, gstate, curr_pc):
         if var in vars_mapping:
             new_pc.append(vars_mapping[var] == gstate[storage_address])
     solver = Solver()
+    solver.set("timeout", global_params.TIMEOUT)
     solver.push()
     solver.add(new_pc)
     if solver.check() == unsat:
@@ -262,6 +264,7 @@ def is_diff(flow1, flow2):
                        Not(flow1[i][1] == flow2[i][1]),
                        Not(flow1[i][2] == flow2[i][2]))
             solver = Solver()
+            solver.set("timeout", global_params.TIMEOUT)
             solver.push()
             solver.add(tx_cd)
 
