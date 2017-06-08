@@ -3,11 +3,38 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <style>
-      /* Email styles need to be inline */
+      .container { padding: 15px auto }
+
+      @media (min-width: 768px) {
+        .container {
+          width: 750px;
+        }
+      }
+      @media (min-width: 992px) {
+        .container {
+          width: 970px;
+        }
+      }
+      @media (min-width: 1200px) {
+        .container {
+          width: 1170px;
+        }
+      }
+
+      .result {
+        background-color: white;
+        border: .2em dotted lightGrey;
+        line-height: 20px;
+        padding: 8px 15px;
+        border-radius: 5px;
+        margin-bottom: 1em
+      }
     </style>
   </head>
 
   <body>
-    <%= yield %>
+    <div class="container">
+      <%= yield %>
+    </div>
   </body>
 </html>
