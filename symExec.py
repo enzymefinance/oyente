@@ -670,7 +670,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
         return stack
 
     current_gas_used = analysis["gas"]
-    if  current_gas_used > global_params.GAS_LIMIT:
+    if current_gas_used > global_params.GAS_LIMIT:
         log.debug("Run out of gas. Terminating this path ... ")
         return stack
 
