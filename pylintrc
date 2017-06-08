@@ -1,0 +1,2 @@
+[master]
+disable=invalid-name,missing-docstring,too-many-statements
