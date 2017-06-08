@@ -607,6 +607,10 @@ def get_init_global_state(path_conditions_and_vars):
         new_var_name = "IH_l"
         currentGasLimit = BitVec(new_var_name, 256)
         path_conditions_and_vars[new_var_name] = currentGasLimit
+        
+    new_var_name = "IH_s"     
+    currentTimestamp = BitVec(new_var_name, 256)      
+    path_conditions_and_vars[new_var_name] = currentTimestamp
 
     # the state of the current current contract
     if "Ia" not in global_state:
