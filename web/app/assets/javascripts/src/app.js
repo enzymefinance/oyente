@@ -967,7 +967,7 @@ var run = function () {
     if (currentFile) {
       var target = currentFile
       var source = files.get(target)
-      analyzer.analyze(source)
+      analyzer.analyze(target, source)
     }
   }
 
@@ -996,7 +996,8 @@ var run = function () {
     {"label": "Global Timeout", "attribute": "global_timeout", "default_value": 20, "title": "Time limit to force Oyente to terminate. Maximum value is 50", "unit": "seconds"},
     {"label": "Gas Limit", "attribute": "gaslimit", "default_value": 4000000, "title": "The maximum gas can be used to run Oyente"},
     {"label": "Depth Limit", "attribute": "depthlimit", "default_value": 1000, "title": "A depth limit for exploring states in symbolic execution. The analysis coverage improves as the depth limit increases, with the cost of longer execution time."},
-    {"label": "Loop Limit", "attribute": "looplimit", "default_value": 100, "title": "The maximum number of iterations that Oyente will follow when encounter a loop. Both the analysis accuracy and the run time rise as this value increases."}
+    {"label": "Loop Limit", "attribute": "looplimit", "default_value": 100, "title": "The maximum number of iterations that Oyente will follow when encounter a loop. Both the analysis accuracy and the run time rise as this value increases."},
+    {"label": "Email", "attribute": "email", "default_value": "", "title": "The result will be sent to this email after the analysis is done"}
   ]
 
   for (var i in options) {

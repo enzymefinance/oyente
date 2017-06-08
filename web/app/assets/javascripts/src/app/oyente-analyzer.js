@@ -17,9 +17,10 @@ function getOptions () {
 
 function Analyzer () {
 
-  this.analyze = function (source) {
+  this.analyze = function (filename, source) {
     var data = getOptions()
     data['source'] = source
+    data['filename'] = filename
 
     var loading = yo`
       <span>

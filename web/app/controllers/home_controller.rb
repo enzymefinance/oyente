@@ -14,18 +14,18 @@ class HomeController < ApplicationController
 
     @output = `python #{ENV['OYENTE']}/oyente.py -s #{filepath} -w#{options} `
 
-    FileUtils.rm_r Dir.glob('public/uploads/*')
+    UserMailer.analyzer_result_notification(oyente_params[:filename], filepath.to_s, @output, oyente_params[:email]).deliver_later
   end
 
   private
   def oyente_params
-    params.require(:data).permit(:source, :timeout, :global_timeout, :depthlimit, :gaslimit, :looplimit)
+    params.require(:data).permit(:filename, :source, :timeout, :global_timeout, :depthlimit, :gaslimit, :looplimit, :email)
   end
 
   def options
     opts = ""
     oyente_params.each do |opt, val|
-      unless opt == "source"
+      unless ["source", "filename", "email"].include?(opt)
         val = seconds_to_milliseconds(val) if opt == "timeout"
         opt = opt.gsub(/_/, '-')
         opts += " --#{opt} #{val}"
