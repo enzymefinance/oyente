@@ -197,7 +197,9 @@ def main():
                 with open(processed_evm_file, 'w') as of:
                     of.write(bin_str)
 
+            os.remove(processed_evm_file)
             os.remove(disasm_file)
+            os.remove(disasm_file + '.log')
 
 if __name__ == '__main__':
     main()
