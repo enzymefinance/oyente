@@ -353,7 +353,7 @@ def detect_data_concurrency():
                     if not addr in concurrency_addr:
                         concurrency_addr.append(addr)
                     break
-    log.debug("data conccureny in storage " + str(concurrency_addr))
+    log.debug("data concurrency in storage " + str(concurrency_addr))
 
 # Detect if any change in a storage address will result in a different
 # flow of money. Currently I implement this detection by
