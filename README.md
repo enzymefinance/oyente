@@ -106,3 +106,7 @@ In the container, run `batch_run.py` after activating the virtualenv. Results ar
 The benchmarks take a long time and a *lot* of RAM in any but the largest of clusters, beware.
 
 Some analytics regarding the number of contracts tested, number of contracts analysed etc. is collected when running this benchmark.
+
+## Contributing
+
+Checkout out our [contribution guide](https://github.com/melonproject/oyente/blob/master/CONTRIBUTING.md) and the code structure [here](https://github.com/melonproject/oyente/blob/master/code.md). 
