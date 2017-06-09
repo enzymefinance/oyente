@@ -23,15 +23,19 @@ The *collect_vertices* and *construct_bb* functions identify the basic blocks in
 After the basic blocks are created, we start to symbolically execute each basic block with the full_sym_exec function. We get the instructions stored in each basic block and execute each of them symbolically via the sym_exec_ins function. In this function, we model each opcode as closely as possible to the behaviour described in the ethereum yellow paper. After this, add this basic block to the list of already visited blocks and follow it to the next basic block. We also maintain the necessary path conditions required to get to the block in the ```path_conditions_and_vars``` variable. In case of instructions like JUMP, there is only one basic block to follow the program execution to. In other cases like ```JUMPI```, we first check if the branch expression is provably True or False using z3. If not, we explore both the branches by adding the branch expression and the negated branch expression to the ```path_conditions_and_vars``` variable. 
 
 - Callstack attack
+
 Checking for the callstack attack is done by the *check_callstack_attack* function. If a ```CALL``` or a ```CALLCODE``` instruction is found without a ```ISZERO``` opcode following it, we flag it as being vulnerable to the callstack attack. 
 
 - Timestamp dependence attack
+
 We find out if the ```path_conditions``` variable contains the symbolic variable corresponding to the block timestamp. If so, the program can be concluded to take a path in the program which makes use of the block timestamp, making it vulnerable to the Timestamp dependence attack. 
 
 - Reentrancy bug
+
 This presence of this bug is analysed in the ```check_reentrancy_bug``` function in analysis.py. At each CALL that is encountered, we obtain the path condition for the execution before the CALL is executed. We then check if such condition with updated variables (e.g., storage values) still holds (i.e., if the call can be executed again). If so, we consider this a vulnerability, since it is possible for the callee to re-execute the call before finishing it.
 
 - Concurrency bug
+
 We track the sender, recepient and the value transferred at each ```CALL``` and ```SUICIDE``` instruction in the ```update_analysis``` function. If these values are different for different flows, we report the bug in the ```detect_money_concurrency``` function.  
 
 ### *vargenerator.py*
