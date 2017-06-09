@@ -5,11 +5,11 @@ var yo = require('yo-yo')
 
 function getOptions () {
   var data = {}
-  $('.oyente-opt').each( function () {
-    var label = $(this).data('label')
-    var val = $(this).find('input').val()
+  $('#oyente-options input').each( function () {
+    var attr = $(this).attr('name')
+    var val = $(this).val()
     if (val) {
-      data[label] = val
+      data[attr] = val
     }
   })
   return data
@@ -28,9 +28,8 @@ function Analyzer () {
         Analyzing ...
       </span>
     `
-    $('#analyzer').html(loading)
+    $('#analyzer').html(loading).css('pointer-events', 'none')
     $('#analysis').empty().hide()
-
 
     $.ajax({
       type: 'POST',
@@ -44,10 +43,12 @@ function Analyzer () {
             Analyze
           </span>
         `
-        $('#analyzer').html(finish)
-
         $('#analysis').append(response.result)
+        $('#analyzer').html(finish).css('pointer-events', 'auto')
         $('#analysis').fadeIn()
+      },
+      error: function(error) {
+        $('#analyzer').html(finish).css('pointer-events', 'auto')
       }
     })
   }

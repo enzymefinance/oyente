@@ -957,10 +957,69 @@ var run = function () {
     }
   }
 
-  // ----------------- Oyente analyzer --------------------
-  var analyzer = new OyenteAnalyzer()
+  // ----------------- Oyente optionSelector ---------------
+  var css = csjs`
+  .crow {
+    margin-top: 1em;
+    display: flex;
+  }
+  .small_item {
+    flex-basis: 10em;
+    text-align: right;
+    margin-right: 5px;
+  }
+  .large_item {
+    flex-basis: 30em;
+  }
+  `
 
+  var options = yo`
+    <div>
+      <div class="${css.crow}">
+        <div class="${css.small_item}">
+          <div>Z3 Timeout:</div>
+        </div>
+        <div class="${css.large_item}"><input name="timeout" type="number"value=5 min=0 title="Time limit for z3 to solve path constraints during symbolic execution."><span> seconds</span></div>
+      </div>
+      <div class="${css.crow}">
+        <div class="${css.small_item}">
+          <div>Global Timeout:</div>
+        </div>
+        <div class="${css.large_item}"><input name="global_timeout" type="number" value=20 min=0 max=50 title="Time limit to force Oyente to terminate. Maximum value is 50"><span> seconds</span></div>
+      </div>
+      <div class="${css.crow}">
+        <div class="${css.small_item}">
+          <div>Gas Limit:</div>
+        </div>
+        <div class="${css.large_item}"><input name="gaslimit" type="number" value=4000000 min=0 title="The maximum gas can be used to run Oyente"></div>
+      </div>
+      <div class="${css.crow}">
+        <div class="${css.small_item}">
+          <div>Depth Limit:</div>
+        </div>
+        <div class="${css.large_item}"><input name="depthlimit" type="number" value=1000 min=0 title="A depth limit for exploring states in symbolic execution. The analysis coverage improves as the depth limit increases, with the cost of longer execution time."></div>
+      </div>
+      <div class="${css.crow}">
+        <div class="${css.small_item}">
+          <div>Loop Limit:</div>
+        </div>
+        <div class="${css.large_item}"><input name="looplimit" type="number" value=100 min=0 title="The maximum number of iterations that Oyente will follow when encounter a loop. Both the analysis accuracy and the run time rise as this value increases."></div>
+      </div>
+      <div class="${css.crow}">
+        <div class="${css.small_item}">
+          <div>Email:</div>
+        </div>
+        <div class="${css.large_item}"><input name="email" type="email" title="The result will be sent to this email after the analysis is done" placeholder="contact@example.com"></div>
+      </div>
+    </div>
+  `
+
+  $('#oyente-options').append(options)
+
+  // ----------------- Oyente analyzer --------------------
   function runAnalyzer () {
+    var analyzer = new OyenteAnalyzer()
+
     if (transactionDebugger.isActive) return
     editorSyncFile()
     var currentFile = config.get('currentFile')
@@ -971,62 +1030,9 @@ var run = function () {
     }
   }
 
-  $('#analyzer').click(function () {
+  $('#analyzer').click(function (e) {
     runAnalyzer()
   })
-
-  // ----------------- Oyente optionSelector ---------------
-  var css = csjs`
-  .crow {
-    margin-top: 1em;
-    display: flex;
-  }
-  .small_item {
-    flex-basis: 15%;
-    text-align: right;
-    margin-right: 5px;
-  }
-  .large_item {
-    flex-basis: 75%;
-  }
-  `
-
-  var options = [
-    {"label": "Z3 Timeout", "attribute": "timeout", "default_value": 2, "title": "Time limit for z3 to solve path constraints during symbolic execution.", "unit": "seconds"},
-    {"label": "Global Timeout", "attribute": "global_timeout", "default_value": 20, "title": "Time limit to force Oyente to terminate. Maximum value is 50", "unit": "seconds"},
-    {"label": "Gas Limit", "attribute": "gaslimit", "default_value": 4000000, "title": "The maximum gas can be used to run Oyente"},
-    {"label": "Depth Limit", "attribute": "depthlimit", "default_value": 1000, "title": "A depth limit for exploring states in symbolic execution. The analysis coverage improves as the depth limit increases, with the cost of longer execution time."},
-    {"label": "Loop Limit", "attribute": "looplimit", "default_value": 100, "title": "The maximum number of iterations that Oyente will follow when encounter a loop. Both the analysis accuracy and the run time rise as this value increases."},
-    {"label": "Email", "attribute": "email", "default_value": "", "title": "The result will be sent to this email after the analysis is done"}
-  ]
-
-  for (var i in options) {
-    var opt = options[i]
-    var label = opt["label"]
-    var attribute = opt["attribute"]
-    var val = opt["default_value"]
-    var title = opt["title"]
-    var unit = opt["unit"]
-
-    var option = yo`
-      <div class="oyente-opt ${css.crow}" data-label="${attribute}">
-        <div class="${css.small_item}">
-          <div>${label}:</div>
-        </div>
-        <div class="${css.large_item}"><input type="${typeInput(label)}" value="${val}" title="${title}"><span> ${unit}</span></div>
-      </div>
-    `
-
-    $('#oyente-options').append(option)
-  }
-
-  function typeInput (option_label) {
-    var opt_type_number = ['Z3_timeout', 'Depth_limit', 'Gas_limit', 'Loop_limit']
-    if ( opt_type_number.indexOf(option_label) !== -1 ) {
-      return "number"
-    }
-    return "text"
-  }
 
   // set default
   $('#optimize').attr('checked', (queryParams.get().optimize === 'true'))

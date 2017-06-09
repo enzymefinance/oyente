@@ -13,6 +13,7 @@ class HomeController < ApplicationController
     end
 
     @output = `python #{ENV['OYENTE']}/oyente.py -s #{filepath} -w#{options} `
+    @output = "File name: #{oyente_params[:filename]}\n" + @output
 
     UserMailer.analyzer_result_notification(oyente_params[:filename], filepath.to_s, @output, oyente_params[:email]).deliver_later
   end
