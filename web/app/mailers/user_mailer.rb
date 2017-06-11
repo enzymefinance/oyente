@@ -7,6 +7,6 @@ class UserMailer < ApplicationMailer
 
     File.delete(filepath)
 
-    mail to: email, subject: "The analysis of a smart contract from Oyente"
+    mail to: email, subject: "Analysis results by Oyente"
   end
 end
