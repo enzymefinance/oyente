@@ -1,16 +1,14 @@
 # return true if the two paths have different flows of money
 # later on we may want to return more meaningful output: e.g. if the concurrency changes
 # the amount of money or the recipient.
-from z3 import *
-from z3.z3util import get_vars
 import json
 import mmap
 import os
 import csv
 import re
 import difflib
-import signal
-
+from z3 import *
+from z3.z3util import get_vars
 
 def my_copy_dict(input):
     output = {}
@@ -201,7 +199,7 @@ def get_contract_info(contract_addr):
 def get_contract_stats(list_of_contracts):
     with open("concurr.csv", "w") as stats_file:
         fp = csv.writer(stats_file, delimiter=',')
-        fp.writerow(["Contract address", "No. of paths", "No. of concurrency pairs",  "Balance", "No. of TXs", "Note"])
+        fp.writerow(["Contract address", "No. of paths", "No. of concurrency pairs", "Balance", "No. of TXs", "Note"])
         with open(list_of_contracts, "r") as f:
             for contract in f.readlines():
                 contract_addr = contract.split()[0]
@@ -227,7 +225,7 @@ def get_distinct_contracts(list_of_contracts = "concurr.csv"):
     flag = []
     with open(list_of_contracts, "rb") as csvfile:
         contracts = csvfile.readlines()[1:]
-        n =len(contracts)
+        n = len(contracts)
         for i in range(n):
             flag.append(i) # mark which contract is similar to contract_i
         for i in range(n):
@@ -260,4 +258,3 @@ def get_distinct_contracts(list_of_contracts = "concurr.csv"):
                         if ndiff < 10:
                             flag[j] = i
     print flag
-

@@ -1,12 +1,12 @@
-from opcodes import *
+import logging
 import math
+from opcodes import *
 from z3 import *
 from z3.z3util import *
 from vargenerator import *
 from utils import *
-from subprocess import Popen
 import global_params
-import logging
+
 log = logging.getLogger(__name__)
 
 # THIS IS TO DEFINE A SKELETON FOR ANALYSIS
