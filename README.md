@@ -1,7 +1,5 @@
 # Oyente
 
-**Note: The tool is currently under development, please report any bugs you may find.**
-
 ## Quick Start
 
 A container with the dependencies set up can be found [here](https://hub.docker.com/r/everconfusedguy/oyente/).
