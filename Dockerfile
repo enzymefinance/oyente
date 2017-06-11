@@ -8,8 +8,13 @@ RUN apt-get install -y wget unzip python-virtualenv git build-essential software
 RUN add-apt-repository -y ppa:ethereum/ethereum-dev
 RUN add-apt-repository -y ppa:ethereum/ethereum
 RUN apt-get update
-RUN apt-get install -y build-essential golang-go solc ethereum python python-pip
+RUN apt-get install -y build-essential golang-go solc ethereum python python-pip \
+						ruby ruby-rails ruby-dev rake git-core curl zlib1g-dev build-essential libssl-dev \
+                        libreadline-dev npm libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev \
+                        libcurl4-openssl-dev python-software-properties libffi-dev nodejs && \
+     apt-get clean
 RUN pip install requests web3
+RUN npm install npm@latest -g  && npm install n --global && n stable
 
 RUN mkdir -p /deps/z3/ &&  wget https://github.com/Z3Prover/z3/archive/z3-4.5.0.zip -O /deps/z3/z3.zip && \
         cd /deps/z3/ && unzip /deps/z3/z3.zip && \
@@ -18,6 +23,8 @@ RUN mkdir -p /deps/z3/ &&  wget https://github.com/Z3Prover/z3/archive/z3-4.5.0.
 
 
 COPY . /oyente/
-WORKDIR /oyente/
 
-CMD python oyente.py -ru https://gist.githubusercontent.com/loiluu/d0eb34d473e421df12b38c12a7423a61/raw/2415b3fb782f5d286777e0bcebc57812ce3786da/puzzle.sol
+RUN cd /oyente/web && node -v && npm -v && npm install
+RUN cd /oyente/web && gem install bundler && bundle install
+
+WORKDIR /oyente/
