@@ -13,8 +13,8 @@ class Generator:
         return "Id_" + str(self.countdata)
 
     def gen_data_var(self, position):
-        self.countdata = max(position + 1, self.countdata)
-        return "Id_" + str(position)
+        self.countdata += 1
+        return "Id_" + str(self.countdata)
 
     def gen_data_size(self):
         return "Id_size"

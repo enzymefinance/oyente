@@ -607,8 +607,8 @@ def get_init_global_state(path_conditions_and_vars):
         currentGasLimit = BitVec(new_var_name, 256)
         path_conditions_and_vars[new_var_name] = currentGasLimit
 
-    new_var_name = "IH_s"     
-    currentTimestamp = BitVec(new_var_name, 256)      
+    new_var_name = "IH_s"
+    currentTimestamp = BitVec(new_var_name, 256)
     path_conditions_and_vars[new_var_name] = currentTimestamp
 
     # the state of the current current contract
@@ -1473,10 +1473,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 solver.add(expression)
                 if solver.check() != unsat:
                     # this means that it is possibly that current_miu_i < temp
-                    if expression == True:
-                        current_miu_i = temp
-                    else:
-                        current_miu_i = If(expression,temp,current_miu_i)
+                    current_miu_i = If(expression,temp,current_miu_i)
                 solver.pop()
                 new_var_name = gen.gen_mem_var(address)
                 if new_var_name in path_conditions_and_vars:
@@ -1500,7 +1497,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             stored_address = stack.pop(0)
             stored_value = stack.pop(0)
             current_miu_i = global_state["miu_i"]
-            if isReal(stored_address):
+            if contains_only_concrete_values([stored_address, current_miu_i]):
                 temp = long(math.ceil((stored_address + 32) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
@@ -1510,8 +1507,6 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             else:
                 log.debug("temp: " + str(stored_address))
                 temp = ((stored_address + 31) / 32) + 1
-                if isReal(current_miu_i):
-                    current_miu_i = BitVecVal(current_miu_i, 256)
                 log.debug("current_miu_i: " + str(current_miu_i))
                 expression = current_miu_i < temp
                 log.debug("Expression: " + str(expression))
@@ -1519,10 +1514,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 solver.add(expression)
                 if solver.check() != unsat:
                     # this means that it is possibly that current_miu_i < temp
-                    if expression:
-                        current_miu_i = temp
-                    else:
-                        current_miu_i = If(expression,temp,current_miu_i)
+                    current_miu_i = If(expression,temp,current_miu_i)
                 solver.pop()
                 mem.clear()  # very conservative
                 mem[str(stored_address)] = stored_value
@@ -1552,10 +1544,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 solver.add(expression)
                 if solver.check() != unsat:
                     # this means that it is possibly that current_miu_i < temp
-                    if expression:
-                        current_miu_i = temp
-                    else:
-                        current_miu_i = If(expression,temp,current_miu_i)
+                    current_miu_i = If(expression,temp,current_miu_i)
                 solver.pop()
                 mem.clear()  # very conservative
                 mem[str(stored_address)] = stored_value
