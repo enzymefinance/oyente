@@ -4,23 +4,23 @@
 
 ## Quick Start
 
-A container with the dependencies set up and the blockchain snapshot installed can be found [here](https://hub.docker.com/r/hrishioa/oyente/).
-
-Note - [This](https://github.com/melonproject/oyente/tree/290f1ae1bbb295b8e61cbf0eed93dbde6f287e69) is the version of Oyente that is shipped with the docker container. If you want to run the most recent version, follow the full installation instructions [below](#full-install). 
+A container with the dependencies set up can be found [here](https://hub.docker.com/r/everconfusedguy/oyente/).
 
 To open the container, install docker and run:
 
 ```
-docker pull hrishioa/oyente && docker run -i -t hrishioa/oyente
+docker pull everconfusedguy/oyente && docker run -i -t everconfusedguy/oyente
 ```
 
 To evaluate the greeter contract inside the container, run:
 
 ```
-cd /home/oyente/oyente && source ../dependencies/venv/bin/activate && python oyente.py -s greeter.sol
+cd /oyente && python oyente.py -s greeter.sol
 ```
 
 and you are done!
+
+Note - If need the [version of Oyente](https://github.com/melonproject/oyente/tree/290f1ae1bbb295b8e61cbf0eed93dbde6f287e69) referred to in the paper, run the container from [here](https://hub.docker.com/r/hrishioa/oyente/)
 
 ## Full install
 
