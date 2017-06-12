@@ -20,7 +20,30 @@ The analysis starts off with the ```build_cfg_and_analyze``` function. We break 
 
 The *collect_vertices* and *construct_bb* functions identify the basic blocks in the program and we store them as vertices. Basic blocks are identified by using opcodes like ```JUMPDEST```, ```STOP```, ```RETURN```, ```SUICIDE```, ```JUMP``` and ```JUMPI``` as separators. Each basic block is backed by an instance of BasicBlock class defined in basicblock.py
 
-After the basic blocks are created, we start to symbolically execute each basic block with the full_sym_exec function. We get the instructions stored in each basic block and execute each of them symbolically via the sym_exec_ins function. In this function, we model each opcode as closely as possible to the behaviour described in the ethereum yellow paper. After this, add this basic block to the list of already visited blocks and follow it to the next basic block. We also maintain the necessary path conditions required to get to the block in the ```path_conditions_and_vars``` variable. In case of instructions like JUMP, there is only one basic block to follow the program execution to. In other cases like ```JUMPI```, we first check if the branch expression is provably True or False using z3. If not, we explore both the branches by adding the branch expression and the negated branch expression to the ```path_conditions_and_vars``` variable. 
+After the basic blocks are created, we start to symbolically execute each basic block with the full_sym_exec function. We get the instructions stored in each basic block and execute each of them symbolically via the sym_exec_ins function. In this function, we model each opcode as closely as possible to the behaviour described in the ethereum yellow paper. Some interesting details regarding each class of opcodes is discussed below. 
+
+### Model
+The stack is modelled using a simple python list. 
+The memory is modelled as a growing list. The maximum index of used by the memory list is stored as ```current_miu_i``` variable. 
+The storage is stored as a python object as key-value pairs.  
+
+### 0s: Stop and Arithmetic Operations, 10s: Comparison & Bitwise Logic Operations
+These group of opcodes is the most straightforward to implement. If one of the operands is symbolic, both of them are converted into a 256-bit symbolic variable. The arithmetic operation is carried out (symbolically, if the operands are symbolic) and the result is pushed on to the stack.  
+
+### 20s: SHA3
+A generic symbolic variable is created to mimic the behaviour of the SHA3 opcode
+
+### 30s: Environmental Information, 40s: Block Information
+For most of these opcodes, a unique symbolic variable is generated to represent it (similar to SHA3). In some cases, to speed up the symbolic execution, concrete values for these opcodes are taken from the state.json file. This behaviour is enabled via the --state flag. We haven't found ways to robustly simulate ```CODECOPY``` and ```EXTCODESIZE``` symbolically yet. 
+
+### 40s: 50s: Stack, Memory, Storage and Flow Operations
+New edges which are found during analysing the ```JUMP``` and ```JUMPI``` instructions are added to the call graph on the fly. 
+
+### f0s: System operations
+To handle the ```CALL``` and ```CALLCODE``` opcodes, we construct symbolic expressions to ensure there are enough funds in the sender's account and the sender's address is different from the receiver's address. If these conditions hold true, we update the corresponding global state. 
+
+
+After this, add this basic block to the list of already visited blocks and follow it to the next basic block. We also maintain the necessary path conditions required to get to the block in the ```path_conditions_and_vars``` variable. In case of instructions like JUMP, there is only one basic block to follow the program execution to. In other cases like ```JUMPI```, we first check if the branch expression is provably True or False using z3. If not, we explore both the branches by adding the branch expression and the negated branch expression to the ```path_conditions_and_vars``` variable. 
 
 - Callstack attack
 
