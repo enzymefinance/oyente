@@ -1825,19 +1825,13 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
 
     print_state(stack, mem, global_state)
 
+# check for evm sequence SWAP4, POP, POP, POP, POP, ISZERO
 def check_callstack_attack(disasm):
     problematic_instructions = ['CALL', 'CALLCODE']
     for i in xrange(0, len(disasm)):
         instruction = disasm[i]
         if instruction[1] in problematic_instructions:
-            error = True
-            for j in xrange(i+1, len(disasm)):
-                if disasm[j][1] in problematic_instructions:
-                    break
-                if disasm[j][1] == 'ISZERO':
-                    error = False
-                    break
-            if error:
+            if not (disasm[i+1][1] == 'SWAP' and disasm[i+1][2] == '4' and disasm[i+2][1] == 'POP' and disasm[i+3][1] == 'POP' and disasm[i+4][1] == 'POP' and disasm[i+5][1] == 'POP' and disasm[i+6][1] == 'ISZERO'):
                 return True
     return False
 
