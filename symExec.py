@@ -688,22 +688,23 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
     visited.append(block)
     depth += 1
 
+    reentrancy_all_paths.append(analysis["reentrancy_bug"])
+    if analysis["money_flow"] not in money_flow_all_paths:
+        money_flow_all_paths.append(analysis["money_flow"])
+        path_conditions.append(path_conditions_and_vars["path_condition"])
+        all_gs.append(copy_global_values(global_state))
+    if global_params.DATA_FLOW:
+        if analysis["sload"] not in data_flow_all_paths[0]:
+            data_flow_all_paths[0].append(analysis["sload"])
+        if analysis["sstore"] not in data_flow_all_paths[1]:
+            data_flow_all_paths[1].append(analysis["sstore"])
+
     # Go to next Basic Block(s)
     if jump_type[block] == "terminal" or depth > global_params.DEPTH_LIMIT:
         log.debug("TERMINATING A PATH ...")
         display_analysis(analysis)
         global total_no_of_paths
         total_no_of_paths += 1
-        reentrancy_all_paths.append(analysis["reentrancy_bug"])
-        if analysis["money_flow"] not in money_flow_all_paths:
-            money_flow_all_paths.append(analysis["money_flow"])
-            path_conditions.append(path_conditions_and_vars["path_condition"])
-            all_gs.append(copy_global_values(global_state))
-        if global_params.DATA_FLOW:
-            if analysis["sload"] not in data_flow_all_paths[0]:
-                data_flow_all_paths[0].append(analysis["sload"])
-            if analysis["sstore"] not in data_flow_all_paths[1]:
-                data_flow_all_paths[1].append(analysis["sstore"])
         if global_params.UNIT_TEST == 1:
             compare_stack_unit_test(stack)
         if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
