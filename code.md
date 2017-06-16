@@ -22,24 +22,24 @@ The *collect_vertices* and *construct_bb* functions identify the basic blocks in
 
 After the basic blocks are created, we start to symbolically execute each basic block with the full_sym_exec function. We get the instructions stored in each basic block and execute each of them symbolically via the sym_exec_ins function. In this function, we model each opcode as closely as possible to the behaviour described in the ethereum yellow paper. Some interesting details regarding each class of opcodes is discussed below.
 
-### Model
+#### Model
 The stack is modelled using a simple python list.
 The memory is modelled as a growing list. The maximum index of used by the memory list is stored as ```current_miu_i``` variable.
 The storage is stored as a python object as key-value pairs.
 
-### 0s: Stop and Arithmetic Operations, 10s: Comparison & Bitwise Logic Operations
+#### 0s: Stop and Arithmetic Operations, 10s: Comparison & Bitwise Logic Operations
 These group of opcodes is the most straightforward to implement. If one of the operands is symbolic, both of them are converted into a 256-bit symbolic variable. The arithmetic operation is carried out (symbolically, if the operands are symbolic) and the result is pushed on to the stack.
 
-### 20s: SHA3
+#### 20s: SHA3
 A generic symbolic variable is created to mimic the behaviour of the SHA3 opcode
 
-### 30s: Environmental Information, 40s: Block Information
+#### 30s: Environmental Information, 40s: Block Information
 For most of these opcodes, a unique symbolic variable is generated to represent it (similar to SHA3). In some cases, to speed up the symbolic execution, concrete values for these opcodes are taken from the state.json file. This behaviour is enabled via the --state flag. We haven't found ways to robustly simulate ```CODECOPY``` and ```EXTCODESIZE``` symbolically yet.
 
-### 40s: 50s: Stack, Memory, Storage and Flow Operations
+#### 40s: 50s: Stack, Memory, Storage and Flow Operations
 New edges which are found during analysing the ```JUMP``` and ```JUMPI``` instructions are added to the call graph on the fly.
 
-### f0s: System operations
+#### f0s: System operations
 To handle the ```CALL``` and ```CALLCODE``` opcodes, we construct symbolic expressions to ensure there are enough funds in the sender's account and the sender's address is different from the receiver's address. If these conditions hold true, we update the corresponding global state.
 
 
@@ -78,11 +78,11 @@ The flow of testing:
 - Compare the results (storage, memory and gas) after running oyente with the results being specified in the test data
 - Report bugs
 
-### *testEvm.py*
+#### *testEvm.py*
 This is the main entry point to the testing program. The program loads a specific test data file in folder ```test_evm/test_data/``` and start running `oyente.py `with the input being specified in the loaded test data to get an exit code which is returned from `oyente.py.` From this exit code the testing program can report the bug
 
-### *evmUnitTest.py*
+#### *evmUnitTest.py*
 A utility class to extract concerned sections and fields (`code`, `storage`, `out`, `gas` and `gas` in `exec` section) in the test data, run the tests, compare the results and return an exit code
 
-### *symExec.py*
+#### *symExec.py*
 ```compare_storage_and_memory_unit_test(global_state, mem, analysis)``` starts comparing the results and return an exit code after the final opcode is implemented
