@@ -161,8 +161,6 @@ def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_
         transfer_amount = stack[2]
         reentrancy_result = check_reentrancy_bug(path_conditions_and_vars, global_state)
         analysis["reentrancy_bug"].append(reentrancy_result)
-        if isinstance(transfer_amount, (int, long)) and transfer_amount == 0:
-            return
         if not isinstance(recipient, (int, long)):
             recipient = simplify(recipient)
         analysis["money_flow"].append(("Ia", str(recipient), transfer_amount))

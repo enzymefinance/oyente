@@ -304,14 +304,14 @@ def detect_money_concurrency():
     false_positive = []
     concurrency_paths = []
     for flow in money_flow_all_paths:
-        i += 1
         if len(flow) == 1:
+            i += 1
             continue  # pass all flows which do not do anything with money
         for j in range(i, n):
             jflow = money_flow_all_paths[j]
             if len(jflow) == 1:
                 continue
-            if is_diff(flow, jflow):
+            if is_diff(money_flow_all_paths[i-1], jflow):
                 concurrency_paths.append([i-1, j])
                 if global_params.CHECK_CONCURRENCY_FP and \
                         is_false_positive(i-1, j, all_gs, path_conditions) and \
