@@ -14,7 +14,7 @@ The contracts are then disassembled into opcodes using the ```evm disasm``` comm
 
 After this, the symexec module is called with the disassembled file which carries out the analyses of the contracts for various vulnerabilities (TOD, timestamp-dependence, mishandled exceptions).
 
-### *symexec.py*
+### *symExec.py*
 
 The analysis starts off with the ```build_cfg_and_analyze``` function. We break up the disasm file created by oyente.py into tokens using the native tokenize python module.
 
@@ -78,10 +78,10 @@ The flow of testing:
 - Compare the results (storage, memory and gas) after running oyente with the results being specified in the test data
 - Report bugs
 
-#### *testEvm.py*
+#### *test_evm.py*
 This is the main entry point to the testing program. The program loads a specific test data file in folder ```test_evm/test_data/``` and start running `oyente.py `with the input being specified in the loaded test data to get an exit code which is returned from `oyente.py.` From this exit code the testing program can report the bug
 
-#### *evmUnitTest.py*
+#### *evm_unit_test.py*
 A utility class to extract concerned sections and fields (`code`, `storage`, `out`, `gas` and `gas` in `exec` section) in the test data, run the tests, compare the results and return an exit code
 
 #### *symExec.py*

@@ -144,6 +144,8 @@ def main(contract):
     set_cur_file(c_name[4:] if len(c_name) > 5 else c_name)
     start = time.time()
     signal.signal(signal.SIGALRM, handler)
+    if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
+        global_params.GLOBAL_TIMEOUT = global_params.GLOBAL_TIMEOUT_TEST
     signal.alarm(global_params.GLOBAL_TIMEOUT)
     atexit.register(closing_message)
     if global_params.WEB:

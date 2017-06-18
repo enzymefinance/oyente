@@ -32,6 +32,6 @@ After running the testing program, the result would display a status for each te
 - ```TIME_OUT```: it takes too long to run the testcase (set ```GLOBAL_TIMEOUT``` in ```global_params.py```)
 - ```UNKNOWN_INSTRUCTION```: there is an unknown opcode in the testcase
 - ```EXCEPTION```: the program encounters an exception while running the testcase
-- ```EMPTY_RESULT``` The result is invalid
-- ```INCORRECT_GAS``` The gas is calculated incorrectly
+- ```EMPTY_RESULT``` the result is invalid
+- ```INCORRECT_GAS``` the gas is calculated incorrectly
 

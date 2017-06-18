@@ -6,18 +6,13 @@ from test_evm.global_test_params import *
 from test_evm.evm_unit_test import EvmUnitTest
 
 def status(exit_code):
-    if exit_code == 0: return "Successful execution but cant evaluate result"
-    if exit_code == 1: return "Error on execution"
     if exit_code == 100: return "Pass"
     if exit_code == 101: return "Fail"
-    if exit_code == 102: return "Not yet handled opcode"
-    if exit_code == 103: return "Json test file structure not match"
-    if exit_code == 104: return "Not a number"
-    if exit_code == 105: return "Time out"
-    if exit_code == 106: return "Unkown instruction"
-    if exit_code == 107: return "Exception"
-    if exit_code == 108: return "Empty result"
-    if exit_code == 109: return "Incorrect gas tracked"
+    if exit_code == 102: return "Time out"
+    if exit_code == 103: return "Unkown instruction"
+    if exit_code == 104: return "Exception"
+    if exit_code == 105: return "Empty result"
+    if exit_code == 106: return "Incorrect gas tracked"
 
 
 def main():
@@ -25,13 +20,13 @@ def main():
     files = glob.glob(test_dir+'/vmArithmeticTest.json')
     test_cases = {}
 
-    num_tests = num_passes =  num_fails = num_nyh_ops = \
-        num_not_matches = num_not_a_numbers = num_time_outs = num_unkown_instrs = \
-        num_exceptions = num_empty_res = num_err_exec = num_cant_eval = num_incorrect_gas = 0
+    num_tests = num_passes =  num_fails = \
+        num_time_outs = num_unkown_instrs = \
+        num_exceptions = num_empty_res = num_incorrect_gas = 0
 
-    fails, nyh_ops, not_matchs, not_a_numbers, time_outs, \
-        unkown_instrs, exceptions, empty_res, err_exec, \
-        cant_eval, incorrect_gas = [], [], [], [], [], [], [], [], [], [], []
+    fails, time_outs, \
+        unkown_instrs, exceptions, empty_res, \
+        incorrect_gas = [], [], [], [], [], []
 
     for f in files:
         test_cases.update(json.loads(open(f).read()))
@@ -61,15 +56,6 @@ def main():
         elif exit_code == FAIL:
             fails.append(testname)
             num_fails += 1
-        elif exit_code == NOT_YET_HANDLED_OPCODE:
-            nyh_ops.append(testname)
-            num_nyh_ops += 1
-        elif exit_code == JSON_STRUCTURE_NOT_MATCH:
-            not_matchs.append(testname)
-            num_not_matches += 1
-        elif exit_code == NOT_A_NUMBER:
-            not_a_numbers.append(testname)
-            num_not_a_numbers += 1
         elif exit_code == TIME_OUT:
             time_outs.append(testname)
             num_time_outs += 1
@@ -82,12 +68,6 @@ def main():
         elif exit_code == EMPTY_RESULT:
             empty_res.append(testname)
             num_empty_res += 1
-        elif exit_code == ERR_EXECUTION:
-            err_exec.append(testname)
-            num_err_exec += 1
-        elif exit_code == CANT_EVALUATE:
-            cant_eval.append(testname)
-            num_cant_eval += 1
         elif exit_code == INCORRECT_GAS:
             incorrect_gas.append(testname)
             num_incorrect_gas += 1
@@ -99,12 +79,6 @@ def main():
     print
     print "Fail: ", num_fails, fails
     print
-    print "Not yet handled opcode: ", num_nyh_ops, nyh_ops
-    print
-    print "Json structure not match: ", num_not_matches, not_matchs
-    print
-    print "Not a number: ", num_not_a_numbers, not_a_numbers
-    print
     print "Time out: ", num_time_outs, time_outs
     print
     print "Unkown instruction: ", num_unkown_instrs, unkown_instrs
@@ -112,10 +86,6 @@ def main():
     print "Exception: ", num_exceptions, exceptions
     print
     print "Empty result: ", num_empty_res, empty_res
-    print
-    print "Error execution:", num_err_exec, err_exec
-    print
-    print "Cant evaluate", num_cant_eval, cant_eval
     print
     print "Incorrect gas tracked", num_incorrect_gas, incorrect_gas
 
