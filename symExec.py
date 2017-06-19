@@ -1558,12 +1558,9 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             address = stack.pop(0)
-            if isReal(address):
-                if address in global_state["Ia"]:
-                    value = global_state["Ia"][address]
-                    stack.insert(0, value)
-                else:
-                    stack.insert(0, 0)
+            if isReal(address) and address in global_state["Ia"]:
+                value = global_state["Ia"][address]
+                stack.insert(0, value)
             else:
                 new_var_name = gen.gen_owner_store_var(address)
                 if new_var_name in path_conditions_and_vars:
