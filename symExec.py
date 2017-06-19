@@ -791,6 +791,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
                 sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
         except Exception as e:
             log_file.write(str(e))
+            traceback.print_exc()
             if str(e) == "timeout":
                 raise e
         solver.pop()  # POP SOLVER CONTEXT
