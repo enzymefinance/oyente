@@ -1460,7 +1460,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             global_state["pc"] = global_state["pc"] + 1
             address = stack.pop(0)
             current_miu_i = global_state["miu_i"]
-            if isReal(address) and address in mem:
+            if contains_only_concrete_values([address, current_miu_i]) and address in mem:
                 temp = long(math.ceil((address + 32) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
@@ -1534,7 +1534,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             temp_value = stack.pop(0)
             stored_value = temp_value % 256  # get the least byte
             current_miu_i = global_state["miu_i"]
-            if isReal(stored_address):
+            if contains_only_concrete_values([address, current_miu_i]):
                 temp = long(math.ceil((stored_address + 1) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
