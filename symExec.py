@@ -1831,7 +1831,13 @@ def check_callstack_attack(disasm):
     for i in xrange(0, len(disasm)):
         instruction = disasm[i]
         if instruction[1] in problematic_instructions:
-            if not (disasm[i+1][1] == 'SWAP' and disasm[i+1][2] == '4' and disasm[i+2][1] == 'POP' and disasm[i+3][1] == 'POP' and disasm[i+4][1] == 'POP' and disasm[i+5][1] == 'POP' and disasm[i+6][1] == 'ISZERO'):
+            if not disasm[i+1][1] == 'SWAP':
+                return True
+            swap_num = int(disasm[i+1][2])
+            for j in range(swap_num):
+                if not disasm[i+j+2][1] == 'POP':
+                    return True
+            if not disasm[i + swap_num + 2][1] == 'ISZERO':
                 return True
     return False
 
