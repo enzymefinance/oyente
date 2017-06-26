@@ -133,7 +133,29 @@ def compare_storage_and_memory_unit_test(global_state, mem, analysis):
 def handler(signum, frame):
     if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
         exit(TIME_OUT)
+    detect_bugs()
     raise Exception("timeout")
+
+def detect_bugs():
+    global results
+
+    if global_params.REPORT_MODE:
+        rfile.write(str(total_no_of_paths) + "\n")
+    detect_money_concurrency()
+    detect_time_dependency()
+    stop = time.time()
+    if global_params.REPORT_MODE:
+        rfile.write(str(stop-start))
+        rfile.close()
+    if global_params.DATA_FLOW:
+        detect_data_concurrency()
+        detect_data_money_concurrency()
+    log.debug("Results for Reentrancy Bug: " + str(reentrancy_all_paths))
+    reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
+    if not isTesting():
+        log.info("\t  Reentrancy bug exists: %s", str(reentrancy_bug_found))
+    results['reentrancy'] = reentrancy_bug_found
+
 
 def main(contract):
     global c_name
@@ -171,23 +193,6 @@ def main(contract):
         traceback.print_exc()
         raise e
     signal.alarm(0)
-
-    if global_params.REPORT_MODE:
-        rfile.write(str(total_no_of_paths) + "\n")
-    detect_money_concurrency()
-    detect_time_dependency()
-    stop = time.time()
-    if global_params.REPORT_MODE:
-        rfile.write(str(stop-start))
-        rfile.close()
-    if global_params.DATA_FLOW:
-        detect_data_concurrency()
-        detect_data_money_concurrency()
-    log.debug("Results for Reentrancy Bug: " + str(reentrancy_all_paths))
-    reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
-    if not isTesting():
-        log.info("\t  Reentrancy bug exists: %s", str(reentrancy_bug_found))
-    results['reentrancy'] = reentrancy_bug_found
 
 
 
