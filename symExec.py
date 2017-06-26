@@ -15,6 +15,7 @@ from z3 import *
 from vargenerator import *
 from ethereum_data import *
 from basicblock import BasicBlock
+from assertion import Assertion
 from analysis import *
 from arithmetic_utils import *
 import global_params
@@ -53,6 +54,9 @@ def initGlobalVars():
 
     global edges
     edges = {}
+
+    global assertions
+    assertions = []
 
     global visited_edges
     visited_edges = {}
@@ -137,7 +141,14 @@ def handler(signum, frame):
     raise Exception("timeout")
 
 def detect_bugs():
+    global assertions
     global results
+
+    assertion_fails = [assertion for assertion in assertions if assertion.is_violated()]
+    if not isTesting():
+        log.info("\t  Assertion fails: \t %s", str(len(assertion_fails) > 0))
+    results['assertion_failure'] = len(assertion_fails) > 0
+
 
     if global_params.REPORT_MODE:
         rfile.write(str(total_no_of_paths) + "\n")
@@ -195,8 +206,6 @@ def main(contract):
     signal.alarm(0)
 
 
-
-
 def results_for_web():
     global results
     if not results.has_key("callstack"):
@@ -207,11 +216,14 @@ def results_for_web():
         results["reentrancy"] = False
     if not results.has_key("concurrency"):
         results["concurrency"] = False
+    if not results.has_key("assertion_failure"):
+        results["assertion_failure"] = False
 
     print "Callstack Attack:", results['callstack']
     print "Time Dependency:", results['time_dependency']
     print "Reentrancy bug:", results['reentrancy']
     print "Concurrency:", results['concurrency']
+    print "Assertion failure:", results['assertion_failure']
 
 
 def closing_message():
@@ -252,6 +264,7 @@ def change_format():
 
     with open(c_name, 'w') as disasm_file:
         disasm_file.write("\n".join(file_contents))
+        print("\n".join(file_contents))
 
 
 def build_cfg_and_analyze():
@@ -388,6 +401,7 @@ def print_cfg():
     for block in vertices.values():
         block.display()
     log.debug(str(edges))
+    print(str(edges))
 
 
 # 1. Parse the disassembled file
@@ -657,6 +671,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
     global data_flow_all_paths
     global path_conditions
     global all_gs
+    global results
     Edge = namedtuple("Edge", ["v1", "v2"]) # Factory Function for tuples is used as dictionary key
     if block < 0:
         log.debug("UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH")
@@ -739,6 +754,28 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
         sym_exec_block(successor, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
     elif jump_type[block] == "conditional":  # executing "JUMPI"
 
+        global assertions
+
+        left_branch = vertices[block].get_jump_target()
+        right_branch = vertices[block].get_falls_to()
+        # This might be an assertion, so we need to check if one of the branches falls to INVALID
+        # We ignore blocks 0 and 57, since the reason why they might fall to INVALID are:
+        # 0 - If the signature of the called function does not exist
+        # 57 - If the callee has no funds (TODO: check this)
+        assertion = None
+        if not block in [0, 57]:
+            left_instr = vertices[left_branch].get_instructions()
+            left_instr_parts = str.split(left_instr[0], ' ')
+            if left_instr_parts[0] == "INVALID":
+                assertion = Assertion(block, right_branch, left_branch)
+            else:
+                right_instr = vertices[right_branch].get_instructions()
+                right_instr_parts = str.split(right_instr[0], ' ')
+                if right_instr_parts[0] == "INVALID":
+                    assertion = Assertion(block, left_branch, right_branch)
+            if assertion != None:
+                assertions.append(assertion)
+
         # A choice point, we proceed with depth first search
 
         branch_expression = vertices[block].get_branch_expression()
@@ -752,7 +789,11 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
             if solver.check() == unsat:
                 log.debug("INFEASIBLE PATH DETECTED")
             else:
-                left_branch = vertices[block].get_jump_target()
+                if assertion != None:
+                    assertion.set_violated(True)
+                    model = solver.model()
+                    assertion.set_model(model)
+
                 stack1 = list(stack)
                 mem1 = dict(mem)
                 global_state1 = my_copy_dict(global_state)
@@ -777,6 +818,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
 
         log.debug("Negated branch expression: " + str(negated_branch_expression))
 
+
         try:
             if solver.check() == unsat:
                 # Note that this check can be optimized. I.e. if the previous check succeeds,
@@ -784,7 +826,11 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
                 # the else branch
                 log.debug("INFEASIBLE PATH DETECTED")
             else:
-                right_branch = vertices[block].get_falls_to()
+                if assertion != None:
+                    assertion.set_violated(True)
+                    model = solver.model()
+                    assertion.set_model(model)
+
                 stack1 = list(stack)
                 mem1 = dict(mem)
                 global_state1 = my_copy_dict(global_state)
@@ -814,6 +860,8 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     global vertices
     global edges
     instr_parts = str.split(instr, ' ')
+
+    #print(instr_parts)
 
     if instr_parts[0] == "INVALID":
         return
@@ -1357,6 +1405,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 stack.insert(0, int(callData[start:end], 16))
             else:
                 new_var_name = gen.gen_data_var(position)
+                #print("NEW VAR " + str(new_var_name) + " CREATED FOR POSITION " + str(position))
                 if new_var_name in path_conditions_and_vars:
                     new_var = path_conditions_and_vars[new_var_name]
                 else:
@@ -1612,6 +1661,9 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 target_address = int(str(simplify(target_address)))
             vertices[start].set_jump_target(target_address)
             flag = stack.pop(0)
+            #if start == 123:
+            #    print("TARGET ADDRESS IS " + str(target_address))
+            #    print("FLAG IS " + str(flag))
             branch_expression = (BitVecVal(0, 1) == BitVecVal(1, 1))
             if isReal(flag):
                 if flag != 0:
