@@ -47,12 +47,17 @@ class Assertion:
     def set_query(self, query):
         self.query = query
 
-    def display(self):
-        print "================"
-        print "Assertion from block %d" % self.block_from
-        print "SMT2 query: %s" % str(self.query)
-        print "Violated: %s" % str(self.violated)
+    def __str__(self):
+        s =  "================\n"
+        s += "Assertion from block " + str(self.block_from) + "\n"
+        s += "SMT2 query:\n" + str(self.query) + "\n"
+        s += "Violated: " + str(self.violated) + "\n"
         if self.violated:
-            print "Model:\n"
+            s += "Model:\n"
             for decl in self.model.decls():
-                print "%s = %s" % (decl.name(), str(self.model[decl]))
+                s += str(decl.name()) + " = " + str(self.model[decl]) + ", "
+        return s
+
+    def display(self):
+        print self.__str__()
+

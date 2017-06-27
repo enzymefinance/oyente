@@ -87,7 +87,7 @@ def analyze(processed_evm_file, disasm_file):
 
     # Run symExec
     symExec.main(disasm_file)
-    symExec.print_cfg()
+    #symExec.print_cfg()
 
 def main():
     # TODO: Implement -o switch.

@@ -144,12 +144,6 @@ def detect_bugs():
     global assertions
     global results
 
-    assertion_fails = [assertion for assertion in assertions if assertion.is_violated()]
-    if not isTesting():
-        log.info("\t  Assertion fails: \t %s", str(len(assertion_fails) > 0))
-    results['assertion_failure'] = len(assertion_fails) > 0
-
-
     if global_params.REPORT_MODE:
         rfile.write(str(total_no_of_paths) + "\n")
     detect_money_concurrency()
@@ -166,6 +160,14 @@ def detect_bugs():
     if not isTesting():
         log.info("\t  Reentrancy bug exists: %s", str(reentrancy_bug_found))
     results['reentrancy'] = reentrancy_bug_found
+
+    assertion_fails = [assertion for assertion in assertions if assertion.is_violated()]
+    if not isTesting():
+        log.info("\t  Assertion fails: \t %s", str(len(assertion_fails) > 0))
+    results['assertion_failure'] = len(assertion_fails) > 0
+    for ass in assertion_fails:
+        print str(ass)
+
 
 
 def main(contract):
@@ -204,6 +206,7 @@ def main(contract):
         traceback.print_exc()
         raise e
     signal.alarm(0)
+    detect_bugs()
 
 
 def results_for_web():
@@ -264,7 +267,7 @@ def change_format():
 
     with open(c_name, 'w') as disasm_file:
         disasm_file.write("\n".join(file_contents))
-        print("\n".join(file_contents))
+        #print("\n".join(file_contents))
 
 
 def build_cfg_and_analyze():
@@ -763,15 +766,19 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
         # 0 - If the signature of the called function does not exist
         # 57 - If the callee has no funds (TODO: check this)
         assertion = None
+        left_branch_asrt = False
+        right_branch_asrt = False
         if not block in [0, 57]:
             left_instr = vertices[left_branch].get_instructions()
             left_instr_parts = str.split(left_instr[0], ' ')
             if left_instr_parts[0] == "INVALID":
+                left_branch_asrt = True
                 assertion = Assertion(block, right_branch, left_branch)
             else:
                 right_instr = vertices[right_branch].get_instructions()
                 right_instr_parts = str.split(right_instr[0], ' ')
                 if right_instr_parts[0] == "INVALID":
+                    right_branch_asrt = True
                     assertion = Assertion(block, left_branch, right_branch)
             if assertion != None:
                 assertions.append(assertion)
@@ -789,8 +796,9 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
             if solver.check() == unsat:
                 log.debug("INFEASIBLE PATH DETECTED")
             else:
-                if assertion != None:
+                if assertion != None and left_branch_asrt:
                     assertion.set_violated(True)
+                    assertion.set_query(branch_expression)
                     model = solver.model()
                     assertion.set_model(model)
 
@@ -826,7 +834,8 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
                 # the else branch
                 log.debug("INFEASIBLE PATH DETECTED")
             else:
-                if assertion != None:
+                if assertion != None and right_branch_asrt:
+                    assertion.set_query(negated_branch_expression)
                     assertion.set_violated(True)
                     model = solver.model()
                     assertion.set_model(model)
