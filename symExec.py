@@ -194,6 +194,7 @@ def main(contract):
         raise e
     signal.alarm(0)
 
+    detect_bugs()
 
 
 
