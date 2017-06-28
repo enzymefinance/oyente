@@ -162,12 +162,62 @@ def detect_bugs():
     results['reentrancy'] = reentrancy_bug_found
 
     assertion_fails = [assertion for assertion in assertions if assertion.is_violated()]
+    is_fail = len(assertion_fails) > 0
     if not isTesting():
-        log.info("\t  Assertion fails: \t %s", str(len(assertion_fails) > 0))
-    results['assertion_failure'] = len(assertion_fails) > 0
-    for ass in assertion_fails:
-        print str(ass)
+        log.info("\t  Assertion fails: \t %s", str(is_fail))
+    results['assertion_failure'] = is_fail
 
+
+def build_rev_edges(edges):
+    rev_edges = {}
+    for v in edges:
+        for e in edges[v]:
+            if not e in rev_edges:
+                rev_edges[e] = []
+            if not v in rev_edges[e]:
+                rev_edges[e].append(v)
+    return rev_edges
+
+def interpret_assertion_bug(fun_sigs):
+    global assertions
+    global edges
+    global vertices
+
+    for v in vertices:
+        for instr in vertices[v].get_instructions():
+            for sig in fun_sigs:
+                if instr.startswith("PUSH4 " + sig):
+                    vertices[v].set_function(fun_sigs[sig])
+                    break
+            if vertices[v].get_function() != None:
+                break
+
+    rev_edges = build_rev_edges(edges)
+
+    assertion_fails = [assertion for assertion in assertions if assertion.is_violated()]
+    for asrt in assertion_fails:
+        interpret_assertion(asrt, rev_edges)
+        asrt.display()
+
+def interpret_assertion(asrt, rev_edges):
+    global vertices
+
+    visited = {}
+    queue  = [asrt.get_block_from()]
+    block_idx = 0
+    visited[queue[block_idx]] = True
+    while block_idx < len(queue):
+        block = queue[block_idx]
+        block_fun = vertices[block].get_function()
+        if block_fun == None:
+            for e in rev_edges[block]:
+                if not e in visited:
+                    queue.append(e)
+                    visited[e] = True
+        else:
+            asrt.set_function(block_fun)
+            break
+        block_idx += 1
 
 
 def main(contract):
@@ -208,6 +258,11 @@ def main(contract):
     signal.alarm(0)
     detect_bugs()
 
+    for key in results:
+        if results[key]:
+            return False
+
+    return True
 
 def results_for_web():
     global results
@@ -404,7 +459,6 @@ def print_cfg():
     for block in vertices.values():
         block.display()
     log.debug(str(edges))
-    print(str(edges))
 
 
 # 1. Parse the disassembled file

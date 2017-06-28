@@ -7,6 +7,13 @@ class BasicBlock:
         self.callvalue = False
         self.calldataload = False
         self.invalid = False
+        self.function = None
+
+    def set_function(self, function):
+        self.function = function
+
+    def get_function(self):
+        return self.function
 
     def contains_callvalue(self):
         return self.callvalue

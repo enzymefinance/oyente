@@ -20,6 +20,15 @@ class Assertion:
         # SMT2 query to decide the assertion
         self.query = None
 
+        # Solidity function that might contain this assertion
+        self.function = None
+
+    def set_function(self, function):
+        self.function = function
+
+    def get_function(self):
+        return self.function
+
     def get_block_from(self):
         return self.block_from
 
@@ -52,6 +61,11 @@ class Assertion:
         s += "Assertion from block " + str(self.block_from) + "\n"
         s += "SMT2 query:\n" + str(self.query) + "\n"
         s += "Violated: " + str(self.violated) + "\n"
+        s += "In function: "
+        if self.function == None:
+            s += "?\n"
+        else:
+            s += self.function + "\n"
         if self.violated:
             s += "Model:\n"
             for decl in self.model.decls():

@@ -51,6 +51,7 @@ def removeSwarmHash(evm):
     evm_without_hash = re.sub(r"a165627a7a72305820\S{64}0029$", "", evm)
     return evm_without_hash
 
+
 def compileContracts(contract):
     solc_cmd = "solc --optimize --bin-runtime %s"
 
@@ -69,6 +70,25 @@ def compileContracts(contract):
 
     return contracts
 
+
+def retrieveFunctionSignatures(contract):
+    solc_cmd = "solc --hashes %s"
+
+    FNULL = open(os.devnull, 'w')
+
+    solc_p = subprocess.Popen(shlex.split(
+        solc_cmd % contract), stdout=subprocess.PIPE, stderr=FNULL)
+    solc_out = solc_p.communicate()
+
+    sigs = solc_out[0].split('\n')[3:-1]
+    dsigs = {}
+    for sig in sigs:
+        spl = sig.split(':')
+        kec = "0x" + spl[0]
+        dsigs[kec] = spl[1].lstrip(' ')
+    return dsigs
+
+
 def analyze(processed_evm_file, disasm_file):
     disasm_out = ""
     try:
@@ -86,11 +106,19 @@ def analyze(processed_evm_file, disasm_file):
     #print(disasm_out)
 
     # Run symExec
-    symExec.main(disasm_file)
+    safe = symExec.main(disasm_file)
     #symExec.print_cfg()
+    
+    if not safe:
+        global args
+        fun_sigs = retrieveFunctionSignatures(args.source)
+        symExec.interpret_assertion_bug(fun_sigs)
+
 
 def main():
     # TODO: Implement -o switch.
+
+    global args
 
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)
