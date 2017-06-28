@@ -1410,7 +1410,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         global_state["pc"] = global_state["pc"] + 1
         stack.insert(0, global_state["gas_price"])
     elif instr_parts[0] == "EXTCODESIZE":
-        if len(stack) > 1:
+        if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             address = stack.pop(0)
             if isReal(address) and global_params.USE_GLOBAL_BLOCKCHAIN:
