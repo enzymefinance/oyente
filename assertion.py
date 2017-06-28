@@ -61,7 +61,7 @@ class Assertion:
         s += "Assertion from block " + str(self.block_from) + "\n"
         s += "SMT2 query:\n" + str(self.query) + "\n"
         s += "Violated: " + str(self.violated) + "\n"
-        s += "In function: "
+        s += "Upmost function: "
         if self.function == None:
             s += "?\n"
         else:

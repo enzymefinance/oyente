@@ -182,15 +182,38 @@ def interpret_assertion_bug(fun_sigs):
     global assertions
     global edges
     global vertices
+    global instructions
 
-    for v in vertices:
-        for instr in vertices[v].get_instructions():
+    state = 0
+    fsig = None
+    for instr in instructions:
+        if state == 0:
             for sig in fun_sigs:
-                if instr.startswith("PUSH4 " + sig):
-                    vertices[v].set_function(fun_sigs[sig])
+                if instructions[instr].startswith("PUSH4 " + sig):
+                    # There will be a test on the function signature,
+                    # we have to look for the next EQ
+                    state = 1
+                    fsig = sig
                     break
-            if vertices[v].get_function() != None:
-                break
+        elif state == 1 and instructions[instr].startswith("EQ"):
+            # We found the EQ, so next should be PUSH
+            state = 2
+        elif state == 2 and instructions[instr].startswith("PUSH"):
+            # We have the address of the beginning of the function
+            hexaddr = instructions[instr].split("0x")[1].replace(' ', '')
+            faddr = int(hexaddr, 16)
+            vertices[faddr].set_function(fun_sigs[fsig])
+            #print("Block " + str(faddr) + " has function " + sig + " = " + fun_sigs[sig])
+            state = 0
+
+    #for v in vertices:
+    #    for instr in vertices[v].get_instructions():
+    #        for sig in fun_sigs:
+    #            if instr.startswith("PUSH4 " + sig):
+    #                vertices[v].set_function(fun_sigs[sig])
+    #                break
+    #        if vertices[v].get_function() != None:
+    #            break
 
     rev_edges = build_rev_edges(edges)
 
@@ -208,6 +231,7 @@ def interpret_assertion(asrt, rev_edges):
     visited[queue[block_idx]] = True
     while block_idx < len(queue):
         block = queue[block_idx]
+        #print("Visiting block " + str(block))
         block_fun = vertices[block].get_function()
         if block_fun == None:
             for e in rev_edges[block]:
@@ -216,7 +240,6 @@ def interpret_assertion(asrt, rev_edges):
                     visited[e] = True
         else:
             asrt.set_function(block_fun)
-            break
         block_idx += 1
 
 
@@ -459,6 +482,7 @@ def print_cfg():
     for block in vertices.values():
         block.display()
     log.debug(str(edges))
+    print(str(edges))
 
 
 # 1. Parse the disassembled file
