@@ -4,6 +4,18 @@ class BasicBlock:
         self.end = end_address
         self.instructions = []  # each instruction is a string
         self.jump_target = 0
+        self.callvalue = False
+        self.calldataload = False
+        self.invalid = False
+
+    def contains_callvalue(self):
+        return self.callvalue
+
+    def contains_calldataload(self):
+        return self.calldataload
+
+    def is_invalid(self):
+        return self.invalid
 
     def get_start_address(self):
         return self.start
@@ -13,6 +25,12 @@ class BasicBlock:
 
     def add_instruction(self, instruction):
         self.instructions.append(instruction)
+        if instruction.startswith("CALLVALUE"):
+            self.callvalue = True
+        elif instruction.startswith("CALLDATALOAD"):
+            self.calldataload = True
+        elif instruction.startswith("INVALID") and len(self.instructions) <= 1:
+            self.invalid = True
 
     def get_instructions(self):
         return self.instructions

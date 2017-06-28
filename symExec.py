@@ -761,25 +761,18 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
 
         left_branch = vertices[block].get_jump_target()
         right_branch = vertices[block].get_falls_to()
-        # This might be an assertion, so we need to check if one of the branches falls to INVALID
-        # We ignore blocks 0 and 57, since the reason why they might fall to INVALID are:
-        # 0 - If the signature of the called function does not exist
-        # 57 - If the callee has no funds (TODO: check this)
+
+        # Assertion build
         assertion = None
         left_branch_asrt = False
         right_branch_asrt = False
-        if not block in [0, 57]:
-            left_instr = vertices[left_branch].get_instructions()
-            left_instr_parts = str.split(left_instr[0], ' ')
-            if left_instr_parts[0] == "INVALID":
+        if block != 0 and not vertices[block].contains_callvalue():
+            if vertices[left_branch].is_invalid():
                 left_branch_asrt = True
                 assertion = Assertion(block, right_branch, left_branch)
-            else:
-                right_instr = vertices[right_branch].get_instructions()
-                right_instr_parts = str.split(right_instr[0], ' ')
-                if right_instr_parts[0] == "INVALID":
-                    right_branch_asrt = True
-                    assertion = Assertion(block, left_branch, right_branch)
+            elif vertices[right_branch].is_invalid():
+                right_branch_asrt = True
+                assertion = Assertion(block, left_branch, right_branch)
             if assertion != None:
                 assertions.append(assertion)
 
@@ -796,6 +789,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
             if solver.check() == unsat:
                 log.debug("INFEASIBLE PATH DETECTED")
             else:
+                # Assertion check
                 if assertion != None and left_branch_asrt:
                     assertion.set_violated(True)
                     assertion.set_query(branch_expression)
@@ -834,6 +828,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
                 # the else branch
                 log.debug("INFEASIBLE PATH DETECTED")
             else:
+                # Assertion check
                 if assertion != None and right_branch_asrt:
                     assertion.set_query(negated_branch_expression)
                     assertion.set_violated(True)
