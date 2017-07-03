@@ -52,3 +52,6 @@ class Generator:
     def gen_balance_var(self):
         self.count += 1
         return "balance_" + str(self.count)
+
+    def gen_code_var(self, address, position):
+        return "code_" + str(address) + "_" + str(position)
