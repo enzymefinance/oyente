@@ -1599,7 +1599,10 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 0:
             target_address = stack.pop(0)
             if isSymbolic(target_address):
-                target_address = int(str(simplify(target_address)))
+                try:
+                    target_address = int(str(simplify(target_address)))
+                except:
+                    raise TypeError("Target address must be an integer")
             vertices[start].set_jump_target(target_address)
             if target_address not in edges[start]:
                 edges[start].append(target_address)
@@ -1610,7 +1613,10 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 1:
             target_address = stack.pop(0)
             if isSymbolic(target_address):
-                target_address = int(str(simplify(target_address)))
+                try:
+                    target_address = int(str(simplify(target_address)))
+                except:
+                    raise TypeError("Target address must be an integer")
             vertices[start].set_jump_target(target_address)
             flag = stack.pop(0)
             branch_expression = (BitVecVal(0, 1) == BitVecVal(1, 1))
