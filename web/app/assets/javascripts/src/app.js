@@ -979,7 +979,7 @@ var run = function () {
         <div class="${css.small_item}">
           <div>Z3 Timeout:</div>
         </div>
-        <div class="${css.large_item}"><input name="timeout" type="number"value=5 min=0 title="Time limit for z3 to solve path constraints during symbolic execution."><span> seconds</span></div>
+        <div class="${css.large_item}"><input name="timeout" type="number" value=1000 min=0 title="Time limit for z3 to solve path constraints during symbolic execution."><span> milliseconds</span></div>
       </div>
       <div class="${css.crow}">
         <div class="${css.small_item}">

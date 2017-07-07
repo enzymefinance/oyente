@@ -3,19 +3,22 @@ class HomeController < ApplicationController
   end
 
   def analyze
-    upload_path = Rails.root.join('public', 'uploads')
-    filepath = upload_path.join('tmp.sol')
-
-    Dir.mkdir(upload_path) unless Dir.exists?(upload_path)
-
-    File.open(filepath, 'wb') do |file|
-      file.write(oyente_params[:source])
+    @output = "File name: #{oyente_params[:filename]}\n"
+    unless check_params
+      @output += "Invalid input"
+    else
+      file = Tempfile.new oyente_params[:filename]
+      begin
+        file.write oyente_params[:source]
+        file.close
+        @output += `python #{ENV['OYENTE']}/oyente.py -s #{file.path} -w#{options} `
+        UserMailer.analyzer_result_notification(oyente_params[:filename], file.path, @output, oyente_params[:email]).deliver_later
+      rescue
+        file.close
+        file.unlink
+        @output += "Error"
+      end
     end
-
-    @output = `python #{ENV['OYENTE']}/oyente.py -s #{filepath} -w#{options} `
-    @output = "File name: #{oyente_params[:filename]}\n" + @output
-
-    UserMailer.analyzer_result_notification(oyente_params[:filename], filepath.to_s, @output, oyente_params[:email]).deliver_later
   end
 
   private
@@ -23,11 +26,19 @@ class HomeController < ApplicationController
     params.require(:data).permit(:filename, :source, :timeout, :global_timeout, :depthlimit, :gaslimit, :looplimit, :email)
   end
 
+  def check_params
+    oyente_params.each do |opt, val|
+      unless ["source", "filename", "email"].include?(opt)
+        return false unless is_number?(val)
+      end
+    end
+    return true
+  end
+
   def options
     opts = ""
     oyente_params.each do |opt, val|
       unless ["source", "filename", "email"].include?(opt)
-        val = seconds_to_milliseconds(val) if opt == "timeout"
         opt = opt.gsub(/_/, '-')
         opts += " --#{opt} #{val}"
       end
@@ -35,7 +46,7 @@ class HomeController < ApplicationController
     return opts
   end
 
-  def seconds_to_milliseconds second
-    ( second.to_f * 1000 ).to_i
+  def is_number? string
+    true if Float(string) rescue false
   end
 end
