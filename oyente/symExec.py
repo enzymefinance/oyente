@@ -21,7 +21,9 @@ from assertion import Assertion
 from analysis import *
 from utils import retrieveFunctionSignatures, retrieveFunctionNames
 import global_params
-from test_evm.global_test_params import *
+
+from test_evm.global_test_params import (TIME_OUT, UNKOWN_INSTRUCTION,
+                                         EXCEPTION, PICKLE_PATH)
 
 
 log = logging.getLogger(__name__)
@@ -126,7 +128,7 @@ def compare_stack_unit_test(stack):
         log.warning(e.message)
 
 def compare_storage_and_memory_unit_test(global_state, mem, analysis):
-    unit_test = pickle.load(open("current_test.pickle", "rb"))
+    unit_test = pickle.load(open(PICKLE_PATH, 'rb'))
     test_status = unit_test.compare_with_symExec_result(global_state, mem, analysis)
     exit(test_status)
 

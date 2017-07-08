@@ -23,7 +23,7 @@ UNIT_TEST = 3
 
 ```
 # Start testing
-$ python test_evm.py
+$ python oyenete/run_tests.py
 ```
 
 After running the testing program, the result would display a status for each testcase:

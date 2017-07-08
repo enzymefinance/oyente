@@ -1,8 +1,12 @@
 import os
+
 from z3 import *
-from global_test_params import *
+
 from global_params import *
 from utils import to_unsigned
+
+from .global_test_params import *
+
 
 class EvmUnitTest(object):
     def __init__(self, name, data):
@@ -27,7 +31,6 @@ class EvmUnitTest(object):
         gas_limit = long(self.data['exec']['gas'], 0)
         gas_remaining = long(self.data['gas'], 0)
         return (gas_limit, gas_remaining)
-
 
     def run_test(self):
         return self._execute_vm(self.bytecode())
@@ -85,7 +88,6 @@ class EvmUnitTest(object):
             return PASS
         else:
             return INCORRECT_GAS
-
 
     def compare_symbolic(self, global_state):
         for key, value in self.storage().items():

@@ -23,7 +23,7 @@ Note - If need the [version of Oyente](https://github.com/melonproject/oyente/tr
 ## Full install
 
 ### Install the following dependencies
-#### solc v0.4.10
+#### solc v0.4.13
 ```
 $ sudo add-apt-repository ppa:ethereum/ethereum
 $ sudo apt-get update
