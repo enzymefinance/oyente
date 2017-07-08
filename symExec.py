@@ -1396,14 +1396,47 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             evm = evm_file.read()[:-1]
             code_size = len(evm)/2
             stack.insert(0, code_size)
-    elif instr_parts[0] == "CODECOPY":  # Copy code running in current env to memory
-        #  TODO: Don't know how to simulate this yet
-        # Need an example to test
+    elif instr_parts[0] == "CODECOPY":
         if len(stack) > 2:
             global_state["pc"] = global_state["pc"] + 1
-            stack.pop(0)
-            stack.pop(0)
-            stack.pop(0)
+            mem_location = stack.pop(0)
+            code_from = stack.pop(0)
+            no_bytes = stack.pop(0)
+
+            if contains_only_concrete_values([mem_location, current_miu_i, code_from, no_bytes]):
+                temp = long(math.ceil((mem_location + no_bytes) / float(32)))
+                if temp > current_miu_i:
+                    current_miu_i = temp
+
+                if c_name.endswith('.disasm'):
+                    evm_file_name = c_name[:-7]
+                else:
+                    evm_file_name = c_name
+                with open(evm_file_name, 'r') as evm_file:
+                    evm = evm_file.read()[:-1]
+                    start = code_from * 2
+                    end = start + no_bytes * 2 
+                    code = evm[start: end]
+                mem[mem_location] = code
+            else:
+                new_var_name = gen.gen_code_var("Ia", code_from, no_bytes)
+                if new_var_name in path_conditions_and_vars:
+                    new_var = path_conditions_and_vars[new_var_name]
+                else:
+                    new_var = BitVec(new_var_name, 256)
+                    path_conditions_and_vars[new_var_name] = new_var
+
+                temp = ((mem_location + no_bytes) / 32) + 1
+                current_miu_i = to_symbolic(current_miu_i)
+                expression = current_miu_i < temp
+                solver.push()
+                solver.add(expression)
+                if solver.check() != unsat:
+                    current_miu_i = If(expression, temp, current_miu_i)
+                solver.pop()
+                mem.clear() # very conservative
+                mem[str(mem_location)] = new_var
+            global_state["miu_i"] = current_miu_i
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "GASPRICE":
