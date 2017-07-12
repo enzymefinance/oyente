@@ -46,9 +46,6 @@ function Analyzer () {
         $('#analysis').append(response.result)
         $('#analyzer').html(finish).css('pointer-events', 'auto')
         $('#analysis').fadeIn()
-      },
-      error: function(error) {
-        $('#analyzer').html(finish).css('pointer-events', 'auto')
       }
     })
   }

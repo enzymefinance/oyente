@@ -31,8 +31,8 @@ def has_dependencies_installed():
         cmd = subprocess.Popen(["evm", "--version"], stdout=subprocess.PIPE)
         cmd_out = cmd.communicate()[0].strip()
         version = re.findall(r"evm version (\d*.\d*.\d*)", cmd_out)[0]
-        if version != '1.6.1':
-            logging.warning("You are using evm version %s. The supported version is 1.6.1" % version)
+        if version != '1.6.6':
+            logging.warning("You are using evm version %s. The supported version is 1.6.6" % version)
 
     if not cmd_exists("solc"):
         logging.critical("solc is missing. Please install the solidity compiler and make sure solc is in the path.")
@@ -41,8 +41,8 @@ def has_dependencies_installed():
         cmd = subprocess.Popen(["solc", "--version"], stdout=subprocess.PIPE)
         cmd_out = cmd.communicate()[0].strip()
         version = re.findall(r"Version: (\d*.\d*.\d*)", cmd_out)[0]
-        if version != '0.4.10':
-            logging.warning("You are using solc version %s, The supported version is 0.4.10" % version)
+        if version != '0.4.13':
+            logging.warning("You are using solc version %s, The supported version is 0.4.13" % version)
 
     return True
 
@@ -66,6 +66,7 @@ def compileContracts(contract):
 
     if not contracts:
         logging.critical("Solidity compilation failed")
+        print "Solidity compilation failed. This might be caused by using unsupported version of solidity compiler. The supported version is 0.4.13"
         exit()
 
     return contracts

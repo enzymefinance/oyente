@@ -40,11 +40,11 @@ WEB = 0
 STORE_RESULT = 0
 
 # depth limit for DFS
-DEPTH_LIMIT = 100000
+DEPTH_LIMIT = 1000
 
 GAS_LIMIT = 4000000
 
-LOOP_LIMIT = 1000
+LOOP_LIMIT = 100
 
 # Use a public blockchain to speed up the symbolic execution
 USE_GLOBAL_BLOCKCHAIN = 0
