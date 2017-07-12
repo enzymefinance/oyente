@@ -23,6 +23,15 @@ class Assertion:
         # Solidity function that might contain this assertion
         self.function = None
 
+        # Branch that led to the assertion failure
+        self.path = None
+
+    def set_path(self, path):
+        self.path = path
+
+    def get_path(self):
+        return self.path
+
     def set_function(self, function):
         self.function = function
 
@@ -61,7 +70,7 @@ class Assertion:
         s += "Assertion from block " + str(self.block_from) + "\n"
         s += "SMT2 query:\n" + str(self.query) + "\n"
         s += "Violated: " + str(self.violated) + "\n"
-        s += "Upmost function: "
+        s += "Function: "
         if self.function == None:
             s += "?\n"
         else:

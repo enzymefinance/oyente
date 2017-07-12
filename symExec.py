@@ -215,32 +215,39 @@ def interpret_assertion_bug(fun_sigs):
     #        if vertices[v].get_function() != None:
     #            break
 
-    rev_edges = build_rev_edges(edges)
+    #rev_edges = build_rev_edges(edges)
 
     assertion_fails = [assertion for assertion in assertions if assertion.is_violated()]
     for asrt in assertion_fails:
-        interpret_assertion(asrt, rev_edges)
+        interpret_assertion(asrt) #, rev_edges)
         asrt.display()
 
-def interpret_assertion(asrt, rev_edges):
+def interpret_assertion(asrt): #, rev_edges):
     global vertices
 
-    visited = {}
-    queue  = [asrt.get_block_from()]
-    block_idx = 0
-    visited[queue[block_idx]] = True
-    while block_idx < len(queue):
-        block = queue[block_idx]
-        #print("Visiting block " + str(block))
+    for i in range(len(asrt.path) - 1, 0, -1):
+        block = asrt.path[i]
         block_fun = vertices[block].get_function()
-        if block_fun == None:
-            for e in rev_edges[block]:
-                if not e in visited:
-                    queue.append(e)
-                    visited[e] = True
-        else:
+        if block_fun != None:
             asrt.set_function(block_fun)
-        block_idx += 1
+            break
+
+    #visited = {}
+    #queue  = [asrt.get_block_from()]
+    #block_idx = 0
+    #visited[queue[block_idx]] = True
+    #while block_idx < len(queue):
+    #    block = queue[block_idx]
+    #    #print("Visiting block " + str(block))
+    #    block_fun = vertices[block].get_function()
+    #    if block_fun == None:
+    #        for e in rev_edges[block]:
+    #            if not e in visited:
+    #                queue.append(e)
+    #                visited[e] = True
+    #    else:
+    #        asrt.set_function(block_fun)
+    #    block_idx += 1
 
 
 def main(contract):
@@ -357,6 +364,7 @@ def build_cfg_and_analyze():
         collect_vertices(tokens)
         construct_bb()
         construct_static_edges()
+        print_cfg()
         full_sym_exec()  # jump targets are constructed on the fly
 
 
@@ -742,11 +750,11 @@ def full_sym_exec():
     # this is init global state for this particular execution
     global_state = get_init_global_state(path_conditions_and_vars)
     analysis = init_analysis()
-    return sym_exec_block(0, 0, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis)
+    return sym_exec_block(0, 0, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis, [])
 
 
 # Symbolically executing a block from the start address
-def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis):
+def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis, path):
     global solver
     global visited_edges
     global money_flow_all_paths
@@ -823,7 +831,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
         visited1 = list(visited)
         path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
         analysis1 = my_copy_dict(analysis)
-        sym_exec_block(successor, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+        sym_exec_block(successor, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1, path + [block])
     elif jump_type[block] == "falls_to":  # just follow to the next basic block
         successor = vertices[block].get_falls_to()
         stack1 = list(stack)
@@ -833,7 +841,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
         visited1 = list(visited)
         path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
         analysis1 = my_copy_dict(analysis)
-        sym_exec_block(successor, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+        sym_exec_block(successor, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1, path + [block])
     elif jump_type[block] == "conditional":  # executing "JUMPI"
 
         global assertions
@@ -874,6 +882,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
                     assertion.set_query(branch_expression)
                     model = solver.model()
                     assertion.set_model(model)
+                    assertion.set_path(path + [block])
 
                 stack1 = list(stack)
                 mem1 = dict(mem)
@@ -883,7 +892,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
                 path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
                 path_conditions_and_vars1["path_condition"].append(branch_expression)
                 analysis1 = my_copy_dict(analysis)
-                sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+                sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1, path + [block])
         except Exception as e:
             log_file.write(str(e))
             traceback.print_exc()
@@ -913,6 +922,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
                     assertion.set_violated(True)
                     model = solver.model()
                     assertion.set_model(model)
+                    assertion.set_path(path + [block])
 
                 stack1 = list(stack)
                 mem1 = dict(mem)
@@ -922,7 +932,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
                 path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
                 path_conditions_and_vars1["path_condition"].append(negated_branch_expression)
                 analysis1 = my_copy_dict(analysis)
-                sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+                sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1, path + [block])
         except Exception as e:
             log_file.write(str(e))
             traceback.print_exc()
