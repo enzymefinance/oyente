@@ -291,6 +291,8 @@ def change_format():
         for line in file_contents:
             line = line.replace('SELFDESTRUCT', 'SUICIDE')
             line = line.replace('Missing opcode', 'INVALID')
+            line = line.replace('INVALID 0xfd', 'REQUIREFAIL')
+            line = line.replace('INVALID 0xfe', 'ASSERTFAIL')
             line = line.replace(':', '')
             lineParts = line.split(' ')
             try: # removing initial zeroes
@@ -313,7 +315,6 @@ def change_format():
 
     with open(c_name, 'w') as disasm_file:
         disasm_file.write("\n".join(file_contents))
-        #print("\n".join(file_contents))
 
 
 def build_cfg_and_analyze():
@@ -450,7 +451,6 @@ def print_cfg():
     for block in vertices.values():
         block.display()
     log.debug(str(edges))
-    print(str(edges))
 
 
 # 1. Parse the disassembled file
@@ -512,7 +512,7 @@ def collect_vertices(tokens):
                     end_ins_dict[current_block] = last_ins_address
                 current_block = current_ins_address
                 is_new_block = False
-            elif tok_string == "STOP" or tok_string == "RETURN" or tok_string == "SUICIDE":
+            elif tok_string == "STOP" or tok_string == "RETURN" or tok_string == "SUICIDE" or tok_string == "REQUIREFAIL" or tok_string == "ASSERTFAIL":
                 jump_type[current_block] = "terminal"
                 end_ins_dict[current_block] = current_ins_address
             elif tok_string == "JUMP":
@@ -803,11 +803,6 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
         sym_exec_block(successor, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1, path + [block], models)
     elif jump_type[block] == "conditional":  # executing "JUMPI"
 
-        global assertions
-
-        left_branch = vertices[block].get_jump_target()
-        right_branch = vertices[block].get_falls_to()
-
         # A choice point, we proceed with depth first search
 
         branch_expression = vertices[block].get_branch_expression()
@@ -821,6 +816,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
             if solver.check() == unsat:
                 log.debug("INFEASIBLE PATH DETECTED")
             else:
+                left_branch = vertices[block].get_jump_target()
                 stack1 = list(stack)
                 mem1 = dict(mem)
                 global_state1 = my_copy_dict(global_state)
@@ -845,7 +841,6 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
 
         log.debug("Negated branch expression: " + str(negated_branch_expression))
 
-
         try:
             if solver.check() == unsat:
                 # Note that this check can be optimized. I.e. if the previous check succeeds,
@@ -853,6 +848,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
                 # the else branch
                 log.debug("INFEASIBLE PATH DETECTED")
             else:
+                right_branch = vertices[block].get_falls_to()
                 stack1 = list(stack)
                 mem1 = dict(mem)
                 global_state1 = my_copy_dict(global_state)
@@ -886,20 +882,25 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     instr_parts = str.split(instr, ' ')
 
     if instr_parts[0] == "INVALID":
+        return
+    elif instr_parts[0] == "ASSERTFAIL":
         # We only care about asserts and ignore requires:
         # We only consider assertions blocks that already start with INVALID,
         # without any JUMPDEST
-        if instr_parts[1] == "0xfe" and instr == vertices[start].get_instructions()[0]:
+        # TODO: Figure how to get rid of the next line...
+        if instr == vertices[start].get_instructions()[0]:
             from_block = path[-1]
             if from_block != 0 and not vertices[from_block].contains_callvalue():
                 assertion = Assertion(start)
                 assertion.set_violated(True)
                 assertion.set_model(models[-1])
                 assertion.set_path(path + [start])
+                assertion.set_sym(path_conditions_and_vars)
                 assertions.append(assertion)
-        elif instr_parts[1] == "0xfd":
-            stack.pop(0)
-            stack.pop(0)
+        return
+    elif instr_parts[0] == "REQUIREFAIL":
+        stack.pop(0)
+        stack.pop(0)
         return
 
     # collecting the analysis result by calling this skeletal function
@@ -1775,9 +1776,6 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                     raise TypeError("Target address must be an integer")
             vertices[start].set_jump_target(target_address)
             flag = stack.pop(0)
-            #if start == 123:
-            #    print("TARGET ADDRESS IS " + str(target_address))
-            #    print("FLAG IS " + str(flag))
             branch_expression = (BitVecVal(0, 1) == BitVecVal(1, 1))
             if isReal(flag):
                 if flag != 0:
