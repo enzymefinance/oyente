@@ -1,14 +1,7 @@
 class Assertion:
-    def __init__(self, block_from, block_yes, block_no):
+    def __init__(self, block_from):
         # Block that contains the test (assertion)
         self.block_from = block_from
-
-        # Block that is executed when the assertion is true
-        self.block_yes = block_yes
-
-        # Block that contains INVALID
-        # This block should fall to INVALOD
-        self.block_no = block_no
 
         # Was the assertion violated?
         self.violated = False
@@ -41,12 +34,6 @@ class Assertion:
     def get_block_from(self):
         return self.block_from
 
-    def get_block_yes(self):
-        return self.block_yes
-    
-    def get_block_no(self):
-        return self.block_no
-
     def is_violated(self):
         return self.violated
 
@@ -68,7 +55,7 @@ class Assertion:
     def __str__(self):
         s =  "================\n"
         s += "Assertion from block " + str(self.block_from) + "\n"
-        s += "SMT2 query:\n" + str(self.query) + "\n"
+        #s += "SMT2 query:\n" + str(self.query) + "\n"
         s += "Violated: " + str(self.violated) + "\n"
         s += "Function: "
         if self.function == None:

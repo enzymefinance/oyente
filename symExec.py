@@ -364,7 +364,6 @@ def build_cfg_and_analyze():
         collect_vertices(tokens)
         construct_bb()
         construct_static_edges()
-        print_cfg()
         full_sym_exec()  # jump targets are constructed on the fly
 
 
@@ -750,11 +749,11 @@ def full_sym_exec():
     # this is init global state for this particular execution
     global_state = get_init_global_state(path_conditions_and_vars)
     analysis = init_analysis()
-    return sym_exec_block(0, 0, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis, [])
+    return sym_exec_block(0, 0, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis, [], [])
 
 
 # Symbolically executing a block from the start address
-def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis, path):
+def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis, path, models):
     global solver
     global visited_edges
     global money_flow_all_paths
@@ -794,7 +793,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
         return ["ERROR"]
 
     for instr in block_ins:
-        sym_exec_ins(block, instr, stack, mem, global_state, path_conditions_and_vars, analysis)
+        sym_exec_ins(block, instr, stack, mem, global_state, path_conditions_and_vars, analysis, path, models)
 
     # Mark that this basic block in the visited blocks
     visited.append(block)
@@ -831,7 +830,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
         visited1 = list(visited)
         path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
         analysis1 = my_copy_dict(analysis)
-        sym_exec_block(successor, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1, path + [block])
+        sym_exec_block(successor, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1, path + [block], models)
     elif jump_type[block] == "falls_to":  # just follow to the next basic block
         successor = vertices[block].get_falls_to()
         stack1 = list(stack)
@@ -841,27 +840,13 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
         visited1 = list(visited)
         path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
         analysis1 = my_copy_dict(analysis)
-        sym_exec_block(successor, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1, path + [block])
+        sym_exec_block(successor, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1, path + [block], models)
     elif jump_type[block] == "conditional":  # executing "JUMPI"
 
         global assertions
 
         left_branch = vertices[block].get_jump_target()
         right_branch = vertices[block].get_falls_to()
-
-        # Assertion build
-        assertion = None
-        left_branch_asrt = False
-        right_branch_asrt = False
-        if block != 0 and not vertices[block].contains_callvalue():
-            if vertices[left_branch].is_invalid():
-                left_branch_asrt = True
-                assertion = Assertion(block, right_branch, left_branch)
-            elif vertices[right_branch].is_invalid():
-                right_branch_asrt = True
-                assertion = Assertion(block, left_branch, right_branch)
-            if assertion != None:
-                assertions.append(assertion)
 
         # A choice point, we proceed with depth first search
 
@@ -876,14 +861,6 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
             if solver.check() == unsat:
                 log.debug("INFEASIBLE PATH DETECTED")
             else:
-                # Assertion check
-                if assertion != None and left_branch_asrt:
-                    assertion.set_violated(True)
-                    assertion.set_query(branch_expression)
-                    model = solver.model()
-                    assertion.set_model(model)
-                    assertion.set_path(path + [block])
-
                 stack1 = list(stack)
                 mem1 = dict(mem)
                 global_state1 = my_copy_dict(global_state)
@@ -892,7 +869,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
                 path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
                 path_conditions_and_vars1["path_condition"].append(branch_expression)
                 analysis1 = my_copy_dict(analysis)
-                sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1, path + [block])
+                sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1, path + [block], models + [solver.model()])
         except Exception as e:
             log_file.write(str(e))
             traceback.print_exc()
@@ -916,14 +893,6 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
                 # the else branch
                 log.debug("INFEASIBLE PATH DETECTED")
             else:
-                # Assertion check
-                if assertion != None and right_branch_asrt:
-                    assertion.set_query(negated_branch_expression)
-                    assertion.set_violated(True)
-                    model = solver.model()
-                    assertion.set_model(model)
-                    assertion.set_path(path + [block])
-
                 stack1 = list(stack)
                 mem1 = dict(mem)
                 global_state1 = my_copy_dict(global_state)
@@ -932,7 +901,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
                 path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
                 path_conditions_and_vars1["path_condition"].append(negated_branch_expression)
                 analysis1 = my_copy_dict(analysis)
-                sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1, path + [block])
+                sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1, path + [block], models + [solver.model()])
         except Exception as e:
             log_file.write(str(e))
             traceback.print_exc()
@@ -948,15 +917,26 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
 
 
 # Symbolically executing an instruction
-def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_vars, analysis):
+def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_vars, analysis, path, models):
     global solver
     global vertices
     global edges
+    global assertions
+
     instr_parts = str.split(instr, ' ')
 
-    #print(instr_parts)
-
     if instr_parts[0] == "INVALID":
+        # We only care about asserts and ignore requires:
+        # We only consider assertions blocks that already start with INVALID,
+        # without any JUMPDEST
+        if instr_parts[1] == "0xfe" and instr == vertices[start].get_instructions()[0]:
+            from_block = path[-1]
+            if from_block != 0 and not vertices[from_block].contains_callvalue():
+                assertion = Assertion(start)
+                assertion.set_violated(True)
+                assertion.set_model(models[-1])
+                assertion.set_path(path + [start])
+                assertions.append(assertion)
         return
 
     # collecting the analysis result by calling this skeletal function
