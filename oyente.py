@@ -103,15 +103,11 @@ def analyze(processed_evm_file, disasm_file):
     with open(disasm_file, 'w') as of:
         of.write(disasm_out)
 
-    #print("DISASM OUT IS")
-    #print(disasm_out)
-
     # Run symExec
-    safe = symExec.main(disasm_file)
-    #symExec.print_cfg()
+    symExec.main(disasm_file)
     
-    if not safe:
-        global args
+    global args
+    if args.assertion:
         fun_sigs = retrieveFunctionSignatures(args.source)
         symExec.interpret_assertion_bug(fun_sigs)
 
@@ -157,6 +153,9 @@ def main():
     parser.add_argument(
         "-w", "--web", help="Run Oyente for web service", action="store_true")
     parser.add_argument("-glt", "--global-timeout", help="Timeout for symbolic execution", action="store", dest="global_timeout", type=int)
+    parser.add_argument(
+        "-a", "--assertion", help="Try to infer info about violated assertions.", action="store_true")
+
 
     args = parser.parse_args()
 
@@ -174,6 +173,7 @@ def main():
     global_params.INPUT_STATE = 1 if args.state else 0
     global_params.WEB = 1 if args.web else 0
     global_params.STORE_RESULT = 1 if args.json else 0
+    global_params.INTERPRET_ASSERTIONS = 1 if args.assertion else 0
 
     if args.depth_limit:
         global_params.DEPTH_LIMIT = args.depth_limit

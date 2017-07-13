@@ -168,21 +168,15 @@ def detect_bugs():
     results['assertion_failure'] = is_fail
 
 
-def build_rev_edges(edges):
-    rev_edges = {}
-    for v in edges:
-        for e in edges[v]:
-            if not e in rev_edges:
-                rev_edges[e] = []
-            if not v in rev_edges[e]:
-                rev_edges[e].append(v)
-    return rev_edges
-
 def interpret_assertion_bug(fun_sigs):
     global assertions
     global edges
     global vertices
     global instructions
+    global results
+
+    if not results['assertion_failure']:
+        return
 
     state = 0
     fsig = None
@@ -203,19 +197,7 @@ def interpret_assertion_bug(fun_sigs):
             hexaddr = instructions[instr].split("0x")[1].replace(' ', '')
             faddr = int(hexaddr, 16)
             vertices[faddr].set_function(fun_sigs[fsig])
-            #print("Block " + str(faddr) + " has function " + sig + " = " + fun_sigs[sig])
             state = 0
-
-    #for v in vertices:
-    #    for instr in vertices[v].get_instructions():
-    #        for sig in fun_sigs:
-    #            if instr.startswith("PUSH4 " + sig):
-    #                vertices[v].set_function(fun_sigs[sig])
-    #                break
-    #        if vertices[v].get_function() != None:
-    #            break
-
-    #rev_edges = build_rev_edges(edges)
 
     assertion_fails = [assertion for assertion in assertions if assertion.is_violated()]
     for asrt in assertion_fails:
@@ -231,23 +213,6 @@ def interpret_assertion(asrt): #, rev_edges):
         if block_fun != None:
             asrt.set_function(block_fun)
             break
-
-    #visited = {}
-    #queue  = [asrt.get_block_from()]
-    #block_idx = 0
-    #visited[queue[block_idx]] = True
-    #while block_idx < len(queue):
-    #    block = queue[block_idx]
-    #    #print("Visiting block " + str(block))
-    #    block_fun = vertices[block].get_function()
-    #    if block_fun == None:
-    #        for e in rev_edges[block]:
-    #            if not e in visited:
-    #                queue.append(e)
-    #                visited[e] = True
-    #    else:
-    #        asrt.set_function(block_fun)
-    #    block_idx += 1
 
 
 def main(contract):
@@ -289,11 +254,6 @@ def main(contract):
 
     detect_bugs()
 
-    for key in results:
-        if results[key]:
-            return False
-
-    return True
 
 def results_for_web():
     global results
@@ -937,6 +897,9 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 assertion.set_model(models[-1])
                 assertion.set_path(path + [start])
                 assertions.append(assertion)
+        elif instr_parts[1] == "0xfd":
+            stack.pop(0)
+            stack.pop(0)
         return
 
     # collecting the analysis result by calling this skeletal function

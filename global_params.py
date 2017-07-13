@@ -51,3 +51,6 @@ USE_GLOBAL_BLOCKCHAIN = 0
 
 # Take state data from state.json to speed up the symbolic execution
 INPUT_STATE = 0
+
+# Try to infer info about violated assertions
+INTERPRET_ASSERTIONS = 0
