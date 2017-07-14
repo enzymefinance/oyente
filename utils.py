@@ -1,6 +1,8 @@
 # return true if the two paths have different flows of money
 # later on we may want to return more meaningful output: e.g. if the concurrency changes
 # the amount of money or the recipient.
+import shlex
+import subprocess
 import json
 import mmap
 import os
@@ -258,3 +260,62 @@ def get_distinct_contracts(list_of_contracts = "concurr.csv"):
                         if ndiff < 10:
                             flag[j] = i
     print flag
+
+
+
+def retrieveFunctionSignatures(contract):
+    solc_cmd = "solc --hashes %s"
+
+    FNULL = open(os.devnull, 'w')
+
+    solc_p = subprocess.Popen(shlex.split(
+        solc_cmd % contract), stdout=subprocess.PIPE, stderr=FNULL)
+    solc_out = solc_p.communicate()
+
+    lines = solc_out[0].split('\n')
+    i = 0
+    while not contract in lines[i]:
+        i += 1
+    i += 2
+    dsigs = {}
+    while i < len(lines) and len(lines[i]) > 0:
+        spl = lines[i].split(':')
+        kec = "0x" + spl[0]
+        dsigs[kec] = spl[1].lstrip(' ')
+        i += 1
+    return dsigs
+
+def retrieveFunctionNames(contract):
+    solc_cmd = "solc --ast-json %s"
+
+    FNULL = open(os.devnull, 'w')
+
+    solc_p = subprocess.Popen(shlex.split(
+        solc_cmd % contract), stdout=subprocess.PIPE, stderr=FNULL)
+    solc_out = solc_p.communicate()
+
+    lines = solc_out[0].split('\n')
+    i = 0
+    while not contract in lines[i]:
+        i += 1
+    i += 1
+    json_src = ""
+    while i < len(lines) and not lines[i].startswith("======= " + contract):
+        json_src += lines[i] + '\n'
+        i += 1
+    json_obj = json.loads(json_src)
+    queue = []
+    queue.append(json_obj)
+    functions = []
+    while len(queue) > 0:
+        node = queue.pop(0)
+        if node["name"] == "FunctionDefinition":
+            fun_name = node["attributes"]["name"]
+            functions.append(fun_name.encode("ascii"))
+            continue
+        if "children" in node:
+            for c in node["children"]:
+                queue.append(c)
+    return functions
+
+

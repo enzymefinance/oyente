@@ -7,6 +7,7 @@ import logging
 import requests
 import symExec
 import global_params
+import json
 
 
 def cmd_exists(cmd):
@@ -72,24 +73,6 @@ def compileContracts(contract):
     return contracts
 
 
-def retrieveFunctionSignatures(contract):
-    solc_cmd = "solc --hashes %s"
-
-    FNULL = open(os.devnull, 'w')
-
-    solc_p = subprocess.Popen(shlex.split(
-        solc_cmd % contract), stdout=subprocess.PIPE, stderr=FNULL)
-    solc_out = solc_p.communicate()
-
-    sigs = solc_out[0].split('\n')[3:-1]
-    dsigs = {}
-    for sig in sigs:
-        spl = sig.split(':')
-        kec = "0x" + spl[0]
-        dsigs[kec] = spl[1].lstrip(' ')
-    return dsigs
-
-
 def analyze(processed_evm_file, disasm_file):
     disasm_out = ""
     try:
@@ -104,13 +87,8 @@ def analyze(processed_evm_file, disasm_file):
         of.write(disasm_out)
 
     # Run symExec
-    symExec.main(disasm_file)
+    symExec.main(disasm_file, args.source)
     
-    global args
-    if args.assertion:
-        fun_sigs = retrieveFunctionSignatures(args.source)
-        symExec.interpret_assertion_bug(fun_sigs)
-
 
 def main():
     # TODO: Implement -o switch.
@@ -153,8 +131,6 @@ def main():
     parser.add_argument(
         "-w", "--web", help="Run Oyente for web service", action="store_true")
     parser.add_argument("-glt", "--global-timeout", help="Timeout for symbolic execution", action="store", dest="global_timeout", type=int)
-    parser.add_argument(
-        "-a", "--assertion", help="Try to infer info about violated assertions.", action="store_true")
 
 
     args = parser.parse_args()
@@ -173,7 +149,6 @@ def main():
     global_params.INPUT_STATE = 1 if args.state else 0
     global_params.WEB = 1 if args.web else 0
     global_params.STORE_RESULT = 1 if args.json else 0
-    global_params.INTERPRET_ASSERTIONS = 1 if args.assertion else 0
 
     if args.depth_limit:
         global_params.DEPTH_LIMIT = args.depth_limit

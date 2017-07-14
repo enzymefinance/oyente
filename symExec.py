@@ -18,6 +18,7 @@ from basicblock import BasicBlock
 from assertion import Assertion
 from analysis import *
 from arithmetic_utils import *
+from utils import retrieveFunctionSignatures, retrieveFunctionNames
 import global_params
 from test_evm.global_test_params import *
 
@@ -161,22 +162,35 @@ def detect_bugs():
         log.info("\t  Reentrancy bug exists: %s", str(reentrancy_bug_found))
     results['reentrancy'] = reentrancy_bug_found
 
+    check_assertions()
     assertion_fails = [assertion for assertion in assertions if assertion.is_violated()]
     is_fail = len(assertion_fails) > 0
+    results['assertion_failure'] = is_fail 
     if not isTesting():
         log.info("\t  Assertion fails: \t %s", str(is_fail))
-    results['assertion_failure'] = is_fail
+    for asrt in assertion_fails:
+        asrt.display()
+
+def check_assertions():
+    global assertions
+    global c_name_sol
+    
+    assertions_fail = [assertion for assertion in assertions if assertion.is_violated()]
+    if len(assertions_fail) == 0:
+        return
+
+    fun_names = retrieveFunctionNames(c_name_sol)
+    fun_sigs = retrieveFunctionSignatures(c_name_sol)
+
+    interpret_assertion_bug(fun_sigs, fun_names)
 
 
-def interpret_assertion_bug(fun_sigs):
+def interpret_assertion_bug(fun_sigs, fun_names):
     global assertions
     global edges
     global vertices
     global instructions
     global results
-
-    if not results['assertion_failure']:
-        return
 
     state = 0
     fsig = None
@@ -202,23 +216,28 @@ def interpret_assertion_bug(fun_sigs):
 
     assertion_fails = [assertion for assertion in assertions if assertion.is_violated()]
     for asrt in assertion_fails:
-        interpret_assertion(asrt, functions)
-        asrt.display()
+        interpret_assertion(asrt, functions, fun_names)
 
-def interpret_assertion(asrt, functions):
+
+def interpret_assertion(asrt, functions, fun_names):
     global vertices
 
     for i in range(len(asrt.path) - 1, 0, -1):
         block = asrt.path[i]
         if block in functions:
             block_fun = functions[block]
-            asrt.set_function(block_fun)
+            if block_fun.split('(')[0] in fun_names:
+                asrt.set_function(block_fun)
+            else:
+                asrt.set_violated(False)
             break
 
 
-def main(contract):
+def main(contract, contract_sol):
     global c_name
+    global c_name_sol
     c_name = contract
+    c_name_sol = contract_sol
 
     check_unit_test_file()
     initGlobalVars()
