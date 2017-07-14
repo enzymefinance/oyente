@@ -50,8 +50,8 @@ def check_reentrancy_bug(path_conditions_and_vars, global_state):
             # check if a var is global
             if var_name.startswith("Ia_store_"):
                 storage_key = var_name.split("Ia_store_")[1]
-                if storage_key in global_state["Ia"]:
-                    new_path_condition.append(var == global_state["Ia"][storage_key])
+                if int(storage_key) in global_state["Ia"]:
+                    new_path_condition.append(var == global_state["Ia"][int(storage_key)])
     log.info("=>>>>>> New PC: " + str(new_path_condition))
 
     solver = Solver()
