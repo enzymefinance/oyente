@@ -180,6 +180,7 @@ def interpret_assertion_bug(fun_sigs):
 
     state = 0
     fsig = None
+    functions = {}
     for instr in instructions:
         if state == 0:
             for sig in fun_sigs:
@@ -196,21 +197,21 @@ def interpret_assertion_bug(fun_sigs):
             # We have the address of the beginning of the function
             hexaddr = instructions[instr].split("0x")[1].replace(' ', '')
             faddr = int(hexaddr, 16)
-            vertices[faddr].set_function(fun_sigs[fsig])
+            functions[faddr] = fun_sigs[fsig]
             state = 0
 
     assertion_fails = [assertion for assertion in assertions if assertion.is_violated()]
     for asrt in assertion_fails:
-        interpret_assertion(asrt) #, rev_edges)
+        interpret_assertion(asrt, functions)
         asrt.display()
 
-def interpret_assertion(asrt): #, rev_edges):
+def interpret_assertion(asrt, functions):
     global vertices
 
     for i in range(len(asrt.path) - 1, 0, -1):
         block = asrt.path[i]
-        block_fun = vertices[block].get_function()
-        if block_fun != None:
+        if block in functions:
+            block_fun = functions[block]
             asrt.set_function(block_fun)
             break
 
@@ -884,13 +885,21 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     if instr_parts[0] == "INVALID":
         return
     elif instr_parts[0] == "ASSERTFAIL":
-        # We only care about asserts and ignore requires:
         # We only consider assertions blocks that already start with INVALID,
         # without any JUMPDEST
-        # TODO: Figure how to get rid of the next line...
         if instr == vertices[start].get_instructions()[0]:
             from_block = path[-1]
-            if from_block != 0 and not vertices[from_block].is_callvalue():
+            block_instrs = vertices[from_block].get_instructions()
+            is_init_callvalue = True
+            if len(block_instrs) < 5:
+                is_init_callvalue = False
+            else:
+                instrs = ["JUMPDEST", "CALLVALUE", "ISZERO", "PUSH", "JUMPI"]
+                for i in range(0, 5):
+                    if not block_instrs[i].startswith(instrs[i]):
+                        is_init_callvalue = False
+                        break
+            if from_block != 0 and not is_init_callvalue:
                 assertion = Assertion(start)
                 assertion.set_violated(True)
                 assertion.set_model(models[-1])

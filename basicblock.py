@@ -4,22 +4,6 @@ class BasicBlock:
         self.end = end_address
         self.instructions = []  # each instruction is a string
         self.jump_target = 0
-        self.function = None
-
-    def set_function(self, function):
-        self.function = function
-
-    def get_function(self):
-        return self.function
-
-    def is_callvalue(self):
-        if len(self.instructions) < 5:
-            return False
-        instrs = ["JUMPDEST", "CALLVALUE", "ISZERO", "PUSH", "JUMPI"]
-        for i in range(0, 5):
-            if not self.instructions[i].startswith(instrs[i]):
-                return False
-        return True
 
     def get_start_address(self):
         return self.start
