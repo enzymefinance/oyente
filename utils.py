@@ -10,6 +10,9 @@ import difflib
 from z3 import *
 from z3.z3util import get_vars
 
+def ceil32(x):
+    return x if x % 32 == 0 else x + 32 - (x % 32)
+
 def my_copy_dict(input):
     output = {}
     for key in input:
