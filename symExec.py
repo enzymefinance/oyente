@@ -290,9 +290,9 @@ def change_format():
         firstLine = file_contents[0].strip('\n')
         for line in file_contents:
             line = line.replace('SELFDESTRUCT', 'SUICIDE')
+            line = line.replace('Missing opcode 0xfd', 'REVERT')
+            line = line.replace('Missing opcode 0xfe', 'ASSERTFAIL')
             line = line.replace('Missing opcode', 'INVALID')
-            line = line.replace('INVALID 0xfd', 'REQUIREFAIL')
-            line = line.replace('INVALID 0xfe', 'ASSERTFAIL')
             line = line.replace(':', '')
             lineParts = line.split(' ')
             try: # removing initial zeroes
@@ -512,7 +512,7 @@ def collect_vertices(tokens):
                     end_ins_dict[current_block] = last_ins_address
                 current_block = current_ins_address
                 is_new_block = False
-            elif tok_string == "STOP" or tok_string == "RETURN" or tok_string == "SUICIDE" or tok_string == "REQUIREFAIL" or tok_string == "ASSERTFAIL":
+            elif tok_string == "STOP" or tok_string == "RETURN" or tok_string == "SUICIDE" or tok_string == "REVERT" or tok_string == "ASSERTFAIL":
                 jump_type[current_block] = "terminal"
                 end_ins_dict[current_block] = current_ins_address
             elif tok_string == "JUMP":
@@ -897,10 +897,6 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 assertion.set_path(path + [start])
                 assertion.set_sym(path_conditions_and_vars)
                 assertions.append(assertion)
-        return
-    elif instr_parts[0] == "REQUIREFAIL":
-        stack.pop(0)
-        stack.pop(0)
         return
 
     # collecting the analysis result by calling this skeletal function
@@ -1500,7 +1496,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 with open(evm_file_name, 'r') as evm_file:
                     evm = evm_file.read()[:-1]
                     start = code_from * 2
-                    end = start + no_bytes * 2 
+                    end = start + no_bytes * 2
                     code = evm[start: end]
                 mem[mem_location] = code
             else:
@@ -1554,7 +1550,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
 
                 evm = data_source.getCode(address)
                 start = code_from * 2
-                end = start + no_bytes * 2 
+                end = start + no_bytes * 2
                 code = evm[start: end]
                 mem[mem_location] = code
             else:
@@ -1955,7 +1951,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 path_conditions_and_vars["path_condition"].append(is_enough_fund)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "RETURN":
+    elif instr_parts[0] == "RETURN" or instr_parts[0] == "REVERT":
         # TODO: Need to handle miu_i
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
