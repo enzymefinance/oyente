@@ -890,7 +890,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         # TODO: Figure how to get rid of the next line...
         if instr == vertices[start].get_instructions()[0]:
             from_block = path[-1]
-            if from_block != 0 and not vertices[from_block].contains_callvalue():
+            if from_block != 0 and not vertices[from_block].is_callvalue():
                 assertion = Assertion(start)
                 assertion.set_violated(True)
                 assertion.set_model(models[-1])
