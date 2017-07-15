@@ -286,14 +286,16 @@ def results_for_web():
         results["reentrancy"] = False
     if not results.has_key("concurrency"):
         results["concurrency"] = False
-    if not results.has_key("assertion_failure"):
-        results["assertion_failure"] = False
 
     print "Callstack Attack:", results['callstack']
     print "Time Dependency:", results['time_dependency']
     print "Reentrancy bug:", results['reentrancy']
     print "Concurrency:", results['concurrency']
-    print "Assertion failure:", results['assertion_failure']
+
+    if global_params.CHECK_ASSERTIONS:
+        if not results.has_key("assertion_failure"):
+            results["assertion_failure"] = False
+        print "Assertion failure:", results['assertion_failure']
 
 
 def closing_message():
