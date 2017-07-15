@@ -51,7 +51,6 @@ def removeSwarmHash(evm):
     evm_without_hash = re.sub(r"a165627a7a72305820\S{64}0029$", "", evm)
     return evm_without_hash
 
-
 def compileContracts(contract):
     solc_cmd = "solc --optimize --bin-runtime %s"
 
@@ -71,7 +70,6 @@ def compileContracts(contract):
 
     return contracts
 
-
 def analyze(processed_evm_file, disasm_file):
     disasm_out = ""
     try:
@@ -88,7 +86,6 @@ def analyze(processed_evm_file, disasm_file):
     # Run symExec
     symExec.main(disasm_file, args.source)
     
-
 def main():
     # TODO: Implement -o switch.
 
