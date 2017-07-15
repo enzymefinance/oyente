@@ -12,7 +12,7 @@ Or even better, send us a PR :)
 # Running the tests
 
 There are two options to run the tests, which are concrete execution and symbolic execution.
-Before running the test you have to choose an option. There is a global variable named `UNIT_TEST` in `test_evm/global_test_params.py` to set the type of the tests.
+Before running the test you have to choose an option. There is a global variable named `UNIT_TEST` in `global_test_params.py` to set the type of the tests.
 
 ```
 # Testing concrete execution

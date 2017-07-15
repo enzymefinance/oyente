@@ -905,7 +905,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     if instr_parts[0] == "INVALID":
         return
     elif instr_parts[0] == "ASSERTFAIL":
-        # We only consider assertions blocks that already start with INVALID,
+        # We only consider assertions blocks that already start with ASSERTFAIL,
         # without any JUMPDEST
         if instr == vertices[start].get_instructions()[0]:
             from_block = path[-1]
