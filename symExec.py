@@ -1469,7 +1469,6 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 stack.insert(0, int(callData[start:end], 16))
             else:
                 new_var_name = gen.gen_data_var(position)
-                #print("NEW VAR " + str(new_var_name) + " CREATED FOR POSITION " + str(position))
                 if new_var_name in path_conditions_and_vars:
                     new_var = path_conditions_and_vars[new_var_name]
                 else:

@@ -1,3 +1,0 @@
-- When an assertion fails, reverse engineer the ASM code to figure
-out the Solidity function the assertion came from
-- Plus: try to do it for variables

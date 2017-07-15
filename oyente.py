@@ -7,7 +7,6 @@ import logging
 import requests
 import symExec
 import global_params
-import json
 
 
 def cmd_exists(cmd):
