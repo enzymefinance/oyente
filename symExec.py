@@ -162,14 +162,15 @@ def detect_bugs():
         log.info("\t  Reentrancy bug exists: %s", str(reentrancy_bug_found))
     results['reentrancy'] = reentrancy_bug_found
 
-    check_assertions()
-    assertion_fails = [assertion for assertion in assertions if assertion.is_violated()]
-    is_fail = len(assertion_fails) > 0
-    results['assertion_failure'] = is_fail 
-    if not isTesting():
-        log.info("\t  Assertion fails: \t %s", str(is_fail))
-    for asrt in assertion_fails:
-        asrt.display()
+    if global_params.CHECK_ASSERTIONS:
+        check_assertions()
+        assertion_fails = [assertion for assertion in assertions if assertion.is_violated()]
+        is_fail = len(assertion_fails) > 0
+        results['assertion_failure'] = is_fail
+        if not isTesting():
+            log.info("\t  Assertion fails: \t %s", str(is_fail))
+        for asrt in assertion_fails:
+            asrt.display()
 
 def check_assertions():
     global assertions
