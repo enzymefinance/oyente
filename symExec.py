@@ -1,5 +1,7 @@
 import tokenize
+import zlib, base64
 from tokenize import NUMBER, NAME, NEWLINE
+import re
 import math
 import sys
 import atexit
@@ -451,7 +453,7 @@ def collect_vertices(tokens):
                     end_ins_dict[current_block] = last_ins_address
                 current_block = current_ins_address
                 is_new_block = False
-            elif tok_string == "STOP" or tok_string == "RETURN" or tok_string == "SUICIDE" or tok_string == "REVERT":
+            elif tok_string == "STOP" or tok_string == "RETURN" or tok_string == "SUICIDE":
                 jump_type[current_block] = "terminal"
                 end_ins_dict[current_block] = current_ins_address
             elif tok_string == "JUMP":
@@ -645,14 +647,16 @@ def full_sym_exec():
     path_conditions_and_vars = {"path_condition" : []}
     visited, depth = [], 0
     mem = {}
+    memory = [] # This memory is used for the process of checking the integrity of balances
+
     # this is init global state for this particular execution
     global_state = get_init_global_state(path_conditions_and_vars)
     analysis = init_analysis()
-    return sym_exec_block(0, 0, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis)
+    return sym_exec_block(0, 0, visited, depth, stack, mem, memory, global_state, path_conditions_and_vars, analysis)
 
 
 # Symbolically executing a block from the start address
-def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, path_conditions_and_vars, analysis):
+def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_state, path_conditions_and_vars, analysis):
     global solver
     global visited_edges
     global money_flow_all_paths
@@ -691,7 +695,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
         return ["ERROR"]
 
     for instr in block_ins:
-        sym_exec_ins(block, instr, stack, mem, global_state, path_conditions_and_vars, analysis)
+        sym_exec_ins(block, instr, stack, mem, memory, global_state, path_conditions_and_vars, analysis)
 
     # Mark that this basic block in the visited blocks
     visited.append(block)
@@ -723,22 +727,24 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
         successor = vertices[block].get_jump_target()
         stack1 = list(stack)
         mem1 = dict(mem)
+        memory1 = list(memory)
         global_state1 = my_copy_dict(global_state)
         global_state1["pc"] = successor
         visited1 = list(visited)
         path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
         analysis1 = my_copy_dict(analysis)
-        sym_exec_block(successor, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+        sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, path_conditions_and_vars1, analysis1)
     elif jump_type[block] == "falls_to":  # just follow to the next basic block
         successor = vertices[block].get_falls_to()
         stack1 = list(stack)
         mem1 = dict(mem)
+        memory1 = list(memory)
         global_state1 = my_copy_dict(global_state)
         global_state1["pc"] = successor
         visited1 = list(visited)
         path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
         analysis1 = my_copy_dict(analysis)
-        sym_exec_block(successor, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+        sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, path_conditions_and_vars1, analysis1)
     elif jump_type[block] == "conditional":  # executing "JUMPI"
 
         # A choice point, we proceed with depth first search
@@ -757,13 +763,14 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
                 left_branch = vertices[block].get_jump_target()
                 stack1 = list(stack)
                 mem1 = dict(mem)
+                memory1 = list(memory)
                 global_state1 = my_copy_dict(global_state)
                 global_state1["pc"] = left_branch
                 visited1 = list(visited)
                 path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
                 path_conditions_and_vars1["path_condition"].append(branch_expression)
                 analysis1 = my_copy_dict(analysis)
-                sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+                sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, path_conditions_and_vars1, analysis1)
         except Exception as e:
             log_file.write(str(e))
             traceback.print_exc()
@@ -789,18 +796,20 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
                 right_branch = vertices[block].get_falls_to()
                 stack1 = list(stack)
                 mem1 = dict(mem)
+                memory1 = list(memory)
                 global_state1 = my_copy_dict(global_state)
                 global_state1["pc"] = right_branch
                 visited1 = list(visited)
                 path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
                 path_conditions_and_vars1["path_condition"].append(negated_branch_expression)
                 analysis1 = my_copy_dict(analysis)
-                sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, global_state1, path_conditions_and_vars1, analysis1)
+                sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, path_conditions_and_vars1, analysis1)
         except Exception as e:
             log_file.write(str(e))
             traceback.print_exc()
-            if str(e) == "timeout":
-                raise e
+            if not global_params.IGNORE_EXCEPTIONS:
+                if str(e) == "timeout":
+                    raise e
         solver.pop()  # POP SOLVER CONTEXT
         updated_count_number = visited_edges[current_edge] - 1
         visited_edges.update({current_edge: updated_count_number})
@@ -811,13 +820,14 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, global_state, p
 
 
 # Symbolically executing an instruction
-def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_vars, analysis):
+def sym_exec_ins(start, instr, stack, mem, memory, global_state, path_conditions_and_vars, analysis):
     global solver
     global vertices
     global edges
     instr_parts = str.split(instr, ' ')
 
     if instr_parts[0] == "INVALID":
+        print "ERC20 bug"
         return
 
     # collecting the analysis result by calling this skeletal function
@@ -1299,13 +1309,22 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
     elif instr_parts[0] == "SHA3":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
-            stack.pop(0)
-            stack.pop(0)
-            # push into the execution a fresh symbolic variable
-            new_var_name = gen.gen_arbitrary_var()
-            new_var = BitVec(new_var_name, 256)
-            path_conditions_and_vars[new_var_name] = new_var
-            stack.insert(0, new_var)
+            s0 = stack.pop(0)
+            s1 = stack.pop(0)
+            if contains_only_concrete_values([s0, s1]):
+                data = [str(x) for x in memory[s0: s0 + s1]]
+                position = ''.join(data)
+                position = re.sub('[\s+]', '', position)
+                position = zlib.compress(position, 9)
+                position = base64.b64encode(position)
+                position = BitVec(position, 256)
+                stack.insert(0, position)
+            else:
+                # push into the execution a fresh symbolic variable
+                new_var_name = gen.gen_arbitrary_var()
+                new_var = BitVec(new_var_name, 256)
+                path_conditions_and_vars[new_var_name] = new_var
+                stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
     #
@@ -1403,6 +1422,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             mem_location = stack.pop(0)
             code_from = stack.pop(0)
             no_bytes = stack.pop(0)
+            current_miu_i = global_state["miu_i"]
 
             if contains_only_concrete_values([mem_location, current_miu_i, code_from, no_bytes]):
                 temp = long(math.ceil((mem_location + no_bytes) / float(32)))
@@ -1462,6 +1482,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             mem_location = stack.pop(0)
             code_from = stack.pop(0)
             no_bytes = stack.pop(0)
+            current_miu_i = global_state["miu_i"]
 
             if contains_only_concrete_values([adress, mem_location, current_miu_i, code_from, no_bytes]) and USE_GLOBAL_BLOCKCHAIN:
                 temp = long(math.ceil((mem_location + no_bytes) / float(32)))
@@ -1579,6 +1600,14 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             stored_address = stack.pop(0)
             stored_value = stack.pop(0)
             current_miu_i = global_state["miu_i"]
+            if isReal(stored_address):
+                old_size = len(memory)
+                new_size = ceil32(stored_address + 32)
+                mem_extend = (new_size - old_size) * 32
+                memory.extend([0] * mem_extend)
+                for i in range(31, -1, -1):
+                    memory[stored_address + i] = stored_value % 256
+                    stored_value /= 256
             if contains_only_concrete_values([stored_address, current_miu_i]):
                 temp = long(math.ceil((stored_address + 32) / float(32)))
                 if temp > current_miu_i:
@@ -1612,7 +1641,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             temp_value = stack.pop(0)
             stored_value = temp_value % 256  # get the least byte
             current_miu_i = global_state["miu_i"]
-            if contains_only_concrete_values([address, current_miu_i]):
+            if contains_only_concrete_values([stored_address, current_miu_i]):
                 temp = long(math.ceil((stored_address + 1) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
@@ -1637,8 +1666,11 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             address = stack.pop(0)
-            if isReal(address) and address in global_state["Ia"]:
+            if address in global_state["Ia"]:
                 value = global_state["Ia"][address]
+                stack.insert(0, value)
+            elif str(address) in global_state["Ia"]:
+                value = global_state["Ia"][str(address)]
                 stack.insert(0, value)
             else:
                 new_var_name = gen.gen_owner_store_var(address)
@@ -1663,7 +1695,6 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 # note that the stored_value could be unknown
                 global_state["Ia"][stored_address] = stored_value
             else:
-                global_state["Ia"].clear()  # very conservative
                 # note that the stored_value could be unknown
                 global_state["Ia"][str(stored_address)] = stored_value
         else:
@@ -1871,7 +1902,7 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
                 path_conditions_and_vars["path_condition"].append(is_enough_fund)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "RETURN" or instr_parts[0] == "REVERT":
+    elif instr_parts[0] == "RETURN":
         # TODO: Need to handle miu_i
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
@@ -1881,6 +1912,13 @@ def sym_exec_ins(start, instr, stack, mem, global_state, path_conditions_and_var
             pass
         else:
             raise ValueError('STACK underflow')
+    elif instr_parts[0] == "REVERT":
+        if len(stack) > 1:
+            global_state["pc"] = global_state["pc"] + 1
+            stack.pop(0)
+            stack.pop(0)
+        else:
+            raise ValueError('STACK underfow')
     elif instr_parts[0] == "SUICIDE":
         global_state["pc"] = global_state["pc"] + 1
         recipient = stack.pop(0)
