@@ -71,6 +71,7 @@ opcodes = {
     "CALLCODE": [0xf2, 7, 1],
     "RETURN": [0xf3, 2, 0],
     "REVERT": [0xfd, 2, 0],
+    "ASSERTFAIL": [0xfe, 0, 0],
     "DELEGATECALL": [0xf4, 6, 1],
     "BREAKPOINT": [0xf5, 0, 0],
     "RNGSEED": [0xf6, 1, 1],
@@ -126,7 +127,7 @@ GCOST = {
     "Gblockhash": 20
 }
 
-Wzero = ("STOP", "RETURN", "REVERT")
+Wzero = ("STOP", "RETURN", "REVERT", "ASSERTFAIL")
 
 Wbase = ("ADDRESS", "ORIGIN", "CALLER", "CALLVALUE", "CALLDATASIZE",
          "CODESIZE", "GASPRICE", "COINBASE", "TIMESTAMP", "NUMBER",
