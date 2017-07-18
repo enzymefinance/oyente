@@ -38,7 +38,7 @@ def display_analysis(analysis):
 
 # Check if this call has the Reentrancy bug
 # Return true if it does, false otherwise
-def check_reentrancy_bug(path_conditions_and_vars, global_state):
+def check_reentrancy_bug(path_conditions_and_vars, stack, global_state):
     path_condition = path_conditions_and_vars["path_condition"]
     new_path_condition = []
     for expr in path_condition:
@@ -63,6 +63,9 @@ def check_reentrancy_bug(path_conditions_and_vars, global_state):
     solver.push()
     solver.add(path_condition)
     solver.add(new_path_condition)
+    # 2300 is the outgas used by transfer and send.
+    # If outgas > 2300 when using call.gas.value then the contract will be considered to contain reentrancy bug
+    solver.add(stack[0] > 2300)
     # if it is not feasible to re-execute the call, its not a bug
     ret_val = not (solver.check() == unsat)
     solver.pop()
@@ -163,7 +166,7 @@ def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_
     if opcode == "CALL":
         recipient = stack[1]
         transfer_amount = stack[2]
-        reentrancy_result = check_reentrancy_bug(path_conditions_and_vars, global_state)
+        reentrancy_result = check_reentrancy_bug(path_conditions_and_vars, stack, global_state)
         analysis["reentrancy_bug"].append(reentrancy_result)
         if isinstance(transfer_amount, (int, long)) and transfer_amount == 0:
             return
