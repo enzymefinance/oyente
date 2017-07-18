@@ -1548,7 +1548,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, path_conditions
                     start = code_from * 2
                     end = start + no_bytes * 2
                     code = evm[start: end]
-                mem[mem_location] = code
+                mem[mem_location] = int(code, 16)
             else:
                 new_var_name = gen.gen_code_var("Ia", code_from, no_bytes)
                 if new_var_name in path_conditions_and_vars:
@@ -1603,7 +1603,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, path_conditions
                 start = code_from * 2
                 end = start + no_bytes * 2
                 code = evm[start: end]
-                mem[mem_location] = code
+                mem[mem_location] = int(code, 16)
             else:
                 new_var_name = gen.gen_code_var(address, code_from, no_bytes)
                 if new_var_name in path_conditions_and_vars:
