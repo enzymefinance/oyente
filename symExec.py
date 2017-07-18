@@ -1532,6 +1532,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, path_conditions
             mem_location = stack.pop(0)
             code_from = stack.pop(0)
             no_bytes = stack.pop(0)
+            current_miu_i = global_state["miu_i"]
 
             if contains_only_concrete_values([mem_location, current_miu_i, code_from, no_bytes]):
                 temp = long(math.ceil((mem_location + no_bytes) / float(32)))
@@ -1591,6 +1592,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, path_conditions
             mem_location = stack.pop(0)
             code_from = stack.pop(0)
             no_bytes = stack.pop(0)
+            current_miu_i = global_state["miu_i"]
 
             if contains_only_concrete_values([adress, mem_location, current_miu_i, code_from, no_bytes]) and USE_GLOBAL_BLOCKCHAIN:
                 temp = long(math.ceil((mem_location + no_bytes) / float(32)))
@@ -1750,7 +1752,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, path_conditions
             temp_value = stack.pop(0)
             stored_value = temp_value % 256  # get the least byte
             current_miu_i = global_state["miu_i"]
-            if contains_only_concrete_values([address, current_miu_i]):
+            if contains_only_concrete_values([stored_address, current_miu_i]):
                 temp = long(math.ceil((stored_address + 1) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
