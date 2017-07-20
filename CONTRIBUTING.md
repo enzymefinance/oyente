@@ -29,7 +29,7 @@ $ python test_evm.py
 After running the testing program, the result would display a status for each testcase:
 - ```PASS```: the testcase passes
 - ```FAIL```: an opcode implements incorrectly
-- ```TIME_OUT```: it takes too long to run the testcase (set ```GLOBAL_TIMEOUT``` in ```global_params.py```)
+- ```TIME_OUT```: it takes too long to run the testcase (set ```GLOBAL_TIMEOUT_TEST``` in ```global_params.py```)
 - ```UNKNOWN_INSTRUCTION```: there is an unknown opcode in the testcase
 - ```EXCEPTION```: the program encounters an exception while running the testcase
 - ```EMPTY_RESULT``` the result is invalid
