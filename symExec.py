@@ -19,7 +19,6 @@ from ethereum_data import *
 from basicblock import BasicBlock
 from assertion import Assertion
 from analysis import *
-from arithmetic_utils import *
 from utils import retrieveFunctionSignatures, retrieveFunctionNames
 import global_params
 from test_evm.global_test_params import *
@@ -106,12 +105,6 @@ def check_unit_test_file():
         except:
             log.critical("Could not open result file for unit test")
             exit()
-
-def isSymbolic(value):
-    return not isinstance(value, (int, long))
-
-def isReal(value):
-    return isinstance(value, (int, long))
 
 def isTesting():
     return global_params.UNIT_TEST != 0
@@ -732,7 +725,7 @@ def full_sym_exec():
     visited, depth = [], 0
     mem = {}
     memory = [] # This memory is used only for the process of finding the position of a mapping variable in storage. In this process, memory is used for hashing methods
-    sha3_list = {} # rename position in SHA3 opcode for easier debug
+    sha3_list = {} # mapping a lengthy position string in SHA3 opcode to an arbitrary BitVec variable for easier debug
 
     # this is init global state for this particular execution
     global_state = get_init_global_state(path_conditions_and_vars)
@@ -1011,7 +1004,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if contains_only_concrete_values([first, second]):
+            if isAllReal(first, second):
                 if second == 0:
                     computed = 0
                 else:
@@ -1036,7 +1029,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if contains_only_concrete_values([first, second]):
+            if isAllReal(first, second):
                 first = to_signed(first)
                 second = to_signed(second)
                 if second == 0:
@@ -1077,7 +1070,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if contains_only_concrete_values([first, second]):
+            if isAllReal(first, second):
                 if second == 0:
                     computed = 0
                 else:
@@ -1106,7 +1099,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if contains_only_concrete_values([first, second]):
+            if isAllReal(first, second):
                 if second == 0:
                     computed = 0
                 else:
@@ -1148,7 +1141,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             second = stack.pop(0)
             third = stack.pop(0)
 
-            if contains_only_concrete_values([first, second, third]):
+            if isAllReal(first, second, third):
                 if third == 0:
                     computed = 0
                 else:
@@ -1177,7 +1170,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             second = stack.pop(0)
             third = stack.pop(0)
 
-            if contains_only_concrete_values([first, second, third]):
+            if isAllReal(first, second, third):
                 if third == 0:
                     computed = 0
                 else:
@@ -1205,7 +1198,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             base = stack.pop(0)
             exponent = stack.pop(0)
             # Type conversion is needed when they are mismatched
-            if contains_only_concrete_values([base, exponent]):
+            if isAllReal(base, exponent):
                 computed = pow(base, exponent, 2**256)
             else:
                 # The computed value is unknown, this is because power is
@@ -1220,7 +1213,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if contains_only_concrete_values([first, second]):
+            if isAllReal(first, second):
                 if first >= 32 or first < 0:
                     computed = second
                 else:
@@ -1257,7 +1250,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if contains_only_concrete_values([first, second]):
+            if isAllReal(first, second):
                 first = to_unsigned(first)
                 second = to_unsigned(second)
                 if first < second:
@@ -1274,7 +1267,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if contains_only_concrete_values([first, second]):
+            if isAllReal(first, second):
                 first = to_unsigned(first)
                 second = to_unsigned(second)
                 if first > second:
@@ -1291,7 +1284,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if contains_only_concrete_values([first, second]):
+            if isAllReal(first, second):
                 first = to_signed(first)
                 second = to_signed(second)
                 if first < second:
@@ -1308,7 +1301,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if contains_only_concrete_values([first, second]):
+            if isAllReal(first, second):
                 first = to_signed(first)
                 second = to_signed(second)
                 if first > second:
@@ -1325,7 +1318,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
             second = stack.pop(0)
-            if contains_only_concrete_values([first, second]):
+            if isAllReal(first, second):
                 if first == second:
                     stack.insert(0, 1)
                 else:
@@ -1398,7 +1391,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             byte_index = 32 - first - 1
             second = stack.pop(0)
 
-            if contains_only_concrete_values([first, second]):
+            if isAllReal(first, second):
                 if first >= 32 or first < 0:
                     computed = 0
                 else:
@@ -1425,7 +1418,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             global_state["pc"] = global_state["pc"] + 1
             s0 = stack.pop(0)
             s1 = stack.pop(0)
-            if contains_only_concrete_values([s0, s1]):
+            if isAllReal(s0, s1):
                 # simulate the hashing of sha3
                 data = [str(x) for x in memory[s0: s0 + s1]]
                 position = ''.join(data)
@@ -1544,7 +1537,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             no_bytes = stack.pop(0)
             current_miu_i = global_state["miu_i"]
 
-            if contains_only_concrete_values([mem_location, current_miu_i, code_from, no_bytes]):
+            if isAllReal(mem_location, current_miu_i, code_from, no_bytes):
                 temp = long(math.ceil((mem_location + no_bytes) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
@@ -1604,7 +1597,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             no_bytes = stack.pop(0)
             current_miu_i = global_state["miu_i"]
 
-            if contains_only_concrete_values([adress, mem_location, current_miu_i, code_from, no_bytes]) and USE_GLOBAL_BLOCKCHAIN:
+            if isAllReal(adress, mem_location, current_miu_i, code_from, no_bytes) and USE_GLOBAL_BLOCKCHAIN:
                 temp = long(math.ceil((mem_location + no_bytes) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
@@ -1680,7 +1673,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             global_state["pc"] = global_state["pc"] + 1
             address = stack.pop(0)
             current_miu_i = global_state["miu_i"]
-            if contains_only_concrete_values([address, current_miu_i]) and address in mem:
+            if isAllReal(address, current_miu_i) and address in mem:
                 temp = long(math.ceil((address + 32) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
@@ -1729,7 +1722,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
                 for i in range(31, -1, -1):
                     memory[stored_address + i] = stored_value % 256
                     stored_value /= 256
-            if contains_only_concrete_values([stored_address, current_miu_i]):
+            if isAllReal(stored_address, current_miu_i):
                 temp = long(math.ceil((stored_address + 32) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
@@ -1762,7 +1755,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             temp_value = stack.pop(0)
             stored_value = temp_value % 256  # get the least byte
             current_miu_i = global_state["miu_i"]
-            if contains_only_concrete_values([stored_address, current_miu_i]):
+            if isAllReal(stored_address, current_miu_i):
                 temp = long(math.ceil((stored_address + 1) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
@@ -2060,7 +2053,10 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             exit(UNKOWN_INSTRUCTION)
         raise Exception('UNKNOWN INSTRUCTION: ' + instr_parts[0])
 
+    try:
         print_state(stack, mem, global_state)
+    except:
+        log.debug("Error: Debugging states")
 
 # check for evm sequence SWAP4, POP, POP, POP, POP, ISZERO
 def check_callstack_attack(disasm):
@@ -2088,28 +2084,6 @@ def run_callstack_attack():
     if not isTesting():
         log.info("\t  CallStack Attack: \t %s", result)
     results['callstack'] = result
-
-def print_state(stack, mem, global_state):
-    log.debug("STACK: " + str(stack))
-    try:
-        log.debug("MEM: " + str(mem))
-    except:
-        log.debug("Memory debug error")
-    try:
-        log.debug("GLOBAL STATE: " + str(global_state))
-    except:
-        log.debug("Global state debug error")
-
-def contains_only_concrete_values(stack):
-    for element in stack:
-        if isSymbolic(element):
-            return False
-    return True
-
-def to_symbolic(number):
-    if isReal(number):
-        return BitVecVal(number, 256)
-    return number
 
 if __name__ == '__main__':
     main(sys.argv[1])
