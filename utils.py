@@ -57,7 +57,17 @@ def my_copy_dict(input):
             output[key] = dict(input[key])
         else:
             output[key] = input[key]
+    return output
 
+def copy_all(*args):
+    output = []
+    for arg in args:
+        if isinstance(arg, dict):
+            output.append(my_copy_dict(arg))
+        elif isinstance(arg, list):
+            output.append(list(arg))
+        else:
+            output.append(arg)
     return output
 
 

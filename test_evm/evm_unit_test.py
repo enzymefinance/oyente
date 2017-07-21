@@ -2,7 +2,7 @@ import os
 from z3 import *
 from global_test_params import *
 from global_params import *
-from arithmetic_utils import *
+from utils import to_unsigned
 
 class EvmUnitTest(object):
     def __init__(self, name, data):

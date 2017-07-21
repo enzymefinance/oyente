@@ -804,27 +804,13 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
 
     elif jump_type[block] == "unconditional":  # executing "JUMP"
         successor = vertices[block].get_jump_target()
-        stack1 = list(stack)
-        mem1 = dict(mem)
-        memory1 = list(memory)
-        global_state1 = my_copy_dict(global_state)
-        sha3_list1 = dict(sha3_list)
+        visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis)
         global_state1["pc"] = successor
-        visited1 = list(visited)
-        path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
-        analysis1 = my_copy_dict(analysis)
         sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, path + [block], models)
     elif jump_type[block] == "falls_to":  # just follow to the next basic block
         successor = vertices[block].get_falls_to()
-        stack1 = list(stack)
-        mem1 = dict(mem)
-        memory1 = list(memory)
-        global_state1 = my_copy_dict(global_state)
-        sha3_list1 = dict(sha3_list)
+        visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis)
         global_state1["pc"] = successor
-        visited1 = list(visited)
-        path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
-        analysis1 = my_copy_dict(analysis)
         sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, path + [block], models)
     elif jump_type[block] == "conditional":  # executing "JUMPI"
 
@@ -842,17 +828,14 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
                 log.debug("INFEASIBLE PATH DETECTED")
             else:
                 left_branch = vertices[block].get_jump_target()
-                stack1 = list(stack)
-                mem1 = dict(mem)
-                memory1 = list(memory)
-                global_state1 = my_copy_dict(global_state)
-                sha3_list1 = dict(sha3_list)
+                visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis)
                 global_state1["pc"] = left_branch
-                visited1 = list(visited)
-                path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
                 path_conditions_and_vars1["path_condition"].append(branch_expression)
-                analysis1 = my_copy_dict(analysis)
-                sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, path + [block], models + [solver.model()])
+                try:
+                    model = [solver.model()]
+                except Exception as e:
+                    model = []
+                sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, path + [block], models + model)
         except Exception as e:
             log_file.write(str(e))
             traceback.print_exc()
@@ -876,17 +859,14 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
                 log.debug("INFEASIBLE PATH DETECTED")
             else:
                 right_branch = vertices[block].get_falls_to()
-                stack1 = list(stack)
-                mem1 = dict(mem)
-                memory1 = list(memory)
-                global_state1 = my_copy_dict(global_state)
-                sha3_list1 = dict(sha3_list)
+                visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis)
                 global_state1["pc"] = right_branch
-                visited1 = list(visited)
-                path_conditions_and_vars1 = my_copy_dict(path_conditions_and_vars)
                 path_conditions_and_vars1["path_condition"].append(negated_branch_expression)
-                analysis1 = my_copy_dict(analysis)
-                sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, path + [block], models + [solver.model()])
+                try:
+                    model = [solver.model()]
+                except Exception as e:
+                    model = []
+                sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, path + [block], models + model)
         except Exception as e:
             log_file.write(str(e))
             traceback.print_exc()
