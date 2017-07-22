@@ -1760,26 +1760,30 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             address = stack.pop(0)
-            if address in global_state["Ia"]:
+            if isReal(address) and address in global_state["Ia"]:
                 value = global_state["Ia"][address]
                 stack.insert(0, value)
-            elif str(address) in global_state["Ia"]:
-                value = global_state["Ia"][str(address)]
-                stack.insert(0, value)
             else:
-                new_var_name = gen.gen_owner_store_var(address)
-                if new_var_name in path_conditions_and_vars:
-                    new_var = path_conditions_and_vars[new_var_name]
+                if str(address) in global_state["Ia"]:
+                    value = global_state["Ia"][str(address)]
+                    stack.insert(0, value)
                 else:
-                    new_var = BitVec(new_var_name, 256)
-                    path_conditions_and_vars[new_var_name] = new_var
-                stack.insert(0, new_var)
-                if isReal(address):
-                    global_state["Ia"][address] = new_var
-                else:
-                    global_state["Ia"][str(address)] = new_var
+                    if is_expr(address):
+                        address = simplify(address)
+                    new_var_name = gen.gen_owner_store_var(address)
+                    if new_var_name in path_conditions_and_vars:
+                        new_var = path_conditions_and_vars[new_var_name]
+                    else:
+                        new_var = BitVec(new_var_name, 256)
+                        path_conditions_and_vars[new_var_name] = new_var
+                    stack.insert(0, new_var)
+                    if isReal(address):
+                        global_state["Ia"][address] = new_var
+                    else:
+                        global_state["Ia"][str(address)] = new_var
         else:
             raise ValueError('STACK underflow')
+
     elif instr_parts[0] == "SSTORE":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
