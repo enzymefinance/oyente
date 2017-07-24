@@ -127,9 +127,9 @@ def compare_stack_unit_test(stack):
         log.warning("FAILED UNIT-TEST")
         log.warning(e.message)
 
-def compare_storage_and_memory_unit_test(global_state, mem, analysis):
+def compare_storage_and_gas_unit_test(global_state, analysis):
     unit_test = pickle.load(open(PICKLE_PATH, 'rb'))
-    test_status = unit_test.compare_with_symExec_result(global_state, mem, analysis)
+    test_status = unit_test.compare_with_symExec_result(global_state, analysis)
     exit(test_status)
 
 def handler(signum, frame):
@@ -806,7 +806,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
         if global_params.UNIT_TEST == 1:
             compare_stack_unit_test(stack)
         if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
-            compare_storage_and_memory_unit_test(global_state, mem, analysis)
+            compare_storage_and_gas_unit_test(global_state, analysis)
 
     elif jump_type[block] == "unconditional":  # executing "JUMP"
         successor = vertices[block].get_jump_target()
