@@ -1,9 +1,17 @@
-import json
+#!/usr/bin/env python
+
 import glob
+import json
 import os
 import pickle
-from test_evm.global_test_params import *
+
+os.chdir(os.path.dirname(__file__))
+
+from test_evm.global_test_params import (
+    PASS, FAIL, TIME_OUT, UNKOWN_INSTRUCTION, EXCEPTION, EMPTY_RESULT,
+    INCORRECT_GAS, PICKLE_PATH)
 from test_evm.evm_unit_test import EvmUnitTest
+
 
 def status(exit_code):
     if exit_code == 100: return "Pass"
@@ -14,13 +22,15 @@ def status(exit_code):
     if exit_code == 105: return "Empty result"
     if exit_code == 106: return "Incorrect gas tracked"
 
+    return str(exit_code)
+
 
 def main():
     test_dir = 'test_evm/test_data'
-    files = glob.glob(test_dir+'/vmArithmeticTest.json')
+    files = glob.glob(test_dir + '/vmArithmeticTest.json')
     test_cases = {}
 
-    num_tests = num_passes =  num_fails = \
+    num_tests = num_passes = num_fails = \
         num_time_outs = num_unkown_instrs = \
         num_exceptions = num_empty_res = num_incorrect_gas = 0
 
@@ -40,14 +50,19 @@ def main():
         print "===============Loading: %s====================" % testname
 
         current_test = EvmUnitTest(testname, testdata)
-        pickle.dump(current_test, open("current_test.pickle", "wb"))
+
+        pickle.dump(current_test, open(PICKLE_PATH, 'wb'), pickle.HIGHEST_PROTOCOL)
 
         exit_code = current_test.run_test()
+
         # Special case when symExec run into exception but it is correct result
         if exit_code == EXCEPTION and current_test.is_exception_case():
             exit_code = PASS
 
-        print "===============%s!====================" % status(exit_code).upper()
+        if exit_code:
+            print "===============%s!====================" % status(exit_code).upper()
+        else:
+            print "no exit code returned"
 
         testname = testname.encode('utf8')
         num_tests += 1
@@ -93,8 +108,12 @@ def main():
 
 
 def remove_temporary_files():
-    if os.path.isfile("./bytecode"): os.system("rm bytecode")
-    if os.path.isfile("./current_test.pickle"): os.system("rm current_test.pickle")
+    if os.path.isfile('./bytecode'):
+        os.unlink('./bytecode')
+
+    if os.path.isfile(PICKLE_PATH):
+        os.unlink(PICKLE_PATH)
+
 
 if __name__ == '__main__':
     main()

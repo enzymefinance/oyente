@@ -85,7 +85,7 @@ The flow of testing:
 - Compare the results (storage, memory and gas) after running oyente with the results being specified in the test data
 - Report bugs
 
-#### *test_evm.py*
+#### *run_tests.py*
 This is the main entry point to the testing program. The program loads a specific test data file in folder ```test_evm/test_data/``` and start running `oyente.py `with the input being specified in the loaded test data to get an exit code which is returned from `oyente.py.` From this exit code the testing program can report the bug
 
 #### *evm_unit_test.py*
