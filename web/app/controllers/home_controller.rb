@@ -11,7 +11,7 @@ class HomeController < ApplicationController
       begin
         file.write oyente_params[:source]
         file.close
-        @output += `python #{ENV['OYENTE']}/oyente.py -s #{file.path} -w#{options} `
+        @output += `python #{ENV['OYENTE']}/oyente.py -s #{file.path} -w#{options} -a`
         UserMailer.analyzer_result_notification(oyente_params[:filename], file.path, @output, oyente_params[:email]).deliver_later
       rescue
         file.close

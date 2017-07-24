@@ -166,8 +166,9 @@ def detect_bugs():
         results['assertion_failure'] = is_fail
         if not isTesting():
             log.info("\t  Assertion fails: \t %s", str(is_fail))
-        for asrt in assertion_fails:
-            asrt.display()
+        if not global_params.WEB:
+            for asrt in assertion_fails:
+                asrt.display()
 
 def check_assertions():
     global assertions
@@ -293,6 +294,9 @@ def results_for_web():
         if not results.has_key("assertion_failure"):
             results["assertion_failure"] = False
         print "Assertion failure:", results['assertion_failure']
+        assertion_fails = [assertion for assertion in assertions if assertion.is_violated()]
+        for asrt in assertion_fails:
+            print asrt.display_on_web()
 
 
 def closing_message():
