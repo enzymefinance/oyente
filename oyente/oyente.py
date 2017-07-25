@@ -87,7 +87,7 @@ def analyze(processed_evm_file, disasm_file):
 
     # Run symExec
     symExec.main(disasm_file, args.source)
-    
+
 def main():
     # TODO: Implement -o switch.
 
@@ -100,6 +100,7 @@ def main():
     group.add_argument("-ru", "--remoteURL", type=str,
                        help="Get contract from remote URL. Solidity by default. Use -b to process evm instead.", dest="remote_URL")
 
+    parser.add_argument("--version", action="version", version="oyente one-north 0.2.0")
     parser.add_argument(
         "-b", "--bytecode", help="read bytecode in source instead of solidity file.", action="store_true")
 
