@@ -20,17 +20,25 @@ and you are done!
 
 Note - If need the [version of Oyente](https://github.com/melonproject/oyente/tree/290f1ae1bbb295b8e61cbf0eed93dbde6f287e69) referred to in the paper, run the container from [here](https://hub.docker.com/r/hrishioa/oyente/)
 
+## Installation
+
+To install Oyente, simply:
+
+```
+$ pip install oyente
+```
+
 ## Full install
 
 ### Install the following dependencies
-#### solc v0.4.13
+#### solc version 0.4.13
 ```
 $ sudo add-apt-repository ppa:ethereum/ethereum
 $ sudo apt-get update
 $ sudo apt-get install solc
 ```
 
-#### evm from [go-ethereum](https://github.com/ethereum/go-ethereum) version 1.6.1. 
+#### evm from [go-ethereum](https://github.com/ethereum/go-ethereum) version 1.6.1.
 
 1. https://geth.ethereum.org/downloads/ or
 2. By from PPA if your using Ubuntu
@@ -72,6 +80,9 @@ pip install web3
 #evaluate a local solidity contract
 python oyente.py -s <contract filename>
 
+#evaluate a local solidity with option -a to verify assertions in the contract
+pyhon oyente.py -a -s <contract filename>
+
 #evaluate a local evm contract
 python oyente.py -s <contract filename> -b
 
@@ -107,4 +118,4 @@ Some analytics regarding the number of contracts tested, number of contracts ana
 
 ## Contributing
 
-Checkout out our [contribution guide](https://github.com/melonproject/oyente/blob/master/CONTRIBUTING.md) and the code structure [here](https://github.com/melonproject/oyente/blob/master/code.md). 
+Checkout out our [contribution guide](https://github.com/melonproject/oyente/blob/master/CONTRIBUTING.md) and the code structure [here](https://github.com/melonproject/oyente/blob/master/code.md).

@@ -27,7 +27,7 @@ def status(exit_code):
 
 def main():
     test_dir = 'test_evm/test_data'
-    files = glob.glob(test_dir + '/vmArithmeticTest.json')
+    files = glob.glob(test_dir + '/*.json')
     test_cases = {}
 
     num_tests = num_passes = num_fails = \

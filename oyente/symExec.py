@@ -127,9 +127,9 @@ def compare_stack_unit_test(stack):
         log.warning("FAILED UNIT-TEST")
         log.warning(e.message)
 
-def compare_storage_and_memory_unit_test(global_state, mem, analysis):
+def compare_storage_and_gas_unit_test(global_state, analysis):
     unit_test = pickle.load(open(PICKLE_PATH, 'rb'))
-    test_status = unit_test.compare_with_symExec_result(global_state, mem, analysis)
+    test_status = unit_test.compare_with_symExec_result(global_state, analysis)
     exit(test_status)
 
 def handler(signum, frame):
@@ -166,8 +166,9 @@ def detect_bugs():
         results['assertion_failure'] = is_fail
         if not isTesting():
             log.info("\t  Assertion fails: \t %s", str(is_fail))
-        for asrt in assertion_fails:
-            asrt.display()
+        if not global_params.WEB:
+            for asrt in assertion_fails:
+                asrt.display()
 
 def check_assertions():
     global assertions
@@ -293,6 +294,9 @@ def results_for_web():
         if not results.has_key("assertion_failure"):
             results["assertion_failure"] = False
         print "Assertion failure:", results['assertion_failure']
+        assertion_fails = [assertion for assertion in assertions if assertion.is_violated()]
+        for asrt in assertion_fails:
+            print asrt.display_on_web()
 
 
 def closing_message():
@@ -802,7 +806,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
         if global_params.UNIT_TEST == 1:
             compare_stack_unit_test(stack)
         if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
-            compare_storage_and_memory_unit_test(global_state, mem, analysis)
+            compare_storage_and_gas_unit_test(global_state, analysis)
 
     elif jump_type[block] == "unconditional":  # executing "JUMP"
         successor = vertices[block].get_jump_target()

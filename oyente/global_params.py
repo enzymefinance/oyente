@@ -17,7 +17,7 @@ DEBUG_MODE = 1
 CHECK_CONCURRENCY_FP = 0
 
 # Timeout for z3 in ms
-TIMEOUT = 1000
+TIMEOUT = 100
 
 # Set this flag to 1 if we want to do unit test from file unit_test.json
 # Set this flag to 2 if we want to do evm real value unit test
@@ -40,11 +40,11 @@ WEB = 0
 STORE_RESULT = 0
 
 # depth limit for DFS
-DEPTH_LIMIT = 1000
+DEPTH_LIMIT = 50
 
 GAS_LIMIT = 4000000
 
-LOOP_LIMIT = 100
+LOOP_LIMIT = 10
 
 # Use a public blockchain to speed up the symbolic execution
 USE_GLOBAL_BLOCKCHAIN = 0

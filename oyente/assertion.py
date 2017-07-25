@@ -80,3 +80,11 @@ class Assertion:
     def display(self):
         print self.__str__()
 
+    def display_on_web(self):
+        s =  "================\n"
+        s += "Assertion failure from function: "
+        if self.function == None:
+            s += "?\n"
+        else:
+            s += self.function + "\n"
+        return s

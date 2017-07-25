@@ -20,13 +20,6 @@ class EvmUnitTest(object):
         storage = self.data['post'].values()[0]['storage']
         return storage if storage != None else {"0": "0"}
 
-    def mem(self):
-        memory = self.data['out']
-        if memory == "0x":
-            return memory + "00"
-        else:
-            return memory
-
     def gas_info(self):
         gas_limit = long(self.data['exec']['gas'], 0)
         gas_remaining = long(self.data['gas'], 0)
@@ -47,16 +40,14 @@ class EvmUnitTest(object):
             code_file.write('\n')
             code_file.close()
 
-    def compare_with_symExec_result(self, global_state, mem, analysis):
-        if UNIT_TEST == 2: return self.compare_real_value(global_state, mem, analysis)
+    def compare_with_symExec_result(self, global_state, analysis):
+        if UNIT_TEST == 2: return self.compare_real_value(global_state, analysis)
         if UNIT_TEST == 3: return self.compare_symbolic(global_state)
 
-    def compare_real_value(self, global_state, mem, analysis):
+    def compare_real_value(self, global_state, analysis):
         storage_status = self._compare_storage_value(global_state)
-        mem_status = self._compare_memory_value(mem)
         gas_status = self._compare_gas_value(analysis)
         if storage_status != PASS: return storage_status
-        if mem_status != PASS: return mem_status
         if gas_status != PASS: return gas_status
         return PASS
 
@@ -71,14 +62,6 @@ class EvmUnitTest(object):
 
             if storage != value:
                 return FAIL
-        return PASS
-
-    def _compare_memory_value(self, mem):
-        memory = 0 if not mem else mem.values()[0]
-        memory = to_unsigned(long(memory))
-
-        if memory != long(self.mem(), 0):
-            return FAIL
         return PASS
 
     def _compare_gas_value(self, analysis):
