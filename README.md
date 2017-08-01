@@ -1,4 +1,10 @@
-# Oyente
+Oyente
+======
+
+An Analysis Tool for Smart Contracts
+
+[![Gitter][gitter-badge]][gitter-url]
+[![License: GPL v3][license-badge]][license-badge-url]
 
 ## Quick Start
 
@@ -119,3 +125,9 @@ Some analytics regarding the number of contracts tested, number of contracts ana
 ## Contributing
 
 Checkout out our [contribution guide](https://github.com/melonproject/oyente/blob/master/CONTRIBUTING.md) and the code structure [here](https://github.com/melonproject/oyente/blob/master/code.md).
+
+
+[gitter-badge]: https://img.shields.io/gitter/room/melonproject/oyente.js.svg?style=flat-square
+[gitter-url]: https://gitter.im/melonproject/oyente?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+[license-badge]: https://img.shields.io/badge/License-GPL%20v3-blue.svg?style=flat-square
+[license-badge-url]: ./LICENSE
