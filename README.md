@@ -1,4 +1,7 @@
-# Oyente
+Oyente
+======
+
+An Analysis Tool for Smart Contracts
 
 [![Gitter][gitter-badge]][gitter-url]
 [![License: GPL v3][license-badge]][license-badge-url]
