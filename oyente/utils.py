@@ -427,3 +427,8 @@ def get_source(c_name):
 def get_position(source, sourceLocation):
     lineBreakPositions = getLinebreakPositions(source)
     return convertOffsetToLineColumn(sourceLocation, lineBreakPositions)
+
+def convertFromSourceLocation(source, sourceLocation):
+    begin = sourceLocation['begin']
+    end = sourceLocation['end']
+    return source[begin:end]

@@ -165,7 +165,6 @@ def detect_bugs():
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
     if not isTesting():
         log.info("\t  Reentrancy bug exists: %s", str(reentrancy_bug_found))
-        print reentrancy_bugs
     results['reentrancy'] = reentrancy_bug_found
 
     if global_params.CHECK_ASSERTIONS:
@@ -366,6 +365,8 @@ def build_cfg_and_analyze():
 # Detect if a money flow depends on the timestamp
 def detect_time_dependency():
     global results
+    global source
+    global sourceLocations
 
     TIMESTAMP_VAR = "IH_s"
     is_dependant = False
@@ -378,7 +379,7 @@ def detect_time_dependency():
             if is_expr(expr):
                 if TIMESTAMP_VAR in str(expr) and j in path_condition_info[i]:
                     pc = path_condition_info[i][j]
-                    print sourceLocations[pc]
+                    print convertFromSourceLocation(source, sourceLocations[pc])
                     is_dependant = True
                     break
 
@@ -949,6 +950,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
                 assertion.set_path(path + [start])
                 assertion.set_sym(path_conditions_and_vars)
                 position = get_position(source, sourceLocations[global_state["pc"]])
+                print convertFromSourceLocation(source, sourceLocations[global_state["pc"]])
                 assertion.set_position(position)
                 assertions.append(assertion)
         return
@@ -959,6 +961,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
     update_analysis(analysis, instr_parts[0], stack, mem, global_state, path_conditions_and_vars, solver)
     if instr_parts[0] == "CALL" and analysis["reentrancy_bug"] and analysis["reentrancy_bug"][-1]:
         position = get_position(source, sourceLocations[global_state["pc"]])
+        print convertFromSourceLocation(source, sourceLocations[global_state["pc"]])
         reentrancy_bugs.append(position)
 
     log.debug("==============================")
