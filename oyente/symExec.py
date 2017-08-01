@@ -19,7 +19,6 @@ from ethereum_data import *
 from basicblock import BasicBlock
 from assertion import Assertion
 from analysis import *
-from utils import retrieveFunctionSignatures, retrieveFunctionNames
 import global_params
 
 from test_evm.global_test_params import (TIME_OUT, UNKOWN_INSTRUCTION,
@@ -48,6 +47,12 @@ def initGlobalVars():
     # capturing all the instructions, keys are corresponding addresses
     global instructions
     instructions = {}
+
+    global source
+    source = ""
+
+    global sourceLocations
+    sourceLocations = {}
 
     # capturing the "jump type" of each basic block
     global jump_type
@@ -483,7 +488,9 @@ def print_cfg():
 def collect_vertices(tokens):
     global end_ins_dict
     global instructions
+    global sourceLocations
     global jump_type
+    global c_name_sol
 
     current_ins_address = 0
     last_ins_address = 0
@@ -492,7 +499,9 @@ def collect_vertices(tokens):
     current_line_content = ""
     wait_for_push = False
     is_new_block = False
+    locations = retrieveSourceLocations(c_name_sol)
 
+    count = 0
     for tok_type, tok_string, (srow, scol), _, line_number in tokens:
         if wait_for_push is True:
             push_val = ""
@@ -501,6 +510,8 @@ def collect_vertices(tokens):
                     is_new_line = True
                     current_line_content += push_val + ' '
                     instructions[current_ins_address] = current_line_content
+                    sourceLocations[current_ins_address] = locations[count]
+                    count += 1
                     log.debug(current_line_content)
                     current_line_content = ""
                     wait_for_push = False
@@ -528,6 +539,11 @@ def collect_vertices(tokens):
             is_new_line = True
             log.debug(current_line_content)
             instructions[current_ins_address] = current_line_content
+            try:
+                sourceLocations[current_ins_address] = locations[count]
+                count += 1
+            except:
+                pass
             current_line_content = ""
             continue
         elif tok_type == NAME:
@@ -894,6 +910,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
     global vertices
     global edges
     global assertions
+    global c_name_sol
 
     instr_parts = str.split(instr, ' ')
 
@@ -920,6 +937,8 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
                 assertion.set_model(models[-1])
                 assertion.set_path(path + [start])
                 assertion.set_sym(path_conditions_and_vars)
+                position = get_position(c_name_sol, source, sourceLocations, global_state["pc"])
+                assertion.set_position(position)
                 assertions.append(assertion)
         return
 
