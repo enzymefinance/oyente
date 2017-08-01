@@ -419,16 +419,11 @@ def findLowerBound(target, array):
             length = half
     return start - 1
 
-def get_source(c_name, source):
-    if not source:
-        with open(c_name, 'r') as f:
-            source = f.read()
+def get_source(c_name):
+    with open(c_name, 'r') as f:
+        source = f.read()
     return source
 
-def get_position(c_name, source, sourceLocations, pc):
-    source = get_source(c_name, source)
+def get_position(source, sourceLocation):
     lineBreakPositions = getLinebreakPositions(source)
-    sourceLocation = sourceLocations[pc]
     return convertOffsetToLineColumn(sourceLocation, lineBreakPositions)
-
-

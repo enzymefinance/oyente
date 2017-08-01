@@ -48,9 +48,6 @@ def initGlobalVars():
     global instructions
     instructions = {}
 
-    global source
-    source = ""
-
     global sourceLocations
     sourceLocations = {}
 
@@ -66,6 +63,9 @@ def initGlobalVars():
 
     global assertions
     assertions = []
+
+    global reentrancy_bugs
+    reentrancy_bugs = []
 
     global visited_edges
     visited_edges = {}
@@ -162,6 +162,7 @@ def detect_bugs():
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
     if not isTesting():
         log.info("\t  Reentrancy bug exists: %s", str(reentrancy_bug_found))
+        print reentrancy_bugs
     results['reentrancy'] = reentrancy_bug_found
 
     if global_params.CHECK_ASSERTIONS:
@@ -240,8 +241,10 @@ def interpret_assertion(asrt, functions, fun_names):
 def main(contract, contract_sol):
     global c_name
     global c_name_sol
+    global source
     c_name = contract
     c_name_sol = contract_sol
+    source = get_source(c_name_sol)
 
     check_unit_test_file()
     initGlobalVars()
@@ -911,6 +914,8 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
     global edges
     global assertions
     global c_name_sol
+    global source
+    global sourceLocations
 
     instr_parts = str.split(instr, ' ')
 
@@ -937,7 +942,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
                 assertion.set_model(models[-1])
                 assertion.set_path(path + [start])
                 assertion.set_sym(path_conditions_and_vars)
-                position = get_position(c_name_sol, source, sourceLocations, global_state["pc"])
+                position = get_position(source, sourceLocations[global_state["pc"]])
                 assertion.set_position(position)
                 assertions.append(assertion)
         return
@@ -946,6 +951,9 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
     # this should be done before symbolically executing the instruction,
     # since SE will modify the stack and mem
     update_analysis(analysis, instr_parts[0], stack, mem, global_state, path_conditions_and_vars, solver)
+    if instr_parts[0] == "CALL" and analysis["reentrancy_bug"] and analysis["reentrancy_bug"][-1]:
+        position = get_position(source, sourceLocations[global_state["pc"]])
+        reentrancy_bugs.append(position)
 
     log.debug("==============================")
     log.debug("EXECUTING: " + instr)
