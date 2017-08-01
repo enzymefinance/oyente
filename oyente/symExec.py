@@ -83,6 +83,9 @@ def initGlobalVars():
     global path_conditions
     path_conditions = []
 
+    global path_condition_info
+    path_condition_info = []
+
     # store global variables, e.g. storage, balance of all paths
     global all_gs
     all_gs = []
@@ -363,23 +366,21 @@ def build_cfg_and_analyze():
 # Detect if a money flow depends on the timestamp
 def detect_time_dependency():
     global results
+
     TIMESTAMP_VAR = "IH_s"
     is_dependant = False
-    index = 0
     if global_params.PRINT_PATHS:
         log.info("ALL PATH CONDITIONS")
-    for cond in path_conditions:
-        index += 1
+    for i, cond in enumerate(path_conditions):
         if global_params.PRINT_PATHS:
-            log.info("PATH " + str(index) + ": " + str(cond))
-        list_vars = []
-        for expr in cond:
+            log.info("PATH " + str(i + 1) + ": " + str(cond))
+        for j, expr in enumerate(cond):
             if is_expr(expr):
-                list_vars += get_vars(expr)
-        set_vars = set(i.decl().name() for i in list_vars)
-        if TIMESTAMP_VAR in set_vars:
-            is_dependant = True
-            break
+                if TIMESTAMP_VAR in str(expr) and j in path_condition_info[i]:
+                    pc = path_condition_info[i][j]
+                    print sourceLocations[pc]
+                    is_dependant = True
+                    break
 
     if not isTesting():
         log.info("\t  Time Dependency: \t %s", is_dependant)
@@ -746,7 +747,7 @@ def get_init_global_state(path_conditions_and_vars):
 def full_sym_exec():
     # executing, starting from beginning
     stack = []
-    path_conditions_and_vars = {"path_condition" : []}
+    path_conditions_and_vars = {"path_condition" : [], "path_condition_info": {}}
     visited, depth = [], 0
     mem = {}
     memory = [] # This memory is used only for the process of finding the position of a mapping variable in storage. In this process, memory is used for hashing methods
@@ -809,6 +810,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
     if analysis["money_flow"] not in money_flow_all_paths:
         money_flow_all_paths.append(analysis["money_flow"])
         path_conditions.append(path_conditions_and_vars["path_condition"])
+        path_condition_info.append(path_conditions_and_vars["path_condition_info"])
         all_gs.append(copy_global_values(global_state))
     if global_params.DATA_FLOW:
         if analysis["sload"] not in data_flow_all_paths[0]:
@@ -856,6 +858,8 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
                 visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis)
                 global_state1["pc"] = left_branch
                 path_conditions_and_vars1["path_condition"].append(branch_expression)
+                path_condition_index = len(path_conditions_and_vars1["path_condition"]) - 1
+                path_conditions_and_vars1["path_condition_info"][path_condition_index] = global_state["pc"]
                 try:
                     model = [solver.model()]
                 except Exception as e:
@@ -887,6 +891,8 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
                 visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis)
                 global_state1["pc"] = right_branch
                 path_conditions_and_vars1["path_condition"].append(negated_branch_expression)
+                path_condition_index = len(path_conditions_and_vars1["path_condition"]) - 1
+                path_conditions_and_vars1["path_condition_info"][path_condition_index] = global_state["pc"]
                 try:
                     model = [solver.model()]
                 except Exception as e:
@@ -1969,6 +1975,8 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
                 solver.pop()
                 solver.add(is_enough_fund)
                 path_conditions_and_vars["path_condition"].append(is_enough_fund)
+                path_condition_index = len(path_conditions_and_vars["path_condition"]) - 1
+                path_conditions_and_vars["path_condition_info"][path_condition_index] = global_state["pc"] - 1
                 new_balance_ia = (balance_ia - transfer_amount)
                 global_state["balance"]["Ia"] = new_balance_ia
                 address_is = path_conditions_and_vars["Is"]
@@ -2031,6 +2039,8 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
                 solver.pop()
                 solver.add(is_enough_fund)
                 path_conditions_and_vars["path_condition"].append(is_enough_fund)
+                path_condition_index = len(path_conditions_and_vars["path_condition"]) - 1
+                path_conditions_and_vars["path_condition_info"][path_condition_index] = global_state["pc"] - 1
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "RETURN" or instr_parts[0] == "REVERT":
