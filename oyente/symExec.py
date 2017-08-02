@@ -86,6 +86,9 @@ def initGlobalVars():
     global path_condition_info
     path_condition_info = []
 
+    global all_possible_bug_instrs
+    all_possible_bug_instrs = {"money_concurrency": []}
+
     # store global variables, e.g. storage, balance of all paths
     global all_gs
     all_gs = []
@@ -400,6 +403,10 @@ def detect_time_dependency():
 # detect if two paths send money to different people
 def detect_money_concurrency():
     global results
+    global source
+    global sourceLocations
+    global all_possible_bug_instrs
+
     n = len(money_flow_all_paths)
     for i in range(n):
         log.debug("Path " + str(i) + ": " + str(money_flow_all_paths[i]))
@@ -416,6 +423,9 @@ def detect_money_concurrency():
             if len(jflow) == 1:
                 continue
             if is_diff(flow, jflow):
+                pcs = all_possible_bug_instrs["money_concurrency"][j]
+                for pc in pcs:
+                    print convertFromSourceLocation(source, sourceLocations[pc])
                 concurrency_paths.append([i-1, j])
                 if global_params.CHECK_CONCURRENCY_FP and \
                         is_false_positive(i-1, j, all_gs, path_conditions) and \
@@ -749,6 +759,7 @@ def full_sym_exec():
     # executing, starting from beginning
     stack = []
     path_conditions_and_vars = {"path_condition" : [], "path_condition_info": {}}
+    possible_bug_instrs = {"money_concurrency": []}
     visited, depth = [], 0
     mem = {}
     memory = [] # This memory is used only for the process of finding the position of a mapping variable in storage. In this process, memory is used for hashing methods
@@ -757,18 +768,21 @@ def full_sym_exec():
     # this is init global state for this particular execution
     global_state = get_init_global_state(path_conditions_and_vars)
     analysis = init_analysis()
-    return sym_exec_block(0, 0, visited, depth, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis, [], [])
+    return sym_exec_block(0, 0, visited, depth, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, possible_bug_instrs, analysis, [], [])
 
 
 # Symbolically executing a block from the start address
-def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis, path, models):
+def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, possible_bug_instrs, analysis, path, models):
     global solver
     global visited_edges
     global money_flow_all_paths
     global data_flow_all_paths
     global path_conditions
+    global path_condition_info
+    global all_possible_bug_instrs
     global all_gs
     global results
+
     Edge = namedtuple("Edge", ["v1", "v2"]) # Factory Function for tuples is used as dictionary key
     if block < 0:
         log.debug("UNKNOWN JUMP ADDRESS. TERMINATING THIS PATH")
@@ -801,7 +815,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
         return ["ERROR"]
 
     for instr in block_ins:
-        sym_exec_ins(block, instr, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis, path, models)
+        sym_exec_ins(block, instr, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, possible_bug_instrs, analysis, path, models)
 
     # Mark that this basic block in the visited blocks
     visited.append(block)
@@ -809,6 +823,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
 
     reentrancy_all_paths.append(analysis["reentrancy_bug"])
     if analysis["money_flow"] not in money_flow_all_paths:
+        all_possible_bug_instrs["money_concurrency"].append(possible_bug_instrs["money_concurrency"])
         money_flow_all_paths.append(analysis["money_flow"])
         path_conditions.append(path_conditions_and_vars["path_condition"])
         path_condition_info.append(path_conditions_and_vars["path_condition_info"])
@@ -832,14 +847,14 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
 
     elif jump_type[block] == "unconditional":  # executing "JUMP"
         successor = vertices[block].get_jump_target()
-        visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis)
+        visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, possible_bug_instrs1, analysis1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, possible_bug_instrs, analysis)
         global_state1["pc"] = successor
-        sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, path + [block], models)
+        sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, possible_bug_instrs1, analysis1, path + [block], models)
     elif jump_type[block] == "falls_to":  # just follow to the next basic block
         successor = vertices[block].get_falls_to()
-        visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis)
+        visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, possible_bug_instrs1, analysis1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, possible_bug_instrs, analysis)
         global_state1["pc"] = successor
-        sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, path + [block], models)
+        sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, possible_bug_instrs1, analysis1, path + [block], models)
     elif jump_type[block] == "conditional":  # executing "JUMPI"
 
         # A choice point, we proceed with depth first search
@@ -856,7 +871,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
                 log.debug("INFEASIBLE PATH DETECTED")
             else:
                 left_branch = vertices[block].get_jump_target()
-                visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis)
+                visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, possible_bug_instrs1, analysis1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, possible_bug_instrs, analysis)
                 global_state1["pc"] = left_branch
                 path_conditions_and_vars1["path_condition"].append(branch_expression)
                 path_condition_index = len(path_conditions_and_vars1["path_condition"]) - 1
@@ -865,7 +880,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
                     model = [solver.model()]
                 except Exception as e:
                     model = []
-                sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, path + [block], models + model)
+                sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, possible_bug_instrs1, analysis1, path + [block], models + model)
         except Exception as e:
             log_file.write(str(e))
             traceback.print_exc()
@@ -889,7 +904,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
                 log.debug("INFEASIBLE PATH DETECTED")
             else:
                 right_branch = vertices[block].get_falls_to()
-                visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis)
+                visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, possible_bug_instrs1, analysis1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, possible_bug_instrs, analysis)
                 global_state1["pc"] = right_branch
                 path_conditions_and_vars1["path_condition"].append(negated_branch_expression)
                 path_condition_index = len(path_conditions_and_vars1["path_condition"]) - 1
@@ -898,7 +913,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
                     model = [solver.model()]
                 except Exception as e:
                     model = []
-                sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, path + [block], models + model)
+                sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, possible_bug_instrs1, analysis1, path + [block], models + model)
         except Exception as e:
             log_file.write(str(e))
             traceback.print_exc()
@@ -915,7 +930,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
 
 
 # Symbolically executing an instruction
-def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis, path, models):
+def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, possible_bug_instrs, analysis, path, models):
     global solver
     global vertices
     global edges
@@ -1946,6 +1961,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
     elif instr_parts[0] == "CALL":
         # TODO: Need to handle miu_i
         if len(stack) > 6:
+            possible_bug_instrs["money_concurrency"].append(global_state["pc"])
             global_state["pc"] = global_state["pc"] + 1
             outgas = stack.pop(0)
             recipient = stack.pop(0)
