@@ -246,13 +246,16 @@ def interpret_assertion(asrt, functions, fun_names):
             break
 
 
-def main(contract, contract_sol):
+def main(contract, contract_sol, _source="", _instrLocations={}):
     global c_name
     global c_name_sol
     global source
+    global instrLocations
+
     c_name = contract
     c_name_sol = contract_sol
-    source = get_source(c_name_sol)
+    source = _source
+    instrLocations = _instrLocations
 
     check_unit_test_file()
     initGlobalVars()
@@ -503,9 +506,8 @@ def print_cfg():
 def collect_vertices(tokens):
     global end_ins_dict
     global instructions
-    global sourceLocations
+    global instrLocations
     global jump_type
-    global c_name_sol
 
     current_ins_address = 0
     last_ins_address = 0
@@ -514,7 +516,6 @@ def collect_vertices(tokens):
     current_line_content = ""
     wait_for_push = False
     is_new_block = False
-    locations = retrieveSourceLocations(c_name_sol)
 
     count = 0
     for tok_type, tok_string, (srow, scol), _, line_number in tokens:
@@ -525,7 +526,7 @@ def collect_vertices(tokens):
                     is_new_line = True
                     current_line_content += push_val + ' '
                     instructions[current_ins_address] = current_line_content
-                    sourceLocations[current_ins_address] = locations[count]
+                    sourceLocations[current_ins_address] = instrLocations[count]
                     count += 1
                     log.debug(current_line_content)
                     current_line_content = ""
@@ -555,7 +556,7 @@ def collect_vertices(tokens):
             log.debug(current_line_content)
             instructions[current_ins_address] = current_line_content
             try:
-                sourceLocations[current_ins_address] = locations[count]
+                sourceLocations[current_ins_address] = instrLocations[count]
                 count += 1
             except:
                 pass

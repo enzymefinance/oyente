@@ -9,6 +9,7 @@ import logging
 import requests
 import symExec
 import global_params
+from utils import retrieveSourceInfo, get_source
 
 
 def cmd_exists(cmd):
@@ -64,6 +65,7 @@ def compileContracts(contract):
 
     binary_regex = r"\n======= (.*?) =======\nBinary of the runtime part: \n(.*?)\n"
     contracts = re.findall(binary_regex, solc_out[0])
+    contracts = [contract for contract in contracts if contract[1]]
 
     if not contracts:
         logging.critical("Solidity compilation failed")
@@ -72,7 +74,7 @@ def compileContracts(contract):
 
     return contracts
 
-def analyze(processed_evm_file, disasm_file):
+def analyze(processed_evm_file, disasm_file, source="", instrLocations={}):
     disasm_out = ""
     try:
         disasm_p = subprocess.Popen(
@@ -86,7 +88,10 @@ def analyze(processed_evm_file, disasm_file):
         of.write(disasm_out)
 
     # Run symExec
-    symExec.main(disasm_file, args.source)
+    if source and instrLocations:
+        symExec.main(disasm_file, args.source, source, instrLocations)
+    else:
+        symExec.main(disasm_file, args.source)
 
 def main():
     # TODO: Implement -o switch.
@@ -191,8 +196,10 @@ def main():
                 exit(exit_code)
     else:
         contracts = compileContracts(args.source)
+        sourceInfo = retrieveSourceInfo(args.source)
+        source = get_source(args.source)
 
-        for (cname, bin_str) in contracts:
+        for index, (cname, bin_str) in enumerate(contracts):
             logging.info("Contract %s:", cname)
             processed_evm_file = cname + '.evm'
             disasm_file = cname + '.evm.disasm'
@@ -200,7 +207,7 @@ def main():
             with open(processed_evm_file, 'w') as of:
                 of.write(removeSwarmHash(bin_str))
 
-            analyze(processed_evm_file, disasm_file)
+            analyze(processed_evm_file, disasm_file, source, sourceInfo[index])
 
             if args.evm:
                 with open(processed_evm_file, 'w') as of:

@@ -365,7 +365,7 @@ def retrieveFunctionNames(contract):
                 queue.append(c)
     return functions
 
-def retrieveSourceLocations(contract):
+def retrieveSourceInfo(contract):
     solc_cmd = "solc --optimize --asm-json %s"
 
     FNULL = open(os.devnull, 'w')
@@ -375,19 +375,17 @@ def retrieveSourceLocations(contract):
 
     reg = r"\{(?:[^{}]|(?R))*\}"
 
-    instructions = regex.findall(reg, solc_out[0])
-    instructions = [json.loads(instr) for instr in instructions]
-    instructions = [instr for instr in instructions if instr.has_key('.auxdata')]
-    instructions = [instr[".code"] for instr in instructions]
-    instructions = reduce((lambda x, y: x + y), instructions, [])
+    all_instructions = regex.findall(reg, solc_out[0])
+    all_instructions = [json.loads(instructions) for instructions in all_instructions]
+    all_instructions = [instructions for instructions in all_instructions if instructions.has_key('.auxdata')]
+    all_instructions = [instructions[".code"] for instructions in all_instructions]
     pattern = re.compile("^tag")
-    sourceLocations = []
 
-    for instr in instructions:
-        if pattern.match(instr["name"]):
-            continue
-        sourceLocations.append(instr)
-    return sourceLocations
+    ret = []
+    for instructions in all_instructions:
+        instructions = [instr for instr in instructions if not pattern.match(instr["name"])]
+        ret.append(instructions)
+    return ret
 
 def getLinebreakPositions(source):
     return [i for i, letter in enumerate(source) if letter == '\n']
