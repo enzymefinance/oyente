@@ -22,6 +22,18 @@ class Assertion:
         # Symbolic constraints of that path
         self.sym = None
 
+        # Position of ASSERTFAIL instruction in source
+        self.begin_line = -1
+        self.begin_column = -1
+        self.end_line = -1
+        self.end_column = -1
+
+    def set_position(self, position):
+        self.begin_line = position['begin']['line']
+        self.begin_column = position['begin']['column']
+        self.end_line = position['end']['line']
+        self.end_column = position['end']['column']
+
     def set_sym(self, sym):
         self.sym = sym
 
@@ -63,7 +75,7 @@ class Assertion:
 
     def __str__(self):
         s =  "================\n"
-        s += "Assertion from block " + str(self.block_from) + "\n"
+        s += "Assertion from block %s, line %s : column %s to line %s : column %s\n" % (str(self.block_from), str(self.begin_line), str(self.begin_column), str(self.end_line), str(self.end_column))
         #s += "SMT2 query:\n" + str(self.query) + "\n"
         s += "Violated: " + str(self.violated) + "\n"
         s += "Function: "

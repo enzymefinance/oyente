@@ -364,4 +364,71 @@ def retrieveFunctionNames(contract):
                 queue.append(c)
     return functions
 
+def retrieveSourceLocations(contract):
+    solc_cmd = "solc --optimize --asm-json %s"
 
+    FNULL = open(os.devnull, 'w')
+
+    solc_p = subprocess.Popen(shlex.split(solc_cmd % contract), stdout=subprocess.PIPE, stderr=FNULL)
+    solc_out = solc_p.communicate()
+
+    start_index = solc_out[0].index("{")
+    end_index = solc_out[0].index("}{") + 1
+    out = solc_out[0][start_index:end_index]
+    j = json.loads(out)
+    instructions =  j[".code"]
+    pattern = re.compile("^tag")
+    sourceLocations = []
+
+    for instr in instructions:
+        if pattern.match(instr["name"]):
+            continue
+        sourceLocations.append(instr)
+    return sourceLocations
+
+def getLinebreakPositions(source):
+    return [i for i, letter in enumerate(source) if letter == '\n']
+
+def convertOffsetToLineColumn(sourceLocation, lineBreakPositions):
+    ret = {}
+    ret['begin'] = None
+    ret['end'] = None
+    if sourceLocation['begin'] >= 0 and (sourceLocation['end'] - sourceLocation['begin'] + 1) >= 0:
+        ret['begin'] = convertFromCharPosition(sourceLocation['begin'], lineBreakPositions)
+        ret['end'] = convertFromCharPosition(sourceLocation['end'], lineBreakPositions)
+    return ret
+
+def convertFromCharPosition(pos, lineBreakPositions):
+    line = findLowerBound(pos, lineBreakPositions)
+    if lineBreakPositions[line] != pos:
+        line += 1
+    beginColumn = 0 if line == 0 else lineBreakPositions[line - 1] + 1
+    column = pos - beginColumn
+    return {'line': line, 'column': column}
+
+def findLowerBound(target, array):
+    start = 0
+    length = len(array)
+    while length > 0:
+        half = length >> 1
+        middle = start + half
+        if array[middle] <= target:
+            length = length - 1 - half
+            start = middle + 1
+        else:
+            length = half
+    return start - 1
+
+def get_source(c_name):
+    with open(c_name, 'r') as f:
+        source = f.read()
+    return source
+
+def get_position(source, sourceLocation):
+    lineBreakPositions = getLinebreakPositions(source)
+    return convertOffsetToLineColumn(sourceLocation, lineBreakPositions)
+
+def convertFromSourceLocation(source, sourceLocation):
+    begin = sourceLocation['begin']
+    end = sourceLocation['end']
+    return source[begin:end]
