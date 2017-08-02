@@ -8,6 +8,7 @@ import mmap
 import os
 import csv
 import re
+import regex
 import difflib
 from z3 import *
 from z3.z3util import get_vars
@@ -372,11 +373,13 @@ def retrieveSourceLocations(contract):
     solc_p = subprocess.Popen(shlex.split(solc_cmd % contract), stdout=subprocess.PIPE, stderr=FNULL)
     solc_out = solc_p.communicate()
 
-    start_index = solc_out[0].index("{")
-    end_index = solc_out[0].index("}{") + 1
-    out = solc_out[0][start_index:end_index]
-    j = json.loads(out)
-    instructions =  j[".code"]
+    reg = r"\{(?:[^{}]|(?R))*\}"
+
+    instructions = regex.findall(reg, solc_out[0])
+    instructions = [json.loads(instr) for instr in instructions]
+    instructions = [instr for instr in instructions if instr.has_key('.auxdata')]
+    instructions = [instr[".code"] for instr in instructions]
+    instructions = reduce((lambda x, y: x + y), instructions, [])
     pattern = re.compile("^tag")
     sourceLocations = []
 
