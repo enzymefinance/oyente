@@ -153,6 +153,9 @@ def detect_bugs():
     global assertions
     global results
 
+    log.debug("Checking for Callstack attack...")
+    run_callstack_attack()
+
     if global_params.REPORT_MODE:
         rfile.write(str(total_no_of_paths) + "\n")
     detect_money_concurrency()
@@ -269,9 +272,6 @@ def main(contract, contract_sol):
 
     if not isTesting():
         log.info("\t============ Results ===========")
-
-    log.debug("Checking for Callstack attack...")
-    run_callstack_attack()
 
     try:
         build_cfg_and_analyze()
@@ -2111,19 +2111,22 @@ def check_callstack_attack(disasm):
         instruction = disasm[i]
         if instruction[1] in problematic_instructions:
             if not disasm[i+1][1] == 'SWAP':
+                print convertFromSourceLocation(source, sourceLocations[int(instruction[0])])
                 return True
             swap_num = int(disasm[i+1][2])
             for j in range(swap_num):
                 if not disasm[i+j+2][1] == 'POP':
+                    print convertFromSourceLocation(source, sourceLocations[int(instruction[0])])
                     return True
             if not disasm[i + swap_num + 2][1] == 'ISZERO':
+                print convertFromSourceLocation(source, sourceLocations[int(instruction[0])])
                 return True
     return False
 
 def run_callstack_attack():
     global results
     disasm_data = open(c_name).read()
-    instr_pattern = r"([\d]+): ([A-Z]+)([\d]?)(?: 0x)?(\S+)?"
+    instr_pattern = r"([\d]+) ([A-Z]+)([\d]+)?(?: => 0x)?(\S+)?"
     instr = re.findall(instr_pattern, disasm_data)
     result = check_callstack_attack(instr)
 
