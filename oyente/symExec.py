@@ -532,8 +532,11 @@ def collect_vertices(tokens):
                     is_new_line = True
                     current_line_content += push_val + ' '
                     instructions[current_ins_address] = current_line_content
-                    SourceMapping.instr_positions[current_ins_address] = SourceMapping.positions[count]
-                    count += 1
+                    try:
+                        SourceMapping.instr_positions[current_ins_address] = SourceMapping.positions[count]
+                        count += 1
+                    except:
+                        pass
                     log.debug(current_line_content)
                     current_line_content = ""
                     wait_for_push = False
