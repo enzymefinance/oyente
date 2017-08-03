@@ -1,3 +1,7 @@
+import logging
+
+log = logging.getLogger(__name__)
+
 class Assertion:
     def __init__(self, block_from):
         # Block that contains the test (assertion)
@@ -21,18 +25,6 @@ class Assertion:
 
         # Symbolic constraints of that path
         self.sym = None
-
-        # Position of ASSERTFAIL instruction in source
-        self.begin_line = -1
-        self.begin_column = -1
-        self.end_line = -1
-        self.end_column = -1
-
-    def set_position(self, position):
-        self.begin_line = position['begin']['line']
-        self.begin_column = position['begin']['column']
-        self.end_line = position['end']['line']
-        self.end_column = position['end']['column']
 
     def set_sym(self, sym):
         self.sym = sym
@@ -73,11 +65,9 @@ class Assertion:
     def set_query(self, query):
         self.query = query
 
-    def __str__(self):
-        s =  "================\n"
-        s += "Assertion from block %s, line %s : column %s to line %s : column %s\n" % (str(self.block_from), str(self.begin_line), str(self.begin_column), str(self.end_line), str(self.end_column))
+    def get_log(self):
         #s += "SMT2 query:\n" + str(self.query) + "\n"
-        s += "Violated: " + str(self.violated) + "\n"
+        s = "Violated: " + str(self.violated) + "\n"
         s += "Function: "
         if self.function == None:
             s += "?\n"
@@ -89,12 +79,9 @@ class Assertion:
                 s += str(decl.name()) + " = " + str(self.model[decl]) + ", "
         return s
 
-    def display(self):
-        print self.__str__()
-
-    def display_on_web(self):
-        s =  "================\n"
-        s += "Assertion failure from function: "
+    def __str__(self):
+        s += "^\n"
+        s += "Function: "
         if self.function == None:
             s += "?\n"
         else:

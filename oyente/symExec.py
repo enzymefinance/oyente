@@ -170,7 +170,16 @@ def detect_bugs():
     log.debug("Results for Reentrancy Bug: " + str(reentrancy_all_paths))
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
     if not isTesting():
-        log.info("\t  Reentrancy bug exists: %s", str(reentrancy_bug_found))
+        s = "\t  Reentrancy bug exists: %s" % reentrancy_bug_found
+        if reentrancy_bug_found:
+            for pc in reentrancy_bugs:
+                s += "\n"
+                position = get_position(source, sourceLocations[pc])
+                source_code = convertFromSourceLocation(source, sourceLocations[pc])
+                s += "%s:%s:%s\n" % (contract_name, position['begin']['line'], position['begin']['column'])
+                s += source_code + "\n"
+                s += "^"
+        log.info(s)
     results['reentrancy'] = reentrancy_bug_found
 
     if global_params.CHECK_ASSERTIONS:
@@ -179,10 +188,11 @@ def detect_bugs():
         is_fail = len(assertion_fails) > 0
         results['assertion_failure'] = is_fail
         if not isTesting():
-            log.info("\t  Assertion fails: \t %s", str(is_fail))
-        if not global_params.WEB:
+            s = "\t  Assertion failure: \t %s" % str(is_fail)
             for asrt in assertion_fails:
-                asrt.display()
+                s += "\n"
+                s += asrt.get_log()
+            log.info(s)
 
 def check_assertions():
     global assertions
@@ -249,11 +259,13 @@ def interpret_assertion(asrt, functions, fun_names):
 def main(contract, contract_sol, _source="", _instrLocations={}):
     global c_name
     global c_name_sol
+    global contract_name
     global source
     global instrLocations
 
     c_name = contract
     c_name_sol = contract_sol
+    contract_name = contract.replace(".evm.disasm", "")
     source = _source
     instrLocations = _instrLocations
 
@@ -266,8 +278,6 @@ def main(contract, contract_sol, _source="", _instrLocations={}):
         global_params.GLOBAL_TIMEOUT = global_params.GLOBAL_TIMEOUT_TEST
     signal.alarm(global_params.GLOBAL_TIMEOUT)
     atexit.register(closing_message)
-    if global_params.WEB:
-        atexit.register(results_for_web)
 
     log.info("Running, please wait...")
 
@@ -310,9 +320,10 @@ def results_for_web():
         if not results.has_key("assertion_failure"):
             results["assertion_failure"] = False
         print "Assertion failure:", results['assertion_failure']
+        print "Bug Information:"
         assertion_fails = [assertion for assertion in assertions if assertion.is_violated()]
         for asrt in assertion_fails:
-            print asrt.display_on_web()
+            print asrt
 
 
 def closing_message():
@@ -376,6 +387,7 @@ def detect_time_dependency():
 
     TIMESTAMP_VAR = "IH_s"
     is_dependant = False
+    pc = -1
     if global_params.PRINT_PATHS:
         log.info("ALL PATH CONDITIONS")
     for i, cond in enumerate(path_conditions):
@@ -385,12 +397,19 @@ def detect_time_dependency():
             if is_expr(expr):
                 if TIMESTAMP_VAR in str(expr) and j in path_condition_info[i]:
                     pc = path_condition_info[i][j]
-                    print convertFromSourceLocation(source, sourceLocations[pc])
                     is_dependant = True
                     break
 
     if not isTesting():
-        log.info("\t  Time Dependency: \t %s", is_dependant)
+        s = "\t  Time Dependency: \t %s" % is_dependant
+        if pc != -1:
+            s += "\n"
+            position = get_position(source, sourceLocations[pc])
+            source_code = convertFromSourceLocation(source, sourceLocations[pc])
+            s += "%s:%s:%s\n" % (contract_name, position['begin']['line'], position['begin']['column'])
+            s += source_code + "\n"
+            s += "^"
+        log.info(s)
     results['time_dependency'] = is_dependant
 
     if global_params.REPORT_MODE:
@@ -409,6 +428,7 @@ def detect_money_concurrency():
     global source
     global sourceLocations
     global all_possible_bug_instrs
+    global contract_name
 
     n = len(money_flow_all_paths)
     for i in range(n):
@@ -427,8 +447,6 @@ def detect_money_concurrency():
                 continue
             if is_diff(flow, jflow):
                 pcs = all_possible_bug_instrs["money_concurrency"][j]
-                for pc in pcs:
-                    print convertFromSourceLocation(source, sourceLocations[pc])
                 concurrency_paths.append([i-1, j])
                 if global_params.CHECK_CONCURRENCY_FP and \
                         is_false_positive(i-1, j, all_gs, path_conditions) and \
@@ -439,7 +457,15 @@ def detect_money_concurrency():
     log.debug("Concurrency in paths: ")
     if len(concurrency_paths) > 0:
         if not isTesting():
-            log.info("\t  Concurrency found in paths: %s", str(concurrency_paths))
+            s = "\t  Concurrency found in paths: %s" % str(concurrency_paths)
+            for pc in pcs:
+                s += "\n"
+                position = get_position(source, sourceLocations[pc])
+                source_code = convertFromSourceLocation(source, sourceLocations[pc])
+                s += "%s:%s:%s\n" % (contract_name, position['begin']['line'], position['begin']['column'])
+                s += source_code + "\n"
+                s += "^"
+            log.info(s)
         results['concurrency'] = True
     else:
         if not isTesting():
@@ -965,9 +991,6 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
                 assertion.set_model(models[-1])
                 assertion.set_path(path + [start])
                 assertion.set_sym(path_conditions_and_vars)
-                position = get_position(source, sourceLocations[global_state["pc"]])
-                print convertFromSourceLocation(source, sourceLocations[global_state["pc"]])
-                assertion.set_position(position)
                 assertions.append(assertion)
         return
 
@@ -976,9 +999,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
     # since SE will modify the stack and mem
     update_analysis(analysis, instr_parts[0], stack, mem, global_state, path_conditions_and_vars, solver)
     if instr_parts[0] == "CALL" and analysis["reentrancy_bug"] and analysis["reentrancy_bug"][-1]:
-        position = get_position(source, sourceLocations[global_state["pc"]])
-        print convertFromSourceLocation(source, sourceLocations[global_state["pc"]])
-        reentrancy_bugs.append(position)
+        reentrancy_bugs.append(global_state["pc"])
 
     log.debug("==============================")
     log.debug("EXECUTING: " + instr)
@@ -2111,29 +2132,39 @@ def check_callstack_attack(disasm):
     for i in xrange(0, len(disasm)):
         instruction = disasm[i]
         if instruction[1] in problematic_instructions:
+            pc = int(instruction[0])
             if not disasm[i+1][1] == 'SWAP':
-                print convertFromSourceLocation(source, sourceLocations[int(instruction[0])])
-                return True
+                return pc
             swap_num = int(disasm[i+1][2])
             for j in range(swap_num):
                 if not disasm[i+j+2][1] == 'POP':
-                    print convertFromSourceLocation(source, sourceLocations[int(instruction[0])])
-                    return True
+                    return pc
             if not disasm[i + swap_num + 2][1] == 'ISZERO':
-                print convertFromSourceLocation(source, sourceLocations[int(instruction[0])])
-                return True
-    return False
+                return pc
+    return -1
 
 def run_callstack_attack():
     global results
+    global source
+    global sourceLocations
+    global contract_name
+
     disasm_data = open(c_name).read()
     instr_pattern = r"([\d]+) ([A-Z]+)([\d]+)?(?: => 0x)?(\S+)?"
     instr = re.findall(instr_pattern, disasm_data)
-    result = check_callstack_attack(instr)
+    pc = check_callstack_attack(instr)
+    result = False if pc == -1 else True
 
     if not isTesting():
-        log.info("\t  CallStack Attack: \t %s", result)
+        s = "\t  CallStack Attack: \t %s" % result
+        if result:
+            s += "\n"
+            position = get_position(source, sourceLocations[pc])
+            source_code = convertFromSourceLocation(source, sourceLocations[pc])
+            s += "%s:%s:%s\n" % (contract_name, position['begin']['line'], position['begin']['column'])
+            s += source_code + "\n"
+            s += "^"
+            log.info(s)
     results['callstack'] = result
-
 if __name__ == '__main__':
     main(sys.argv[1])
