@@ -1,7 +1,3 @@
-import logging
-
-log = logging.getLogger(__name__)
-
 class Assertion:
     def __init__(self, block_from):
         # Block that contains the test (assertion)
@@ -76,16 +72,16 @@ class Assertion:
 
     def get_log(self):
         #s += "SMT2 query:\n" + str(self.query) + "\n"
-        s = "Violated: " + str(self.violated) + "\n"
-        s += "Function: "
+        #  s = "Violated: " + str(self.violated) + "\n"
+        s = "Function: "
         if self.function == None:
             s += "?\n"
         else:
             s += self.function + "\n"
-        if self.violated:
-            s += "Model:\n"
-            for decl in self.model.decls():
-                s += str(decl.name()) + " = " + str(self.model[decl]) + ", "
+        #  if self.violated:
+            #  s += "Model:\n"
+            #  for decl in self.model.decls():
+                #  s += str(decl.name()) + " = " + str(self.model[decl]) + ", "
         return s
 
     def __str__(self):
