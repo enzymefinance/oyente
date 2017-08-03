@@ -9,7 +9,7 @@ import logging
 import requests
 import symExec
 import global_params
-from utils import retrieveSourceInfo, get_source
+from source_mapping import SourceMapping
 
 
 def cmd_exists(cmd):
@@ -74,7 +74,7 @@ def compileContracts(contract):
 
     return contracts
 
-def analyze(processed_evm_file, disasm_file, source="", instrLocations={}):
+def analyze(processed_evm_file, disasm_file, is_bytecode):
     disasm_out = ""
     try:
         disasm_p = subprocess.Popen(
@@ -88,10 +88,14 @@ def analyze(processed_evm_file, disasm_file, source="", instrLocations={}):
         of.write(disasm_out)
 
     # Run symExec
-    if source and instrLocations:
-        symExec.main(disasm_file, args.source, source, instrLocations)
-    else:
+    if is_bytecode:
         symExec.main(disasm_file, args.source)
+    else:
+        symExec.main(disasm_file, args.source, SourceMapping)
+
+def remove_temporary_file(path):
+    if os.path.isfile(path):
+        os.unlink(path)
 
 def main():
     # TODO: Implement -o switch.
@@ -185,10 +189,10 @@ def main():
         with open(processed_evm_file, 'w') as f:
             f.write(removeSwarmHash(evm))
 
-        analyze(processed_evm_file, disasm_file)
+        analyze(processed_evm_file, disasm_file, True)
 
-        os.remove(disasm_file)
-        os.remove(processed_evm_file)
+        remove_temporary_file(disasm_file)
+        remove_temporary_file(processed_evm_file)
 
         if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
             exit_code = os.WEXITSTATUS(cmd)
@@ -196,10 +200,12 @@ def main():
                 exit(exit_code)
     else:
         contracts = compileContracts(args.source)
-        sourceInfo = retrieveSourceInfo(args.source)
-        source = get_source(args.source)
+        SourceMapping.load_source(args.source)
 
         for index, (cname, bin_str) in enumerate(contracts):
+            SourceMapping.positions = SourceMapping.position_groups[index]
+            SourceMapping.c_name = cname
+
             logging.info("Contract %s:", cname)
             processed_evm_file = cname + '.evm'
             disasm_file = cname + '.evm.disasm'
@@ -207,15 +213,15 @@ def main():
             with open(processed_evm_file, 'w') as of:
                 of.write(removeSwarmHash(bin_str))
 
-            analyze(processed_evm_file, disasm_file, source, sourceInfo[index])
+            analyze(processed_evm_file, disasm_file, False)
 
             if args.evm:
                 with open(processed_evm_file, 'w') as of:
                     of.write(bin_str)
 
-            os.remove(processed_evm_file)
-            os.remove(disasm_file)
-            os.remove(disasm_file + '.log')
+            remove_temporary_file(processed_evm_file)
+            remove_temporary_file(disasm_file)
+            remove_temporary_file(disasm_file + '.log')
 
 if __name__ == '__main__':
     main()

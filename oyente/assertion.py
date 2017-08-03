@@ -26,6 +26,15 @@ class Assertion:
         # Symbolic constraints of that path
         self.sym = None
 
+        # Program counter of the ASSERTFAIL
+        self.pc = -1
+
+    def set_pc(self, pc):
+        self.pc = pc
+
+    def get_pc(self):
+        return self.pc
+
     def set_sym(self, sym):
         self.sym = sym
 

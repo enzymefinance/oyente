@@ -48,9 +48,6 @@ def initGlobalVars():
     global instructions
     instructions = {}
 
-    global sourceLocations
-    sourceLocations = {}
-
     # capturing the "jump type" of each basic block
     global jump_type
     jump_type = {}
@@ -152,6 +149,7 @@ def handler(signum, frame):
 def detect_bugs():
     global assertions
     global results
+    global SourceMapping
 
     log.debug("Checking for Callstack attack...")
     run_callstack_attack()
@@ -173,12 +171,7 @@ def detect_bugs():
         s = "\t  Reentrancy bug exists: %s" % reentrancy_bug_found
         if reentrancy_bug_found:
             for pc in reentrancy_bugs:
-                s += "\n"
-                position = get_position(source, sourceLocations[pc])
-                source_code = convertFromSourceLocation(source, sourceLocations[pc])
-                s += "%s:%s:%s\n" % (contract_name, position['begin']['line'], position['begin']['column'])
-                s += source_code + "\n"
-                s += "^"
+                s += "\n%s" % SourceMapping.to_str(pc)
         log.info(s)
     results['reentrancy'] = reentrancy_bug_found
 
@@ -190,7 +183,7 @@ def detect_bugs():
         if not isTesting():
             s = "\t  Assertion failure: \t %s" % str(is_fail)
             for asrt in assertion_fails:
-                s += "\n"
+                s += "\n%s\n" % SourceMapping.to_str(asrt.get_pc())
                 s += asrt.get_log()
             log.info(s)
 
@@ -256,18 +249,14 @@ def interpret_assertion(asrt, functions, fun_names):
             break
 
 
-def main(contract, contract_sol, _source="", _instrLocations={}):
+def main(contract, contract_sol, source_mapping = None):
     global c_name
     global c_name_sol
-    global contract_name
-    global source
-    global instrLocations
+    global SourceMapping
 
     c_name = contract
     c_name_sol = contract_sol
-    contract_name = contract.replace(".evm.disasm", "")
-    source = _source
-    instrLocations = _instrLocations
+    SourceMapping = source_mapping
 
     check_unit_test_file()
     initGlobalVars()
@@ -382,8 +371,7 @@ def build_cfg_and_analyze():
 # Detect if a money flow depends on the timestamp
 def detect_time_dependency():
     global results
-    global source
-    global sourceLocations
+    global SourceMapping
 
     TIMESTAMP_VAR = "IH_s"
     is_dependant = False
@@ -403,12 +391,7 @@ def detect_time_dependency():
     if not isTesting():
         s = "\t  Time Dependency: \t %s" % is_dependant
         if pc != -1:
-            s += "\n"
-            position = get_position(source, sourceLocations[pc])
-            source_code = convertFromSourceLocation(source, sourceLocations[pc])
-            s += "%s:%s:%s\n" % (contract_name, position['begin']['line'], position['begin']['column'])
-            s += source_code + "\n"
-            s += "^"
+            s += "\n%s" % SourceMapping.to_str(pc)
         log.info(s)
     results['time_dependency'] = is_dependant
 
@@ -425,10 +408,7 @@ def detect_time_dependency():
 # detect if two paths send money to different people
 def detect_money_concurrency():
     global results
-    global source
-    global sourceLocations
-    global all_possible_bug_instrs
-    global contract_name
+    global SourceMapping
 
     n = len(money_flow_all_paths)
     for i in range(n):
@@ -437,6 +417,7 @@ def detect_money_concurrency():
     i = 0
     false_positive = []
     concurrency_paths = []
+    pcs = []
     for flow in money_flow_all_paths:
         i += 1
         if len(flow) == 1:
@@ -459,12 +440,7 @@ def detect_money_concurrency():
         if not isTesting():
             s = "\t  Concurrency found in paths: %s" % str(concurrency_paths)
             for pc in pcs:
-                s += "\n"
-                position = get_position(source, sourceLocations[pc])
-                source_code = convertFromSourceLocation(source, sourceLocations[pc])
-                s += "%s:%s:%s\n" % (contract_name, position['begin']['line'], position['begin']['column'])
-                s += source_code + "\n"
-                s += "^"
+                s += "\n%s" % SourceMapping.to_str(pc)
             log.info(s)
         results['concurrency'] = True
     else:
@@ -532,8 +508,8 @@ def print_cfg():
 def collect_vertices(tokens):
     global end_ins_dict
     global instructions
-    global instrLocations
     global jump_type
+    global SourceMapping
 
     current_ins_address = 0
     last_ins_address = 0
@@ -552,7 +528,7 @@ def collect_vertices(tokens):
                     is_new_line = True
                     current_line_content += push_val + ' '
                     instructions[current_ins_address] = current_line_content
-                    sourceLocations[current_ins_address] = instrLocations[count]
+                    SourceMapping.instr_positions[current_ins_address] = SourceMapping.positions[count]
                     count += 1
                     log.debug(current_line_content)
                     current_line_content = ""
@@ -582,7 +558,7 @@ def collect_vertices(tokens):
             log.debug(current_line_content)
             instructions[current_ins_address] = current_line_content
             try:
-                sourceLocations[current_ins_address] = instrLocations[count]
+                SourceMapping.instr_positions[current_ins_address] = SourceMapping.positions[count]
                 count += 1
             except:
                 pass
@@ -962,9 +938,6 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
     global vertices
     global edges
     global assertions
-    global c_name_sol
-    global source
-    global sourceLocations
 
     instr_parts = str.split(instr, ' ')
 
@@ -991,6 +964,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
                 assertion.set_model(models[-1])
                 assertion.set_path(path + [start])
                 assertion.set_sym(path_conditions_and_vars)
+                assertion.set_pc(global_state["pc"])
                 assertions.append(assertion)
         return
 
@@ -2145,9 +2119,7 @@ def check_callstack_attack(disasm):
 
 def run_callstack_attack():
     global results
-    global source
-    global sourceLocations
-    global contract_name
+    global SourceMapping
 
     disasm_data = open(c_name).read()
     instr_pattern = r"([\d]+) ([A-Z]+)([\d]+)?(?: => 0x)?(\S+)?"
@@ -2158,13 +2130,8 @@ def run_callstack_attack():
     if not isTesting():
         s = "\t  CallStack Attack: \t %s" % result
         if result:
-            s += "\n"
-            position = get_position(source, sourceLocations[pc])
-            source_code = convertFromSourceLocation(source, sourceLocations[pc])
-            s += "%s:%s:%s\n" % (contract_name, position['begin']['line'], position['begin']['column'])
-            s += source_code + "\n"
-            s += "^"
-            log.info(s)
+            s += "\n %s" % SourceMapping.to_str(pc)
+        log.info(s)
     results['callstack'] = result
 if __name__ == '__main__':
     main(sys.argv[1])
