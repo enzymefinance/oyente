@@ -182,13 +182,15 @@ def detect_bugs():
         results['assertion_failure'] = is_fail
         if not isTesting():
             s = "\t  Assertion failure: \t %s" % str(is_fail)
-            pc_asrt_pair = {}
+            source_code_asrt_pair = {}
             for asrt in assertion_fails:
-                if asrt.get_pc() not in pc_asrt_pair:
-                    pc_asrt_pair[asrt.get_pc()] = asrt
-            for pc in pc_asrt_pair:
-                s += "\n%s\n" % SourceMapping.to_str(pc)
-                s += pc_asrt_pair[pc].get_log()
+                source_code = SourceMapping.find_source_code(asrt.get_pc())
+                if source_code not in source_code_asrt_pair:
+                    source_code_asrt_pair[source_code] = asrt
+            for source_code in source_code_asrt_pair:
+                asrt = source_code_asrt_pair[source_code]
+                s += "\n%s\n" % SourceMapping.to_str(asrt.get_pc())
+                s += asrt.get_log()
             log.info(s)
 
 def check_assertions():
