@@ -30,18 +30,24 @@ class SourceMapping:
         solc_p = subprocess.Popen(shlex.split(solc_cmd % cls.c_name), stdout=subprocess.PIPE, stderr=FNULL)
         solc_out = solc_p.communicate()
 
-        reg = r"\{(?:[^{}]|(?R))*\}"
+        reg = r"======= .*? =======\nEVM assembly:\n"
+        out = re.compile(reg).split(solc_out[0])
 
-        all_instructions = regex.findall(reg, solc_out[0])
-        all_instructions = [json.loads(instructions) for instructions in all_instructions]
-        all_instructions = [instructions for instructions in all_instructions if instructions.has_key('.auxdata')]
-        all_instructions = [instructions[".code"] for instructions in all_instructions]
+        list_asm = []
+        for asm in out[1:]:
+            try:
+                idx = asm.index("}{") + 1
+                list_asm.append(asm[:idx])
+            except:
+                pass
+        list_asm = [json.loads(asm) for asm in list_asm]
+        list_asm = [asm[".code"] for asm in list_asm if asm.has_key('.auxdata')]
         pattern = re.compile("^tag")
 
         ret = []
-        for instructions in all_instructions:
-            instructions = [instr for instr in instructions if not pattern.match(instr["name"])]
-            ret.append(instructions)
+        for asm in list_asm:
+            asm = [instr for instr in asm if not pattern.match(instr["name"])]
+            ret.append(asm)
         return ret
 
     @classmethod
