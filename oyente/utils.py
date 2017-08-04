@@ -318,18 +318,12 @@ def retrieveFunctionSignatures(contract):
         solc_cmd % contract), stdout=subprocess.PIPE, stderr=FNULL)
     solc_out = solc_p.communicate()
 
-    lines = solc_out[0].split('\n')
-    i = 0
-    while not contract in lines[i]:
-        i += 1
-    i += 2
-    dsigs = {}
-    while i < len(lines) and len(lines[i]) > 0:
-        spl = lines[i].split(':')
-        kec = "0x" + spl[0]
-        dsigs[kec] = spl[1].lstrip(' ')
-        i += 1
-    return dsigs
+    reg = r"([a-z0-9]+): (.*?\(.*?\))"
+    func_sig_hashes =  re.findall(reg, solc_out[0])
+    sig_hashes = {}
+    for sig_hash, func_name in func_sig_hashes:
+        sig_hashes["0x" + sig_hash] = func_name
+    return sig_hashes
 
 def retrieveFunctionNames(contract):
     solc_cmd = "solc --ast-json %s"

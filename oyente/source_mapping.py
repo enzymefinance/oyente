@@ -93,7 +93,7 @@ class SourceMapping:
         return cls.convert_offset_to_line_column(pos)
 
     @classmethod
-    def convert_pos_to_source_code(cls, pc):
+    def find_source_code(cls, pc):
         pos = cls.instr_positions[pc]
         begin = pos['begin']
         end = pos['end']
@@ -102,7 +102,7 @@ class SourceMapping:
     @classmethod
     def to_str(cls, pc):
         position = cls.get_position(pc)
-        source_code = cls.convert_pos_to_source_code(pc)
+        source_code = cls.find_source_code(pc)
         s = "%s:%s:%s\n" % (cls.c_name, position['begin']['line'], position['begin']['column'])
         s += source_code + "\n"
         s += "^"
