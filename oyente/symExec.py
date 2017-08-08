@@ -149,7 +149,7 @@ def handler(signum, frame):
 def detect_bugs():
     global assertions
     global results
-    global SourceMapping
+    global source_map
 
     log.debug("Checking for Callstack attack...")
     run_callstack_attack()
@@ -171,7 +171,7 @@ def detect_bugs():
         s = "\t  Reentrancy bug exists: %s" % reentrancy_bug_found
         if reentrancy_bug_found:
             for pc in reentrancy_bugs:
-                s += "\n%s" % SourceMapping.to_str(pc)
+                s += "\n%s" % source_map.to_str(pc)
         log.info(s)
     results['reentrancy'] = reentrancy_bug_found
 
@@ -184,12 +184,12 @@ def detect_bugs():
             s = "\t  Assertion failure: \t %s" % str(is_fail)
             source_code_asrt_pair = {}
             for asrt in assertion_fails:
-                source_code = SourceMapping.find_source_code(asrt.get_pc())
+                source_code = source_map.find_source_code(asrt.get_pc())
                 if source_code not in source_code_asrt_pair:
                     source_code_asrt_pair[source_code] = asrt
             for source_code in source_code_asrt_pair:
                 asrt = source_code_asrt_pair[source_code]
-                s += "\n%s\n" % SourceMapping.to_str(asrt.get_pc())
+                s += "\n%s\n" % source_map.to_str(asrt.get_pc())
                 s += asrt.get_log()
             log.info(s)
 
@@ -255,14 +255,14 @@ def interpret_assertion(asrt, functions, fun_names):
             break
 
 
-def main(contract, contract_sol, source_mapping = None):
+def main(contract, contract_sol, _source_map = None):
     global c_name
     global c_name_sol
-    global SourceMapping
+    global source_map
 
     c_name = contract
     c_name_sol = contract_sol
-    SourceMapping = source_mapping
+    source_map = _source_map
 
     check_unit_test_file()
     initGlobalVars()
@@ -377,7 +377,7 @@ def build_cfg_and_analyze():
 # Detect if a money flow depends on the timestamp
 def detect_time_dependency():
     global results
-    global SourceMapping
+    global source_map
 
     TIMESTAMP_VAR = "IH_s"
     is_dependant = False
@@ -397,7 +397,7 @@ def detect_time_dependency():
     if not isTesting():
         s = "\t  Time Dependency: \t %s" % is_dependant
         if pc != -1:
-            s += "\n%s" % SourceMapping.to_str(pc)
+            s += "\n%s" % source_map.to_str(pc)
         log.info(s)
     results['time_dependency'] = is_dependant
 
@@ -414,7 +414,7 @@ def detect_time_dependency():
 # detect if two paths send money to different people
 def detect_money_concurrency():
     global results
-    global SourceMapping
+    global source_map
 
     n = len(money_flow_all_paths)
     for i in range(n):
@@ -446,7 +446,7 @@ def detect_money_concurrency():
         if not isTesting():
             s = "\t  Concurrency found in paths: %s" % str(concurrency_paths)
             for pc in pcs:
-                s += "\n%s" % SourceMapping.to_str(pc)
+                s += "\n%s" % source_map.to_str(pc)
             log.info(s)
         results['concurrency'] = True
     else:
@@ -515,7 +515,7 @@ def collect_vertices(tokens):
     global end_ins_dict
     global instructions
     global jump_type
-    global SourceMapping
+    global source_map
 
     current_ins_address = 0
     last_ins_address = 0
@@ -535,7 +535,7 @@ def collect_vertices(tokens):
                     current_line_content += push_val + ' '
                     instructions[current_ins_address] = current_line_content
                     try:
-                        SourceMapping.instr_positions[current_ins_address] = SourceMapping.positions[count]
+                        source_map.set_instr_positions(current_ins_address, count)
                         count += 1
                     except:
                         pass
@@ -567,7 +567,7 @@ def collect_vertices(tokens):
             log.debug(current_line_content)
             instructions[current_ins_address] = current_line_content
             try:
-                SourceMapping.instr_positions[current_ins_address] = SourceMapping.positions[count]
+                source_map.set_instr_positions(current_ins_address, count)
                 count += 1
             except:
                 pass
@@ -2128,7 +2128,7 @@ def check_callstack_attack(disasm):
 
 def run_callstack_attack():
     global results
-    global SourceMapping
+    global source_map
 
     disasm_data = open(c_name).read()
     instr_pattern = r"([\d]+) ([A-Z]+)([\d]+)?(?: => 0x)?(\S+)?"
@@ -2139,7 +2139,7 @@ def run_callstack_attack():
     if not isTesting():
         s = "\t  CallStack Attack: \t %s" % result
         if result:
-            s += "\n %s" % SourceMapping.to_str(pc)
+            s += "\n %s" % source_map.to_str(pc)
         log.info(s)
     results['callstack'] = result
 if __name__ == '__main__':
