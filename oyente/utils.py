@@ -334,16 +334,10 @@ def retrieveFunctionNames(contract):
         solc_cmd % contract), stdout=subprocess.PIPE, stderr=FNULL)
     solc_out = solc_p.communicate()
 
-    lines = solc_out[0].split('\n')
-    i = 0
-    while not contract in lines[i]:
-        i += 1
-    i += 1
-    json_src = ""
-    while i < len(lines) and not lines[i].startswith("======= " + contract):
-        json_src += lines[i] + '\n'
-        i += 1
-    json_obj = json.loads(json_src)
+    reg = "======= .*? =======(.*?)======= .*?"
+    out = re.findall(reg, solc_out[0], re.DOTALL)
+
+    json_obj = json.loads(out[0])
     queue = []
     queue.append(json_obj)
     functions = []
@@ -357,3 +351,10 @@ def retrieveFunctionNames(contract):
             for c in node["children"]:
                 queue.append(c)
     return functions
+
+def run_solc_compiler(cmd, filename):
+    FNULL = open(os.devnull, 'w')
+
+    solc_p = subprocess.Popen(shlex.split(cmd % filename), stdout=subprocess.PIPE, stderr=FNULL)
+    return solc_p.communicate()
+

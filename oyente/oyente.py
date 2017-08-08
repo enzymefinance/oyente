@@ -9,7 +9,7 @@ import logging
 import requests
 import symExec
 import global_params
-from source_mapping import SourceMapping
+from source_map import SourceMap
 
 
 def cmd_exists(cmd):
@@ -74,7 +74,7 @@ def compileContracts(contract):
 
     return contracts
 
-def analyze(processed_evm_file, disasm_file, is_bytecode):
+def analyze(processed_evm_file, disasm_file, source_map = None):
     disasm_out = ""
     try:
         disasm_p = subprocess.Popen(
@@ -88,10 +88,10 @@ def analyze(processed_evm_file, disasm_file, is_bytecode):
         of.write(disasm_out)
 
     # Run symExec
-    if is_bytecode:
-        symExec.main(disasm_file, args.source)
+    if source_map:
+        symExec.main(disasm_file, args.source, source_map)
     else:
-        symExec.main(disasm_file, args.source, SourceMapping)
+        symExec.main(disasm_file, args.source)
 
 def remove_temporary_file(path):
     if os.path.isfile(path):
@@ -200,11 +200,12 @@ def main():
                 exit(exit_code)
     else:
         contracts = compileContracts(args.source)
-        SourceMapping.load_source(args.source)
 
-        for index, (cname, bin_str) in enumerate(contracts):
-            SourceMapping.positions = SourceMapping.position_groups[index]
-            SourceMapping.c_name = cname
+        source_maps = {}
+        for cname, bin_str in contracts:
+            source_maps[cname] = SourceMap(cname, args.source)
+
+        for cname, bin_str in contracts:
 
             logging.info("Contract %s:", cname)
             processed_evm_file = cname + '.evm'
@@ -213,7 +214,7 @@ def main():
             with open(processed_evm_file, 'w') as of:
                 of.write(removeSwarmHash(bin_str))
 
-            analyze(processed_evm_file, disasm_file, False)
+            analyze(processed_evm_file, disasm_file, source_maps[cname])
 
             if args.evm:
                 with open(processed_evm_file, 'w') as of:
