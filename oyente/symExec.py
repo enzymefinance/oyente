@@ -914,7 +914,8 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
                 sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1, path + [block], models + model)
         except Exception as e:
             log_file.write(str(e))
-            traceback.print_exc()
+            if global_params.DEBUG_MODE:
+                traceback.print_exc()
             if not global_params.IGNORE_EXCEPTIONS:
                 if str(e) == "timeout":
                     raise e
@@ -947,7 +948,8 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
                 sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1, path + [block], models + model)
         except Exception as e:
             log_file.write(str(e))
-            traceback.print_exc()
+            if global_params.DEBUG_MODE:
+                traceback.print_exc()
             if not global_params.IGNORE_EXCEPTIONS:
                 if str(e) == "timeout":
                     raise e

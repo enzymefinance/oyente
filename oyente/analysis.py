@@ -56,7 +56,8 @@ def check_reentrancy_bug(path_conditions_and_vars, stack, global_state):
                 except:
                     if storage_key in global_state["Ia"]:
                         new_path_condition.append(var == global_state["Ia"][storage_key])
-    log.info("=>>>>>> New PC: " + str(new_path_condition))
+    if global_params.DEBUG_MODE:
+        log.info("=>>>>>> New PC: " + str(new_path_condition))
 
     solver = Solver()
     solver.set("timeout", global_params.TIMEOUT)
@@ -69,7 +70,8 @@ def check_reentrancy_bug(path_conditions_and_vars, stack, global_state):
     # if it is not feasible to re-execute the call, its not a bug
     ret_val = not (solver.check() == unsat)
     solver.pop()
-    log.info("Reentrancy_bug? " + str(ret_val))
+    if global_params.DEBUG_MODE:
+        log.info("Reentrancy_bug? " + str(ret_val))
     global reported
     if not reported:
         with open(reentrancy_report_file, 'a') as r_report:
