@@ -8,11 +8,11 @@ class SourceMap:
 
     def __init__(self, cname, filename):
         self.cname = cname
-        self.__class__.filename = filename
+        SourceMap.filename = filename
         self.source = self.__load_source()
         self.line_break_positions = self.__load_line_break_positions()
-        if not self.__class__.position_groups:
-            self.__class__.position_groups = self.__load_position_groups()
+        if not SourceMap.position_groups:
+            SourceMap.position_groups = self.__load_position_groups()
         self.positions = self.__load_positions()
         self.instr_positions = {}
 
@@ -35,6 +35,13 @@ class SourceMap:
 
     def get_positions(self):
         return self.positions
+
+    def retrieveFunctionSignatures(self):
+        cmd = "solc --combined-json hashes %s"
+        out = run_solc_compiler(cmd, SourceMap.filename)
+        out = out[0]
+        out = json.loads(out)
+        return {"0x" + fun_sig: fun_name for fun_name, fun_sig in out['contracts'][self.cname]['hashes'].iteritems()}
 
     def __load_source(self):
         source = ""
@@ -64,7 +71,7 @@ class SourceMap:
         return c_asm
 
     def __load_positions(self):
-        return self.__class__.position_groups[self.cname]['asm']['.data']['0']['.code']
+        return SourceMap.position_groups[self.cname]['asm']['.data']['0']['.code']
 
     def __get_position(self, pc):
         pos = self.instr_positions[pc]

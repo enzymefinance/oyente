@@ -171,7 +171,7 @@ def detect_bugs():
 
     if global_params.CHECK_ASSERTIONS:
         check_assertions()
-        assertion_fails = [assertion for assertion in assertions if assertion.is_violated()]
+        assertion_fails = [assertion for assertion in assertions if assertion.is_violated() and assertion.get_function()]
         is_fail = len(assertion_fails) > 0
         results['assertion_failure'] = is_fail
         if not isTesting():
@@ -190,13 +190,14 @@ def detect_bugs():
 def check_assertions():
     global assertions
     global c_name_sol
+    global source_map
 
     assertions_fail = [assertion for assertion in assertions if assertion.is_violated()]
     if len(assertions_fail) == 0:
         return
 
-    fun_names = retrieveFunctionNames(c_name_sol)
-    fun_sigs = retrieveFunctionSignatures(c_name_sol)
+    fun_sigs = source_map.retrieveFunctionSignatures()
+    fun_names = fun_sigs.values()
 
     interpret_assertion_bug(fun_sigs, fun_names)
 
@@ -242,7 +243,7 @@ def interpret_assertion(asrt, functions, fun_names):
         block = asrt.path[i]
         if block in functions:
             block_fun = functions[block]
-            if block_fun.split('(')[0] in fun_names:
+            if block_fun in fun_names:
                 asrt.set_function(block_fun)
             else:
                 asrt.set_violated(False)
