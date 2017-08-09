@@ -55,7 +55,7 @@ def removeSwarmHash(evm):
     return evm_without_hash
 
 def compileContracts(contract):
-    solc_cmd = "solc --optimize --bin-runtime %s"
+    solc_cmd = "solc --bin-runtime %s"
 
     FNULL = open(os.devnull, 'w')
 

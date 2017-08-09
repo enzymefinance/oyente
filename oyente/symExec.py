@@ -518,8 +518,10 @@ def collect_vertices(tokens):
     current_line_content = ""
     wait_for_push = False
     is_new_block = False
-
     count = 0
+    positions = source_map.get_positions()
+    length = len(positions)
+
     for tok_type, tok_string, (srow, scol), _, line_number in tokens:
         if wait_for_push is True:
             push_val = ""
@@ -528,11 +530,27 @@ def collect_vertices(tokens):
                     is_new_line = True
                     current_line_content += push_val + ' '
                     instructions[current_ins_address] = current_line_content
-                    try:
-                        source_map.set_instr_positions(current_ins_address, count)
-                        count += 1
-                    except:
-                        pass
+                    instr_name, instr_value, _ = current_line_content.split(" ")
+                    while (count < length):
+                        name = positions[count]['name']
+                        if name.startswith("tag"):
+                            count += 1
+                        else:
+                            value = positions[count]['value']
+                            if name.startswith("PUSH"):
+                                if name == "PUSH":
+                                    if int(value, 16) == int(instr_value, 16):
+                                        source_map.set_instr_positions(current_ins_address, count)
+                                        count += 1
+                                        break;
+                                    else:
+                                        raise Exception("Source map error")
+                                else:
+                                    source_map.set_instr_positions(current_ins_address, count)
+                                    count += 1
+                                    break;
+                            else:
+                                raise Exception("Source map error")
                     log.debug(current_line_content)
                     current_line_content = ""
                     wait_for_push = False
@@ -560,11 +578,18 @@ def collect_vertices(tokens):
             is_new_line = True
             log.debug(current_line_content)
             instructions[current_ins_address] = current_line_content
-            try:
-                source_map.set_instr_positions(current_ins_address, count)
-                count += 1
-            except:
-                pass
+            instr_name = current_line_content.split(" ")[0]
+            while (count < length):
+                name = positions[count]['name']
+                if name.startswith("tag"):
+                    count += 1
+                else:
+                    if name == instr_name or name == "INVALID" and instr_name == "ASSERTFAIL" or name == "KECCAK256" and instr_name == "SHA3" or name == "SELFDESTRUCT" and instr_name == "SUICIDE":
+                        source_map.set_instr_positions(current_ins_address, count)
+                        count += 1
+                        break;
+                    else:
+                        raise Exception("Source map error")
             current_line_content = ""
             continue
         elif tok_type == NAME:
