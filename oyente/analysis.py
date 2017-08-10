@@ -99,7 +99,10 @@ def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
     elif opcode == "SSTORE" and len(stack) > 1:
         if isinstance(stack[1], (int, long)):
             try:
-                storage_value = global_state['Ia'][str(stack[0])]
+                try:
+                    storage_value = global_state["Ia"][int(stack[0])]
+                except:
+                    storage_value = global_state["Ia"][str(stack[0])]
                 # when we change storage value from zero to non-zero
                 if storage_value == 0 and stack[1] != 0:
                     gas_increment += GCOST["Gsset"]
@@ -112,7 +115,10 @@ def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
                     gas_increment += GCOST["Gsreset"]
         else:
             try:
-                storage_value = global_state['Ia'][str(stack[0])]
+                try:
+                    storage_value = global_state["Ia"][int(stack[0])]
+                except:
+                    storage_value = global_state["Ia"][str(stack[0])]
                 solver.push()
                 solver.add(Not( And(storage_value == 0, stack[1] != 0) ))
                 if solver.check() == unsat:
@@ -120,7 +126,9 @@ def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
                 else:
                     gas_increment += GCOST["Gsreset"]
                 solver.pop()
-            except:
+            except Exception as e:
+                if str(e) == "canceled":
+                    solver.pop()
                 solver.push()
                 solver.add(Not( stack[1] != 0 ))
                 if solver.check() == unsat:
