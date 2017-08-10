@@ -8,11 +8,11 @@ class SourceMap:
 
     def __init__(self, cname, filename):
         self.cname = cname
-        self.__class__.filename = filename
+        SourceMap.filename = filename
         self.source = self.__load_source()
         self.line_break_positions = self.__load_line_break_positions()
-        if not self.__class__.position_groups:
-            self.__class__.position_groups = self.__load_position_groups()
+        if not SourceMap.position_groups:
+            SourceMap.position_groups = self.__load_position_groups()
         self.positions = self.__load_positions()
         self.instr_positions = {}
 
@@ -33,6 +33,16 @@ class SourceMap:
         s += "^"
         return s
 
+    def get_positions(self):
+        return self.positions
+
+    def retrieveFunctionSignatures(self):
+        cmd = "solc --combined-json hashes %s"
+        out = run_solc_compiler(cmd, SourceMap.filename)
+        out = out[0]
+        out = json.loads(out)
+        return {"0x" + fun_sig: fun_name for fun_name, fun_sig in out['contracts'][self.cname]['hashes'].iteritems()}
+
     def __load_source(self):
         source = ""
         with open(self.__get_filename(), 'r') as f:
@@ -44,23 +54,11 @@ class SourceMap:
 
     @classmethod
     def __load_position_groups(cls):
-        cmd = "solc  --optimize --asm-json %s"
+        cmd = "solc --combined-json asm %s"
         out = run_solc_compiler(cmd, cls.filename)
         out = out[0]
-
-        reg = r"======= (.*?) =======\nEVM assembly:\n"
-        out = re.compile(reg).split(out)
-        out = out[1:]
-        out = dict(zip(out[0::2], out[1::2]))
-
-        c_asm = {}
-        for cname in out:
-            try:
-                idx = out[cname].index("}{") + 1
-                c_asm[cname] = out[cname][:idx]
-            except:
-                continue
-        return cls.__extract_position_groups(c_asm)
+        out = json.loads(out)
+        return out['contracts']
 
     @classmethod
     def __extract_position_groups(cls, c_asm):
@@ -73,7 +71,7 @@ class SourceMap:
         return c_asm
 
     def __load_positions(self):
-        return self.__class__.position_groups[self.cname]
+        return SourceMap.position_groups[self.cname]['asm']['.data']['0']['.code']
 
     def __get_position(self, pc):
         pos = self.instr_positions[pc]

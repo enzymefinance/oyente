@@ -307,51 +307,6 @@ def get_distinct_contracts(list_of_contracts = "concurr.csv"):
                             flag[j] = i
     print flag
 
-
-
-def retrieveFunctionSignatures(contract):
-    solc_cmd = "solc --hashes %s"
-
-    FNULL = open(os.devnull, 'w')
-
-    solc_p = subprocess.Popen(shlex.split(
-        solc_cmd % contract), stdout=subprocess.PIPE, stderr=FNULL)
-    solc_out = solc_p.communicate()
-
-    reg = r"([a-z0-9]+): (.*?\(.*?\))"
-    func_sig_hashes =  re.findall(reg, solc_out[0])
-    sig_hashes = {}
-    for sig_hash, func_name in func_sig_hashes:
-        sig_hashes["0x" + sig_hash] = func_name
-    return sig_hashes
-
-def retrieveFunctionNames(contract):
-    solc_cmd = "solc --ast-json %s"
-
-    FNULL = open(os.devnull, 'w')
-
-    solc_p = subprocess.Popen(shlex.split(
-        solc_cmd % contract), stdout=subprocess.PIPE, stderr=FNULL)
-    solc_out = solc_p.communicate()
-
-    reg = "======= .*? =======(.*?)======= .*?"
-    out = re.findall(reg, solc_out[0], re.DOTALL)
-
-    json_obj = json.loads(out[0])
-    queue = []
-    queue.append(json_obj)
-    functions = []
-    while len(queue) > 0:
-        node = queue.pop(0)
-        if node["name"] == "FunctionDefinition":
-            fun_name = node["attributes"]["name"]
-            functions.append(fun_name.encode("ascii"))
-            continue
-        if "children" in node:
-            for c in node["children"]:
-                queue.append(c)
-    return functions
-
 def run_solc_compiler(cmd, filename):
     FNULL = open(os.devnull, 'w')
 

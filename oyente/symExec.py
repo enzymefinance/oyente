@@ -171,7 +171,7 @@ def detect_bugs():
 
     if global_params.CHECK_ASSERTIONS:
         check_assertions()
-        assertion_fails = [assertion for assertion in assertions if assertion.is_violated()]
+        assertion_fails = [asrt for asrt in assertions if asrt.is_violated() and asrt.get_function() and "assert" in source_map.find_source_code(asrt.get_pc())]
         is_fail = len(assertion_fails) > 0
         results['assertion_failure'] = is_fail
         if not isTesting():
@@ -190,13 +190,14 @@ def detect_bugs():
 def check_assertions():
     global assertions
     global c_name_sol
+    global source_map
 
     assertions_fail = [assertion for assertion in assertions if assertion.is_violated()]
     if len(assertions_fail) == 0:
         return
 
-    fun_names = retrieveFunctionNames(c_name_sol)
-    fun_sigs = retrieveFunctionSignatures(c_name_sol)
+    fun_sigs = source_map.retrieveFunctionSignatures()
+    fun_names = fun_sigs.values()
 
     interpret_assertion_bug(fun_sigs, fun_names)
 
@@ -242,7 +243,7 @@ def interpret_assertion(asrt, functions, fun_names):
         block = asrt.path[i]
         if block in functions:
             block_fun = functions[block]
-            if block_fun.split('(')[0] in fun_names:
+            if block_fun in fun_names:
                 asrt.set_function(block_fun)
             else:
                 asrt.set_violated(False)
@@ -518,8 +519,10 @@ def collect_vertices(tokens):
     current_line_content = ""
     wait_for_push = False
     is_new_block = False
-
     count = 0
+    positions = source_map.get_positions()
+    length = len(positions)
+
     for tok_type, tok_string, (srow, scol), _, line_number in tokens:
         if wait_for_push is True:
             push_val = ""
@@ -528,11 +531,27 @@ def collect_vertices(tokens):
                     is_new_line = True
                     current_line_content += push_val + ' '
                     instructions[current_ins_address] = current_line_content
-                    try:
-                        source_map.set_instr_positions(current_ins_address, count)
-                        count += 1
-                    except:
-                        pass
+                    instr_name, instr_value, _ = current_line_content.split(" ")
+                    while (count < length):
+                        name = positions[count]['name']
+                        if name.startswith("tag"):
+                            count += 1
+                        else:
+                            value = positions[count]['value']
+                            if name.startswith("PUSH"):
+                                if name == "PUSH":
+                                    if int(value, 16) == int(instr_value, 16):
+                                        source_map.set_instr_positions(current_ins_address, count)
+                                        count += 1
+                                        break;
+                                    else:
+                                        raise Exception("Source map error")
+                                else:
+                                    source_map.set_instr_positions(current_ins_address, count)
+                                    count += 1
+                                    break;
+                            else:
+                                raise Exception("Source map error")
                     log.debug(current_line_content)
                     current_line_content = ""
                     wait_for_push = False
@@ -560,11 +579,18 @@ def collect_vertices(tokens):
             is_new_line = True
             log.debug(current_line_content)
             instructions[current_ins_address] = current_line_content
-            try:
-                source_map.set_instr_positions(current_ins_address, count)
-                count += 1
-            except:
-                pass
+            instr_name = current_line_content.split(" ")[0]
+            while (count < length):
+                name = positions[count]['name']
+                if name.startswith("tag"):
+                    count += 1
+                else:
+                    if name == instr_name or name == "INVALID" and instr_name == "ASSERTFAIL" or name == "KECCAK256" and instr_name == "SHA3" or name == "SELFDESTRUCT" and instr_name == "SUICIDE":
+                        source_map.set_instr_positions(current_ins_address, count)
+                        count += 1
+                        break;
+                    else:
+                        raise Exception("Source map error")
             current_line_content = ""
             continue
         elif tok_type == NAME:
@@ -888,7 +914,8 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
                 sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1, path + [block], models + model)
         except Exception as e:
             log_file.write(str(e))
-            traceback.print_exc()
+            if global_params.DEBUG_MODE:
+                traceback.print_exc()
             if not global_params.IGNORE_EXCEPTIONS:
                 if str(e) == "timeout":
                     raise e
@@ -921,7 +948,8 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
                 sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1, path + [block], models + model)
         except Exception as e:
             log_file.write(str(e))
-            traceback.print_exc()
+            if global_params.DEBUG_MODE:
+                traceback.print_exc()
             if not global_params.IGNORE_EXCEPTIONS:
                 if str(e) == "timeout":
                     raise e
