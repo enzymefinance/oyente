@@ -171,7 +171,7 @@ def detect_bugs():
 
     if global_params.CHECK_ASSERTIONS:
         check_assertions()
-        assertion_fails = [assertion for assertion in assertions if assertion.is_violated() and assertion.get_function()]
+        assertion_fails = [asrt for asrt in assertions if asrt.is_violated() and asrt.get_function() and "assert" in source_map.find_source_code(asrt.get_pc())]
         is_fail = len(assertion_fails) > 0
         results['assertion_failure'] = is_fail
         if not isTesting():
