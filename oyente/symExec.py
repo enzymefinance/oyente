@@ -37,6 +37,9 @@ def initGlobalVars():
     solver = Solver()
     solver.set("timeout", global_params.TIMEOUT)
 
+    global visited_pcs
+    visited_pcs = set()
+
     global results
     results = {}
 
@@ -144,6 +147,10 @@ def detect_bugs():
     global assertions
     global results
     global source_map
+    global visited_pcs
+
+    percentage_of_opcodes_covered = float(len(visited_pcs)) / len(instructions.keys()) * 100
+    log.info("\t  EVM code covered: \t %s%%", round(percentage_of_opcodes_covered, 2))
 
     log.debug("Checking for Callstack attack...")
     run_callstack_attack()
@@ -905,10 +912,13 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
 
 # Symbolically executing an instruction
 def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis, models):
+    global visited_pcs
     global solver
     global vertices
     global edges
     global assertions
+
+    visited_pcs.add(global_state["pc"])
 
     instr_parts = str.split(instr, ' ')
 
