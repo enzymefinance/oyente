@@ -13,15 +13,6 @@ class Assertion:
         # SMT2 query to decide the assertion
         self.query = None
 
-        # Solidity function that might contain this assertion
-        self.function = None
-
-        # Branch that led to the assertion failure
-        self.path = None
-
-        # Symbolic constraints of that path
-        self.sym = None
-
         # Program counter of the ASSERTFAIL
         self.pc = -1
 
@@ -30,24 +21,6 @@ class Assertion:
 
     def get_pc(self):
         return self.pc
-
-    def set_sym(self, sym):
-        self.sym = sym
-
-    def get_sym(self):
-        return self.sym
-
-    def set_path(self, path):
-        self.path = path
-
-    def get_path(self):
-        return self.path
-
-    def set_function(self, function):
-        self.function = function
-
-    def get_function(self):
-        return self.function
 
     def get_block_from(self):
         return self.block_from
@@ -71,24 +44,15 @@ class Assertion:
         self.query = query
 
     def get_log(self):
+        s = ""
         #s += "SMT2 query:\n" + str(self.query) + "\n"
-        #  s = "Violated: " + str(self.violated) + "\n"
-        s = "Function: "
-        if self.function == None:
-            s += "?\n"
-        else:
-            s += self.function + "\n"
-        #  if self.violated:
-            #  s += "Model:\n"
-            #  for decl in self.model.decls():
-                #  s += str(decl.name()) + " = " + str(self.model[decl]) + ", "
+        #s += "Violated: " + str(self.violated) + "\n"
+        #if self.violated:
+        #    s += "Model:\n"
+        #    for decl in self.model.decls():
+        #        s += str(decl.name()) + " = " + str(self.model[decl]) + ", "
         return s
 
     def __str__(self):
-        s += "^\n"
-        s += "Function: "
-        if self.function == None:
-            s += "?\n"
-        else:
-            s += self.function + "\n"
+        s = ""
         return s
