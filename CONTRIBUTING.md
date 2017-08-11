@@ -23,7 +23,7 @@ UNIT_TEST = 3
 
 ```
 # Start testing
-$ python oyenete/run_tests.py
+$ python oyente/run_tests.py
 ```
 
 After running the testing program, the result would display a status for each testcase:

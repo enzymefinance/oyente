@@ -163,13 +163,15 @@ def detect_bugs():
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
     if not isTesting():
         s = "\t  Reentrancy bug exists: %s" % reentrancy_bug_found
-        if reentrancy_bug_found:
+        if reentrancy_bug_found and source_map != None:
             for pc in global_problematic_pcs["reentrancy_bug"]:
                 s += "\n%s" % source_map.to_str(pc)
         log.info(s)
     results['reentrancy'] = reentrancy_bug_found
 
     if global_params.CHECK_ASSERTIONS:
+        if source_map == None:
+            raise("Assertion checks need a Source Map")
         assertion_fails = [asrt for asrt in assertions if asrt.is_violated() and "assert" in source_map.find_source_code(asrt.get_pc())]
         is_fail = len(assertion_fails) > 0
         results['assertion_failure'] = is_fail
@@ -327,7 +329,7 @@ def detect_time_dependency():
 
     if not isTesting():
         s = "\t  Time Dependency: \t %s" % is_dependant
-        if pc != -1:
+        if pc != -1 and source_map != None:
             s += "\n%s" % source_map.to_str(pc)
         log.info(s)
     results['time_dependency'] = is_dependant
@@ -376,8 +378,9 @@ def detect_money_concurrency():
     if len(concurrency_paths) > 0:
         if not isTesting():
             s = "\t  Concurrency found in paths: %s" % str(concurrency_paths)
-            for pc in pcs:
-                s += "\n%s" % source_map.to_str(pc)
+            if source_map != None:
+                for pc in pcs:
+                    s += "\n%s" % source_map.to_str(pc)
             log.info(s)
         results['concurrency'] = True
     else:
@@ -456,7 +459,9 @@ def collect_vertices(tokens):
     wait_for_push = False
     is_new_block = False
     count = 0
-    positions = source_map.get_positions()
+    positions = []
+    if source_map != None:
+        positions = source_map.get_positions()
     length = len(positions)
 
     for tok_type, tok_string, (srow, scol), _, line_number in tokens:
@@ -2078,7 +2083,7 @@ def run_callstack_attack():
 
     if not isTesting():
         s = "\t  CallStack Attack: \t %s" % result
-        if result:
+        if result and source_map != None:
             s += "\n %s" % source_map.to_str(pc)
         log.info(s)
     results['callstack'] = result

@@ -88,7 +88,7 @@ def analyze(processed_evm_file, disasm_file, source_map = None):
         of.write(disasm_out)
 
     # Run symExec
-    if source_map:
+    if source_map != None:
         symExec.main(disasm_file, args.source, source_map)
     else:
         symExec.main(disasm_file, args.source)
@@ -192,7 +192,7 @@ def main():
         with open(processed_evm_file, 'w') as f:
             f.write(removeSwarmHash(evm))
 
-        analyze(processed_evm_file, disasm_file, True)
+        analyze(processed_evm_file, disasm_file)
 
         remove_temporary_file(disasm_file)
         remove_temporary_file(processed_evm_file)
