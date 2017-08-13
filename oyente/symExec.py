@@ -163,15 +163,16 @@ def detect_bugs():
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
     if not isTesting():
         s = "\t  Reentrancy bug exists: %s" % reentrancy_bug_found
-        if reentrancy_bug_found:
+        if reentrancy_bug_found and source_map != None:
             for pc in global_problematic_pcs["reentrancy_bug"]:
                 s += "\n%s" % source_map.to_str(pc)
         log.info(s)
     results['reentrancy'] = reentrancy_bug_found
 
     if global_params.CHECK_ASSERTIONS:
-        check_assertions()
-        assertion_fails = [asrt for asrt in assertions if asrt.is_violated() and asrt.get_function() and "assert" in source_map.find_source_code(asrt.get_pc())]
+        if source_map == None:
+            raise("Assertion checks need a Source Map")
+        assertion_fails = [asrt for asrt in assertions if asrt.is_violated() and "assert" in source_map.find_source_code(asrt.get_pc())]
         is_fail = len(assertion_fails) > 0
         results['assertion_failure'] = is_fail
         if not isTesting():
@@ -186,69 +187,6 @@ def detect_bugs():
                 s += "\n%s\n" % source_map.to_str(asrt.get_pc())
                 s += asrt.get_log()
             log.info(s)
-
-def check_assertions():
-    global assertions
-    global c_name_sol
-    global source_map
-
-    assertions_fail = [assertion for assertion in assertions if assertion.is_violated()]
-    if len(assertions_fail) == 0:
-        return
-
-    fun_sigs = source_map.retrieveFunctionSignatures()
-    fun_names = fun_sigs.values()
-
-    interpret_assertion_bug(fun_sigs, fun_names)
-
-
-def interpret_assertion_bug(fun_sigs, fun_names):
-    global assertions
-    global edges
-    global vertices
-    global instructions
-    global results
-
-    state = 0
-    fsig = None
-    functions = {}
-    for instr in instructions:
-        if state == 0:
-            for sig in fun_sigs:
-                if instructions[instr].startswith("PUSH4 " + sig):
-                    # There will be a test on the function signature,
-                    # we have to look for the next EQ
-                    state = 1
-                    fsig = sig
-                    break
-        elif state == 1 and instructions[instr].startswith("EQ"):
-            # We found the EQ, so next should be PUSH
-            state = 2
-        elif state == 2 and instructions[instr].startswith("PUSH"):
-            # We have the address of the beginning of the function
-            hexaddr = instructions[instr].split("0x")[1].replace(' ', '')
-            faddr = int(hexaddr, 16)
-            functions[faddr] = fun_sigs[fsig]
-            state = 0
-
-    assertion_fails = [assertion for assertion in assertions if assertion.is_violated()]
-    for asrt in assertion_fails:
-        interpret_assertion(asrt, functions, fun_names)
-
-
-def interpret_assertion(asrt, functions, fun_names):
-    global vertices
-
-    for i in range(len(asrt.path) - 1, 0, -1):
-        block = asrt.path[i]
-        if block in functions:
-            block_fun = functions[block]
-            if block_fun in fun_names:
-                asrt.set_function(block_fun)
-            else:
-                asrt.set_violated(False)
-            break
-
 
 def main(contract, contract_sol, _source_map = None):
     global c_name
@@ -391,7 +329,7 @@ def detect_time_dependency():
 
     if not isTesting():
         s = "\t  Time Dependency: \t %s" % is_dependant
-        if pc != -1:
+        if pc != -1 and source_map != None:
             s += "\n%s" % source_map.to_str(pc)
         log.info(s)
     results['time_dependency'] = is_dependant
@@ -440,8 +378,9 @@ def detect_money_concurrency():
     if len(concurrency_paths) > 0:
         if not isTesting():
             s = "\t  Concurrency found in paths: %s" % str(concurrency_paths)
-            for pc in pcs:
-                s += "\n%s" % source_map.to_str(pc)
+            if source_map != None:
+                for pc in pcs:
+                    s += "\n%s" % source_map.to_str(pc)
             log.info(s)
         results['concurrency'] = True
     else:
@@ -520,7 +459,9 @@ def collect_vertices(tokens):
     wait_for_push = False
     is_new_block = False
     count = 0
-    positions = source_map.get_positions()
+    positions = []
+    if source_map != None:
+        positions = source_map.get_positions()
     length = len(positions)
 
     for tok_type, tok_string, (srow, scol), _, line_number in tokens:
@@ -800,11 +741,11 @@ def full_sym_exec():
     # this is init global state for this particular execution
     global_state = get_init_global_state(path_conditions_and_vars)
     analysis = init_analysis()
-    return sym_exec_block(0, 0, visited, depth, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis, [], [])
+    return sym_exec_block(0, 0, visited, depth, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis, [])
 
 
 # Symbolically executing a block from the start address
-def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis, path, models):
+def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis, models):
     global solver
     global visited_edges
     global money_flow_all_paths
@@ -846,7 +787,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
         return ["ERROR"]
 
     for instr in block_ins:
-        sym_exec_ins(block, instr, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis, path, models)
+        sym_exec_ins(block, instr, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis, models)
 
     # Mark that this basic block in the visited blocks
     visited.append(block)
@@ -880,12 +821,12 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
         successor = vertices[block].get_jump_target()
         visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis)
         global_state1["pc"] = successor
-        sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1, path + [block], models)
+        sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1, models)
     elif jump_type[block] == "falls_to":  # just follow to the next basic block
         successor = vertices[block].get_falls_to()
         visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis)
         global_state1["pc"] = successor
-        sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1, path + [block], models)
+        sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1, models)
     elif jump_type[block] == "conditional":  # executing "JUMPI"
 
         # A choice point, we proceed with depth first search
@@ -911,7 +852,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
                     model = [solver.model()]
                 except Exception as e:
                     model = []
-                sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1, path + [block], models + model)
+                sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1, models + model)
         except Exception as e:
             log_file.write(str(e))
             if global_params.DEBUG_MODE:
@@ -945,7 +886,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
                     model = [solver.model()]
                 except Exception as e:
                     model = []
-                sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1, path + [block], models + model)
+                sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1, models + model)
         except Exception as e:
             log_file.write(str(e))
             if global_params.DEBUG_MODE:
@@ -963,7 +904,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
 
 
 # Symbolically executing an instruction
-def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis, path, models):
+def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis, models):
     global solver
     global vertices
     global edges
@@ -974,28 +915,11 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
     if instr_parts[0] == "INVALID":
         return
     elif instr_parts[0] == "ASSERTFAIL":
-        # We only consider assertions blocks that already start with ASSERTFAIL,
-        # without any JUMPDEST
-        if instr == vertices[start].get_instructions()[0]:
-            from_block = path[-1]
-            block_instrs = vertices[from_block].get_instructions()
-            is_init_callvalue = True
-            if len(block_instrs) < 5:
-                is_init_callvalue = False
-            else:
-                instrs = ["JUMPDEST", "CALLVALUE", "ISZERO", "PUSH", "JUMPI"]
-                for i in range(0, 5):
-                    if not block_instrs[i].startswith(instrs[i]):
-                        is_init_callvalue = False
-                        break
-            if from_block != 0 and not is_init_callvalue:
-                assertion = Assertion(start)
-                assertion.set_violated(True)
-                assertion.set_model(models[-1])
-                assertion.set_path(path + [start])
-                assertion.set_sym(path_conditions_and_vars)
-                assertion.set_pc(global_state["pc"])
-                assertions.append(assertion)
+        assertion = Assertion(start)
+        assertion.set_violated(True)
+        assertion.set_model(models[-1])
+        assertion.set_pc(global_state["pc"])
+        assertions.append(assertion)
         return
 
     # collecting the analysis result by calling this skeletal function
@@ -2159,7 +2083,7 @@ def run_callstack_attack():
 
     if not isTesting():
         s = "\t  CallStack Attack: \t %s" % result
-        if result:
+        if result and source_map != None:
             s += "\n %s" % source_map.to_str(pc)
         log.info(s)
     results['callstack'] = result

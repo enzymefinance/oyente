@@ -36,13 +36,6 @@ class SourceMap:
     def get_positions(self):
         return self.positions
 
-    def retrieveFunctionSignatures(self):
-        cmd = "solc --combined-json hashes %s"
-        out = run_solc_compiler(cmd, SourceMap.filename)
-        out = out[0]
-        out = json.loads(out)
-        return {"0x" + fun_sig: fun_name for fun_name, fun_sig in out['contracts'][self.cname]['hashes'].iteritems()}
-
     def __load_source(self):
         source = ""
         with open(self.__get_filename(), 'r') as f:
