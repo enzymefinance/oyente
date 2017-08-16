@@ -169,10 +169,13 @@ def detect_bugs():
     log.debug("Results for Reentrancy Bug: " + str(reentrancy_all_paths))
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
     if not isTesting():
-        s = "\t  Reentrancy bug exists: %s" % reentrancy_bug_found
+        s = ""
         if reentrancy_bug_found and source_map != None:
             for pc in global_problematic_pcs["reentrancy_bug"]:
-                s += "\n%s" % source_map.to_str(pc)
+                source_code = source_map.find_source_code(pc)
+                if source_code:
+                    s += "\n%s" % source_map.to_str(pc)
+        s = "\t  Reentrancy bug exists: True" + s if s else "\t  Reentrancy bug exists: False"
         log.info(s)
     results['reentrancy'] = reentrancy_bug_found
 
@@ -183,16 +186,17 @@ def detect_bugs():
         is_fail = len(assertion_fails) > 0
         results['assertion_failure'] = is_fail
         if not isTesting():
-            s = "\t  Assertion failure: \t %s" % str(is_fail)
+            s = ""
             source_code_asrt_pair = {}
             for asrt in assertion_fails:
                 source_code = source_map.find_source_code(asrt.get_pc())
-                if source_code not in source_code_asrt_pair:
+                if source_code and source_code not in source_code_asrt_pair:
                     source_code_asrt_pair[source_code] = asrt
             for source_code in source_code_asrt_pair:
                 asrt = source_code_asrt_pair[source_code]
                 s += "\n%s\n" % source_map.to_str(asrt.get_pc())
                 s += asrt.get_log()
+            s = "\t  Assertion failure: \t True" + s if s else "\t Assertion failure: \t False"
             log.info(s)
 
 def main(contract, contract_sol, _source_map = None):
@@ -335,9 +339,12 @@ def detect_time_dependency():
                     break
 
     if not isTesting():
-        s = "\t  Time Dependency: \t %s" % is_dependant
+        s = ""
         if pc != -1 and source_map != None:
-            s += "\n%s" % source_map.to_str(pc)
+            source_code = source_map.find_source_code(pc)
+            if source_code:
+                s += "\n%s" % source_map.to_str(pc)
+        s = "\t  Time Dependency: \t True" + s if s else "\t  Time Dependency: \t False"
         log.info(s)
     results['time_dependency'] = is_dependant
 
@@ -384,10 +391,13 @@ def detect_money_concurrency():
     log.debug("Concurrency in paths: ")
     if len(concurrency_paths) > 0:
         if not isTesting():
-            s = "\t  Concurrency found in paths: %s" % str(concurrency_paths)
+            s = ""
             if source_map != None:
                 for pc in pcs:
-                    s += "\n%s" % source_map.to_str(pc)
+                    source_code = source_map.find_source_code(pc)
+                    if source_code:
+                        s += "\n%s" % source_map.to_str(pc)
+            s = "\t  Concurrency found in paths: True" + s if s else "\t  Concurrency found in paths: False"
             log.info(s)
         results['concurrency'] = True
     else:
@@ -2092,9 +2102,12 @@ def run_callstack_attack():
     result = False if pc == -1 else True
 
     if not isTesting():
-        s = "\t  CallStack Attack: \t %s" % result
+        s = ""
         if result and source_map != None:
-            s += "\n %s" % source_map.to_str(pc)
+            source_code = source_map.find_source_code(pc)
+            if source_code:
+                s += "\n %s" % source_map.to_str(pc)
+        s = "\t  CallStack Attack: \t True" + s if s else "\t  CallStack Attack: \t False"
         log.info(s)
     results['callstack'] = result
 if __name__ == '__main__':
