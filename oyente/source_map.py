@@ -26,7 +26,7 @@ class SourceMap:
         return self.source[begin:end]
 
     def to_str(self, pc):
-        position = self.__get_position(pc)
+        position = self.__get_location(pc)
         source_code = self.find_source_code(pc)
         s = "%s:%s:%s\n" % (self.cname, position['begin']['line'], position['begin']['column'])
         s += source_code + "\n"
@@ -35,6 +35,14 @@ class SourceMap:
 
     def get_positions(self):
         return self.positions
+
+    def reduce_same_position_pcs(self, pcs):
+        d = {}
+        for pc in pcs:
+            pos = str(self.instr_positions[pc])
+            if pos not in d:
+                d[pos] = pc
+        return d.values()
 
     def __load_source(self):
         source = ""
@@ -66,7 +74,7 @@ class SourceMap:
     def __load_positions(self):
         return SourceMap.position_groups[self.cname]['asm']['.data']['0']['.code']
 
-    def __get_position(self, pc):
+    def __get_location(self, pc):
         pos = self.instr_positions[pc]
         return self.__convert_offset_to_line_column(pos)
 
