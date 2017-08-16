@@ -27,8 +27,8 @@ class SourceMap:
 
     def to_str(self, pc):
         position = self.__get_location(pc)
-        source_code = self.find_source_code(pc)
-        s = "%s:%s:%s\n" % (self.cname, position['begin']['line'], position['begin']['column'])
+        source_code = self.find_source_code(pc).split("\n", 1)[0]
+        s = "%s:%s:%s\n" % (self.cname, position['begin']['line'] + 1, position['begin']['column'] + 1)
         s += source_code + "\n"
         s += "^"
         return s
