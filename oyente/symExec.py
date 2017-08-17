@@ -1573,7 +1573,13 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
                 stack.insert(0, len(code)/2)
             else:
                 #not handled yet
-                stack.insert(0, 0)
+                new_var_name = gen.gen_code_size_var(address)
+                if new_var_name in path_conditions_and_vars:
+                    new_var = path_conditions_and_vars[new_var_name]
+                else:
+                    new_var = BitVec(new_var_name, 256)
+                    path_conditions_and_vars[new_var_name] = new_var
+                stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "EXTCODECOPY":
@@ -1707,9 +1713,10 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
                 new_size = ceil32(stored_address + 32) // 32
                 mem_extend = (new_size - old_size) * 32
                 memory.extend([0] * mem_extend)
+                value = stored_value
                 for i in range(31, -1, -1):
-                    memory[stored_address + i] = stored_value % 256
-                    stored_value /= 256
+                    memory[stored_address + i] = value % 256
+                    value /= 256
             if isAllReal(stored_address, current_miu_i):
                 temp = long(math.ceil((stored_address + 32) / float(32)))
                 if temp > current_miu_i:
