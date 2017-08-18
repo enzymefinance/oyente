@@ -17,12 +17,10 @@ class HomeController < ApplicationController
         @output[1..-1].each do |result|
           @results[:contracts] << eval(result)
         end
-        UserMailer.analyzer_result_notification(oyente_params[:filename], file.path, @results, oyente_params[:email]).deliver_later
+        UserMailer.analyzer_result_notification(file.path, @results, oyente_params[:email]).deliver_later
       rescue
-        @results[:error] = "Error"
-      ensure
         file.close
-        file.unlink
+        @results[:error] = "Error"
       end
     end
   end
