@@ -1,11 +1,10 @@
 class UserMailer < ApplicationMailer
-  def analyzer_result_notification filename, filepath, result, email
-    @filename = filename
-    @result = result
+  helper ApplicationHelper
 
-    attachments[filename] = File.read(filepath)
+  def analyzer_result_notification filepath, results, email
+    @results = results
 
-    File.delete(filepath)
+    attachments[@results[:filename]] = File.read(filepath)
 
     mail to: email, subject: "Analysis results by Oyente"
   end

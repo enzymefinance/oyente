@@ -979,13 +979,13 @@ var run = function () {
         <div class="${css.small_item}">
           <div>Z3 Timeout:</div>
         </div>
-        <div class="${css.large_item}"><input name="timeout" type="number" value=1000 min=0 title="Time limit for z3 to solve path constraints during symbolic execution."><span> milliseconds</span></div>
+        <div class="${css.large_item}"><input name="timeout" type="number" value=100 min=0 title="Time limit for z3 to solve path constraints during symbolic execution."><span> milliseconds</span></div>
       </div>
       <div class="${css.crow}">
         <div class="${css.small_item}">
           <div>Global Timeout:</div>
         </div>
-        <div class="${css.large_item}"><input name="global_timeout" type="number" value=20 min=0 max=50 title="Time limit to force Oyente to terminate. Maximum value is 50"><span> seconds</span></div>
+        <div class="${css.large_item}"><input name="global_timeout" type="number" value=50 min=0 max=100 title="Time limit to force Oyente to terminate. Maximum value is 50"><span> seconds</span></div>
       </div>
       <div class="${css.crow}">
         <div class="${css.small_item}">
@@ -997,13 +997,13 @@ var run = function () {
         <div class="${css.small_item}">
           <div>Depth Limit:</div>
         </div>
-        <div class="${css.large_item}"><input name="depthlimit" type="number" value=1000 min=0 title="A depth limit for exploring states in symbolic execution. The analysis coverage improves as the depth limit increases, with the cost of longer execution time."></div>
+        <div class="${css.large_item}"><input name="depthlimit" type="number" value=50 min=0 title="A depth limit for exploring states in symbolic execution. The analysis coverage improves as the depth limit increases, with the cost of longer execution time."></div>
       </div>
       <div class="${css.crow}">
         <div class="${css.small_item}">
           <div>Loop Limit:</div>
         </div>
-        <div class="${css.large_item}"><input name="looplimit" type="number" value=100 min=0 title="The maximum number of iterations that Oyente will follow when encounter a loop. Both the analysis accuracy and the run time rise as this value increases."></div>
+        <div class="${css.large_item}"><input name="looplimit" type="number" value=50 min=0 title="The maximum number of iterations that Oyente will follow when encounter a loop. Both the analysis accuracy and the run time rise as this value increases."></div>
       </div>
       <div class="${css.crow}">
         <div class="${css.small_item}">

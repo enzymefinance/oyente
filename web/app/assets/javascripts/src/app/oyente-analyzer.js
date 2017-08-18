@@ -51,11 +51,13 @@ function Analyzer () {
 
         var results = yo`<div>
           <div>${filename}</div>
+          <br />
           ${contracts.map(function (contract) {
             return yo`<div>
-              <div>======= Results =======</div>
+              <div>======= contract ${contract.cname} =======</div>
+              <div>Percentage of EVM code being covered: ${contract.perct_evm_covered}%</div>
               <div>Callstack bug: ${bug_exists(contract.callstack)}</div>
-              <div>Concurrency bug: ${bug_exists(contract.concurrency)}</div>
+              <div>Money concurrency bug: ${bug_exists(contract.concurrency)}</div>
               <div>Time dependency bug: ${bug_exists(contract.time_dependency)}</div>
               <div>Reentrancy bug: ${bug_exists(contract.reentrancy)}</div>
               <div>Assertion failure: ${bug_exists(contract.assertion_failure)}</div>

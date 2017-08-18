@@ -146,7 +146,8 @@ def detect_bugs():
     global global_problematic_pcs
 
     percentage_of_opcodes_covered = float(len(visited_pcs)) / len(instructions.keys()) * 100
-    log.info("\t  EVM code covered: \t %s%%", round(percentage_of_opcodes_covered, 2))
+    log.info("\t  EVM code covered: \t %s%%", round(percentage_of_opcodes_covered, 1))
+    results["perct_evm_covered"] = str(round(percentage_of_opcodes_covered, 1))
 
     log.debug("Checking for Callstack attack...")
     run_callstack_attack()
@@ -171,8 +172,8 @@ def detect_bugs():
             pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
             pcs = source_map.reduce_same_position_pcs(pcs)
             s = source_map.to_str(pcs, "Reentrancy bug")
-        results['reentrancy'] = s
-        s = "\t  Reentrancy bug exists: True" + s if s else "\t  Reentrancy bug exists: False"
+        results["reentrancy"] = s
+        s = "\t  Reentrancy bug: True" + s if s else "\t  Reentrancy bug: False"
         log.info(s)
 
     if global_params.CHECK_ASSERTIONS:
@@ -183,7 +184,7 @@ def detect_bugs():
 
         if not isTesting():
             s = source_map.to_str(pcs, "Assertion failure")
-            results['assertion_failure'] = s
+            results["assertion_failure"] = s
             s = "\t  Assertion failure: \t True" + s if s else "\t  Assertion failure: \t False"
             log.info(s)
 
@@ -313,8 +314,8 @@ def detect_time_dependency():
             pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
             pcs = source_map.reduce_same_position_pcs(pcs)
             s = source_map.to_str(pcs, "Time dependency bug")
-        results['time_dependency'] = s
-        s = "\t  Time Dependency: \t True" + s if s else "\t  Time Dependency: \t False"
+        results["time_dependency"] = s
+        s = "\t  Time dependency bug: \t True" + s if s else "\t  Time dependency bug: \t False"
         log.info(s)
 
     if global_params.REPORT_MODE:
@@ -364,8 +365,8 @@ def detect_money_concurrency():
             pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
             pcs = source_map.reduce_same_position_pcs(pcs)
             s = source_map.to_str(pcs, "Money concurrency bug")
-        results['concurrency'] = s
-        s = "\t  Concurrency found in paths: True" + s if s else "\t  Concurrency found in paths: False"
+        results["concurrency"] = s
+        s = "\t  Money concurrency bug: True" + s if s else "\t  Money concurrency bug: False"
         log.info(s)
     if global_params.REPORT_MODE:
         rfile.write("number of path: " + str(n) + "\n")
@@ -2076,8 +2077,8 @@ def run_callstack_attack():
             pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
             pcs = source_map.reduce_same_position_pcs(pcs)
             s = source_map.to_str(pcs, "Callstack bug")
-        results['callstack'] = s
-        s = "\t  CallStack Attack: \t True" + s if s else "\t  CallStack Attack: \t False"
+        results["callstack"] = s
+        s = "\t  Callstack bug: \t True" + s if s else "\t  Callstack bug: \t False"
         log.info(s)
 if __name__ == '__main__':
     main(sys.argv[1])
