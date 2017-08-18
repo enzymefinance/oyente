@@ -170,26 +170,25 @@ def detect_bugs():
             pcs = global_problematic_pcs["reentrancy_bug"]
             pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
             pcs = source_map.reduce_same_position_pcs(pcs)
-            for pc in pcs:
-                s += "\n%s" % source_map.to_str(pc)
+            s = source_map.to_str(pcs, "Reentrancy bug")
+        results['reentrancy'] = s
         s = "\t  Reentrancy bug exists: True" + s if s else "\t  Reentrancy bug exists: False"
         log.info(s)
-    results['reentrancy'] = reentrancy_bug_found
 
     if global_params.CHECK_ASSERTIONS:
         if source_map == None:
             raise("Assertion checks need a Source Map")
         pcs = [pc for pc in global_problematic_pcs["assertion_failure"] if "assert" in source_map.find_source_code(pc)]
         pcs = source_map.reduce_same_position_pcs(pcs)
-        is_fail = len(pcs) > 0
 
-        results['assertion_failure'] = is_fail
         if not isTesting():
-            s = ""
-            for pc in pcs:
-                s += "\n %s" % source_map.to_str(pc)
-            s = "\t  Assertion failure: \t True" + s if s else "\t Assertion failure: \t False"
+            s = source_map.to_str(pcs, "Assertion failure")
+            results['assertion_failure'] = s
+            s = "\t  Assertion failure: \t True" + s if s else "\t  Assertion failure: \t False"
             log.info(s)
+
+    if global_params.WEB:
+        results_for_web()
 
 def main(contract, contract_sol, _source_map = None):
     global c_name
@@ -212,8 +211,6 @@ def main(contract, contract_sol, _source_map = None):
 
     log.info("Running, please wait...")
 
-    global results
-
     if not isTesting():
         log.info("\t============ Results ===========")
 
@@ -233,29 +230,9 @@ def main(contract, contract_sol, _source_map = None):
 
 def results_for_web():
     global results
-    if not results.has_key("callstack"):
-        results["callstack"] = False
-    if not results.has_key("time_dependency"):
-        results["time_dependency"] = False
-    if not results.has_key("reentrancy"):
-        results["reentrancy"] = False
-    if not results.has_key("concurrency"):
-        results["concurrency"] = False
-
-    print "Callstack Attack:", results['callstack']
-    print "Time Dependency:", results['time_dependency']
-    print "Reentrancy bug:", results['reentrancy']
-    print "Concurrency:", results['concurrency']
-
-    if global_params.CHECK_ASSERTIONS:
-        if not results.has_key("assertion_failure"):
-            results["assertion_failure"] = False
-        print "Assertion failure:", results['assertion_failure']
-        print "Bug Information:"
-        assertion_fails = [assertion for assertion in assertions if assertion.is_violated()]
-        for asrt in assertion_fails:
-            print asrt
-
+    results["cname"] = source_map.get_cname().split(":")[1]
+    print "======= results ======="
+    print json.dumps(results)
 
 def closing_message():
     log.info("\t====== Analysis Completed ======")
@@ -335,11 +312,10 @@ def detect_time_dependency():
         if source_map != None:
             pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
             pcs = source_map.reduce_same_position_pcs(pcs)
-            for pc in pcs:
-                s += "\n%s" % source_map.to_str(pc)
+            s = source_map.to_str(pcs, "Time dependency bug")
+        results['time_dependency'] = s
         s = "\t  Time Dependency: \t True" + s if s else "\t  Time Dependency: \t False"
         log.info(s)
-    results['time_dependency'] = is_dependant
 
     if global_params.REPORT_MODE:
         file_name = c_name.split("/")[len(c_name.split("/"))-1].split(".")[0]
@@ -382,21 +358,15 @@ def detect_money_concurrency():
 
     # if PRINT_MODE: print "All false positive cases: ", false_positive
     log.debug("Concurrency in paths: ")
-    if len(concurrency_paths) > 0:
-        if not isTesting():
-            s = ""
-            if source_map != None:
-                pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
-                pcs = source_map.reduce_same_position_pcs(pcs)
-                for pc in pcs:
-                    s += "\n%s" % source_map.to_str(pc)
-            s = "\t  Concurrency found in paths: True" + s if s else "\t  Concurrency found in paths: False"
-            log.info(s)
-        results['concurrency'] = True
-    else:
-        if not isTesting():
-            log.info("\t  Concurrency Bug: \t False")
-        results['concurrency'] = False
+    if not isTesting():
+        s = ""
+        if source_map != None:
+            pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
+            pcs = source_map.reduce_same_position_pcs(pcs)
+            s = source_map.to_str(pcs, "Money concurrency bug")
+        results['concurrency'] = s
+        s = "\t  Concurrency found in paths: True" + s if s else "\t  Concurrency found in paths: False"
+        log.info(s)
     if global_params.REPORT_MODE:
         rfile.write("number of path: " + str(n) + "\n")
         # number of FP detected
@@ -1573,7 +1543,13 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
                 stack.insert(0, len(code)/2)
             else:
                 #not handled yet
-                stack.insert(0, 0)
+                new_var_name = gen.gen_code_size_var(address)
+                if new_var_name in path_conditions_and_vars:
+                    new_var = path_conditions_and_vars[new_var_name]
+                else:
+                    new_var = BitVec(new_var_name, 256)
+                    path_conditions_and_vars[new_var_name] = new_var
+                stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "EXTCODECOPY":
@@ -1707,9 +1683,10 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
                 new_size = ceil32(stored_address + 32) // 32
                 mem_extend = (new_size - old_size) * 32
                 memory.extend([0] * mem_extend)
+                value = stored_value
                 for i in range(31, -1, -1):
-                    memory[stored_address + i] = stored_value % 256
-                    stored_value /= 256
+                    memory[stored_address + i] = value % 256
+                    value /= 256
             if isAllReal(stored_address, current_miu_i):
                 temp = long(math.ceil((stored_address + 32) / float(32)))
                 if temp > current_miu_i:
@@ -2055,25 +2032,32 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
     except:
         log.debug("Error: Debugging states")
 
-# check for evm sequence SWAP4, POP, POP, POP, POP, ISZERO
 def check_callstack_attack(disasm):
     problematic_instructions = ['CALL', 'CALLCODE']
     pcs = []
-    for i in xrange(0, len(disasm)):
-        instruction = disasm[i]
+    for i, instruction in enumerate(disasm):
         if instruction[1] in problematic_instructions:
             pc = int(instruction[0])
-            if not disasm[i+1][1] == 'SWAP':
-                pcs.append(pc)
-                continue
-            swap_num = int(disasm[i+1][2])
-            for j in range(swap_num):
-                if not disasm[i+j+2][1] == 'POP':
+            if disasm[i+1][1] == "ISZERO":
+                found_bug = False
+                external_call_sequence = [instruction[1], "ISZERO", "ISZERO", "PUSH", "JUMPI", "PUSH", "DUP", "REVERT", "JUMPDEST", "POP", "POP", "POP", "PUSH", "MLOAD", "DUP", "MLOAD", "SWAP", "POP"]
+                for j, opcode in enumerate(external_call_sequence):
+                    if disasm[i+j][1] != opcode:
+                        pcs.append(pc)
+                        found_bug = True
+                        break
+                if not found_bug and disasm[i+j+1][1] == "POP":
                     pcs.append(pc)
-                    continue
-            if not disasm[i + swap_num + 2][1] == 'ISZERO':
-                pcs.append(pc)
-                continue
+            elif disasm[i+1][1] == "SWAP":
+                swap_num = int(disasm[i+1][2])
+                found_bug = False
+                for j in range(swap_num):
+                    if not disasm[i+j+2][1] == "POP":
+                        pcs.append(pc)
+                        found_bug = True
+                        break
+                if not found_bug and disasm[i+j+3][1] == "POP":
+                    pcs.append(pc)
     return pcs
 
 def run_callstack_attack():
@@ -2091,10 +2075,9 @@ def run_callstack_attack():
         if source_map != None:
             pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
             pcs = source_map.reduce_same_position_pcs(pcs)
-            for pc in pcs:
-                s += "\n %s" % source_map.to_str(pc)
+            s = source_map.to_str(pcs, "Callstack bug")
+        results['callstack'] = s
         s = "\t  CallStack Attack: \t True" + s if s else "\t  CallStack Attack: \t False"
         log.info(s)
-    results['callstack'] = result
 if __name__ == '__main__':
     main(sys.argv[1])

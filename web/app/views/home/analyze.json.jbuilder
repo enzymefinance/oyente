@@ -1,1 +1,1 @@
-json.result simple_format(@output)
+json.results @results
