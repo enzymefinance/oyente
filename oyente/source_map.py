@@ -1,5 +1,6 @@
 import re
 import json
+import global_params
 from utils import run_solc_compiler
 
 class SourceMap:
@@ -25,16 +26,26 @@ class SourceMap:
         end = pos['end']
         return self.source[begin:end]
 
-    def to_str(self, pc):
-        position = self.__get_location(pc)
-        source_code = self.find_source_code(pc).split("\n", 1)[0]
-        s = "%s:%s:%s\n" % (self.cname, position['begin']['line'] + 1, position['begin']['column'] + 1)
-        s += source_code + "\n"
-        s += "^"
+    def to_str(self, pcs, bug_name):
+        s = ""
+        for pc in pcs:
+            position = self.__get_location(pc)
+            source_code = self.find_source_code(pc).split("\n", 1)[0]
+            if global_params.WEB:
+                s += "%s:%s:%s: %s:<br />" % (self.cname.split(":", 1)[1], position['begin']['line'] + 1, position['begin']['column'] + 1, bug_name)
+                s += "<span style='margin-left: 20px'>%s</span><br />" % source_code
+                s += "<span style='margin-left: 20px'>^</span><br />"
+            else:
+                s += "\n%s:%s:%s\n" % (self.cname, position['begin']['line'] + 1, position['begin']['column'] + 1)
+                s += source_code + "\n"
+                s += "^"
         return s
 
     def get_positions(self):
         return self.positions
+
+    def get_cname(self):
+        return self.cname
 
     def reduce_same_position_pcs(self, pcs):
         d = {}
