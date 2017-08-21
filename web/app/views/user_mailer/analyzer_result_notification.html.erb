@@ -2,26 +2,30 @@
 <div class="result">
   <div><%= @results[:filename] %></div>
   <br />
-  <% @results[:contracts].each do |contract| %>
-    <div>
-      <div>======= contract <%= contract[:cname] %> =======</div>
-      <div>Percentage of EVM code being covered: <%= contract[:perct_evm_covered] %>%</div>
-      <div>Callstack bug: <%= bug_exists?(contract[:callstack]) %></div>
-      <div>Money concurrency bug: <%= bug_exists?(contract[:concurrency]) %></div>
-      <div>Time dependency bug: <%= bug_exists?(contract[:time_dependency]) %></div>
-      <div>Reentrancy bug: <%= bug_exists?(contract[:reentrancy]) %></div>
-      <div>Assertion failure: <%= bug_exists?(contract[:assertion_failure]) %></div>
-      <% if contract[:callstack] || contract[:concurrency] \
-        || contract[:time_dependency] || contract[:reentrancy] || contract[:assertion_failure] %>
+  <% if @results.key?(:error) %>
+    <div><%= @results[:error] %></div>
+  <% else %>
+    <% @results[:contracts].each do |contract| %>
+      <div>
+        <div>======= contract <%= contract[:cname] %> =======</div>
+        <div>EVM code coverage: <%= contract[:perct_evm_covered] %>%</div>
+        <div>Callstack bug: <%= bug_exists?(contract[:callstack]) %></div>
+        <div>Money concurrency bug: <%= bug_exists?(contract[:concurrency]) %></div>
+        <div>Time dependency bug: <%= bug_exists?(contract[:time_dependency]) %></div>
+        <div>Reentrancy bug: <%= bug_exists?(contract[:reentrancy]) %></div>
+        <div>Assertion failure: <%= bug_exists?(contract[:assertion_failure]) %></div>
+        <% if contract[:callstack] || contract[:concurrency] \
+          || contract[:time_dependency] || contract[:reentrancy] || contract[:assertion_failure] %>
+          <br />
+        <% end %>
+        <div><%= contract[:callstack].html_safe %></div>
+        <div><%= contract[:concurrency].html_safe %></div>
+        <div><%= contract[:time_dependency].html_safe %></div>
+        <div><%= contract[:reentrancy].html_safe %></div>
+        <div><%= contract[:assertion_failure].html_safe %></div>
+        <div>======= Analysis Completed =======</div>
         <br />
-      <% end %>
-      <div><%= contract[:callstack].html_safe %></div>
-      <div><%= contract[:concurrency].html_safe %></div>
-      <div><%= contract[:time_dependency].html_safe %></div>
-      <div><%= contract[:reentrancy].html_safe %></div>
-      <div><%= contract[:assertion_failure].html_safe %></div>
-      <div>======= Analysis Completed =======</div>
-      <br />
-    </div>
+      </div>
+    <% end %>
   <% end %>
 </div>

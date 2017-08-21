@@ -11,7 +11,7 @@ PRINT_MODE = 0
 DATA_FLOW = 0
 
 # enable log file to print all exception
-DEBUG_MODE = 1
+DEBUG_MODE = 0
 
 # check false positive in concurrency
 CHECK_CONCURRENCY_FP = 0

@@ -146,7 +146,7 @@ def detect_bugs():
     global global_problematic_pcs
 
     percentage_of_opcodes_covered = float(len(visited_pcs)) / len(instructions.keys()) * 100
-    log.info("\t  EVM code covered: \t %s%%", round(percentage_of_opcodes_covered, 1))
+    log.info("\t  EVM code coverage: \t %s%%", round(percentage_of_opcodes_covered, 1))
     results["perct_evm_covered"] = str(round(percentage_of_opcodes_covered, 1))
 
     log.debug("Checking for Callstack attack...")
@@ -173,7 +173,7 @@ def detect_bugs():
             pcs = source_map.reduce_same_position_pcs(pcs)
             s = source_map.to_str(pcs, "Reentrancy bug")
         results["reentrancy"] = s
-        s = "\t  Reentrancy bug: True" + s if s else "\t  Reentrancy bug: False"
+        s = "\t  Reentrancy bug: \t True" + s if s else "\t  Reentrancy bug: \t False"
         log.info(s)
 
     if global_params.CHECK_ASSERTIONS:

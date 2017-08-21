@@ -76,6 +76,10 @@ The feature verifies Solidity assertions, which tries to report `assert` fails i
 
 This is a utility class to provide unqiue symbolic variables required for analysis
 
+### source_map.py
+
+This is a utility class to map problematic opcodes into the source code
+
 ### Tests
 Testing opcodes in Oyente in order to check if opcodes are implemented correctly based on the final state of the storage and the memory. The tests are based on the [VM tests of Ethereum](http://ethdocs.org/en/latest/contracts-and-transactions/ethereum-tests/vm_tests/index.html).
 
@@ -92,4 +96,4 @@ This is the main entry point to the testing program. The program loads a specifi
 A utility class to extract concerned sections and fields (`code`, `storage`, `out`, `gas` and `gas` in `exec` section) in the test data, run the tests, compare the results and return an exit code
 
 #### *symExec.py*
-```compare_storage_and_memory_unit_test(global_state, mem, analysis)``` starts comparing the results and return an exit code after the final opcode is implemented
+```compare_storage_and_gas_unit_test(global_state, analysis)``` starts comparing the results and return an exit code after the final opcode is implemented

@@ -6,6 +6,8 @@ var $ = require('jquery')
 var base64 = require('js-base64').Base64
 var swarmgw = require('swarmgw')
 var csjs = require('csjs-inject')
+var styleGuide = require('./app/style-guide')
+var styles = styleGuide()
 var yo = require('yo-yo')
 
 var QueryParams = require('./app/query-params')
@@ -975,6 +977,7 @@ var run = function () {
 
   var options = yo`
     <div>
+      <div class="${styles.infoTextBox}">The lastest supported version of solidity is 0.4.13</div>
       <div class="${css.crow}">
         <div class="${css.small_item}">
           <div>Z3 Timeout:</div>
@@ -985,7 +988,7 @@ var run = function () {
         <div class="${css.small_item}">
           <div>Global Timeout:</div>
         </div>
-        <div class="${css.large_item}"><input name="global_timeout" type="number" value=50 min=0 max=100 title="Time limit to force Oyente to terminate. Maximum value is 50"><span> seconds</span></div>
+        <div class="${css.large_item}"><input name="global_timeout" type="number" value=50 min=0 max=100 title="Time limit to force Oyente to terminate. Maximum value is 100"><span> seconds</span></div>
       </div>
       <div class="${css.crow}">
         <div class="${css.small_item}">
@@ -1003,7 +1006,7 @@ var run = function () {
         <div class="${css.small_item}">
           <div>Loop Limit:</div>
         </div>
-        <div class="${css.large_item}"><input name="looplimit" type="number" value=50 min=0 title="The maximum number of iterations that Oyente will follow when encounter a loop. Both the analysis accuracy and the run time rise as this value increases."></div>
+        <div class="${css.large_item}"><input name="looplimit" type="number" value=10 min=0 title="The maximum number of iterations that Oyente will follow when encounter a loop. Both the analysis accuracy and the run time rise as this value increases."></div>
       </div>
       <div class="${css.crow}">
         <div class="${css.small_item}">

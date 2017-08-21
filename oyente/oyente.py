@@ -69,7 +69,8 @@ def compileContracts(contract):
 
     if not contracts:
         logging.critical("Solidity compilation failed")
-        print "Solidity compilation failed. This might be caused by using unsupported version of solidity compiler. The supported version is 0.4.13"
+        print "======= error ======="
+        print "Solidity compilation failed"
         exit()
 
     return contracts
@@ -109,7 +110,7 @@ def main():
     group.add_argument("-ru", "--remoteURL", type=str,
                        help="Get contract from remote URL. Solidity by default. Use -b to process evm instead.", dest="remote_URL")
 
-    parser.add_argument("--version", action="version", version="oyente one-north 0.2.0")
+    parser.add_argument("--version", action="version", version="oyente version 0.2.5-Buona Vista")
     parser.add_argument(
         "-b", "--bytecode", help="read bytecode in source instead of solidity file.", action="store_true")
 
@@ -142,7 +143,7 @@ def main():
     parser.add_argument(
         "-a", "--assertion", help="Check assertion failures.", action="store_true")
     parser.add_argument(
-            "--no-debug", help="Don't display debug information", action="store_true")
+            "--debug", help="Display debug information", action="store_true")
 
     args = parser.parse_args()
 
@@ -161,7 +162,7 @@ def main():
     global_params.WEB = 1 if args.web else 0
     global_params.STORE_RESULT = 1 if args.json else 0
     global_params.CHECK_ASSERTIONS = 1 if args.assertion else 0
-    global_params.DEBUG_MODE = 0 if args.no_debug else 1
+    global_params.DEBUG_MODE = 1 if args.debug else 0
 
     if args.depth_limit:
         global_params.DEPTH_LIMIT = args.depth_limit
