@@ -12,7 +12,7 @@ class HomeController < ApplicationController
       begin
         file.write oyente_params[:source]
         file.close
-        output = `python #{ENV['OYENTE']}/oyente.py -s #{file.path} -w#{options} -a --no-debug`
+        output = `python #{ENV['OYENTE']}/oyente.py -s #{file.path} -w#{options} -a`
         error = output.split("======= error =======\n", 2)
         if error.size > 1
           @results[:error] = error[1]

@@ -1,6 +1,6 @@
 FROM ubuntu:rolling
 
-LABEL maintainer "Inian Parameshwaran <inian1234@gmail.com>"
+LABEL maintainer "Luong Nguyen <luongnt.58@gmail.com>"
 
 SHELL ["/bin/bash", "-c"]
 RUN apt-get update
