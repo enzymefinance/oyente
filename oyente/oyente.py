@@ -69,7 +69,8 @@ def compileContracts(contract):
 
     if not contracts:
         logging.critical("Solidity compilation failed")
-        print "Solidity compilation failed. This might be caused by using unsupported version of solidity compiler. The supported version is 0.4.13"
+        print "======= error ======="
+        print "Solidity compilation failed"
         exit()
 
     return contracts

@@ -3,7 +3,7 @@ class HomeController < ApplicationController
   end
 
   def analyze
-    @results = {contracts: []}
+    @results = {}
     @results[:filename] = oyente_params[:filename]
     unless check_params
       @results[:error] = "Invalid input"
@@ -12,10 +12,16 @@ class HomeController < ApplicationController
       begin
         file.write oyente_params[:source]
         file.close
-        @output = `python #{ENV['OYENTE']}/oyente.py -s #{file.path} -w#{options} -a --no-debug`
-        @output = @output.split("======= results =======\n")
-        @output[1..-1].each do |result|
-          @results[:contracts] << eval(result)
+        output = `python #{ENV['OYENTE']}/oyente.py -s #{file.path} -w#{options} -a --no-debug`
+        error = output.split("======= error =======\n", 2)
+        if error.size > 1
+          @results[:error] = error[1]
+        else
+          @results[:contracts] = []
+          output = output.split("======= results =======\n")
+          output[1..-1].each do |result|
+            @results[:contracts] << eval(result)
+          end
         end
         UserMailer.analyzer_result_notification(file.path, @results, oyente_params[:email]).deliver_later
       rescue
