@@ -8,12 +8,12 @@ An Analysis Tool for Smart Contracts
 
 ## Quick Start
 
-A container with the dependencies set up can be found [here](https://hub.docker.com/r/everconfusedguy/oyente/).
+A container with the dependencies set up can be found [here](https://hub.docker.com/r/luongnguyen/oyente/).
 
 To open the container, install docker and run:
 
 ```
-docker pull everconfusedguy/oyente && docker run -i -t everconfusedguy/oyente
+docker pull luongnguyen/oyente && docker run -i -t luongnguyen/oyente
 ```
 
 To evaluate the greeter contract inside the container, run:
