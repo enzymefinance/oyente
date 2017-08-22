@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='oyente',
-    version='0.2.5',
+    version='0.2.6',
     author='Loi Luu',
     # author_email='',
     url='https://github.com/melonport/oyente',
