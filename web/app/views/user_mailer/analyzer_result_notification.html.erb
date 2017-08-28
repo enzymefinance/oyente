@@ -8,7 +8,7 @@
     <% @results[:contracts].each do |contract| %>
       <div>
         <div>======= contract <%= contract[:cname] %> =======</div>
-        <div>EVM code coverage: <%= contract[:perct_evm_covered] %>%</div>
+        <div>EVM code coverage: <%= contract[:evm_code_coverage] %>%</div>
         <div>Callstack bug: <%= bug_exists?(contract[:callstack]) %></div>
         <div>Money concurrency bug: <%= bug_exists?(contract[:concurrency]) %></div>
         <div>Time dependency bug: <%= bug_exists?(contract[:time_dependency]) %></div>

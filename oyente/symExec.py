@@ -199,15 +199,15 @@ def detect_time_dependency():
                     is_dependant = True
                     continue
 
-    if not isTesting():
-        s = ""
-        if source_map != None:
-            pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
-            pcs = source_map.reduce_same_position_pcs(pcs)
-            s = source_map.to_str(pcs, "Time dependency bug")
+    if source_map:
+        pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
+        pcs = source_map.reduce_same_position_pcs(pcs)
+        s = source_map.to_str(pcs, "Time dependency bug")
         results["time_dependency"] = s
         s = "\t  Time dependency bug: \t True" + s if s else "\t  Time dependency bug: \t False"
         log.info(s)
+    else:
+        log.info("\t  Timedependency bug: \t %s", bool(pcs))
 
     if global_params.REPORT_MODE:
         file_name = c_name.split("/")[len(c_name.split("/"))-1].split(".")[0]
@@ -250,15 +250,16 @@ def detect_money_concurrency():
 
     # if PRINT_MODE: print "All false positive cases: ", false_positive
     log.debug("Concurrency in paths: ")
-    if not isTesting():
-        s = ""
-        if source_map != None:
-            pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
-            pcs = source_map.reduce_same_position_pcs(pcs)
-            s = source_map.to_str(pcs, "Money concurrency bug")
+    if source_map:
+        pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
+        pcs = source_map.reduce_same_position_pcs(pcs)
+        s = source_map.to_str(pcs, "Money concurrency bug")
         results["concurrency"] = s
         s = "\t  Money concurrency bug: True" + s if s else "\t  Money concurrency bug: False"
         log.info(s)
+    else:
+        log.info("\t  Money concurrency bug: %s", bool(pcs))
+
     if global_params.REPORT_MODE:
         rfile.write("number of path: " + str(n) + "\n")
         # number of FP detected
@@ -1971,17 +1972,38 @@ def run_callstack_attack():
     instr_pattern = r"([\d]+) ([A-Z]+)([\d]+)?(?: => 0x)?(\S+)?"
     instr = re.findall(instr_pattern, disasm_data)
     pcs = check_callstack_attack(instr)
-    result = True if pcs else False
 
-    if not isTesting():
-        s = ""
-        if source_map != None:
-            pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
-            pcs = source_map.reduce_same_position_pcs(pcs)
-            s = source_map.to_str(pcs, "Callstack bug")
+    if source_map:
+        pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
+        pcs = source_map.reduce_same_position_pcs(pcs)
+        s = source_map.to_str(pcs, "Callstack bug")
         results["callstack"] = s
         s = "\t  Callstack bug: \t True" + s if s else "\t  Callstack bug: \t False"
         log.info(s)
+    else:
+        log.info("\t  Callstack bug: \t %s", bool(pcs))
+
+def detect_reentrancy():
+    reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
+    if source_map:
+        pcs = global_problematic_pcs["reentrancy_bug"]
+        pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
+        pcs = source_map.reduce_same_position_pcs(pcs)
+        s = source_map.to_str(pcs, "Reentrancy bug")
+        results["reentrancy"] = s
+        s = "\t  Reentrancy bug: \t True" + s if s else "\t  Reentrancy bug: \t False"
+        log.info(s)
+    else:
+        log.info("\t  Reentrancy bug: \t %s", reentrancy_bug_found)
+
+def detect_assertion_failure():
+    pcs = [pc for pc in global_problematic_pcs["assertion_failure"] if "assert" in source_map.find_source_code(pc)]
+    pcs = source_map.reduce_same_position_pcs(pcs)
+
+    s = source_map.to_str(pcs, "Assertion failure")
+    results["assertion_failure"] = s
+    s = "\t  Assertion failure: \t True" + s if s else "\t  Assertion failure: \t False"
+    log.info(s)
 
 def detect_bugs():
     if isTesting():
@@ -1994,15 +2016,17 @@ def detect_bugs():
 
     evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys()) * 100
     log.info("\t  EVM code coverage: \t %s%%", round(evm_code_coverage, 1))
-    results["perct_evm_covered"] = str(round(evm_code_coverage, 1))
+    results["evm_code_coverage"] = str(round(evm_code_coverage, 1))
 
     log.debug("Checking for Callstack attack...")
     run_callstack_attack()
 
     if global_params.REPORT_MODE:
         rfile.write(str(total_no_of_paths) + "\n")
+
     detect_money_concurrency()
     detect_time_dependency()
+
     stop = time.time()
     if global_params.REPORT_MODE:
         rfile.write(str(stop-start))
@@ -2010,29 +2034,15 @@ def detect_bugs():
     if global_params.DATA_FLOW:
         detect_data_concurrency()
         detect_data_money_concurrency()
-    log.debug("Results for Reentrancy Bug: " + str(reentrancy_all_paths))
-    reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
 
-    s = ""
-    if reentrancy_bug_found and source_map != None:
-        pcs = global_problematic_pcs["reentrancy_bug"]
-        pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
-        pcs = source_map.reduce_same_position_pcs(pcs)
-        s = source_map.to_str(pcs, "Reentrancy bug")
-    results["reentrancy"] = s
-    s = "\t  Reentrancy bug: \t True" + s if s else "\t  Reentrancy bug: \t False"
-    log.info(s)
+    log.debug("Results for Reentrancy Bug: " + str(reentrancy_all_paths))
+    detect_reentrancy()
 
     if global_params.CHECK_ASSERTIONS:
-        if source_map == None:
+        if source_map:
+            detect_assertion_failure()
+        else:
             raise("Assertion checks need a Source Map")
-        pcs = [pc for pc in global_problematic_pcs["assertion_failure"] if "assert" in source_map.find_source_code(pc)]
-        pcs = source_map.reduce_same_position_pcs(pcs)
-
-        s = source_map.to_str(pcs, "Assertion failure")
-        results["assertion_failure"] = s
-        s = "\t  Assertion failure: \t True" + s if s else "\t  Assertion failure: \t False"
-        log.info(s)
 
     if global_params.WEB:
         results_for_web()
