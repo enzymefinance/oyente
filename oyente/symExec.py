@@ -40,7 +40,10 @@ def initGlobalVars():
     visited_pcs = set()
 
     global results
-    results = {}
+    results = {
+        "evm_code_coverage": "", "callstack": "", "concurrency": "",
+        "time_dependency": "", "reentrancy": "", "assertion_failure": ""
+    }
 
     # capturing the last statement of each basic block
     global end_ins_dict
@@ -177,136 +180,6 @@ def build_cfg_and_analyze():
         construct_bb()
         construct_static_edges()
         full_sym_exec()  # jump targets are constructed on the fly
-
-
-# Detect if a money flow depends on the timestamp
-def detect_time_dependency():
-    global results
-    global source_map
-
-    TIMESTAMP_VAR = "IH_s"
-    is_dependant = False
-    pcs = []
-    if global_params.PRINT_PATHS:
-        log.info("ALL PATH CONDITIONS")
-    for i, cond in enumerate(path_conditions):
-        if global_params.PRINT_PATHS:
-            log.info("PATH " + str(i + 1) + ": " + str(cond))
-        for j, expr in enumerate(cond):
-            if is_expr(expr):
-                if TIMESTAMP_VAR in str(expr) and j in global_problematic_pcs["time_dependency_bug"][i]:
-                    pcs.append(global_problematic_pcs["time_dependency_bug"][i][j])
-                    is_dependant = True
-                    continue
-
-    if source_map:
-        pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
-        pcs = source_map.reduce_same_position_pcs(pcs)
-        s = source_map.to_str(pcs, "Time dependency bug")
-        results["time_dependency"] = s
-        s = "\t  Time dependency bug: \t True" + s if s else "\t  Time dependency bug: \t False"
-        log.info(s)
-    else:
-        log.info("\t  Timedependency bug: \t %s", bool(pcs))
-
-    if global_params.REPORT_MODE:
-        file_name = c_name.split("/")[len(c_name.split("/"))-1].split(".")[0]
-        report_file = file_name + '.report'
-        with open(report_file, 'w') as rfile:
-            if is_dependant:
-                rfile.write("yes\n")
-            else:
-                rfile.write("no\n")
-
-
-# detect if two paths send money to different people
-def detect_money_concurrency():
-    global results
-    global source_map
-
-    n = len(money_flow_all_paths)
-    for i in range(n):
-        log.debug("Path " + str(i) + ": " + str(money_flow_all_paths[i]))
-        log.debug(all_gs[i])
-    i = 0
-    false_positive = []
-    concurrency_paths = []
-    pcs = []
-    for flow in money_flow_all_paths:
-        i += 1
-        if len(flow) == 1:
-            continue  # pass all flows which do not do anything with money
-        for j in range(i, n):
-            jflow = money_flow_all_paths[j]
-            if len(jflow) == 1:
-                continue
-            if is_diff(flow, jflow):
-                pcs = global_problematic_pcs["money_concurrency_bug"][j]
-                concurrency_paths.append([i-1, j])
-                if global_params.CHECK_CONCURRENCY_FP and \
-                        is_false_positive(i-1, j, all_gs, path_conditions) and \
-                        is_false_positive(j, i-1, all_gs, path_conditions):
-                    false_positive.append([i-1, j])
-
-    # if PRINT_MODE: print "All false positive cases: ", false_positive
-    log.debug("Concurrency in paths: ")
-    if source_map:
-        pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
-        pcs = source_map.reduce_same_position_pcs(pcs)
-        s = source_map.to_str(pcs, "Money concurrency bug")
-        results["concurrency"] = s
-        s = "\t  Money concurrency bug: True" + s if s else "\t  Money concurrency bug: False"
-        log.info(s)
-    else:
-        log.info("\t  Money concurrency bug: %s", bool(pcs))
-
-    if global_params.REPORT_MODE:
-        rfile.write("number of path: " + str(n) + "\n")
-        # number of FP detected
-        rfile.write(str(len(false_positive)) + "\n")
-        rfile.write(str(false_positive) + "\n")
-        # number of total races
-        rfile.write(str(len(concurrency_paths)) + "\n")
-        # all the races
-        rfile.write(str(concurrency_paths) + "\n")
-
-
-# Detect if there is data concurrency in two different flows.
-# e.g. if a flow modifies a value stored in the storage address and
-# the other one reads that value in its execution
-def detect_data_concurrency():
-    sload_flows = data_flow_all_paths[0]
-    sstore_flows = data_flow_all_paths[1]
-    concurrency_addr = []
-    for sflow in sstore_flows:
-        for addr in sflow:
-            for lflow in sload_flows:
-                if addr in lflow:
-                    if not addr in concurrency_addr:
-                        concurrency_addr.append(addr)
-                    break
-    log.debug("data concurrency in storage " + str(concurrency_addr))
-
-# Detect if any change in a storage address will result in a different
-# flow of money. Currently I implement this detection by
-# considering if a path condition contains
-# a variable which is a storage address.
-def detect_data_money_concurrency():
-    n = len(money_flow_all_paths)
-    sstore_flows = data_flow_all_paths[1]
-    concurrency_addr = []
-    for i in range(n):
-        cond = path_conditions[i]
-        list_vars = []
-        for expr in cond:
-            list_vars += get_vars(expr)
-        set_vars = set(i.decl().name() for i in list_vars)
-        for sflow in sstore_flows:
-            for addr in sflow:
-                var_name = gen.gen_owner_store_var(addr)
-                if var_name in set_vars:
-                    concurrency_addr.append(var_name)
-    log.debug("Concurrency in data that affects money flow: " + str(set(concurrency_addr)))
 
 
 def print_cfg():
@@ -1936,6 +1809,137 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
     except:
         log.debug("Error: Debugging states")
 
+# Detect if a money flow depends on the timestamp
+def detect_time_dependency():
+    global results
+    global source_map
+
+    TIMESTAMP_VAR = "IH_s"
+    is_dependant = False
+    pcs = []
+    if global_params.PRINT_PATHS:
+        log.info("ALL PATH CONDITIONS")
+    for i, cond in enumerate(path_conditions):
+        if global_params.PRINT_PATHS:
+            log.info("PATH " + str(i + 1) + ": " + str(cond))
+        for j, expr in enumerate(cond):
+            if is_expr(expr):
+                if TIMESTAMP_VAR in str(expr) and j in global_problematic_pcs["time_dependency_bug"][i]:
+                    pcs.append(global_problematic_pcs["time_dependency_bug"][i][j])
+                    is_dependant = True
+                    continue
+
+    if source_map:
+        pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
+        pcs = source_map.reduce_same_position_pcs(pcs)
+        s = source_map.to_str(pcs, "Time dependency bug")
+        results["time_dependency"] = s
+        s = "\t  Time dependency bug: \t True" + s if s else "\t  Time dependency bug: \t False"
+        log.info(s)
+    else:
+        log.info("\t  Timedependency bug: \t %s", bool(pcs))
+
+    if global_params.REPORT_MODE:
+        file_name = c_name.split("/")[len(c_name.split("/"))-1].split(".")[0]
+        report_file = file_name + '.report'
+        with open(report_file, 'w') as rfile:
+            if is_dependant:
+                rfile.write("yes\n")
+            else:
+                rfile.write("no\n")
+
+
+# detect if two paths send money to different people
+def detect_money_concurrency():
+    global results
+    global source_map
+
+    n = len(money_flow_all_paths)
+    for i in range(n):
+        log.debug("Path " + str(i) + ": " + str(money_flow_all_paths[i]))
+        log.debug(all_gs[i])
+    i = 0
+    false_positive = []
+    concurrency_paths = []
+    pcs = []
+    for flow in money_flow_all_paths:
+        i += 1
+        if len(flow) == 1:
+            continue  # pass all flows which do not do anything with money
+        for j in range(i, n):
+            jflow = money_flow_all_paths[j]
+            if len(jflow) == 1:
+                continue
+            if is_diff(flow, jflow):
+                pcs = global_problematic_pcs["money_concurrency_bug"][j]
+                concurrency_paths.append([i-1, j])
+                if global_params.CHECK_CONCURRENCY_FP and \
+                        is_false_positive(i-1, j, all_gs, path_conditions) and \
+                        is_false_positive(j, i-1, all_gs, path_conditions):
+                    false_positive.append([i-1, j])
+
+    # if PRINT_MODE: print "All false positive cases: ", false_positive
+    log.debug("Concurrency in paths: ")
+    if source_map:
+        pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
+        pcs = source_map.reduce_same_position_pcs(pcs)
+        s = source_map.to_str(pcs, "Money concurrency bug")
+        results["concurrency"] = s
+        s = "\t  Money concurrency bug: True" + s if s else "\t  Money concurrency bug: False"
+        log.info(s)
+    else:
+        log.info("\t  Money concurrency bug: %s", bool(pcs))
+
+    if global_params.REPORT_MODE:
+        rfile.write("number of path: " + str(n) + "\n")
+        # number of FP detected
+        rfile.write(str(len(false_positive)) + "\n")
+        rfile.write(str(false_positive) + "\n")
+        # number of total races
+        rfile.write(str(len(concurrency_paths)) + "\n")
+        # all the races
+        rfile.write(str(concurrency_paths) + "\n")
+
+
+# Detect if there is data concurrency in two different flows.
+# e.g. if a flow modifies a value stored in the storage address and
+# the other one reads that value in its execution
+def detect_data_concurrency():
+    sload_flows = data_flow_all_paths[0]
+    sstore_flows = data_flow_all_paths[1]
+    concurrency_addr = []
+    for sflow in sstore_flows:
+        for addr in sflow:
+            for lflow in sload_flows:
+                if addr in lflow:
+                    if not addr in concurrency_addr:
+                        concurrency_addr.append(addr)
+                    break
+    log.debug("data concurrency in storage " + str(concurrency_addr))
+
+# Detect if any change in a storage address will result in a different
+# flow of money. Currently I implement this detection by
+# considering if a path condition contains
+# a variable which is a storage address.
+def detect_data_money_concurrency():
+    n = len(money_flow_all_paths)
+    sstore_flows = data_flow_all_paths[1]
+    concurrency_addr = []
+    for i in range(n):
+        cond = path_conditions[i]
+        list_vars = []
+        for expr in cond:
+            list_vars += get_vars(expr)
+        set_vars = set(i.decl().name() for i in list_vars)
+        for sflow in sstore_flows:
+            for addr in sflow:
+                var_name = gen.gen_owner_store_var(addr)
+                if var_name in set_vars:
+                    concurrency_addr.append(var_name)
+    log.debug("Concurrency in data that affects money flow: " + str(set(concurrency_addr)))
+
+
+
 def check_callstack_attack(disasm):
     problematic_instructions = ['CALL', 'CALLCODE']
     pcs = []
@@ -2014,35 +2018,39 @@ def detect_bugs():
     global visited_pcs
     global global_problematic_pcs
 
-    evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys()) * 100
-    log.info("\t  EVM code coverage: \t %s%%", round(evm_code_coverage, 1))
-    results["evm_code_coverage"] = str(round(evm_code_coverage, 1))
+    if instructions:
+        evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys()) * 100
+        log.info("\t  EVM code coverage: \t %s%%", round(evm_code_coverage, 1))
+        results["evm_code_coverage"] = str(round(evm_code_coverage, 1))
 
-    log.debug("Checking for Callstack attack...")
-    run_callstack_attack()
+        log.debug("Checking for Callstack attack...")
+        run_callstack_attack()
 
-    if global_params.REPORT_MODE:
-        rfile.write(str(total_no_of_paths) + "\n")
+        if global_params.REPORT_MODE:
+            rfile.write(str(total_no_of_paths) + "\n")
 
-    detect_money_concurrency()
-    detect_time_dependency()
+        detect_money_concurrency()
+        detect_time_dependency()
 
-    stop = time.time()
-    if global_params.REPORT_MODE:
-        rfile.write(str(stop-start))
-        rfile.close()
-    if global_params.DATA_FLOW:
-        detect_data_concurrency()
-        detect_data_money_concurrency()
+        stop = time.time()
+        if global_params.REPORT_MODE:
+            rfile.write(str(stop-start))
+            rfile.close()
+        if global_params.DATA_FLOW:
+            detect_data_concurrency()
+            detect_data_money_concurrency()
 
-    log.debug("Results for Reentrancy Bug: " + str(reentrancy_all_paths))
-    detect_reentrancy()
+        log.debug("Results for Reentrancy Bug: " + str(reentrancy_all_paths))
+        detect_reentrancy()
 
-    if global_params.CHECK_ASSERTIONS:
-        if source_map:
-            detect_assertion_failure()
-        else:
-            raise("Assertion checks need a Source Map")
+        if global_params.CHECK_ASSERTIONS:
+            if source_map:
+                detect_assertion_failure()
+            else:
+                raise("Assertion checks need a Source Map")
+    else:
+        log.info("\t  EVM code coverage: \t 0/0")
+        results["evm_code_coverage"] = "0/0"
 
     if global_params.WEB:
         results_for_web()
