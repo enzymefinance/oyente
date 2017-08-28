@@ -8,14 +8,18 @@
     <% @results[:contracts].each do |contract| %>
       <div>
         <div>======= contract <%= contract[:cname] %> =======</div>
-        <div>EVM code coverage: <%= contract[:perct_evm_covered] %>%</div>
+        <% if contract[:evm_code_coverage] == "0/0" %>
+          <div>EVM code coverage: <%= contract[:evm_code_coverage] %></div>
+        <% else %>
+          <div>EVM code coverage: <%= contract[:evm_code_coverage] %>%</div>
+        <% end %>
         <div>Callstack bug: <%= bug_exists?(contract[:callstack]) %></div>
         <div>Money concurrency bug: <%= bug_exists?(contract[:concurrency]) %></div>
         <div>Time dependency bug: <%= bug_exists?(contract[:time_dependency]) %></div>
         <div>Reentrancy bug: <%= bug_exists?(contract[:reentrancy]) %></div>
         <div>Assertion failure: <%= bug_exists?(contract[:assertion_failure]) %></div>
-        <% if contract[:callstack] || contract[:concurrency] \
-          || contract[:time_dependency] || contract[:reentrancy] || contract[:assertion_failure] %>
+        <% if contract[:callstack].present? || contract[:concurrency].present? \
+          || contract[:time_dependency].present? || contract[:reentrancy].present? || contract[:assertion_failure].present? %>
           <br />
         <% end %>
         <div><%= contract[:callstack].html_safe %></div>
