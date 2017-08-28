@@ -133,116 +133,6 @@ def compare_storage_and_gas_unit_test(global_state, analysis):
     test_status = unit_test.compare_with_symExec_result(global_state, analysis)
     exit(test_status)
 
-def handler(signum, frame):
-    if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
-        exit(TIME_OUT)
-    detect_bugs()
-    raise Exception("timeout")
-
-def detect_bugs():
-    global results
-    global source_map
-    global visited_pcs
-    global global_problematic_pcs
-
-    percentage_of_opcodes_covered = float(len(visited_pcs)) / len(instructions.keys()) * 100
-    log.info("\t  EVM code coverage: \t %s%%", round(percentage_of_opcodes_covered, 1))
-    results["perct_evm_covered"] = str(round(percentage_of_opcodes_covered, 1))
-
-    log.debug("Checking for Callstack attack...")
-    run_callstack_attack()
-
-    if global_params.REPORT_MODE:
-        rfile.write(str(total_no_of_paths) + "\n")
-    detect_money_concurrency()
-    detect_time_dependency()
-    stop = time.time()
-    if global_params.REPORT_MODE:
-        rfile.write(str(stop-start))
-        rfile.close()
-    if global_params.DATA_FLOW:
-        detect_data_concurrency()
-        detect_data_money_concurrency()
-    log.debug("Results for Reentrancy Bug: " + str(reentrancy_all_paths))
-    reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
-    if not isTesting():
-        s = ""
-        if reentrancy_bug_found and source_map != None:
-            pcs = global_problematic_pcs["reentrancy_bug"]
-            pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
-            pcs = source_map.reduce_same_position_pcs(pcs)
-            s = source_map.to_str(pcs, "Reentrancy bug")
-        results["reentrancy"] = s
-        s = "\t  Reentrancy bug: \t True" + s if s else "\t  Reentrancy bug: \t False"
-        log.info(s)
-
-    if global_params.CHECK_ASSERTIONS:
-        if source_map == None:
-            raise("Assertion checks need a Source Map")
-        pcs = [pc for pc in global_problematic_pcs["assertion_failure"] if "assert" in source_map.find_source_code(pc)]
-        pcs = source_map.reduce_same_position_pcs(pcs)
-
-        if not isTesting():
-            s = source_map.to_str(pcs, "Assertion failure")
-            results["assertion_failure"] = s
-            s = "\t  Assertion failure: \t True" + s if s else "\t  Assertion failure: \t False"
-            log.info(s)
-
-    if global_params.WEB:
-        results_for_web()
-
-def main(contract, contract_sol, _source_map = None):
-    global c_name
-    global c_name_sol
-    global source_map
-
-    c_name = contract
-    c_name_sol = contract_sol
-    source_map = _source_map
-
-    check_unit_test_file()
-    initGlobalVars()
-    set_cur_file(c_name[4:] if len(c_name) > 5 else c_name)
-    start = time.time()
-    signal.signal(signal.SIGALRM, handler)
-    if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
-        global_params.GLOBAL_TIMEOUT = global_params.GLOBAL_TIMEOUT_TEST
-    signal.alarm(global_params.GLOBAL_TIMEOUT)
-    atexit.register(closing_message)
-
-    log.info("Running, please wait...")
-
-    if not isTesting():
-        log.info("\t============ Results ===========")
-
-    try:
-        build_cfg_and_analyze()
-        log.debug("Done Symbolic execution")
-    except Exception as e:
-        if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
-            log.exception(e)
-            exit(EXCEPTION)
-        traceback.print_exc()
-        raise e
-    signal.alarm(0)
-
-    detect_bugs()
-
-
-def results_for_web():
-    global results
-    results["cname"] = source_map.get_cname().split(":")[1]
-    print "======= results ======="
-    print json.dumps(results)
-
-def closing_message():
-    log.info("\t====== Analysis Completed ======")
-    if global_params.STORE_RESULT:
-        result_file = c_name + '.json'
-        with open(result_file, 'w') as of:
-            of.write(json.dumps(results, indent=1))
-        log.info("Wrote results to %s.", result_file)
-
 def change_format():
     with open(c_name) as disasm_file:
         file_contents = disasm_file.readlines()
@@ -276,8 +166,9 @@ def change_format():
     with open(c_name, 'w') as disasm_file:
         disasm_file.write("\n".join(file_contents))
 
-
 def build_cfg_and_analyze():
+    global source_map
+
     change_format()
     with open(c_name, 'r') as disasm_file:
         disasm_file.readline()  # Remove first line
@@ -423,14 +314,61 @@ def print_cfg():
     log.debug(str(edges))
 
 
+def mapping_push_instruction(current_line_content, current_ins_address, idx, positions, length):
+    global source_map
+
+    instr_value = current_line_content.split(" ")[1]
+    while (idx < length):
+        name = positions[idx]['name']
+        if name.startswith("tag"):
+            idx += 1
+        else:
+            value = positions[idx]['value']
+            if name.startswith("PUSH"):
+                if name == "PUSH":
+                    if int(value, 16) == int(instr_value, 16):
+                        source_map.set_instr_positions(current_ins_address, idx)
+                        idx += 1
+                        break;
+                    else:
+                        raise Exception("Source map error")
+                else:
+                    source_map.set_instr_positions(current_ins_address, idx)
+                    idx += 1
+                    break;
+            else:
+                raise Exception("Source map error")
+    return idx
+
+def mapping_non_push_instruction(current_line_content, current_ins_address, idx, positions, length):
+    global source_map
+
+    instr_name = current_line_content.split(" ")[0]
+    while (idx < length):
+        name = positions[idx]['name']
+        if name.startswith("tag"):
+            idx += 1
+        else:
+            if name == instr_name or name == "INVALID" and instr_name == "ASSERTFAIL" or name == "KECCAK256" and instr_name == "SHA3" or name == "SELFDESTRUCT" and instr_name == "SUICIDE":
+                source_map.set_instr_positions(current_ins_address, idx)
+                idx += 1
+                break;
+            else:
+                raise Exception("Source map error")
+    return idx
+
 # 1. Parse the disassembled file
 # 2. Then identify each basic block (i.e. one-in, one-out)
 # 3. Store them in vertices
 def collect_vertices(tokens):
+    global source_map
+    if source_map:
+        idx = 0
+        positions = source_map.get_positions()
+        length = len(positions)
     global end_ins_dict
     global instructions
     global jump_type
-    global source_map
 
     current_ins_address = 0
     last_ins_address = 0
@@ -439,11 +377,6 @@ def collect_vertices(tokens):
     current_line_content = ""
     wait_for_push = False
     is_new_block = False
-    count = 0
-    positions = []
-    if source_map != None:
-        positions = source_map.get_positions()
-    length = len(positions)
 
     for tok_type, tok_string, (srow, scol), _, line_number in tokens:
         if wait_for_push is True:
@@ -453,27 +386,7 @@ def collect_vertices(tokens):
                     is_new_line = True
                     current_line_content += push_val + ' '
                     instructions[current_ins_address] = current_line_content
-                    instr_name, instr_value, _ = current_line_content.split(" ")
-                    while (count < length):
-                        name = positions[count]['name']
-                        if name.startswith("tag"):
-                            count += 1
-                        else:
-                            value = positions[count]['value']
-                            if name.startswith("PUSH"):
-                                if name == "PUSH":
-                                    if int(value, 16) == int(instr_value, 16):
-                                        source_map.set_instr_positions(current_ins_address, count)
-                                        count += 1
-                                        break;
-                                    else:
-                                        raise Exception("Source map error")
-                                else:
-                                    source_map.set_instr_positions(current_ins_address, count)
-                                    count += 1
-                                    break;
-                            else:
-                                raise Exception("Source map error")
+                    idx = mapping_push_instruction(current_line_content, current_ins_address, idx, positions, length) if source_map else None
                     log.debug(current_line_content)
                     current_line_content = ""
                     wait_for_push = False
@@ -501,18 +414,7 @@ def collect_vertices(tokens):
             is_new_line = True
             log.debug(current_line_content)
             instructions[current_ins_address] = current_line_content
-            instr_name = current_line_content.split(" ")[0]
-            while (count < length):
-                name = positions[count]['name']
-                if name.startswith("tag"):
-                    count += 1
-                else:
-                    if name == instr_name or name == "INVALID" and instr_name == "ASSERTFAIL" or name == "KECCAK256" and instr_name == "SHA3" or name == "SELFDESTRUCT" and instr_name == "SUICIDE":
-                        source_map.set_instr_positions(current_ins_address, count)
-                        count += 1
-                        break;
-                    else:
-                        raise Exception("Source map error")
+            idx = mapping_non_push_instruction(current_line_content, current_ins_address, idx, positions, length) if source_map else None
             current_line_content = ""
             continue
         elif tok_type == NAME:
@@ -2080,5 +1982,117 @@ def run_callstack_attack():
         results["callstack"] = s
         s = "\t  Callstack bug: \t True" + s if s else "\t  Callstack bug: \t False"
         log.info(s)
+
+def detect_bugs():
+    if isTesting():
+        return
+
+    global results
+    global source_map
+    global visited_pcs
+    global global_problematic_pcs
+
+    evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys()) * 100
+    log.info("\t  EVM code coverage: \t %s%%", round(evm_code_coverage, 1))
+    results["perct_evm_covered"] = str(round(evm_code_coverage, 1))
+
+    log.debug("Checking for Callstack attack...")
+    run_callstack_attack()
+
+    if global_params.REPORT_MODE:
+        rfile.write(str(total_no_of_paths) + "\n")
+    detect_money_concurrency()
+    detect_time_dependency()
+    stop = time.time()
+    if global_params.REPORT_MODE:
+        rfile.write(str(stop-start))
+        rfile.close()
+    if global_params.DATA_FLOW:
+        detect_data_concurrency()
+        detect_data_money_concurrency()
+    log.debug("Results for Reentrancy Bug: " + str(reentrancy_all_paths))
+    reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
+
+    s = ""
+    if reentrancy_bug_found and source_map != None:
+        pcs = global_problematic_pcs["reentrancy_bug"]
+        pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
+        pcs = source_map.reduce_same_position_pcs(pcs)
+        s = source_map.to_str(pcs, "Reentrancy bug")
+    results["reentrancy"] = s
+    s = "\t  Reentrancy bug: \t True" + s if s else "\t  Reentrancy bug: \t False"
+    log.info(s)
+
+    if global_params.CHECK_ASSERTIONS:
+        if source_map == None:
+            raise("Assertion checks need a Source Map")
+        pcs = [pc for pc in global_problematic_pcs["assertion_failure"] if "assert" in source_map.find_source_code(pc)]
+        pcs = source_map.reduce_same_position_pcs(pcs)
+
+        s = source_map.to_str(pcs, "Assertion failure")
+        results["assertion_failure"] = s
+        s = "\t  Assertion failure: \t True" + s if s else "\t  Assertion failure: \t False"
+        log.info(s)
+
+    if global_params.WEB:
+        results_for_web()
+
+def closing_message():
+    log.info("\t====== Analysis Completed ======")
+    if global_params.STORE_RESULT:
+        result_file = c_name + '.json'
+        with open(result_file, 'w') as of:
+            of.write(json.dumps(results, indent=1))
+        log.info("Wrote results to %s.", result_file)
+
+def handler(signum, frame):
+    if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
+        exit(TIME_OUT)
+    detect_bugs()
+    raise Exception("timeout")
+
+def results_for_web():
+    global results
+    results["cname"] = source_map.get_cname().split(":")[1]
+    print "======= results ======="
+    print json.dumps(results)
+
+def main(contract, contract_sol, _source_map = None):
+    global c_name
+    global c_name_sol
+    global source_map
+
+    c_name = contract
+    c_name_sol = contract_sol
+    source_map = _source_map
+
+    check_unit_test_file()
+    initGlobalVars()
+    set_cur_file(c_name[4:] if len(c_name) > 5 else c_name)
+    start = time.time()
+    signal.signal(signal.SIGALRM, handler)
+    if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
+        global_params.GLOBAL_TIMEOUT = global_params.GLOBAL_TIMEOUT_TEST
+    signal.alarm(global_params.GLOBAL_TIMEOUT)
+    atexit.register(closing_message)
+
+    log.info("Running, please wait...")
+
+    if not isTesting():
+        log.info("\t============ Results ===========")
+
+    try:
+        build_cfg_and_analyze()
+        log.debug("Done Symbolic execution")
+    except Exception as e:
+        if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
+            log.exception(e)
+            exit(EXCEPTION)
+        traceback.print_exc()
+        raise e
+    signal.alarm(0)
+
+    detect_bugs()
+
 if __name__ == '__main__':
     main(sys.argv[1])
