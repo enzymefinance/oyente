@@ -1,8 +1,20 @@
-import re
 import json
 import global_params
 from utils import run_command
-from source import Source
+
+class Source:
+    def __init__(self, filename):
+        self.filename = filename
+        self.content = self.__load_content()
+        self.line_break_positions = self.__load_line_break_positions()
+
+    def __load_content(self):
+        with open(self.filename, 'r') as f:
+            content = f.read()
+        return content
+
+    def __load_line_break_positions(self):
+        return [i for i, letter in enumerate(self.content) if letter == '\n']
 
 class SourceMap:
     parent_filename = ""
@@ -34,16 +46,20 @@ class SourceMap:
             if not source_code:
                 continue
 
-            position = self.__get_location(pc)
+            location = self.get_location(pc)
             if global_params.WEB:
-                s += "%s:%s:%s: %s:<br />" % (self.cname.split(":", 1)[1], position['begin']['line'] + 1, position['begin']['column'] + 1, bug_name)
+                s += "%s:%s:%s: %s:<br />" % (self.cname.split(":", 1)[1], location['begin']['line'] + 1, location['begin']['column'] + 1, bug_name)
                 s += "<span style='margin-left: 20px'>%s</span><br />" % source_code
                 s += "<span style='margin-left: 20px'>^</span><br />"
             else:
-                s += "\n%s:%s:%s\n" % (self.cname, position['begin']['line'] + 1, position['begin']['column'] + 1)
+                s += "\n%s:%s:%s\n" % (self.cname, location['begin']['line'] + 1, location['begin']['column'] + 1)
                 s += source_code + "\n"
                 s += "^"
         return s
+
+    def get_location(self, pc):
+        pos = self.instr_positions[pc]
+        return self.__convert_offset_to_line_column(pos)
 
     def reduce_same_position_pcs(self, pcs):
         d = {}
