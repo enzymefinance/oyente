@@ -2,19 +2,20 @@ import re
 import json
 import global_params
 from utils import run_solc_compiler
+from source import Source
 
 class SourceMap:
+    parent_filename = ""
     position_groups = {}
-    filename = ""
+    sources = {}
 
-    def __init__(self, cname, filename):
+    def __init__(self, cname, parent_filename):
         self.cname = cname
-        SourceMap.filename = filename
-        self.source = self.__load_source()
-        self.line_break_positions = self.__load_line_break_positions()
-        if not SourceMap.position_groups:
-            SourceMap.position_groups = self.__load_position_groups()
-        self.positions = self.__load_positions()
+        if not SourceMap.parent_filename:
+            SourceMap.parent_filename = parent_filename
+            SourceMap.position_groups = SourceMap.__load_position_groups()
+        self.source = self.__get_source()
+        self.positions = self.__get_positions()
         self.instr_positions = {}
 
     def set_instr_positions(self, pc, pos_idx):
@@ -24,7 +25,7 @@ class SourceMap:
         pos = self.instr_positions[pc]
         begin = pos['begin']
         end = pos['end']
-        return self.source[begin:end]
+        return self.source.content[begin:end]
 
     def to_str(self, pcs, bug_name):
         s = ""
@@ -41,12 +42,6 @@ class SourceMap:
                 s += "^"
         return s
 
-    def get_positions(self):
-        return self.positions
-
-    def get_cname(self):
-        return self.cname
-
     def reduce_same_position_pcs(self, pcs):
         d = {}
         for pc in pcs:
@@ -55,34 +50,23 @@ class SourceMap:
                 d[pos] = pc
         return d.values()
 
-    def __load_source(self):
-        source = ""
-        with open(self.__get_filename(), 'r') as f:
-            source = f.read()
-        return source
-
-    def __load_line_break_positions(self):
-        return [i for i, letter in enumerate(self.source) if letter == '\n']
+    def __get_source(self):
+        fname = self.__get_filename()
+        if SourceMap.sources.has_key(fname):
+            return SourceMap.sources[fname]
+        else:
+            SourceMap.sources[fname] = Source(fname)
+            return SourceMap.sources[fname]
 
     @classmethod
     def __load_position_groups(cls):
         cmd = "solc --combined-json asm %s"
-        out = run_solc_compiler(cmd, cls.filename)
+        out = run_solc_compiler(cmd, cls.parent_filename)
         out = out[0]
         out = json.loads(out)
         return out['contracts']
 
-    @classmethod
-    def __extract_position_groups(cls, c_asm):
-        for cname in c_asm:
-            asm = json.loads(c_asm[cname])
-            asm = asm[".code"]
-            pattern = re.compile("^tag")
-            asm = [instr for instr in asm if not pattern.match(instr["name"])]
-            c_asm[cname] = asm
-        return c_asm
-
-    def __load_positions(self):
+    def __get_positions(self):
         return SourceMap.position_groups[self.cname]['asm']['.data']['0']['.code']
 
     def __get_location(self, pc):
@@ -99,10 +83,10 @@ class SourceMap:
         return ret
 
     def __convert_from_char_pos(self, pos):
-        line = self.__find_lower_bound(pos, self.line_break_positions)
-        if self.line_break_positions[line] != pos:
+        line = self.__find_lower_bound(pos, self.source.line_break_positions)
+        if self.source.line_break_positions[line] != pos:
             line += 1
-        begin_col = 0 if line == 0 else self.line_break_positions[line - 1] + 1
+        begin_col = 0 if line == 0 else self.source.line_break_positions[line - 1] + 1
         col = pos - begin_col
         return {'line': line, 'column': col}
 

@@ -48,6 +48,14 @@ def print_state(stack, mem, global_state):
     log.debug("MEM: " + str(mem))
     log.debug("GLOBAL STATE: " + str(global_state))
 
+def check_solver(solver):
+    try:
+        ret = solver.check()
+    except Exception as e:
+        solver.pop()
+        raise e
+    return ret
+
 def my_copy_dict(input):
     output = {}
     for key in input:

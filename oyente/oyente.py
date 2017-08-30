@@ -205,12 +205,7 @@ def main():
     else:
         contracts = compileContracts(args.source)
 
-        source_maps = {}
         for cname, bin_str in contracts:
-            source_maps[cname] = SourceMap(cname, args.source)
-
-        for cname, bin_str in contracts:
-
             logging.info("Contract %s:", cname)
             processed_evm_file = cname + '.evm'
             disasm_file = cname + '.evm.disasm'
@@ -218,7 +213,7 @@ def main():
             with open(processed_evm_file, 'w') as of:
                 of.write(removeSwarmHash(bin_str))
 
-            analyze(processed_evm_file, disasm_file, source_maps[cname])
+            analyze(processed_evm_file, disasm_file, SourceMap(cname, args.source))
 
             if args.evm:
                 with open(processed_evm_file, 'w') as of:
