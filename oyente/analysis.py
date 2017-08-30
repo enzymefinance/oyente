@@ -68,7 +68,7 @@ def check_reentrancy_bug(path_conditions_and_vars, stack, global_state):
     # If outgas > 2300 when using call.gas.value then the contract will be considered to contain reentrancy bug
     solver.add(stack[0] > 2300)
     # if it is not feasible to re-execute the call, its not a bug
-    ret_val = not (solver.check() == unsat)
+    ret_val = not (check_solver(solver) == unsat)
     solver.pop()
     if global_params.DEBUG_MODE:
         log.info("Reentrancy_bug? " + str(ret_val))
@@ -154,7 +154,7 @@ def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
         else:
             solver.push()
             solver.add(Not (stack[2] != 0))
-            if solver.check() == unsat:
+            if check_solver(solver) == unsat:
                 gas_increment += GCOST["Gcallvalue"]
             solver.pop()
     elif opcode == "SHA3" and isinstance(stack[1], (int, long)):
@@ -238,7 +238,7 @@ def is_feasible(prev_pc, gstate, curr_pc):
     solver.set("timeout", global_params.TIMEOUT)
     solver.push()
     solver.add(new_pc)
-    if solver.check() == unsat:
+    if check_solver(solver) == unsat:
         solver.pop()
         return False
     else:
@@ -285,7 +285,7 @@ def is_diff(flow1, flow2):
             solver.push()
             solver.add(tx_cd)
 
-            if solver.check() == sat:
+            if check_solver(solver) == sat:
                 solver.pop()
                 return 1
             solver.pop()
