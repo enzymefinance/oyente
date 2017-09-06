@@ -23,7 +23,6 @@ import global_params
 from test_evm.global_test_params import (TIME_OUT, UNKOWN_INSTRUCTION,
                                          EXCEPTION, PICKLE_PATH)
 
-
 log = logging.getLogger(__name__)
 
 UNSIGNED_BOUND_NUMBER = 2**256 - 1
@@ -191,15 +190,17 @@ def print_cfg():
 def mapping_push_instruction(current_line_content, current_ins_address, idx, positions, length):
     global source_map
 
-    instr_value = current_line_content.split(" ")[1]
     while (idx < length):
+        if not positions[idx]:
+            return idx + 1
         name = positions[idx]['name']
         if name.startswith("tag"):
             idx += 1
         else:
-            value = positions[idx]['value']
             if name.startswith("PUSH"):
                 if name == "PUSH":
+                    value = positions[idx]['value']
+                    instr_value = current_line_content.split(" ")[1]
                     if int(value, 16) == int(instr_value, 16):
                         source_map.instr_positions[current_ins_address] = source_map.positions[idx]
                         idx += 1
@@ -217,12 +218,14 @@ def mapping_push_instruction(current_line_content, current_ins_address, idx, pos
 def mapping_non_push_instruction(current_line_content, current_ins_address, idx, positions, length):
     global source_map
 
-    instr_name = current_line_content.split(" ")[0]
     while (idx < length):
+        if not positions[idx]:
+            return idx + 1
         name = positions[idx]['name']
         if name.startswith("tag"):
             idx += 1
         else:
+            instr_name = current_line_content.split(" ")[0]
             if name == instr_name or name == "INVALID" and instr_name == "ASSERTFAIL" or name == "KECCAK256" and instr_name == "SHA3" or name == "SELFDESTRUCT" and instr_name == "SUICIDE":
                 source_map.instr_positions[current_ins_address] = source_map.positions[idx]
                 idx += 1

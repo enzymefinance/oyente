@@ -18,11 +18,11 @@ class SourceMap:
         self.positions = self.__get_positions()
         self.instr_positions = {}
 
-    def set_instr_positions(self, pc, pos_idx):
-        self.instr_positions[pc] = self.positions[pos_idx]
-
     def find_source_code(self, pc):
-        pos = self.instr_positions[pc]
+        try:
+            pos = self.instr_positions[pc]
+        except:
+            return ""
         begin = pos['begin']
         end = pos['end']
         return self.source.content[begin:end]
@@ -30,8 +30,11 @@ class SourceMap:
     def to_str(self, pcs, bug_name):
         s = ""
         for pc in pcs:
-            position = self.__get_location(pc)
             source_code = self.find_source_code(pc).split("\n", 1)[0]
+            if not source_code:
+                continue
+
+            position = self.__get_location(pc)
             if global_params.WEB:
                 s += "%s:%s:%s: %s:<br />" % (self.cname.split(":", 1)[1], position['begin']['line'] + 1, position['begin']['column'] + 1, bug_name)
                 s += "<span style='margin-left: 20px'>%s</span><br />" % source_code
@@ -67,7 +70,16 @@ class SourceMap:
         return out['contracts']
 
     def __get_positions(self):
-        return SourceMap.position_groups[self.cname]['asm']['.data']['0']['.code']
+        asm = SourceMap.position_groups[self.cname]['asm']['.data']['0']
+        positions = asm['.code']
+        while(True):
+            try:
+                positions.append(None)
+                positions += asm['.data']['0']['.code']
+                asm = asm['.data']['0']
+            except:
+                break
+        return positions
 
     def __get_location(self, pc):
         pos = self.instr_positions[pc]
