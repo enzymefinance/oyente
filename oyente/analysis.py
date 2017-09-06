@@ -61,7 +61,6 @@ def check_reentrancy_bug(path_conditions_and_vars, stack, global_state):
 
     solver = Solver()
     solver.set("timeout", global_params.TIMEOUT)
-    solver.push()
     solver.add(path_condition)
     solver.add(new_path_condition)
     # 2300 is the outgas used by transfer and send.
@@ -69,7 +68,6 @@ def check_reentrancy_bug(path_conditions_and_vars, stack, global_state):
     solver.add(stack[0] > 2300)
     # if it is not feasible to re-execute the call, its not a bug
     ret_val = not (check_solver(solver) == unsat)
-    solver.pop()
     if global_params.DEBUG_MODE:
         log.info("Reentrancy_bug? " + str(ret_val))
     global reported
