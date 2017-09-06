@@ -67,7 +67,7 @@ def check_reentrancy_bug(path_conditions_and_vars, stack, global_state):
     # If outgas > 2300 when using call.gas.value then the contract will be considered to contain reentrancy bug
     solver.add(stack[0] > 2300)
     # if it is not feasible to re-execute the call, its not a bug
-    ret_val = not (check_solver(solver) == unsat)
+    ret_val = not (solver.check() == unsat)
     if global_params.DEBUG_MODE:
         log.info("Reentrancy_bug? " + str(ret_val))
     global reported
@@ -234,13 +234,10 @@ def is_feasible(prev_pc, gstate, curr_pc):
             new_pc.append(vars_mapping[var] == gstate[storage_address])
     solver = Solver()
     solver.set("timeout", global_params.TIMEOUT)
-    solver.push()
     solver.add(new_pc)
-    if check_solver(solver) == unsat:
-        solver.pop()
+    if solver.check() == unsat:
         return False
     else:
-        solver.pop()
         return True
 
 
@@ -280,13 +277,10 @@ def is_diff(flow1, flow2):
                        Not(flow1[i][2] == flow2[i][2]))
             solver = Solver()
             solver.set("timeout", global_params.TIMEOUT)
-            solver.push()
             solver.add(tx_cd)
 
-            if check_solver(solver) == sat:
-                solver.pop()
+            if solver.check() == sat:
                 return 1
-            solver.pop()
         except Exception as e:
             return 1
     return 0
