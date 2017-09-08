@@ -3,7 +3,7 @@ from ast_walker import AstWalker
 import json
 
 class AstHelper:
-    def extractContractDefinitions(self, sourcesList):
+    def extract_contract_definitions(self, sourcesList):
         ret = {
             "contractsById": {},
             "contractsByName": {},
@@ -17,44 +17,39 @@ class AstHelper:
             ret["contractsByName"][k + ':' + node["attributes"]["name"]] = node
         return ret
 
-    def getLinearizedBaseContracts(self, id, contractsById):
+    def get_linearized_base_contracts(self, id, contractsById):
         return map(lambda id: contractsById[id], contractsById[id]["attributes"]["linearizedBaseContracts"])
 
-    def extractStateDefinitions(self, contractName, sourcesList, contracts=None):
+    def extract_state_definitions(self, contractName, sourcesList, contracts=None):
         if not contracts:
-            contracts = self.extractContractDefinitions(sourcesList)
+            contracts = self.extract_contract_definitions(sourcesList)
         node = contracts["contractsByName"][contractName]
         if node:
-            stateItems = []
             stateVar = []
-            baseContracts = self.getLinearizedBaseContracts(node["id"], contracts["contractsById"])
+            baseContracts = self.get_linearized_base_contracts(node["id"], contracts["contractsById"])
             baseContracts = list(reversed(baseContracts))
             for ctr in baseContracts:
                 for item in ctr["children"]:
-                    stateItems.append(item)
                     if item["name"] == "VariableDeclaration":
                         stateVar.append(item)
-            return {
-                "stateDefinitions": stateItems,
-                "stateVariables": stateVar
-            }
+            return stateVar
 
-    def extractStatesDefinitions(self, sourcesList, contracts=None):
+    def extract_states_definitions(self, sourcesList, contracts=None):
         if not contracts:
-            contracts = self.extractContractDefinitions(sourcesList)
+            contracts = self.extract_contract_definitions(sourcesList)
         for contract in contracts["contractsById"]:
             name = contracts["contractsById"][contract]["attributes"]["name"]
             source = contracts["sourcesByContract"][contract]
             fullName = source + ":" + name
-            state = self.extractStateDefinitions(fullName, sourcesList, contracts)
+            state = self.extract_state_definitions(fullName, sourcesList, contracts)
         return state
 
-    def extractStateVariableNames(self, filename):
+    def extract_state_variable_names(self, filename):
         cmd = "solc --combined-json ast %s" % filename
         out = run_command(cmd)
         out = json.loads(out)
-        state = self.extractStatesDefinitions(out["sources"])
+        state_variables = self.extract_states_definitions(out["sources"])
         var_names = []
-        for var_name in state["stateVariables"]:
+        for var_name in state_variables:
             var_names.append(var_name["attributes"]["name"])
         return var_names
