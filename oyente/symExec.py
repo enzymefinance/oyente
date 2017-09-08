@@ -2072,7 +2072,7 @@ def detect_bugs():
             if source_map:
                 detect_assertion_failure()
             else:
-                raise("Assertion checks need a Source Map")
+                raise Exception("Assertion checks need a Source Map")
     else:
         log.info("\t  EVM code coverage: \t 0/0")
         log.info("\t  Callstack bug: \t False")
