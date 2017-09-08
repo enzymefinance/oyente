@@ -1,7 +1,7 @@
 import re
 import json
 import global_params
-from utils import run_solc_compiler
+from utils import run_command
 from source import Source
 
 class SourceMap:
@@ -63,9 +63,8 @@ class SourceMap:
 
     @classmethod
     def __load_position_groups(cls):
-        cmd = "solc --combined-json asm %s"
-        out = run_solc_compiler(cmd, cls.parent_filename)
-        out = out[0]
+        cmd = "solc --combined-json asm %s" % cls.parent_filename
+        out = run_command(cmd)
         out = json.loads(out)
         return out['contracts']
 

@@ -315,9 +315,6 @@ def get_distinct_contracts(list_of_contracts = "concurr.csv"):
                             flag[j] = i
     print flag
 
-def run_solc_compiler(cmd, filename):
+def run_command(cmd):
     FNULL = open(os.devnull, 'w')
-
-    solc_p = subprocess.Popen(shlex.split(cmd % filename), stdout=subprocess.PIPE, stderr=FNULL)
-    return solc_p.communicate()
-
+    return subprocess.check_output(cmd, shell=True, stderr=FNULL)

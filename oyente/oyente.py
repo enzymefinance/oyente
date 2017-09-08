@@ -10,7 +10,7 @@ import requests
 import symExec
 import global_params
 from source_map import SourceMap
-
+from utils import run_command
 
 def cmd_exists(cmd):
     return subprocess.call("type " + cmd, shell=True,
@@ -31,9 +31,9 @@ def has_dependencies_installed():
         logging.critical("Please install evm from go-ethereum and make sure it is in the path.")
         return False
     else:
-        cmd = subprocess.Popen(["evm", "--version"], stdout=subprocess.PIPE)
-        cmd_out = cmd.communicate()[0].strip()
-        version = re.findall(r"evm version (\d*.\d*.\d*)", cmd_out)[0]
+        cmd = "evm --version"
+        out = run_command(cmd).strip()
+        version = re.findall(r"evm version (\d*.\d*.\d*)", out)[0]
         if version != '1.6.6':
             logging.warning("You are using evm version %s. The supported version is 1.6.6" % version)
 
@@ -41,9 +41,9 @@ def has_dependencies_installed():
         logging.critical("solc is missing. Please install the solidity compiler and make sure solc is in the path.")
         return False
     else:
-        cmd = subprocess.Popen(["solc", "--version"], stdout=subprocess.PIPE)
-        cmd_out = cmd.communicate()[0].strip()
-        version = re.findall(r"Version: (\d*.\d*.\d*)", cmd_out)[0]
+        cmd = "solc --version"
+        out = run_command(cmd).strip()
+        version = re.findall(r"Version: (\d*.\d*.\d*)", out)[0]
         if version != '0.4.13':
             logging.warning("You are using solc version %s, The supported version is 0.4.13" % version)
 
@@ -54,26 +54,37 @@ def removeSwarmHash(evm):
     evm_without_hash = re.sub(r"a165627a7a72305820\S{64}0029$", "", evm)
     return evm_without_hash
 
-def compileContracts(contract):
-    solc_cmd = "solc --bin-runtime %s"
-
-    FNULL = open(os.devnull, 'w')
-
-    solc_p = subprocess.Popen(shlex.split(
-        solc_cmd % contract), stdout=subprocess.PIPE, stderr=FNULL)
-    solc_out = solc_p.communicate()
-
+def extract_bin_str(s):
     binary_regex = r"\n======= (.*?) =======\nBinary of the runtime part: \n(.*?)\n"
-    contracts = re.findall(binary_regex, solc_out[0])
+    contracts = re.findall(binary_regex, s)
     contracts = [contract for contract in contracts if contract[1]]
-
     if not contracts:
         logging.critical("Solidity compilation failed")
         print "======= error ======="
         print "Solidity compilation failed"
         exit()
-
     return contracts
+
+def compileContracts(contract):
+    cmd = "solc --bin-runtime %s" % contract
+    out = run_command(cmd)
+
+    libs = re.findall(r"_+(.*?)_+", out)
+    libs = set(libs)
+    if libs:
+        return link_libraries(contract, libs)
+    else:
+        return extract_bin_str(out)
+
+
+def link_libraries(filename, libs):
+    option = ""
+    for idx, lib in enumerate(libs):
+        lib_address = "0x" + hex(idx+1)[2:].zfill(40)
+        option += " --libraries %s:%s" % (lib, lib_address)
+    cmd = "solc --bin-runtime %s | solc --link%s" % (filename, option)
+    out = run_command(cmd)
+    return extract_bin_str(out)
 
 def analyze(processed_evm_file, disasm_file, source_map = None):
     disasm_out = ""
