@@ -675,6 +675,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
     global vertices
     global edges
     global var_names
+    global source_map
 
     visited_pcs.add(global_state["pc"])
 
@@ -1263,7 +1264,18 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
                     callData = callData + "0"
                 stack.insert(0, int(callData[start:end], 16))
             else:
-                new_var_name = gen.gen_data_var(position)
+                source_code = source_map.find_source_code(global_state["pc"] - 1)
+                if source_code.startswith("function"):
+                    idx1 = source_code.index("(") + 1
+                    idx2 = source_code.index(")")
+                    params = source_code[idx1:idx2]
+                    params_list = params.split(",")
+                    params_list = [param.split(" ")[-1] for param in params_list]
+                    param_idx = (position - 4) / 32
+                    new_var_name = params_list[param_idx]
+                    var_names.append(new_var_name)
+                else:
+                    new_var_name = gen.gen_data_var(position)
                 if new_var_name in path_conditions_and_vars:
                     new_var = path_conditions_and_vars[new_var_name]
                 else:
