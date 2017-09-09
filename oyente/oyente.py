@@ -82,8 +82,13 @@ def link_libraries(filename, libs):
     for idx, lib in enumerate(libs):
         lib_address = "0x" + hex(idx+1)[2:].zfill(40)
         option += " --libraries %s:%s" % (lib, lib_address)
-    cmd = "solc --bin-runtime %s | solc --link%s" % (filename, option)
-    out = run_command(cmd)
+    FNULL = open(os.devnull, 'w')
+    cmd = "solc --bin-runtime %s" % filename
+    p1 = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)
+    cmd = "solc --link%s" %option
+    p2 = subprocess.Popen(shlex.split(cmd), stdin=p1.stdout, stdout=subprocess.PIPE, stderr=FNULL)
+    p1.stdout.close()
+    out = p2.communicate()[0]
     return extract_bin_str(out)
 
 def analyze(processed_evm_file, disasm_file, source_map = None):
