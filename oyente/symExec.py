@@ -1731,6 +1731,17 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
     #
     #  f0s: System Operations
     #
+    elif instr_parts[0] == "CREATE":
+        if len(stack) > 2:
+            global_state["pc"] += 1
+            stack.pop(0)
+            stack.pop(0)
+            stack.pop(0)
+            new_var_name = gen.gen_arbitrary_var()
+            new_var = BitVec(new_var_name, 256)
+            stack.insert(0, new_var)
+        else:
+            raise ValueError('STACK underflow')
     elif instr_parts[0] == "CALL":
         # TODO: Need to handle miu_i
         if len(stack) > 6:
@@ -1833,6 +1844,20 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
                 path_conditions_and_vars["path_condition"].append(is_enough_fund)
                 last_idx = len(path_conditions_and_vars["path_condition"]) - 1
                 local_problematic_pcs["time_dependency_bug"][last_idx] = global_state["pc"] - 1
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[0] == "DELEGATECALL":
+        if len(stack) > 5:
+            global_state["pc"] += 1
+            stack.pop(0)
+            stack.pop(0)
+            stack.pop(0)
+            stack.pop(0)
+            stack.pop(0)
+            stack.pop(0)
+            new_var_name = gen.gen_arbitrary_var()
+            new_var = BitVec(new_var_name, 256)
+            stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "RETURN" or instr_parts[0] == "REVERT":
