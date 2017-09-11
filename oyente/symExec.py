@@ -22,11 +22,15 @@ import global_params
 
 from test_evm.global_test_params import (TIME_OUT, UNKOWN_INSTRUCTION,
                                          EXCEPTION, PICKLE_PATH)
+import ast
+from ast_helper import AstHelper
 
 log = logging.getLogger(__name__)
 
 UNSIGNED_BOUND_NUMBER = 2**256 - 1
 CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
+
+Assertion = namedtuple('Assertion', ['pc', 'model'])
 
 
 def initGlobalVars():
@@ -501,11 +505,12 @@ def full_sym_exec():
     # this is init global state for this particular execution
     global_state = get_init_global_state(path_conditions_and_vars)
     analysis = init_analysis()
-    return sym_exec_block(0, 0, visited, depth, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis)
+    models = []
+    return sym_exec_block(0, 0, visited, depth, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis, models)
 
 
 # Symbolically executing a block from the start address
-def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis):
+def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis, models):
     global solver
     global visited_edges
     global money_flow_all_paths
@@ -547,7 +552,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
         return ["ERROR"]
 
     for instr in block_ins:
-        sym_exec_ins(block, instr, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis)
+        sym_exec_ins(block, instr, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis, models)
 
     # Mark that this basic block in the visited blocks
     visited.append(block)
@@ -581,12 +586,12 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
         successor = vertices[block].get_jump_target()
         visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis)
         global_state1["pc"] = successor
-        sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1)
+        sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1, models)
     elif jump_type[block] == "falls_to":  # just follow to the next basic block
         successor = vertices[block].get_falls_to()
         visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis)
         global_state1["pc"] = successor
-        sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1)
+        sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1, models)
     elif jump_type[block] == "conditional":  # executing "JUMPI"
 
         # A choice point, we proceed with depth first search
@@ -608,7 +613,11 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
                 path_conditions_and_vars1["path_condition"].append(branch_expression)
                 last_idx = len(path_conditions_and_vars1["path_condition"]) - 1
                 local_problematic_pcs1["time_dependency_bug"][last_idx] = global_state["pc"]
-                sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1)
+                try:
+                    model = [solver.model()]
+                except:
+                    model = []
+                sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1, models + model)
         except Exception as e:
             log_file.write(str(e))
             if global_params.DEBUG_MODE:
@@ -638,7 +647,11 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
                 path_conditions_and_vars1["path_condition"].append(negated_branch_expression)
                 last_idx = len(path_conditions_and_vars1["path_condition"]) - 1
                 local_problematic_pcs1["time_dependency_bug"][last_idx] = global_state["pc"]
-                sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1)
+                try:
+                    model = [solver.model()]
+                except:
+                    model = []
+                sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, local_problematic_pcs1, analysis1, models + model)
         except Exception as e:
             log_file.write(str(e))
             if global_params.DEBUG_MODE:
@@ -656,12 +669,13 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
 
 
 # Symbolically executing an instruction
-def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis):
+def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, local_problematic_pcs, analysis, models):
     global visited_pcs
     global solver
     global vertices
     global edges
-    global assertions
+    global var_names
+    global source_map
 
     visited_pcs.add(global_state["pc"])
 
@@ -670,7 +684,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
     if instr_parts[0] == "INVALID":
         return
     elif instr_parts[0] == "ASSERTFAIL":
-        global_problematic_pcs["assertion_failure"].append(global_state["pc"])
+        global_problematic_pcs["assertion_failure"].append(Assertion(global_state["pc"], models[-1]))
         return
 
     # collecting the analysis result by calling this skeletal function
@@ -1250,7 +1264,21 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
                     callData = callData + "0"
                 stack.insert(0, int(callData[start:end], 16))
             else:
-                new_var_name = gen.gen_data_var(position)
+                if source_map:
+                    source_code = source_map.find_source_code(global_state["pc"] - 1)
+                    if source_code.startswith("function"):
+                        idx1 = source_code.index("(") + 1
+                        idx2 = source_code.index(")")
+                        params = source_code[idx1:idx2]
+                        params_list = params.split(",")
+                        params_list = [param.split(" ")[-1] for param in params_list]
+                        param_idx = (position - 4) / 32
+                        new_var_name = params_list[param_idx]
+                        var_names.append(new_var_name)
+                    else:
+                        new_var_name = gen.gen_data_var(position)
+                else:
+                    new_var_name = gen.gen_data_var(position)
                 if new_var_name in path_conditions_and_vars:
                     new_var = path_conditions_and_vars[new_var_name]
                 else:
@@ -1557,7 +1585,22 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
                 else:
                     if is_expr(address):
                         address = simplify(address)
-                    new_var_name = gen.gen_owner_store_var(address)
+                    if source_map:
+                        new_var_name = source_map.find_source_code(global_state["pc"] - 1)
+                        operators = '[-+*/%|&^!><=]'
+                        new_var_name = re.compile(operators).split(new_var_name)[0].strip()
+                        try:
+                            names = [
+                                node.id for node in ast.walk(ast.parse(new_var_name))
+                                if isinstance(node, ast.Name)
+                            ]
+                            if names[0] not in var_names:
+                                raise Exception
+                        except Exception as e:
+                            new_var_name = gen.gen_owner_store_var(address)
+                    else:
+                        new_var_name = gen.gen_owner_store_var(address)
+
                     if new_var_name in path_conditions_and_vars:
                         new_var = path_conditions_and_vars[new_var_name]
                     else:
@@ -1688,6 +1731,17 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
     #
     #  f0s: System Operations
     #
+    elif instr_parts[0] == "CREATE":
+        if len(stack) > 2:
+            global_state["pc"] += 1
+            stack.pop(0)
+            stack.pop(0)
+            stack.pop(0)
+            new_var_name = gen.gen_arbitrary_var()
+            new_var = BitVec(new_var_name, 256)
+            stack.insert(0, new_var)
+        else:
+            raise ValueError('STACK underflow')
     elif instr_parts[0] == "CALL":
         # TODO: Need to handle miu_i
         if len(stack) > 6:
@@ -1790,6 +1844,20 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
                 path_conditions_and_vars["path_condition"].append(is_enough_fund)
                 last_idx = len(path_conditions_and_vars["path_condition"]) - 1
                 local_problematic_pcs["time_dependency_bug"][last_idx] = global_state["pc"] - 1
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[0] == "DELEGATECALL":
+        if len(stack) > 5:
+            global_state["pc"] += 1
+            stack.pop(0)
+            stack.pop(0)
+            stack.pop(0)
+            stack.pop(0)
+            stack.pop(0)
+            stack.pop(0)
+            new_var_name = gen.gen_arbitrary_var()
+            new_var = BitVec(new_var_name, 256)
+            stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
     elif instr_parts[0] == "RETURN" or instr_parts[0] == "REVERT":
@@ -2013,6 +2081,8 @@ def run_callstack_attack():
         log.info("\t  Callstack bug: \t %s", bool(pcs))
 
 def detect_reentrancy():
+    global source_map
+
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
     if source_map:
         pcs = global_problematic_pcs["reentrancy_bug"]
@@ -2026,11 +2096,36 @@ def detect_reentrancy():
         log.info("\t  Reentrancy bug: \t %s", reentrancy_bug_found)
 
 def detect_assertion_failure():
-    pcs = [pc for pc in global_problematic_pcs["assertion_failure"] if "assert" in source_map.find_source_code(pc)]
-    pcs = source_map.reduce_same_position_pcs(pcs)
+    global source_map
+    global var_names
 
-    s = source_map.to_str(pcs, "Assertion failure")
-    results["assertion_failure"] = s
+    assertions = [asrt for asrt in global_problematic_pcs["assertion_failure"] if "assert" in source_map.find_source_code(asrt.pc)]
+    d = {}
+    for asrt in assertions:
+        pos = str(source_map.instr_positions[asrt.pc])
+        if pos not in d:
+            d[pos] = asrt
+    assertions = d.values()
+
+    s = ""
+    for asrt in assertions:
+        location = source_map.get_location(asrt.pc)
+        source_code = source_map.find_source_code(asrt.pc).split("\n", 1)[0]
+        s += "\n%s:%s:%s\n" % (source_map.cname, location['begin']['line'] + 1, location['begin']['column'] + 1)
+        s += source_code + "\n"
+        s += "^\n"
+        for variable in asrt.model.decls():
+            var_name = str(variable)
+            names = [
+                node.id for node in ast.walk(ast.parse(var_name))
+                if isinstance(node, ast.Name)
+            ]
+            var_name = names[0]
+            if var_name in var_names:
+                s += str(variable) + " = " + str(asrt.model[variable]) + "\n"
+
+    #  s = source_map.to_str(assertions, "Assertion failure")
+    #  results["assertion_failure"] = s
     s = "\t  Assertion failure: \t True" + s if s else "\t  Assertion failure: \t False"
     log.info(s)
 
@@ -2110,10 +2205,14 @@ def main(contract, contract_sol, _source_map = None):
     global c_name
     global c_name_sol
     global source_map
+    global var_names
 
     c_name = contract
     c_name_sol = contract_sol
     source_map = _source_map
+    if source_map:
+        ast_helper = AstHelper()
+        var_names = ast_helper.extract_state_variable_names(contract_sol)
 
     check_unit_test_file()
     initGlobalVars()
