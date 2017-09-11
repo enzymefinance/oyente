@@ -19,7 +19,7 @@ docker pull luongnguyen/oyente && docker run -i -t luongnguyen/oyente
 To evaluate the greeter contract inside the container, run:
 
 ```
-cd /oyente && python oyente.py -s greeter.sol
+cd /oyente/oyente && python oyente.py -s greeter.sol
 ```
 
 and you are done!
