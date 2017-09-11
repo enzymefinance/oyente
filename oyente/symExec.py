@@ -1587,6 +1587,8 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
                         address = simplify(address)
                     if source_map:
                         new_var_name = source_map.find_source_code(global_state["pc"] - 1)
+                        operators = '[-+*/%|&^!><=]'
+                        new_var_name = re.compile(operators).split(new_var_name)[0].strip()
                         try:
                             names = [
                                 node.id for node in ast.walk(ast.parse(new_var_name))
