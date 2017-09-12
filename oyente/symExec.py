@@ -2111,21 +2111,34 @@ def detect_assertion_failure():
     for asrt in assertions:
         location = source_map.get_location(asrt.pc)
         source_code = source_map.find_source_code(asrt.pc).split("\n", 1)[0]
-        s += "\n%s:%s:%s\n" % (source_map.cname, location['begin']['line'] + 1, location['begin']['column'] + 1)
-        s += source_code + "\n"
-        s += "^\n"
-        for variable in asrt.model.decls():
-            var_name = str(variable)
-            names = [
-                node.id for node in ast.walk(ast.parse(var_name))
-                if isinstance(node, ast.Name)
-            ]
-            var_name = names[0]
-            if var_name in var_names:
-                s += str(variable) + " = " + str(asrt.model[variable]) + "\n"
+        if global_params.WEB:
+            s += "%s:%s:%s: Assertion failure:<br />" % (source_map.cname.split(":", 1)[1], location['begin']['line'] + 1, location['begin']['column'] + 1)
+            s += "<span style='margin-left: 20px'>%s</span><br />" % source_code
+            s += "<span style='margin-left: 20px'>^</span><br />"
+            for variable in asrt.model.decls():
+                var_name = str(variable)
+                names = [
+                    node.id for node in ast.walk(ast.parse(var_name))
+                    if isinstance(node, ast.Name)
+                ]
+                var_name = names[0]
+                if var_name in var_names:
+                    s += "<span style='margin-left: 20px'>" + str(variable) + " = " + str(asrt.model[variable]) + "</span>" + "<br />"
+        else:
+            s += "\n%s:%s:%s\n" % (source_map.cname, location['begin']['line'] + 1, location['begin']['column'] + 1)
+            s += source_code + "\n"
+            s += "^\n"
+            for variable in asrt.model.decls():
+                var_name = str(variable)
+                names = [
+                    node.id for node in ast.walk(ast.parse(var_name))
+                    if isinstance(node, ast.Name)
+                ]
+                var_name = names[0]
+                if var_name in var_names:
+                    s += str(variable) + " = " + str(asrt.model[variable]) + "\n"
 
-    #  s = source_map.to_str(assertions, "Assertion failure")
-    #  results["assertion_failure"] = s
+    results["assertion_failure"] = s
     s = "\t  Assertion failure: \t True" + s if s else "\t  Assertion failure: \t False"
     log.info(s)
 
