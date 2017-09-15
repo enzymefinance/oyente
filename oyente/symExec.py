@@ -39,6 +39,9 @@ def initGlobalVars():
     solver = Solver()
     solver.set("timeout", global_params.TIMEOUT)
 
+    global any_bug
+    any_bug = False
+
     global visited_pcs
     visited_pcs = set()
 
@@ -1906,6 +1909,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
 def detect_time_dependency():
     global results
     global source_map
+    global any_bug
 
     TIMESTAMP_VAR = "IH_s"
     is_dependant = False
@@ -1926,6 +1930,8 @@ def detect_time_dependency():
         pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
         pcs = source_map.reduce_same_position_pcs(pcs)
         s = source_map.to_str(pcs, "Time dependency bug")
+        if s:
+            any_bug = True
         results["time_dependency"] = s
         s = "\t  Time dependency bug: \t True" + s if s else "\t  Time dependency bug: \t False"
         log.info(s)
@@ -1946,6 +1952,7 @@ def detect_time_dependency():
 def detect_money_concurrency():
     global results
     global source_map
+    global any_bug
 
     n = len(money_flow_all_paths)
     for i in range(n):
@@ -1977,6 +1984,8 @@ def detect_money_concurrency():
         pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
         pcs = source_map.reduce_same_position_pcs(pcs)
         s = source_map.to_str(pcs, "Money concurrency bug")
+        if s:
+            any_bug = True
         results["concurrency"] = s
         s = "\t  Money concurrency bug: True" + s if s else "\t  Money concurrency bug: False"
         log.info(s)
@@ -2064,6 +2073,7 @@ def check_callstack_attack(disasm):
 def run_callstack_attack():
     global results
     global source_map
+    global any_bug
 
     disasm_data = open(c_name).read()
     instr_pattern = r"([\d]+) ([A-Z]+)([\d]+)?(?: => 0x)?(\S+)?"
@@ -2074,6 +2084,8 @@ def run_callstack_attack():
         pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
         pcs = source_map.reduce_same_position_pcs(pcs)
         s = source_map.to_str(pcs, "Callstack bug")
+        if s:
+            any_bug = True
         results["callstack"] = s
         s = "\t  Callstack bug: \t True" + s if s else "\t  Callstack bug: \t False"
         log.info(s)
@@ -2082,6 +2094,7 @@ def run_callstack_attack():
 
 def detect_reentrancy():
     global source_map
+    global any_bug
 
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
     if source_map:
@@ -2089,6 +2102,8 @@ def detect_reentrancy():
         pcs = [pc for pc in pcs if source_map.find_source_code(pc)]
         pcs = source_map.reduce_same_position_pcs(pcs)
         s = source_map.to_str(pcs, "Reentrancy bug")
+        if s:
+            any_bug = True
         results["reentrancy"] = s
         s = "\t  Reentrancy bug: \t True" + s if s else "\t  Reentrancy bug: \t False"
         log.info(s)
@@ -2098,6 +2113,7 @@ def detect_reentrancy():
 def detect_assertion_failure():
     global source_map
     global var_names
+    global any_bug
 
     assertions = [asrt for asrt in global_problematic_pcs["assertion_failure"] if "assert" in source_map.find_source_code(asrt.pc)]
     d = {}
@@ -2138,6 +2154,8 @@ def detect_assertion_failure():
                 if var_name in var_names:
                     s += str(variable) + " = " + str(asrt.model[variable]) + "\n"
 
+    if s:
+        any_bug = True
     results["assertion_failure"] = s
     s = "\t  Assertion failure: \t True" + s if s else "\t  Assertion failure: \t False"
     log.info(s)
@@ -2150,6 +2168,7 @@ def detect_bugs():
     global source_map
     global visited_pcs
     global global_problematic_pcs
+    global any_bug
 
     if instructions:
         evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys()) * 100
@@ -2193,6 +2212,9 @@ def detect_bugs():
 
     if global_params.WEB:
         results_for_web()
+
+    if any_bug:
+        exit(1)
 
 def closing_message():
     log.info("\t====== Analysis Completed ======")
