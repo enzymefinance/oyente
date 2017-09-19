@@ -8,7 +8,8 @@ class HomeController < ApplicationController
     unless check_params
       @results[:error] = "Invalid input"
     else
-      file = Tempfile.new oyente_params[:filename]
+      FileUtils::mkdir_p 'tmp/contracts'
+      file = Tempfile.new(oyente_params[:filename], 'tmp/contracts')
       begin
         file.write oyente_params[:source]
         file.close
