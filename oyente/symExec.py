@@ -2233,8 +2233,9 @@ def detect_bugs():
     if global_params.WEB:
         results_for_web()
 
-    if any_bug:
-        exit(1)
+    if not os.path.isfile("bug_found") and any_bug:
+        with open("bug_found", "w") as f:
+            f.write(str(any_bug))
 
 def closing_message():
     log.info("\t====== Analysis Completed ======")

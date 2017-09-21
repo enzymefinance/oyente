@@ -226,6 +226,9 @@ def main():
             if exit_code != 0:
                 exit(exit_code)
     else:
+        if os.path.isfile("bug_found"):
+            os.remove("bug_found")
+
         contracts = compileContracts(args.source)
 
         for cname, bin_str in contracts:
@@ -245,6 +248,9 @@ def main():
             remove_temporary_file(processed_evm_file)
             remove_temporary_file(disasm_file)
             remove_temporary_file(disasm_file + '.log')
+        if os.path.isfile("bug_found"):
+            os.remove("bug_found")
+            exit(1)
 
 if __name__ == '__main__':
     main()
