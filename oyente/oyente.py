@@ -189,8 +189,12 @@ def main():
         global_params.GAS_LIMIT = args.gas_limit
     if args.loop_limit:
         global_params.LOOP_LIMIT = args.loop_limit
-    if args.global_timeout and args.global_timeout < global_params.GLOBAL_TIMEOUT:
-        global_params.GLOBAL_TIMEOUT = args.global_timeout
+    if global_params.WEB:
+        if args.global_timeout and args.global_timeout < global_params.GLOBAL_TIMEOUT:
+            global_params.GLOBAL_TIMEOUT = args.global_timeout
+    else:
+        if args.global_timeout:
+            global_params.GLOBAL_TIMEOUT = args.global_timeout
 
     if not has_dependencies_installed():
         return
