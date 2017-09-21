@@ -95,6 +95,9 @@ def initGlobalVars():
     global total_no_of_paths
     total_no_of_paths = 0
 
+    global no_of_test_cases
+    no_of_test_cases = 0
+
     # to generate names for symbolic variables
     global gen
     gen = Generator()
@@ -576,10 +579,27 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
 
     # Go to next Basic Block(s)
     if jump_type[block] == "terminal" or depth > global_params.DEPTH_LIMIT:
+        global total_no_of_paths
+        global no_of_test_cases
+
+        total_no_of_paths += 1
+
+        if global_params.GENERATE_TEST_CASES:
+            try:
+                model = solver.model()
+                no_of_test_cases += 1
+                filename = "test%s.otest" % no_of_test_cases
+                with open(filename, 'w') as f:
+                    for variable in model.decls():
+                        f.write(str(variable) + " = " + str(model[variable]) + "\n")
+                if os.stat(filename).st_size == 0:
+                    os.remove(filename)
+                    no_of_test_cases -= 1
+            except Exception as e:
+                pass
+
         log.debug("TERMINATING A PATH ...")
         display_analysis(analysis)
-        global total_no_of_paths
-        total_no_of_paths += 1
         if global_params.UNIT_TEST == 1:
             compare_stack_unit_test(stack)
         if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:

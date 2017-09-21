@@ -160,6 +160,8 @@ def main():
         "-a", "--assertion", help="Check assertion failures.", action="store_true")
     parser.add_argument(
             "--debug", help="Display debug information", action="store_true")
+    parser.add_argument(
+        "--generate-test-cases", help="Generate test cases each branch of symbolic execution tree", action="store_true")
 
     args = parser.parse_args()
 
@@ -179,6 +181,7 @@ def main():
     global_params.STORE_RESULT = 1 if args.json else 0
     global_params.CHECK_ASSERTIONS = 1 if args.assertion else 0
     global_params.DEBUG_MODE = 1 if args.debug else 0
+    global_params.GENERATE_TEST_CASES = 1 if args.generate_test_cases else 0
 
     if args.depth_limit:
         global_params.DEPTH_LIMIT = args.depth_limit
