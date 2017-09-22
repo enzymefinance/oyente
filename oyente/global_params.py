@@ -54,3 +54,5 @@ INPUT_STATE = 0
 
 # Check assertions
 CHECK_ASSERTIONS = 0
+
+GENERATE_TEST_CASES = 0

@@ -160,6 +160,8 @@ def main():
         "-a", "--assertion", help="Check assertion failures.", action="store_true")
     parser.add_argument(
             "--debug", help="Display debug information", action="store_true")
+    parser.add_argument(
+        "--generate-test-cases", help="Generate test cases each branch of symbolic execution tree", action="store_true")
 
     args = parser.parse_args()
 
@@ -179,6 +181,7 @@ def main():
     global_params.STORE_RESULT = 1 if args.json else 0
     global_params.CHECK_ASSERTIONS = 1 if args.assertion else 0
     global_params.DEBUG_MODE = 1 if args.debug else 0
+    global_params.GENERATE_TEST_CASES = 1 if args.generate_test_cases else 0
 
     if args.depth_limit:
         global_params.DEPTH_LIMIT = args.depth_limit
@@ -186,8 +189,12 @@ def main():
         global_params.GAS_LIMIT = args.gas_limit
     if args.loop_limit:
         global_params.LOOP_LIMIT = args.loop_limit
-    if args.global_timeout and args.global_timeout < global_params.GLOBAL_TIMEOUT:
-        global_params.GLOBAL_TIMEOUT = args.global_timeout
+    if global_params.WEB:
+        if args.global_timeout and args.global_timeout < global_params.GLOBAL_TIMEOUT:
+            global_params.GLOBAL_TIMEOUT = args.global_timeout
+    else:
+        if args.global_timeout:
+            global_params.GLOBAL_TIMEOUT = args.global_timeout
 
     if not has_dependencies_installed():
         return
@@ -219,6 +226,9 @@ def main():
             if exit_code != 0:
                 exit(exit_code)
     else:
+        if os.path.isfile("bug_found"):
+            os.remove("bug_found")
+
         contracts = compileContracts(args.source)
 
         for cname, bin_str in contracts:
@@ -238,6 +248,9 @@ def main():
             remove_temporary_file(processed_evm_file)
             remove_temporary_file(disasm_file)
             remove_temporary_file(disasm_file + '.log')
+        if os.path.isfile("bug_found"):
+            os.remove("bug_found")
+            exit(1)
 
 if __name__ == '__main__':
     main()
