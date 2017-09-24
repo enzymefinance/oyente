@@ -11,10 +11,12 @@ class AstHelper:
         }
         walker = AstWalker()
         for k in sourcesList:
-            node = walker.walk(sourcesList[k]["AST"], "ContractDefinition")
-            ret["contractsById"][node["id"]] = node
-            ret["sourcesByContract"][node["id"]] = k
-            ret["contractsByName"][k + ':' + node["attributes"]["name"]] = node
+            nodes = []
+            walker.walk(sourcesList[k]["AST"], "ContractDefinition", nodes)
+            for node in nodes:
+                ret["contractsById"][node["id"]] = node
+                ret["sourcesByContract"][node["id"]] = k
+                ret["contractsByName"][k + ':' + node["attributes"]["name"]] = node
         return ret
 
     def get_linearized_base_contracts(self, id, contractsById):
@@ -37,18 +39,20 @@ class AstHelper:
     def extract_states_definitions(self, sourcesList, contracts=None):
         if not contracts:
             contracts = self.extract_contract_definitions(sourcesList)
+        ret = {}
         for contract in contracts["contractsById"]:
             name = contracts["contractsById"][contract]["attributes"]["name"]
             source = contracts["sourcesByContract"][contract]
             fullName = source + ":" + name
             state = self.extract_state_definitions(fullName, sourcesList, contracts)
-        return state
+            ret[fullName] = state
+        return ret
 
-    def extract_state_variable_names(self, filename):
+    def extract_state_variable_names(self, filename, c_name):
         cmd = "solc --combined-json ast %s" % filename
         out = run_command(cmd)
         out = json.loads(out)
-        state_variables = self.extract_states_definitions(out["sources"])
+        state_variables = self.extract_states_definitions(out["sources"])[c_name]
         var_names = []
         for var_name in state_variables:
             var_names.append(var_name["attributes"]["name"])

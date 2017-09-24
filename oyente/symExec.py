@@ -1619,6 +1619,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
                             ]
                             if names[0] not in var_names:
                                 raise Exception
+                            new_var_name = "Ia_store" + "-" + str(address) + "-" + new_var_name
                         except Exception as e:
                             new_var_name = gen.gen_owner_store_var(address)
                     else:
@@ -2166,13 +2167,14 @@ def detect_assertion_failure():
             s += "^\n"
             for variable in asrt.model.decls():
                 var_name = str(variable)
+                if len(var_name.split("-")) > 2:
+                    var_name = var_name.split("-")[2]
                 names = [
                     node.id for node in ast.walk(ast.parse(var_name))
                     if isinstance(node, ast.Name)
                 ]
-                var_name = names[0]
-                if var_name in var_names:
-                    s += str(variable) + " = " + str(asrt.model[variable]) + "\n"
+                if names[0] in var_names:
+                    s += var_name + " = " + str(asrt.model[variable]) + "\n"
 
     if s:
         any_bug = True
@@ -2268,7 +2270,7 @@ def main(contract, contract_sol, _source_map = None):
     source_map = _source_map
     if source_map:
         ast_helper = AstHelper()
-        var_names = ast_helper.extract_state_variable_names(contract_sol)
+        var_names = ast_helper.extract_state_variable_names(contract_sol, source_map.cname)
 
     check_unit_test_file()
     initGlobalVars()
