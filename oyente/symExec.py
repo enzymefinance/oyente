@@ -2154,13 +2154,14 @@ def detect_assertion_failure():
             s += "<span style='margin-left: 20px'>^</span><br />"
             for variable in asrt.model.decls():
                 var_name = str(variable)
+                if len(var_name.split("-")) > 2:
+                    var_name = var_name.split("-")[2]
                 names = [
                     node.id for node in ast.walk(ast.parse(var_name))
                     if isinstance(node, ast.Name)
                 ]
-                var_name = names[0]
-                if var_name in var_names:
-                    s += "<span style='margin-left: 20px'>" + str(variable) + " = " + str(asrt.model[variable]) + "</span>" + "<br />"
+                if names[0] in var_names:
+                    s += "<span style='margin-left: 20px'>" + var_name + " = " + str(asrt.model[variable]) + "</span>" + "<br />"
         else:
             s += "\n%s:%s:%s\n" % (source_map.cname, location['begin']['line'] + 1, location['begin']['column'] + 1)
             s += source_code + "\n"
