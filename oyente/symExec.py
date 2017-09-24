@@ -2270,7 +2270,7 @@ def main(contract, contract_sol, _source_map = None):
     source_map = _source_map
     if source_map:
         ast_helper = AstHelper()
-        var_names = ast_helper.extract_state_variable_names(contract_sol)
+        var_names = ast_helper.extract_state_variable_names(contract_sol, source_map.cname)
 
     check_unit_test_file()
     initGlobalVars()
