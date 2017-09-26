@@ -708,7 +708,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
     # collecting the analysis result by calling this skeletal function
     # this should be done before symbolically executing the instruction,
     # since SE will modify the stack and mem
-    update_analysis(analysis, instr_parts[0], stack, mem, global_state, path_conditions_and_vars, solver)
+    update_analysis(analysis, instr_parts[0], stack, mem, global_state, path_conditions_and_vars, local_problematic_pcs, solver)
     if instr_parts[0] == "CALL" and analysis["reentrancy_bug"] and analysis["reentrancy_bug"][-1]:
         global_problematic_pcs["reentrancy_bug"].append(global_state["pc"])
 
@@ -1752,7 +1752,6 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
     elif instr_parts[0] == "CALL":
         # TODO: Need to handle miu_i
         if len(stack) > 6:
-            local_problematic_pcs["money_concurrency_bug"].append(global_state["pc"])
             global_state["pc"] = global_state["pc"] + 1
             outgas = stack.pop(0)
             recipient = stack.pop(0)
