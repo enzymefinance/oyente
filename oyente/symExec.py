@@ -1280,7 +1280,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             position = stack.pop(0)
             if source_map:
                 source_code = source_map.find_source_code(global_state["pc"] - 1)
-                if source_code.startswith("function"):
+                if source_code.startswith("function") and isReal(position):
                     idx1 = source_code.index("(") + 1
                     idx2 = source_code.index(")")
                     params = source_code[idx1:idx2]
