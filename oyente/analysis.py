@@ -49,7 +49,10 @@ def check_reentrancy_bug(path_conditions_and_vars, stack, global_state):
             var_name = var.decl().name()
             # check if a var is global
             if var_name.startswith("Ia_store"):
-                storage_key = var_name.split("-")[1]
+                try:
+                    storage_key = var_name.split("Ia_store_")[1]
+                except:
+                    storage_key = var_name.split("-")[1]
                 try:
                     if int(storage_key) in global_state["Ia"]:
                         new_path_condition.append(var == global_state["Ia"][int(storage_key)])
