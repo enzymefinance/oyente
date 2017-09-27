@@ -2048,30 +2048,28 @@ def detect_data_money_concurrency():
 def check_callstack_attack(disasm):
     problematic_instructions = ['CALL', 'CALLCODE']
     pcs = []
-    for i, instruction in enumerate(disasm):
+    for i in xrange(0, len(disasm)):
+        instruction = disasm[i]
         if instruction[1] in problematic_instructions:
             pc = int(instruction[0])
-            if disasm[i+1][1] == "ISZERO":
-                found_bug = False
-                external_call_sequence = [instruction[1], "ISZERO", "ISZERO", "PUSH", "JUMPI", "PUSH", "DUP", "REVERT", "JUMPDEST", "POP", "POP", "POP", "PUSH", "MLOAD", "DUP", "MLOAD", "SWAP", "POP"]
-                for j, opcode in enumerate(external_call_sequence):
-                    if disasm[i+j][1] != opcode:
-                        pcs.append(pc)
-                        found_bug = True
-                        break
-                if not found_bug and disasm[i+j+1][1] == "POP":
-                    pcs.append(pc)
-            elif disasm[i+1][1] == "SWAP":
-                swap_num = int(disasm[i+1][2])
-                found_bug = False
-                for j in range(swap_num):
-                    if not disasm[i+j+2][1] == "POP":
-                        pcs.append(pc)
-                        found_bug = True
-                        break
-                if not found_bug and disasm[i+j+3][1] == "POP":
-                    pcs.append(pc)
+            if not disasm[i+1][1] == 'SWAP':
+                continue
+            swap_num = int(disasm[i+1][2])
+            for j in range(swap_num):
+                if not disasm[i+j+2][1] == 'POP':
+                    continue
+            opcode1 = disasm[i + swap_num + 2][1]
+            opcode2 = disasm[i + swap_num + 3][1]
+            opcode3 = disasm[i + swap_num + 4][1]
+            if opcode1 == "ISZERO" \
+                or opcode1 == "DUP" and opcode2 == "ISZERO" \
+                or opcode1 == "JUMPDEST" and opcode2 == "ISZERO" \
+                or opcode1 == "JUMPDEST" and opcode2 == "DUP" and opcode3 == "ISZERO":
+                    pass
+            else:
+                pcs.append(pc)
     return pcs
+
 
 def run_callstack_attack():
     global results
