@@ -388,7 +388,7 @@ def get_init_global_state(path_conditions_and_vars):
             if state["Ia"]["balance"]:
                 init_ia = int(state["Ia"]["balance"], 16)
             if state["exec"]["value"]:
-                deposited_value = int(state["exec"]["value"], 16)
+                deposited_value = 0
             if state["Is"]["address"]:
                 sender_address = int(state["Is"]["address"], 16)
             if state["Ia"]["address"]:
@@ -405,10 +405,6 @@ def get_init_global_state(path_conditions_and_vars):
                 currentDifficulty = int(state["env"]["currentDifficulty"], 16)
             if state["env"]["currentGasLimit"]:
                 currentGasLimit = int(state["env"]["currentGasLimit"], 16)
-            if state["exec"]["data"]:
-                callData = state["exec"]["data"]
-                if callData[:2] == "0x":
-                    callData = callData[2:]
             if state["Ia"]["storage"]:
                 storage_dict = state["Ia"]["storage"]
                 global_state["Ia"] = {}
@@ -493,7 +489,6 @@ def get_init_global_state(path_conditions_and_vars):
     global_state["currentNumber"] = currentNumber
     global_state["currentDifficulty"] = currentDifficulty
     global_state["currentGasLimit"] = currentGasLimit
-    global_state["callData"] = callData
 
     return global_state
 
@@ -713,7 +708,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
     # collecting the analysis result by calling this skeletal function
     # this should be done before symbolically executing the instruction,
     # since SE will modify the stack and mem
-    update_analysis(analysis, instr_parts[0], stack, mem, global_state, path_conditions_and_vars, solver)
+    update_analysis(analysis, instr_parts[0], stack, mem, global_state, path_conditions_and_vars, local_problematic_pcs, solver)
     if instr_parts[0] == "CALL" and analysis["reentrancy_bug"] and analysis["reentrancy_bug"][-1]:
         global_problematic_pcs["reentrancy_bug"].append(global_state["pc"])
 
@@ -1278,50 +1273,38 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             position = stack.pop(0)
-            if global_params.INPUT_STATE and global_state["callData"]:
-                callData = global_state["callData"]
-                start = position * 2
-                end = start + 64
-                while end > len(callData):
-                    # append with zeros if insufficient length
-                    callData = callData + "0"
-                stack.insert(0, int(callData[start:end], 16))
-            else:
-                if source_map:
-                    source_code = source_map.find_source_code(global_state["pc"] - 1)
-                    if source_code.startswith("function"):
-                        idx1 = source_code.index("(") + 1
-                        idx2 = source_code.index(")")
-                        params = source_code[idx1:idx2]
-                        params_list = params.split(",")
-                        params_list = [param.split(" ")[-1] for param in params_list]
-                        param_idx = (position - 4) / 32
-                        new_var_name = params_list[param_idx]
-                        var_names.append(new_var_name)
-                    else:
-                        new_var_name = gen.gen_data_var(position)
+            if source_map:
+                source_code = source_map.find_source_code(global_state["pc"] - 1)
+                if source_code.startswith("function"):
+                    idx1 = source_code.index("(") + 1
+                    idx2 = source_code.index(")")
+                    params = source_code[idx1:idx2]
+                    params_list = params.split(",")
+                    params_list = [param.split(" ")[-1] for param in params_list]
+                    param_idx = (position - 4) / 32
+                    new_var_name = params_list[param_idx]
+                    var_names.append(new_var_name)
                 else:
                     new_var_name = gen.gen_data_var(position)
-                if new_var_name in path_conditions_and_vars:
-                    new_var = path_conditions_and_vars[new_var_name]
-                else:
-                    new_var = BitVec(new_var_name, 256)
-                    path_conditions_and_vars[new_var_name] = new_var
-                stack.insert(0, new_var)
-        else:
-            raise ValueError('STACK underflow')
-    elif instr_parts[0] == "CALLDATASIZE":
-        global_state["pc"] = global_state["pc"] + 1
-        if global_params.INPUT_STATE and global_state["callData"]:
-            stack.insert(0, len(global_state["callData"])/2)
-        else:
-            new_var_name = gen.gen_data_size()
+            else:
+                new_var_name = gen.gen_data_var(position)
             if new_var_name in path_conditions_and_vars:
                 new_var = path_conditions_and_vars[new_var_name]
             else:
                 new_var = BitVec(new_var_name, 256)
                 path_conditions_and_vars[new_var_name] = new_var
             stack.insert(0, new_var)
+        else:
+            raise ValueError('STACK underflow')
+    elif instr_parts[0] == "CALLDATASIZE":
+        global_state["pc"] = global_state["pc"] + 1
+        new_var_name = gen.gen_data_size()
+        if new_var_name in path_conditions_and_vars:
+            new_var = path_conditions_and_vars[new_var_name]
+        else:
+            new_var = BitVec(new_var_name, 256)
+            path_conditions_and_vars[new_var_name] = new_var
+        stack.insert(0, new_var)
     elif instr_parts[0] == "CALLDATACOPY":  # Copy input data to memory
         #  TODO: Don't know how to simulate this yet
         if len(stack) > 2:
@@ -1769,7 +1752,6 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
     elif instr_parts[0] == "CALL":
         # TODO: Need to handle miu_i
         if len(stack) > 6:
-            local_problematic_pcs["money_concurrency_bug"].append(global_state["pc"])
             global_state["pc"] = global_state["pc"] + 1
             outgas = stack.pop(0)
             recipient = stack.pop(0)
@@ -1788,7 +1770,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
 
             # Let us ignore the call depth
             balance_ia = global_state["balance"]["Ia"]
-            is_enough_fund = (balance_ia < transfer_amount)
+            is_enough_fund = (transfer_amount <= balance_ia)
             solver.push()
             solver.add(is_enough_fund)
 
@@ -1852,7 +1834,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
 
             # Let us ignore the call depth
             balance_ia = global_state["balance"]["Ia"]
-            is_enough_fund = (balance_ia < transfer_amount)
+            is_enough_fund = (transfer_amount <= balance_ia)
             solver.push()
             solver.add(is_enough_fund)
 
@@ -2066,30 +2048,28 @@ def detect_data_money_concurrency():
 def check_callstack_attack(disasm):
     problematic_instructions = ['CALL', 'CALLCODE']
     pcs = []
-    for i, instruction in enumerate(disasm):
+    for i in xrange(0, len(disasm)):
+        instruction = disasm[i]
         if instruction[1] in problematic_instructions:
             pc = int(instruction[0])
-            if disasm[i+1][1] == "ISZERO":
-                found_bug = False
-                external_call_sequence = [instruction[1], "ISZERO", "ISZERO", "PUSH", "JUMPI", "PUSH", "DUP", "REVERT", "JUMPDEST", "POP", "POP", "POP", "PUSH", "MLOAD", "DUP", "MLOAD", "SWAP", "POP"]
-                for j, opcode in enumerate(external_call_sequence):
-                    if disasm[i+j][1] != opcode:
-                        pcs.append(pc)
-                        found_bug = True
-                        break
-                if not found_bug and disasm[i+j+1][1] == "POP":
-                    pcs.append(pc)
-            elif disasm[i+1][1] == "SWAP":
-                swap_num = int(disasm[i+1][2])
-                found_bug = False
-                for j in range(swap_num):
-                    if not disasm[i+j+2][1] == "POP":
-                        pcs.append(pc)
-                        found_bug = True
-                        break
-                if not found_bug and disasm[i+j+3][1] == "POP":
-                    pcs.append(pc)
+            if not disasm[i+1][1] == 'SWAP':
+                continue
+            swap_num = int(disasm[i+1][2])
+            for j in range(swap_num):
+                if not disasm[i+j+2][1] == 'POP':
+                    continue
+            opcode1 = disasm[i + swap_num + 2][1]
+            opcode2 = disasm[i + swap_num + 3][1]
+            opcode3 = disasm[i + swap_num + 4][1]
+            if opcode1 == "ISZERO" \
+                or opcode1 == "DUP" and opcode2 == "ISZERO" \
+                or opcode1 == "JUMPDEST" and opcode2 == "ISZERO" \
+                or opcode1 == "JUMPDEST" and opcode2 == "DUP" and opcode3 == "ISZERO":
+                    pass
+            else:
+                pcs.append(pc)
     return pcs
+
 
 def run_callstack_attack():
     global results
@@ -2154,13 +2134,14 @@ def detect_assertion_failure():
             s += "<span style='margin-left: 20px'>^</span><br />"
             for variable in asrt.model.decls():
                 var_name = str(variable)
+                if len(var_name.split("-")) > 2:
+                    var_name = var_name.split("-")[2]
                 names = [
                     node.id for node in ast.walk(ast.parse(var_name))
                     if isinstance(node, ast.Name)
                 ]
-                var_name = names[0]
-                if var_name in var_names:
-                    s += "<span style='margin-left: 20px'>" + str(variable) + " = " + str(asrt.model[variable]) + "</span>" + "<br />"
+                if names[0] in var_names:
+                    s += "<span style='margin-left: 20px'>" + var_name + " = " + str(asrt.model[variable]) + "</span>" + "<br />"
         else:
             s += "\n%s:%s:%s\n" % (source_map.cname, location['begin']['line'] + 1, location['begin']['column'] + 1)
             s += source_code + "\n"
