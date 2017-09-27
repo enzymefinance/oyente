@@ -56,6 +56,15 @@ def check_reentrancy_bug(path_conditions_and_vars, stack, global_state):
                 except:
                     if storage_key in global_state["Ia"]:
                         new_path_condition.append(var == global_state["Ia"][storage_key])
+    transfer_amount = stack[2]
+    if isSymbolic(transfer_amount) and str(transfer_amount).startswith("Ia_store"):
+        storage_key = str(transfer_amount).split("-")[1]
+        try:
+            if int(storage_key) in global_state["Ia"]:
+                new_path_condition.append(global_state["Ia"][int(storage_key)] != 0)
+        except:
+            if storage_key in global_state["Ia"]:
+                new_path_condition.append(global_state["Ia"][storage_key] != 0)
     if global_params.DEBUG_MODE:
         log.info("=>>>>>> New PC: " + str(new_path_condition))
 
@@ -183,7 +192,7 @@ def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_
         analysis["reentrancy_bug"].append(reentrancy_result)
 
         local_problematic_pcs["money_concurrency_bug"].append(global_state["pc"])
-        analysis["money_flow"].append( ("Ia", str(recipient), str(transfer_amount)) )
+        analysis["money_flow"].append( ("Ia", str(recipient), str(transfer_amount)))
     elif opcode == "SUICIDE":
         recipient = stack[0]
         if not isinstance(recipient, (int, long)):
