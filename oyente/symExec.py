@@ -2158,12 +2158,15 @@ def detect_assertion_failure():
                 var_name = str(variable)
                 if len(var_name.split("-")) > 2:
                     var_name = var_name.split("-")[2]
-                names = [
-                    node.id for node in ast.walk(ast.parse(var_name))
-                    if isinstance(node, ast.Name)
-                ]
-                if names[0] in var_names:
-                    s += "<span style='margin-left: 20px'>" + var_name + " = " + str(asrt.model[variable]) + "</span>" + "<br />"
+                try:
+                    names = [
+                        node.id for node in ast.walk(ast.parse(var_name))
+                        if isinstance(node, ast.Name)
+                    ]
+                    if names[0] in var_names:
+                        s += "<span style='margin-left: 20px'>" + var_name + " = " + str(asrt.model[variable]) + "</span>" + "<br />"
+                except:
+                    pass
         else:
             s += "\n%s:%s:%s\n" % (source_map.cname, location['begin']['line'] + 1, location['begin']['column'] + 1)
             s += source_code + "\n"
@@ -2172,12 +2175,15 @@ def detect_assertion_failure():
                 var_name = str(variable)
                 if len(var_name.split("-")) > 2:
                     var_name = var_name.split("-")[2]
-                names = [
-                    node.id for node in ast.walk(ast.parse(var_name))
-                    if isinstance(node, ast.Name)
-                ]
-                if names[0] in var_names:
-                    s += var_name + " = " + str(asrt.model[variable]) + "\n"
+                try:
+                    names = [
+                        node.id for node in ast.walk(ast.parse(var_name))
+                        if isinstance(node, ast.Name)
+                    ]
+                    if names[0] in var_names:
+                        s += var_name + " = " + str(asrt.model[variable]) + "\n"
+                except:
+                    pass
 
     if s:
         any_bug = True
