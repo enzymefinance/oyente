@@ -31,9 +31,10 @@ class AstHelper:
             baseContracts = self.get_linearized_base_contracts(node["id"], contracts["contractsById"])
             baseContracts = list(reversed(baseContracts))
             for ctr in baseContracts:
-                for item in ctr["children"]:
-                    if item["name"] == "VariableDeclaration":
-                        stateVar.append(item)
+                if "children" in ctr:
+                    for item in ctr["children"]:
+                        if item["name"] == "VariableDeclaration":
+                            stateVar.append(item)
             return stateVar
 
     def extract_states_definitions(self, sourcesList, contracts=None):
