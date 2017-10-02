@@ -26,7 +26,9 @@ def init_analysis():
         "money_flow": [("Is", "Ia", "Iv")],  # (source, destination, amount)
         "sload": [],
         "sstore": {},
-        "reentrancy_bug":[]
+        "reentrancy_bug":[],
+        "money_concurrency_bug": [],
+        "time_dependency_bug": {}
     }
     return analysis
 
@@ -50,9 +52,9 @@ def check_reentrancy_bug(path_conditions_and_vars, stack, global_state):
             # check if a var is global
             if var_name.startswith("Ia_store"):
                 try:
-                    storage_key = var_name.split("Ia_store_")[1]
-                except:
                     storage_key = var_name.split("-")[1]
+                except:
+                    storage_key = var_name.split("Ia_store_")[1]
                 try:
                     if int(storage_key) in global_state["Ia"]:
                         new_path_condition.append(var == global_state["Ia"][int(storage_key)])
@@ -178,7 +180,7 @@ def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
 
     return (gas_increment, new_gas_memory)
 
-def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_and_vars, local_problematic_pcs, solver):
+def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_and_vars, solver):
     gas_increment, gas_memory = calculate_gas(opcode, stack, mem, global_state, analysis, solver)
     analysis["gas"] += gas_increment
     analysis["gas_mem"] = gas_memory
@@ -194,7 +196,7 @@ def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_
         reentrancy_result = check_reentrancy_bug(path_conditions_and_vars, stack, global_state)
         analysis["reentrancy_bug"].append(reentrancy_result)
 
-        local_problematic_pcs["money_concurrency_bug"].append(global_state["pc"])
+        analysis["money_concurrency_bug"].append(global_state["pc"])
         analysis["money_flow"].append( ("Ia", str(recipient), str(transfer_amount)))
     elif opcode == "SUICIDE":
         recipient = stack[0]

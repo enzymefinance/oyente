@@ -44,8 +44,8 @@ def has_dependencies_installed():
         cmd = "solc --version"
         out = run_command(cmd).strip()
         version = re.findall(r"Version: (\d*.\d*.\d*)", out)[0]
-        if version != '0.4.13':
-            logging.warning("You are using solc version %s, The supported version is 0.4.13" % version)
+        if version != '0.4.17':
+            logging.warning("You are using solc version %s, The latest supported version is 0.4.17" % version)
 
     return True
 

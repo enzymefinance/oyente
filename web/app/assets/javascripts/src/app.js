@@ -977,7 +977,7 @@ var run = function () {
 
   var options = yo`
     <div>
-      <div class="${styles.infoTextBox}">The lastest supported version of solidity is 0.4.13</div>
+      <div class="${styles.infoTextBox}">The latest supported version of solidity is 0.4.17</div>
       <div class="${css.crow}">
         <div class="${css.small_item}">
           <div>Z3 Timeout:</div>
@@ -994,7 +994,7 @@ var run = function () {
         <div class="${css.small_item}">
           <div>Gas Limit:</div>
         </div>
-        <div class="${css.large_item}"><input name="gaslimit" type="number" value=4000000 min=0 title="The maximum gas can be used to run Oyente"></div>
+        <div class="${css.large_item}"><input name="gaslimit" type="number" value=6700000 min=0 title="The maximum gas can be used to run Oyente"></div>
       </div>
       <div class="${css.crow}">
         <div class="${css.small_item}">
