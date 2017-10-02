@@ -408,29 +408,18 @@ def get_init_global_state(path_conditions_and_vars):
                 currentDifficulty = int(state["env"]["currentDifficulty"], 16)
             if state["env"]["currentGasLimit"]:
                 currentGasLimit = int(state["env"]["currentGasLimit"], 16)
-            if state["Ia"]["storage"]:
-                storage_dict = state["Ia"]["storage"]
-                global_state["Ia"] = {}
-                for key in storage_dict:
-                    global_state["Ia"][int(key, 16)] = int(storage_dict[key], 16)
 
     # for some weird reason these 3 vars are stored in path_conditions insteaad of global_state
-    if not sender_address:
+    else:
         sender_address = BitVec("Is", 256)
-    path_conditions_and_vars["Is"] = sender_address
-
-    if not receiver_address:
         receiver_address = BitVec("Ia", 256)
-    path_conditions_and_vars["Ia"] = receiver_address
-
-    if not deposited_value:
         deposited_value = BitVec("Iv", 256)
-    path_conditions_and_vars["Iv"] = deposited_value
-
-    if not init_is:
         init_is = BitVec("init_Is", 256)
-    if not init_ia:
         init_ia = BitVec("init_Ia", 256)
+
+    path_conditions_and_vars["Is"] = sender_address
+    path_conditions_and_vars["Ia"] = receiver_address
+    path_conditions_and_vars["Iv"] = deposited_value
 
     constraint = (deposited_value >= BitVecVal(0, 256))
     path_conditions_and_vars["path_condition"].append(constraint)
