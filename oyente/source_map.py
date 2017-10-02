@@ -1,6 +1,8 @@
 import json
 import global_params
+import ast
 from utils import run_command
+from ast_helper import AstHelper
 
 class Source:
     def __init__(self, filename):
@@ -29,6 +31,7 @@ class SourceMap:
         self.source = self.__get_source()
         self.positions = self.__get_positions()
         self.instr_positions = {}
+        self.var_names = self.__get_var_names()
 
     def find_source_code(self, pc):
         try:
@@ -69,6 +72,18 @@ class SourceMap:
                 d[pos] = pc
         return d.values()
 
+    def is_a_parameter_or_state_variable(self, var_name):
+        try:
+            names = [
+                node.id for node in ast.walk(ast.parse(var_name))
+                if isinstance(node, ast.Name)
+            ]
+            if names[0] in self.var_names:
+                return True
+        except:
+            return False
+        return False
+
     def __get_source(self):
         fname = self.__get_filename()
         if SourceMap.sources.has_key(fname):
@@ -76,6 +91,11 @@ class SourceMap:
         else:
             SourceMap.sources[fname] = Source(fname)
             return SourceMap.sources[fname]
+
+    def __get_var_names(self):
+        ast_helper = AstHelper()
+        return ast_helper.extract_state_variable_names(SourceMap.parent_filename, self.cname)
+
 
     @classmethod
     def __load_position_groups(cls):
