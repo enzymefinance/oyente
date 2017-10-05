@@ -22,16 +22,19 @@ class SourceMap:
     parent_filename = ""
     position_groups = {}
     sources = {}
+    ast_helper = None
 
     def __init__(self, cname, parent_filename):
         self.cname = cname
         if not SourceMap.parent_filename:
             SourceMap.parent_filename = parent_filename
             SourceMap.position_groups = SourceMap.__load_position_groups()
+            SourceMap.ast_helper = AstHelper(SourceMap.parent_filename)
         self.source = self.__get_source()
         self.positions = self.__get_positions()
         self.instr_positions = {}
         self.var_names = self.__get_var_names()
+        self.func_call_names = self.__get_func_call_names()
 
     def find_source_code(self, pc):
         try:
@@ -93,9 +96,17 @@ class SourceMap:
             return SourceMap.sources[fname]
 
     def __get_var_names(self):
-        ast_helper = AstHelper()
-        return ast_helper.extract_state_variable_names(SourceMap.parent_filename, self.cname)
+        return SourceMap.ast_helper.extract_state_variable_names(self.cname)
 
+    def __get_func_call_names(self):
+        func_call_srcs = SourceMap.ast_helper.extract_func_call_srcs(self.cname)
+        func_call_names = []
+        for src in func_call_srcs:
+            src = src.split(":")
+            start = int(src[0])
+            end = start + int(src[1])
+            func_call_names.append(self.source.content[start:end])
+        return func_call_names
 
     @classmethod
     def __load_position_groups(cls):
@@ -115,10 +126,6 @@ class SourceMap:
             except:
                 break
         return positions
-
-    def __get_location(self, pc):
-        pos = self.instr_positions[pc]
-        return self.__convert_offset_to_line_column(pos)
 
     def __convert_offset_to_line_column(self, pos):
         ret = {}

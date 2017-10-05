@@ -3,6 +3,16 @@ from ast_walker import AstWalker
 import json
 
 class AstHelper:
+    def __init__(self, filename):
+        self.source_list = self.get_source_list(filename)
+        self.contracts = self.extract_contract_definitions(self.source_list)
+
+    def get_source_list(self, filename):
+        cmd = "solc --combined-json ast %s" % filename
+        out = run_command(cmd)
+        out = json.loads(out)
+        return out["sources"]
+
     def extract_contract_definitions(self, sourcesList):
         ret = {
             "contractsById": {},
@@ -22,39 +32,55 @@ class AstHelper:
     def get_linearized_base_contracts(self, id, contractsById):
         return map(lambda id: contractsById[id], contractsById[id]["attributes"]["linearizedBaseContracts"])
 
-    def extract_state_definitions(self, contractName, sourcesList, contracts=None):
-        if not contracts:
-            contracts = self.extract_contract_definitions(sourcesList)
-        node = contracts["contractsByName"][contractName]
+    def extract_state_definitions(self, c_name):
+        node = self.contracts["contractsByName"][c_name]
+        state_vars = []
         if node:
-            stateVar = []
-            baseContracts = self.get_linearized_base_contracts(node["id"], contracts["contractsById"])
-            baseContracts = list(reversed(baseContracts))
-            for ctr in baseContracts:
-                if "children" in ctr:
-                    for item in ctr["children"]:
+            base_contracts = self.get_linearized_base_contracts(node["id"], self.contracts["contractsById"])
+            base_contracts = list(reversed(base_contracts))
+            for contract in base_contracts:
+                if "children" in contract:
+                    for item in contract["children"]:
                         if item["name"] == "VariableDeclaration":
-                            stateVar.append(item)
-            return stateVar
+                            state_vars.append(item)
+        return state_vars
 
-    def extract_states_definitions(self, sourcesList, contracts=None):
-        if not contracts:
-            contracts = self.extract_contract_definitions(sourcesList)
+    def extract_states_definitions(self):
         ret = {}
-        for contract in contracts["contractsById"]:
-            name = contracts["contractsById"][contract]["attributes"]["name"]
-            source = contracts["sourcesByContract"][contract]
-            fullName = source + ":" + name
-            state = self.extract_state_definitions(fullName, sourcesList, contracts)
-            ret[fullName] = state
+        for contract in self.contracts["contractsById"]:
+            name = self.contracts["contractsById"][contract]["attributes"]["name"]
+            source = self.contracts["sourcesByContract"][contract]
+            full_name = source + ":" + name
+            ret[full_name] = self.extract_state_definitions(full_name)
         return ret
 
-    def extract_state_variable_names(self, filename, c_name):
-        cmd = "solc --combined-json ast %s" % filename
-        out = run_command(cmd)
-        out = json.loads(out)
-        state_variables = self.extract_states_definitions(out["sources"])[c_name]
+    def extract_func_call_definitions(self, c_name):
+        node = self.contracts["contractsByName"][c_name]
+        walker = AstWalker()
+        nodes = []
+        if node:
+            walker.walk(node, "FunctionCall", nodes)
+        return nodes
+
+    def extract_func_calls_definitions(self):
+        ret = {}
+        for contract in self.contracts["contractsById"]:
+            name = self.contracts["contractsById"][contract]["attributes"]["name"]
+            source = self.contracts["sourcesByContract"][contract]
+            full_name = source + ":" + name
+            ret[full_name] = self.extract_func_call_definitions(full_name)
+        return ret
+
+    def extract_state_variable_names(self, c_name):
+        state_variables = self.extract_states_definitions()[c_name]
         var_names = []
         for var_name in state_variables:
             var_names.append(var_name["attributes"]["name"])
         return var_names
+
+    def extract_func_call_srcs(self, c_name):
+        func_calls = self.extract_func_calls_definitions()[c_name]
+        func_call_srcs = []
+        for func_call in func_calls:
+            func_call_srcs.append(func_call["src"])
+        return func_call_srcs
