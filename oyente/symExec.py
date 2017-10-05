@@ -494,11 +494,12 @@ def full_sym_exec():
     analysis = init_analysis()
     models = []
     calls = []
-    return sym_exec_block(0, 0, visited, depth, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis, models, calls)
+    func_call = -1
+    return sym_exec_block(0, 0, visited, depth, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis, models, calls, func_call)
 
 
 # Symbolically executing a block from the start address
-def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis, models, calls):
+def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis, models, calls, func_call):
     global solver
     global visited_edges
     global money_flow_all_paths
@@ -540,7 +541,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
         return ["ERROR"]
 
     for instr in block_ins:
-        sym_exec_ins(block, instr, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis, models, calls)
+        sym_exec_ins(block, instr, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis, models, calls, func_call)
 
     # Mark that this basic block in the visited blocks
     visited.append(block)
@@ -588,15 +589,18 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
             compare_storage_and_gas_unit_test(global_state, analysis)
 
     elif jump_type[block] == "unconditional":  # executing "JUMP"
+        source_code = source_map.find_source_code(global_state["pc"])
+        if source_code in source_map.func_call_names:
+            func_call = global_state["pc"]
         successor = vertices[block].get_jump_target()
         visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, calls1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis, calls)
         global_state1["pc"] = successor
-        sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, models, calls1)
+        sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, models, calls1, func_call)
     elif jump_type[block] == "falls_to":  # just follow to the next basic block
         successor = vertices[block].get_falls_to()
         visited1, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, calls1 = copy_all(visited, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis, calls)
         global_state1["pc"] = successor
-        sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, models, calls1)
+        sym_exec_block(successor, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, models, calls1, func_call)
     elif jump_type[block] == "conditional":  # executing "JUMPI"
 
         # A choice point, we proceed with depth first search
@@ -622,7 +626,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
                     model = [solver.model()]
                 except:
                     model = []
-                sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, models + model, calls1)
+                sym_exec_block(left_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, models + model, calls1, func_call)
         except Exception as e:
             log_file.write(str(e))
             if global_params.DEBUG_MODE:
@@ -656,7 +660,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
                     model = [solver.model()]
                 except:
                     model = []
-                sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, models + model, calls1)
+                sym_exec_block(right_branch, block, visited1, depth, stack1, mem1, memory1, global_state1, sha3_list1, path_conditions_and_vars1, analysis1, models + model, calls1, func_call)
         except Exception as e:
             log_file.write(str(e))
             if global_params.DEBUG_MODE:
@@ -674,7 +678,7 @@ def sym_exec_block(block, pre_block, visited, depth, stack, mem, memory, global_
 
 
 # Symbolically executing an instruction
-def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis, models, calls):
+def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path_conditions_and_vars, analysis, models, calls, func_call):
     global visited_pcs
     global solver
     global vertices
@@ -689,7 +693,11 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
     if instr_parts[0] == "INVALID":
         return
     elif instr_parts[0] == "ASSERTFAIL":
-        global_problematic_pcs["assertion_failure"].append(Assertion(global_state["pc"], models[-1]))
+        source_code = source_map.find_source_code(global_state["pc"])
+        if func_call == -1 and "assert" in source_code:
+            global_problematic_pcs["assertion_failure"].append(Assertion(global_state["pc"], models[-1]))
+        else:
+            global_problematic_pcs["assertion_failure"].append(Assertion(func_call, models[-1]))
         return
 
     # collecting the analysis result by calling this skeletal function
@@ -2107,7 +2115,7 @@ def detect_assertion_failure():
     global source_map
     global any_bug
 
-    assertions = [asrt for asrt in global_problematic_pcs["assertion_failure"] if "assert" in source_map.find_source_code(asrt.pc)]
+    assertions = global_problematic_pcs["assertion_failure"]
     d = {}
     for asrt in assertions:
         pos = str(source_map.instr_positions[asrt.pc])
