@@ -1028,8 +1028,8 @@ var run = function () {
     var currentFile = config.get('currentFile')
     if (currentFile) {
       var target = currentFile
-      var source = files.get(target)
-      analyzer.analyze(target, source)
+      var sources = files.listAsTree()
+      analyzer.analyze(target, sources)
     }
   }
 

@@ -17,10 +17,10 @@ function getOptions () {
 
 function Analyzer () {
 
-  this.analyze = function (filename, source) {
+  this.analyze = function (current_file, sources) {
     var data = getOptions()
-    data['source'] = source
-    data['filename'] = filename
+    data['sources'] = JSON.stringify(sources)
+    data['current_file'] = current_file
 
     var loading = yo`
       <span>
@@ -71,43 +71,47 @@ function Analyzer () {
             }
           }
           var results = yo`<div>
-            <div>${filename}</div>
-            <br />
-            ${contracts.map(function (contract) {
-              if (contract.evm_code_coverage === "0/0") {
-                return yo`<div>
-                  <div>======= contract ${contract.cname} =======</div>
-                  <div>EVM code coverage: ${contract.evm_code_coverage}</div>
-                  <div>Callstack bug: ${bug_exists(contract.callstack)}</div>
-                  <div>Money concurrency bug: ${bug_exists(contract.concurrency)}</div>
-                  <div>Time dependency bug: ${bug_exists(contract.time_dependency)}</div>
-                  <div>Reentrancy bug: ${bug_exists(contract.reentrancy)}</div>
-                  <div>Assertion failure: ${bug_exists(contract.assertion_failure)}</div>
-                  <div>======= Analysis Completed =======</div>
-                  <br />
-                </div>`
-              } else {
-                return yo`<div>
-                  <div>======= contract ${contract.cname} =======</div>
-                  <div>EVM code coverage: ${contract.evm_code_coverage}%</div>
-                  <div>Callstack bug: ${bug_exists(contract.callstack)}</div>
-                  <div>Money concurrency bug: ${bug_exists(contract.concurrency)}</div>
-                  <div>Time dependency bug: ${bug_exists(contract.time_dependency)}</div>
-                  <div>Reentrancy bug: ${bug_exists(contract.reentrancy)}</div>
-                  <div>Assertion failure: ${bug_exists(contract.assertion_failure)}</div>
-                  ${
-                    (contract.callstack || contract.concurrency || contract.time_dependency
-                      || contract.reentrancy || contract.assertion_failure) ? $.parseHTML("<br />") : ""
+            ${Object.keys(contracts).map(function(filename) {
+              return yo`<div>
+                <div>${filename}</div>
+                <br />
+                ${contracts[filename].map(function (contract) {
+                  if (contract.evm_code_coverage === "0/0") {
+                    return yo`<div>
+                      <div>======= contract ${contract.cname} =======</div>
+                      <div>EVM code coverage: ${contract.evm_code_coverage}</div>
+                      <div>Callstack bug: ${bug_exists(contract.callstack)}</div>
+                      <div>Money concurrency bug: ${bug_exists(contract.concurrency)}</div>
+                      <div>Time dependency bug: ${bug_exists(contract.time_dependency)}</div>
+                      <div>Reentrancy bug: ${bug_exists(contract.reentrancy)}</div>
+                      <div>Assertion failure: ${bug_exists(contract.assertion_failure)}</div>
+                      <div>======= Analysis Completed =======</div>
+                      <br />
+                    </div>`
+                  } else {
+                    return yo`<div>
+                      <div>======= contract ${contract.cname} =======</div>
+                      <div>EVM code coverage: ${contract.evm_code_coverage}%</div>
+                      <div>Callstack bug: ${bug_exists(contract.callstack)}</div>
+                      <div>Money concurrency bug: ${bug_exists(contract.concurrency)}</div>
+                      <div>Time dependency bug: ${bug_exists(contract.time_dependency)}</div>
+                      <div>Reentrancy bug: ${bug_exists(contract.reentrancy)}</div>
+                      <div>Assertion failure: ${bug_exists(contract.assertion_failure)}</div>
+                      ${
+                        (contract.callstack || contract.concurrency || contract.time_dependency
+                          || contract.reentrancy || contract.assertion_failure) ? $.parseHTML("<br />") : ""
+                      }
+                      <div>${$.parseHTML(contract.callstack)}</div>
+                      <div>${$.parseHTML(contract.concurrency)}</div>
+                      <div>${$.parseHTML(contract.time_dependency)}</div>
+                      <div>${$.parseHTML(contract.reentrancy)}</div>
+                      <div>${$.parseHTML(contract.assertion_failure)}</div>
+                      <div>======= Analysis Completed =======</div>
+                      <br />
+                    </div>`
                   }
-                  <div>${$.parseHTML(contract.callstack)}</div>
-                  <div>${$.parseHTML(contract.concurrency)}</div>
-                  <div>${$.parseHTML(contract.time_dependency)}</div>
-                  <div>${$.parseHTML(contract.reentrancy)}</div>
-                  <div>${$.parseHTML(contract.assertion_failure)}</div>
-                  <div>======= Analysis Completed =======</div>
-                  <br />
-                </div>`
-              }
+                })}
+              </div>`
             })}
           </div>`
         }
