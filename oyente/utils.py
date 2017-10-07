@@ -56,28 +56,16 @@ def check_solver(solver):
         raise e
     return ret
 
-def my_copy_dict(input):
+def custom_deepcopy(input):
     output = {}
     for key in input:
         if isinstance(input[key], list):
             output[key] = list(input[key])
         elif isinstance(input[key], dict):
-            output[key] = dict(input[key])
+            output[key] = custom_deepcopy(input[key])
         else:
             output[key] = input[key]
     return output
-
-def copy_all(*args):
-    output = []
-    for arg in args:
-        if isinstance(arg, dict):
-            output.append(my_copy_dict(arg))
-        elif isinstance(arg, list):
-            output.append(list(arg))
-        else:
-            output.append(arg)
-    return output
-
 
 # class Timeout():
 #     """Timeout class using ALARM signal."""
