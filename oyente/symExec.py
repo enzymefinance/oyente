@@ -1965,7 +1965,7 @@ def detect_money_concurrency():
     i = 0
     false_positive = []
     concurrency_paths = []
-    pcs = []
+    flows = []
     for flow in money_flow_all_paths:
         i += 1
         if len(flow) == 1:
@@ -1975,7 +1975,8 @@ def detect_money_concurrency():
             if len(jflow) == 1:
                 continue
             if is_diff(flow, jflow):
-                pcs = global_problematic_pcs["money_concurrency_bug"][j]
+                flows.append(global_problematic_pcs["money_concurrency_bug"][i-1])
+                flows.append(global_problematic_pcs["money_concurrency_bug"][j])
                 concurrency_paths.append([i-1, j])
                 if global_params.CHECK_CONCURRENCY_FP and \
                         is_false_positive(i-1, j, all_gs, path_conditions) and \
@@ -1983,16 +1984,26 @@ def detect_money_concurrency():
                     false_positive.append([i-1, j])
 
     if source_map:
-        pcs = validator.remove_false_positives(pcs)
-        s = source_map.to_str(pcs, "Money concurrency bug")
+        s = ""
+        for idx, pcs in enumerate(flows):
+            pcs = validator.remove_false_positives(pcs)
+            s += "\nflow " + str(idx + 1) + ":"
+            for pc in pcs:
+                source_code = source_map.find_source_code(pc).split("\n", 1)[0]
+                if not source_code:
+                    continue
+                location = source_map.get_location(pc)
+                s += "\n%s:%s:%s\n" % (source_map.cname, location['begin']['line'] + 1, location['begin']['column'] + 1)
+                s += source_code + "\n"
+                s += "^"
         if s:
             any_bug = True
             results["money_concurrency"] = s
         s = "\t  Money concurrency bug: True" + s if s else "\t  Money concurrency bug: False"
         log.info(s)
     else:
-        results["money_concurrency"] = bool(pcs)
-        log.info("\t  Money concurrency bug: %s", bool(pcs))
+        results["money_concurrency"] = bool(flows)
+        log.info("\t  Money concurrency bug: %s", bool(flows))
 
     # if PRINT_MODE: print "All false positive cases: ", false_positive
     log.debug("Concurrency in paths: ")
