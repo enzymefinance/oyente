@@ -81,7 +81,7 @@ function Analyzer () {
                       <div>======= contract ${contract.cname} =======</div>
                       <div>EVM code coverage: ${contract.evm_code_coverage}</div>
                       <div>Callstack bug: ${bug_exists(contract.callstack)}</div>
-                      <div>Money concurrency bug: ${bug_exists(contract.concurrency)}</div>
+                      <div>Money concurrency bug: ${bug_exists(contract.money_concurrency)}</div>
                       <div>Time dependency bug: ${bug_exists(contract.time_dependency)}</div>
                       <div>Reentrancy bug: ${bug_exists(contract.reentrancy)}</div>
                       <div>Assertion failure: ${bug_exists(contract.assertion_failure)}</div>
@@ -93,16 +93,16 @@ function Analyzer () {
                       <div>======= contract ${contract.cname} =======</div>
                       <div>EVM code coverage: ${contract.evm_code_coverage}%</div>
                       <div>Callstack bug: ${bug_exists(contract.callstack)}</div>
-                      <div>Money concurrency bug: ${bug_exists(contract.concurrency)}</div>
+                      <div>Money concurrency bug: ${bug_exists(contract.money_concurrency)}</div>
                       <div>Time dependency bug: ${bug_exists(contract.time_dependency)}</div>
                       <div>Reentrancy bug: ${bug_exists(contract.reentrancy)}</div>
                       <div>Assertion failure: ${bug_exists(contract.assertion_failure)}</div>
                       ${
-                        (contract.callstack || contract.concurrency || contract.time_dependency
+                        (contract.callstack || contract.money_concurrency || contract.time_dependency
                           || contract.reentrancy || contract.assertion_failure) ? $.parseHTML("<br />") : ""
                       }
                       <div>${$.parseHTML(contract.callstack)}</div>
-                      <div>${$.parseHTML(contract.concurrency)}</div>
+                      <div>${$.parseHTML(contract.money_concurrency)}</div>
                       <div>${$.parseHTML(contract.time_dependency)}</div>
                       <div>${$.parseHTML(contract.reentrancy)}</div>
                       <div>${$.parseHTML(contract.assertion_failure)}</div>
