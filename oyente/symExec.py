@@ -45,8 +45,8 @@ def initGlobalVars():
 
     global results
     results = {
-        "evm_code_coverage": "", "callstack": "", "concurrency": "",
-        "time_dependency": "", "reentrancy": "", "assertion_failure": ""
+        "evm_code_coverage": "", "callstack": False, "money_concurrency": False,
+        "time_dependency": False, "reentrancy": False, "assertion_failure": False
     }
 
     # capturing the last statement of each basic block
@@ -1392,7 +1392,7 @@ def sym_exec_ins(start, instr, stack, mem, memory, global_state, sha3_list, path
             no_bytes = stack.pop(0)
             current_miu_i = global_state["miu_i"]
 
-            if isAllReal(adress, mem_location, current_miu_i, code_from, no_bytes) and USE_GLOBAL_BLOCKCHAIN:
+            if isAllReal(address, mem_location, current_miu_i, code_from, no_bytes) and USE_GLOBAL_BLOCKCHAIN:
                 temp = long(math.ceil((mem_location + no_bytes) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
@@ -1934,10 +1934,11 @@ def detect_time_dependency():
         s = source_map.to_str(pcs, "Time dependency bug")
         if s:
             any_bug = True
-        results["time_dependency"] = s
+            results["time_dependency"] = s
         s = "\t  Time dependency bug: \t True" + s if s else "\t  Time dependency bug: \t False"
         log.info(s)
     else:
+        results["time_dependency"] = bool(pcs)
         log.info("\t  Timedependency bug: \t %s", bool(pcs))
 
     if global_params.REPORT_MODE:
@@ -1986,10 +1987,11 @@ def detect_money_concurrency():
         s = source_map.to_str(pcs, "Money concurrency bug")
         if s:
             any_bug = True
-        results["concurrency"] = s
+            results["money_concurrency"] = s
         s = "\t  Money concurrency bug: True" + s if s else "\t  Money concurrency bug: False"
         log.info(s)
     else:
+        results["money_concurrency"] = bool(pcs)
         log.info("\t  Money concurrency bug: %s", bool(pcs))
 
     # if PRINT_MODE: print "All false positive cases: ", false_positive
@@ -2070,7 +2072,7 @@ def check_callstack_attack(disasm):
     return pcs
 
 
-def run_callstack_attack():
+def detect_callstack_attack():
     global results
     global source_map
     global validator
@@ -2087,16 +2089,18 @@ def run_callstack_attack():
         s = source_map.to_str(pcs, "Callstack bug")
         if s:
             any_bug = True
-        results["callstack"] = s
+            results["callstack"] = s
         s = "\t  Callstack bug: \t True" + s if s else "\t  Callstack bug: \t False"
         log.info(s)
     else:
+        results["callstack"] = bool(pcs)
         log.info("\t  Callstack bug: \t %s", bool(pcs))
 
 def detect_reentrancy():
     global source_map
     global validator
     global any_bug
+    global results
 
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
     if source_map:
@@ -2105,15 +2109,17 @@ def detect_reentrancy():
         s = source_map.to_str(pcs, "Reentrancy bug")
         if s:
             any_bug = True
-        results["reentrancy"] = s
+            results["reentrancy"] = s
         s = "\t  Reentrancy bug: \t True" + s if s else "\t  Reentrancy bug: \t False"
         log.info(s)
     else:
+        results["reentrancy"] = reentrancy_bug_found
         log.info("\t  Reentrancy bug: \t %s", reentrancy_bug_found)
 
 def detect_assertion_failure():
     global source_map
     global any_bug
+    global results
 
     assertions = global_problematic_pcs["assertion_failure"]
     d = {}
@@ -2150,7 +2156,7 @@ def detect_assertion_failure():
 
     if s:
         any_bug = True
-    results["assertion_failure"] = s
+        results["assertion_failure"] = s
     s = "\t  Assertion failure: \t True" + s if s else "\t  Assertion failure: \t False"
     log.info(s)
 
@@ -2170,7 +2176,7 @@ def detect_bugs():
         results["evm_code_coverage"] = str(round(evm_code_coverage, 1))
 
         log.debug("Checking for Callstack attack...")
-        run_callstack_attack()
+        detect_callstack_attack()
 
         if global_params.REPORT_MODE:
             rfile.write(str(total_no_of_paths) + "\n")
@@ -2212,9 +2218,12 @@ def detect_bugs():
             f.write(str(any_bug))
 
 def closing_message():
+    global c_name_sol
+    global results
+
     log.info("\t====== Analysis Completed ======")
     if global_params.STORE_RESULT:
-        result_file = c_name + '.json'
+        result_file = c_name_sol + '.json'
         with open(result_file, 'w') as of:
             of.write(json.dumps(results, indent=1))
         log.info("Wrote results to %s.", result_file)
