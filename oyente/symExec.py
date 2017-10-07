@@ -2050,15 +2050,23 @@ def detect_money_concurrency():
         s = ""
         for idx, pcs in enumerate(flows):
             pcs = validator.remove_false_positives(pcs)
-            s += "\nflow " + str(idx + 1) + ":"
+            if global_params.WEB:
+                s += "flow " + str(idx + 1) + ":<br />"
+            else:
+                s += "\nflow " + str(idx + 1) + ":"
             for pc in pcs:
                 source_code = source_map.find_source_code(pc).split("\n", 1)[0]
                 if not source_code:
                     continue
                 location = source_map.get_location(pc)
-                s += "\n%s:%s:%s\n" % (source_map.cname, location['begin']['line'] + 1, location['begin']['column'] + 1)
-                s += source_code + "\n"
-                s += "^"
+                if global_params.WEB:
+                    s += "%s:%s:%s: Money concurrency bug:<br />" % (source_map.cname.split(":", 1)[1], location['begin']['line'] + 1, location['begin']['column'] + 1)
+                    s += "<span style='margin-left: 20px'>%s</span><br />" % source_code
+                    s += "<span style='margin-left: 20px'>^</span><br />"
+                else:
+                    s += "\n%s:%s:%s\n" % (source_map.cname, location['begin']['line'] + 1, location['begin']['column'] + 1)
+                    s += source_code + "\n"
+                    s += "^"
         if s:
             any_bug = True
             results["money_concurrency"] = s
