@@ -755,7 +755,7 @@ def sym_exec_ins(params):
     elif instr_parts[0] == "ASSERTFAIL":
         if source_map:
             source_code = source_map.find_source_code(global_state["pc"])
-            if func_call == -1 and "assert" in source_code:
+            if "assert" in source_code:
                 global_problematic_pcs["assertion_failure"].append(Assertion(global_state["pc"], models[-1]))
             elif func_call != -1:
                 global_problematic_pcs["assertion_failure"].append(Assertion(func_call, models[-1]))
