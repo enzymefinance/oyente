@@ -4,7 +4,7 @@ class HomeController < ApplicationController
 
   def analyze
     @results = {}
-    @results[:filename] = oyente_params[:current_file]
+    @results[:current_file] = oyente_params[:current_file]
     unless check_params
       @results[:error] = "Invalid input"
     else
@@ -36,10 +36,11 @@ class HomeController < ApplicationController
             end
           end
         end
-        UserMailer.analyzer_result_notification(file.path, @results, oyente_params[:email]).deliver_later
+        UserMailer.analyzer_result_notification(dir_path, @results, oyente_params[:email]).deliver_later unless oyente_params[:email].nil?
       rescue
-        file.close
         @results[:error] = "Error"
+      ensure
+        file.close
       end
     end
   end

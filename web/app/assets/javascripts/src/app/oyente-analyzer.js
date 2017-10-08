@@ -73,7 +73,7 @@ function Analyzer () {
           var results = yo`<div>
             ${Object.keys(contracts).map(function(filename) {
               return yo`<div>
-                <div>${filename}</div>
+                <div style="font-weight: bold">${filename}</div>
                 <br />
                 ${contracts[filename].map(function (contract) {
                   if (contract.evm_code_coverage === "0/0") {
