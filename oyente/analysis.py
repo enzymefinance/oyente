@@ -63,7 +63,10 @@ def check_reentrancy_bug(path_conditions_and_vars, stack, global_state):
                         new_path_condition.append(var == global_state["Ia"][storage_key])
     transfer_amount = stack[2]
     if isSymbolic(transfer_amount) and str(transfer_amount).startswith("Ia_store"):
-        storage_key = str(transfer_amount).split("-")[1]
+        try:
+            storage_key = str(transfer_amount).split("-")[1]
+        except:
+            storage_key = str(transfer_amount).split("Ia_store_")[1]
         try:
             if int(storage_key) in global_state["Ia"]:
                 new_path_condition.append(global_state["Ia"][int(storage_key)] != 0)
