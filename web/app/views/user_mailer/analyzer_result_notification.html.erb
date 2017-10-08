@@ -1,35 +1,37 @@
 <h1 style="text-align: center">Oyente analysis result</h1>
 <div class="result">
-  <div><%= @results[:filename] %></div>
-  <br />
-  <% if @results.key?(:error) %>
-    <div><%= @results[:error] %></div>
-  <% else %>
-    <% @results[:contracts].each do |contract| %>
-      <div>
-        <div>======= contract <%= contract[:cname] %> =======</div>
-        <% if contract[:evm_code_coverage] == "0/0" %>
-          <div>EVM code coverage: <%= contract[:evm_code_coverage] %></div>
-        <% else %>
-          <div>EVM code coverage: <%= contract[:evm_code_coverage] %>%</div>
-        <% end %>
-        <div>Callstack bug: <%= bug_exists?(contract[:callstack]) %></div>
-        <div>Money concurrency bug: <%= bug_exists?(contract[:concurrency]) %></div>
-        <div>Time dependency bug: <%= bug_exists?(contract[:time_dependency]) %></div>
-        <div>Reentrancy bug: <%= bug_exists?(contract[:reentrancy]) %></div>
-        <div>Assertion failure: <%= bug_exists?(contract[:assertion_failure]) %></div>
-        <% if contract[:callstack].present? || contract[:concurrency].present? \
-          || contract[:time_dependency].present? || contract[:reentrancy].present? || contract[:assertion_failure].present? %>
+  <% @results[:contracts].each do |filename, results| %>
+    <div style="font-weight: bold"><%= filename %></div>
+    <br />
+    <% results.each do |contract| %>
+      <% if contract.key?(:error) %>
+        <div><%= contract[:error] %></div>
+      <% else %>
+        <div>
+          <div>======= contract <%= contract[:cname] %> =======</div>
+          <% if contract[:evm_code_coverage] == "0/0" %>
+            <div>EVM code coverage: <%= contract[:evm_code_coverage] %></div>
+          <% else %>
+            <div>EVM code coverage: <%= contract[:evm_code_coverage] %>%</div>
+          <% end %>
+          <div>Callstack bug: <%= bug_exists?(contract[:callstack]) %></div>
+          <div>Money concurrency bug: <%= bug_exists?(contract[:money_concurrency]) %></div>
+          <div>Time dependency bug: <%= bug_exists?(contract[:time_dependency]) %></div>
+          <div>Reentrancy bug: <%= bug_exists?(contract[:reentrancy]) %></div>
+          <div>Assertion failure: <%= bug_exists?(contract[:assertion_failure]) %></div>
+          <% if contract[:callstack].present? || contract[:money_concurrency].present? \
+            || contract[:time_dependency].present? || contract[:reentrancy].present? || contract[:assertion_failure].present? %>
+            <br />
+          <% end %>
+          <div><%= contract[:callstack].html_safe if contract[:callstack] %></div>
+          <div><%= contract[:money_concurrency].html_safe if contract[:money_concurrency] %></div>
+          <div><%= contract[:time_dependency].html_safe if contract[:time_dependency] %></div>
+          <div><%= contract[:reentrancy].html_safe if contract[:reentrancy] %></div>
+          <div><%= contract[:assertion_failure].html_safe if contract[:assertion_failure] %></div>
+          <div>======= Analysis Completed =======</div>
           <br />
-        <% end %>
-        <div><%= contract[:callstack].html_safe %></div>
-        <div><%= contract[:concurrency].html_safe %></div>
-        <div><%= contract[:time_dependency].html_safe %></div>
-        <div><%= contract[:reentrancy].html_safe %></div>
-        <div><%= contract[:assertion_failure].html_safe %></div>
-        <div>======= Analysis Completed =======</div>
-        <br />
-      </div>
+        </div>
+      <% end %>
     <% end %>
   <% end %>
 </div>
