@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='oyente',
-    version='0.2.6',
+    version='0.2.7',
     author='Loi Luu',
     # author_email='',
     url='https://github.com/melonport/oyente',
@@ -35,5 +35,6 @@ setup(
     install_requires=[
         'requests',
         'web3',
+        'z3-solver'
     ]
 )
