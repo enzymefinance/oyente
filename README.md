@@ -28,23 +28,26 @@ Note - If need the [version of Oyente](https://github.com/melonproject/oyente/tr
 
 ## Installation
 
-To install Oyente, simply:
+Install Oyente via pip:
 
 ```
-$ pip install oyente
+$ pip2 install oyente
 ```
+Dependencies:
+[solc](https://github.com/melonproject/oyente#solc)
+[evm](https://github.com/melonproject/oyente#evm-from-go-ethereum)
 
-## Full install
+## Full installation
 
 ### Install the following dependencies
-#### solc version 0.4.13
+#### solc
 ```
 $ sudo add-apt-repository ppa:ethereum/ethereum
 $ sudo apt-get update
 $ sudo apt-get install solc
 ```
 
-#### evm from [go-ethereum](https://github.com/ethereum/go-ethereum) version 1.6.1.
+#### evm from [go-ethereum](https://github.com/ethereum/go-ethereum)
 
 1. https://geth.ethereum.org/downloads/ or
 2. By from PPA if your using Ubuntu

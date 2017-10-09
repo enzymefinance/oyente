@@ -126,7 +126,7 @@ def main():
     group.add_argument("-ru", "--remoteURL", type=str,
                        help="Get contract from remote URL. Solidity by default. Use -b to process evm instead.", dest="remote_URL")
 
-    parser.add_argument("--version", action="version", version="oyente version 0.2.5-Buona Vista")
+    parser.add_argument("--version", action="version", version="oyente version 0.2.7 - Commonwealth")
     parser.add_argument(
         "-b", "--bytecode", help="read bytecode in source instead of solidity file.", action="store_true")
 

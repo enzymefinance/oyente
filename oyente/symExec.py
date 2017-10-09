@@ -2045,6 +2045,9 @@ def detect_money_concurrency():
                         is_false_positive(i-1, j, all_gs, path_conditions) and \
                         is_false_positive(j, i-1, all_gs, path_conditions):
                     false_positive.append([i-1, j])
+                break
+        if flows:
+            break
 
     if source_map:
         s = ""
@@ -2069,7 +2072,8 @@ def detect_money_concurrency():
                     s += "^"
         if s:
             any_bug = True
-            s = "Money concurrency bug:<br />" + "<div style='margin-left: 20px'>" + s + "</div>"
+            if global_params.WEB:
+                s = "Money concurrency bug:<br />" + "<div style='margin-left: 20px'>" + s + "</div>"
             results["money_concurrency"] = s
         s = "\t  Money concurrency bug: True" + s if s else "\t  Money concurrency bug: False"
         log.info(s)
