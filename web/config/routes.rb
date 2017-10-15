@@ -3,5 +3,6 @@ Rails.application.routes.draw do
   root 'home#index'
   resources :home, only: :index do
     post 'analyze', on: :collection
+    post 'analyze_bytecode', on: :collection
   end
 end

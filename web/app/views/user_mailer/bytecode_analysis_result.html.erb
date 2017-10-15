@@ -1,0 +1,12 @@
+<h1 style="text-align: center">Oyente analysis result</h1>
+<div class="result">
+  <div style="font-weight: bold">Bytecode analysis result</div>
+  <br />
+  <div>
+    <div>EVM code coverage: <%= @result[:result][:evm_code_coverage] %></div>
+    <div>Callstack bug: <%= bug_exists?(@result[:result][:callstack]) %></div>
+    <div>Money concurrency bug: <%= bug_exists?(@result[:result][:money_concurrency]) %></div>
+    <div>Time dependency bug: <%= bug_exists?(@result[:result][:time_dependency]) %></div>
+    <div>Reentrancy bug: <%= bug_exists?(@result[:result][:reentrancy]) %></div>
+  </div>
+</div>

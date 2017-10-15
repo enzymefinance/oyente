@@ -1014,6 +1014,12 @@ var run = function () {
         </div>
         <div class="${css.large_item}"><input name="email" type="email" title="The result will be sent to this email after the analysis is done" placeholder="contact@example.com"></div>
       </div>
+      <div class="${css.crow}">
+        <div class="${css.small_item}">
+          <div>Runtime Bytecode:</div>
+        </div>
+        <div class="${css.large_item}"><input name="bytecode" type="text"></div>
+      </div>
     </div>
   `
 
@@ -1026,10 +1032,16 @@ var run = function () {
     if (transactionDebugger.isActive) return
     editorSyncFile()
     var currentFile = config.get('currentFile')
-    if (currentFile) {
-      var target = currentFile
-      var sources = files.listAsTree()
-      analyzer.analyze(target, sources)
+    var bytecode = $("#oyente-options input[name='bytecode']").val()
+    if (bytecode) {
+      analyzer.analyze_bytecode(bytecode)
+    }
+    else {
+      if (currentFile && !bytecode) {
+        var target = currentFile
+        var sources = files.listAsTree()
+        analyzer.analyze(target, sources)
+      }
     }
   }
 

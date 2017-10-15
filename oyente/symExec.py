@@ -2323,9 +2323,11 @@ def handler(signum, frame):
 
 def results_for_web():
     global results
+    global source_map
 
-    results["filename"] = source_map.cname.split(":")[0].split("/")[-1]
-    results["cname"] = source_map.cname.split(":")[1]
+    if source_map:
+        results["filename"] = source_map.cname.split(":")[0].split("/")[-1]
+        results["cname"] = source_map.cname.split(":")[1]
     print "======= results ======="
     print json.dumps(results)
 
