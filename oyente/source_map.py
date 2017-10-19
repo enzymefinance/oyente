@@ -24,12 +24,18 @@ class SourceMap:
     sources = {}
     ast_helper = None
 
-    def __init__(self, cname, parent_filename):
+    def __init__(self, cname, parent_filename, input_type):
         self.cname = cname
+        self.input_type = input_type
         if not SourceMap.parent_filename:
             SourceMap.parent_filename = parent_filename
-            SourceMap.position_groups = SourceMap.__load_position_groups()
-            SourceMap.ast_helper = AstHelper(SourceMap.parent_filename)
+            if input_type == "solidity":
+                SourceMap.position_groups = SourceMap.__load_position_groups()
+            elif input_type == "standard json":
+                SourceMap.position_groups = SourceMap.__load_position_groups_standard_json()
+            else:
+                raise Exception("There is no such type of input")
+            SourceMap.ast_helper = AstHelper(SourceMap.parent_filename, input_type)
         self.source = self.__get_source()
         self.positions = self.__get_positions()
         self.instr_positions = {}
@@ -109,6 +115,13 @@ class SourceMap:
         return func_call_names
 
     @classmethod
+    def __load_position_groups_standard_json(cls):
+        with open('standard_json_output', 'r') as f:
+            output = f.read()
+        output = json.loads(output)
+        return output["contracts"]
+
+    @classmethod
     def __load_position_groups(cls):
         cmd = "solc --combined-json asm %s" % cls.parent_filename
         out = run_command(cmd)
@@ -116,7 +129,11 @@ class SourceMap:
         return out['contracts']
 
     def __get_positions(self):
-        asm = SourceMap.position_groups[self.cname]['asm']['.data']['0']
+        if self.input_type == "solidity":
+            asm = SourceMap.position_groups[self.cname]['asm']['.data']['0']
+        else:
+            filename, contract_name = self.cname.split(":")
+            asm = SourceMap.position_groups[filename][contract_name]['evm']['legacyAssembly']['.data']['0']
         positions = asm['.code']
         while(True):
             try:

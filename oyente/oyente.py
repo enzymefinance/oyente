@@ -7,6 +7,7 @@ import re
 import argparse
 import logging
 import requests
+import json
 import symExec
 import global_params
 from source_map import SourceMap
@@ -65,18 +66,6 @@ def extract_bin_str(s):
         exit()
     return contracts
 
-def compileContracts(contract):
-    cmd = "solc --bin-runtime %s" % contract
-    out = run_command(cmd)
-
-    libs = re.findall(r"_+(.*?)_+", out)
-    libs = set(libs)
-    if libs:
-        return link_libraries(contract, libs)
-    else:
-        return extract_bin_str(out)
-
-
 def link_libraries(filename, libs):
     option = ""
     for idx, lib in enumerate(libs):
@@ -90,6 +79,17 @@ def link_libraries(filename, libs):
     p1.stdout.close()
     out = p2.communicate()[0]
     return extract_bin_str(out)
+
+def compileContracts(contract):
+    cmd = "solc --bin-runtime %s" % contract
+    out = run_command(cmd)
+
+    libs = re.findall(r"_+(.*?)_+", out)
+    libs = set(libs)
+    if libs:
+        return link_libraries(contract, libs)
+    else:
+        return extract_bin_str(out)
 
 def analyze(processed_evm_file, disasm_file, source_map = None):
     disasm_out = ""
@@ -121,47 +121,34 @@ def main():
 
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("-s", "--source", type=str,
-                       help="local source file name. Solidity by default. Use -b to process evm instead. Use stdin to read from stdin.")
-    group.add_argument("-ru", "--remoteURL", type=str,
-                       help="Get contract from remote URL. Solidity by default. Use -b to process evm instead.", dest="remote_URL")
+
+    group.add_argument("-s",  "--source",    type=str, help="local source file name. Solidity by default. Use -b to process evm instead. Use stdin to read from stdin.")
+    group.add_argument("-ru", "--remoteURL", type=str, help="Get contract from remote URL. Solidity by default. Use -b to process evm instead.", dest="remote_URL")
 
     parser.add_argument("--version", action="version", version="oyente version 0.2.7 - Commonwealth")
-    parser.add_argument(
-        "-b", "--bytecode", help="read bytecode in source instead of solidity file.", action="store_true")
 
-    parser.add_argument(
-        "-j", "--json", help="Redirect results to a json file.", action="store_true")
-    parser.add_argument(
-        "-e", "--evm", help="Do not remove the .evm file.", action="store_true")
-    parser.add_argument(
-        "-p", "--paths", help="Print path condition information.", action="store_true")
-    parser.add_argument(
-        "--error", help="Enable exceptions and print output. Monsters here.", action="store_true")
-    parser.add_argument("-t", "--timeout", type=int, help="Timeout for Z3 in ms.")
-    parser.add_argument(
-        "-v", "--verbose", help="Verbose output, print everything.", action="store_true")
-    parser.add_argument(
-        "-r", "--report", help="Create .report file.", action="store_true")
-    parser.add_argument("-gb", "--globalblockchain",
-                        help="Integrate with the global ethereum blockchain", action="store_true")
-    parser.add_argument("-dl", "--depthlimit", help="Limit DFS depth",
-                        action="store", dest="depth_limit", type=int)
-    parser.add_argument("-gl", "--gaslimit", help="Limit Gas",
-                        action="store", dest="gas_limit", type=int)
-    parser.add_argument(
-        "-st", "--state", help="Get input state from state.json", action="store_true")
-    parser.add_argument("-ll", "--looplimit", help="Limit number of loops",
-                        action="store", dest="loop_limit", type=int)
-    parser.add_argument(
-        "-w", "--web", help="Run Oyente for web service", action="store_true")
+    parser.add_argument("-t",   "--timeout",        help="Timeout for Z3 in ms.", action="store", type=int)
+    parser.add_argument("-gl",  "--gaslimit",       help="Limit Gas", action="store", dest="gas_limit", type=int)
+    parser.add_argument("-ll",  "--looplimit",      help="Limit number of loops", action="store", dest="loop_limit", type=int)
+    parser.add_argument("-dl",  "--depthlimit",     help="Limit DFS depth", action="store", dest="depth_limit", type=int)
+    parser.add_argument("-ap",  "--allow-paths",    help="Allow a given path for imports", action="store", dest="allow_paths", type=str)
     parser.add_argument("-glt", "--global-timeout", help="Timeout for symbolic execution", action="store", dest="global_timeout", type=int)
-    parser.add_argument(
-        "-a", "--assertion", help="Check assertion failures.", action="store_true")
-    parser.add_argument(
-            "--debug", help="Display debug information", action="store_true")
-    parser.add_argument(
-        "--generate-test-cases", help="Generate test cases each branch of symbolic execution tree", action="store_true")
+
+
+    parser.add_argument( "-e",   "--evm",                 help="Do not remove the .evm file.", action="store_true")
+    parser.add_argument( "-w",   "--web",                 help="Run Oyente for web service", action="store_true")
+    parser.add_argument( "-j",   "--json",                help="Redirect results to a json file.", action="store_true")
+    parser.add_argument( "-err", "--error",               help="Enable exceptions and print output. Monsters here.", action="store_true")
+    parser.add_argument( "-p",   "--paths",               help="Print path condition information.", action="store_true")
+    parser.add_argument( "-db",  "--debug",               help="Display debug information", action="store_true")
+    parser.add_argument( "-st",  "--state",               help="Get input state from state.json", action="store_true")
+    parser.add_argument( "-r",   "--report",              help="Create .report file.", action="store_true")
+    parser.add_argument( "-v",   "--verbose",             help="Verbose output, print everything.", action="store_true")
+    parser.add_argument( "-b",   "--bytecode",            help="read bytecode in source instead of solidity file.", action="store_true")
+    parser.add_argument( "-a",   "--assertion",           help="Check assertion failures.", action="store_true")
+    parser.add_argument( "-sj",  "--standard-json",       help="Support Standard JSON input", action="store_true")
+    parser.add_argument( "-gb",  "--globalblockchain",    help="Integrate with the global ethereum blockchain", action="store_true")
+    parser.add_argument( "-gtc", "--generate-test-cases", help="Generate test cases each branch of symbolic execution tree", action="store_true")
 
     args = parser.parse_args()
 
@@ -225,6 +212,49 @@ def main():
             exit_code = os.WEXITSTATUS(cmd)
             if exit_code != 0:
                 exit(exit_code)
+    elif args.standard_json:
+        FNULL = open(os.devnull, 'w')
+        cmd = "cat %s" % args.source
+        p1 = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)
+        cmd = "solc --allow-paths %s --standard-json" % args.allow_paths
+        p2 = subprocess.Popen(shlex.split(cmd), stdin=p1.stdout, stdout=subprocess.PIPE, stderr=FNULL)
+        p1.stdout.close()
+        out = p2.communicate()[0]
+        with open('standard_json_output', 'w') as f:
+            f.write(out)
+        # should handle the case without allow-paths option
+        j = json.loads(out)
+        contracts = []
+        for source in j["sources"]:
+            for contract in j["contracts"][source]:
+                cname = source + ":" + contract
+                evm = j["contracts"][source][contract]["evm"]["deployedBytecode"]["object"]
+                contracts.append((cname, evm))
+
+        if os.path.isfile("bug_found"):
+            os.remove("bug_found")
+
+        for cname, bin_str in contracts:
+            logging.info("Contract %s:", cname)
+            processed_evm_file = cname + '.evm'
+            disasm_file = cname + '.evm.disasm'
+
+            with open(processed_evm_file, 'w') as of:
+                of.write(removeSwarmHash(bin_str))
+
+            analyze(processed_evm_file, disasm_file, SourceMap(cname, args.source, "standard json"))
+
+            if args.evm:
+                with open(processed_evm_file, 'w') as of:
+                    of.write(bin_str)
+
+            remove_temporary_file(processed_evm_file)
+            remove_temporary_file(disasm_file)
+            remove_temporary_file(disasm_file + '.log')
+        if os.path.isfile("bug_found"):
+            os.remove("bug_found")
+            exit(1)
+
     else:
         if os.path.isfile("bug_found"):
             os.remove("bug_found")
@@ -239,7 +269,7 @@ def main():
             with open(processed_evm_file, 'w') as of:
                 of.write(removeSwarmHash(bin_str))
 
-            analyze(processed_evm_file, disasm_file, SourceMap(cname, args.source))
+            analyze(processed_evm_file, disasm_file, SourceMap(cname, args.source, "solidity"))
 
             if args.evm:
                 with open(processed_evm_file, 'w') as of:

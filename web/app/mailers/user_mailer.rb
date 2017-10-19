@@ -11,4 +11,10 @@ class UserMailer < ApplicationMailer
 
     mail to: email, subject: "Analysis results by Oyente"
   end
+
+  def bytecode_analysis_result filepath, result, email
+    @result = result
+    attachments["result"] = File.read(filepath)
+    mail to: email, subject: "Bytecode analysis result by Oyente"
+  end
 end

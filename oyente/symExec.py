@@ -755,7 +755,9 @@ def sym_exec_ins(params):
     elif instr_parts[0] == "ASSERTFAIL":
         if source_map:
             source_code = source_map.find_source_code(global_state["pc"])
-            if "assert" in source_code:
+            idx = source_code.index("(")
+            func_name = source_code[:idx].strip()
+            if func_name == "assert":
                 global_problematic_pcs["assertion_failure"].append(Assertion(global_state["pc"], models[-1]))
             elif func_call != -1:
                 global_problematic_pcs["assertion_failure"].append(Assertion(func_call, models[-1]))
@@ -2323,9 +2325,11 @@ def handler(signum, frame):
 
 def results_for_web():
     global results
+    global source_map
 
-    results["filename"] = source_map.cname.split(":")[0].split("/")[-1]
-    results["cname"] = source_map.cname.split(":")[1]
+    if source_map:
+        results["filename"] = source_map.cname.split(":")[0].split("/")[-1]
+        results["cname"] = source_map.cname.split(":")[1]
     print "======= results ======="
     print json.dumps(results)
 
