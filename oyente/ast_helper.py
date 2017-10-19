@@ -3,9 +3,21 @@ from ast_walker import AstWalker
 import json
 
 class AstHelper:
-    def __init__(self, filename):
-        self.source_list = self.get_source_list(filename)
+    def __init__(self, filename, input_type):
+        self.input_type = input_type
+        if input_type == "solidity":
+            self.source_list = self.get_source_list(filename)
+        elif input_type == "standard json":
+            self.source_list = self.get_source_list_standard_json(filename)
+        else:
+            raise Exception("There is no such type of input")
         self.contracts = self.extract_contract_definitions(self.source_list)
+
+    def get_source_list_standard_json(self, filename):
+        with open('standard_json_output', 'r') as f:
+            out = f.read()
+        out = json.loads(out)
+        return out["sources"]
 
     def get_source_list(self, filename):
         cmd = "solc --combined-json ast %s" % filename
@@ -21,8 +33,12 @@ class AstHelper:
         }
         walker = AstWalker()
         for k in sourcesList:
+            if self.input_type == "solidity":
+                ast = sourcesList[k]["AST"]
+            else:
+                ast = sourcesList[k]["legacyAST"]
             nodes = []
-            walker.walk(sourcesList[k]["AST"], "ContractDefinition", nodes)
+            walker.walk(ast, "ContractDefinition", nodes)
             for node in nodes:
                 ret["contractsById"][node["id"]] = node
                 ret["sourcesByContract"][node["id"]] = k
