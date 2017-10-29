@@ -1,0 +1,3 @@
+[submodule "web/browser-solidity"]
+	path = web/browser-solidity
+	url = git@github.com:ethereum/browser-solidity.git

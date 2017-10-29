@@ -70,8 +70,14 @@ def initGlobalVars():
 
     global results
     results = {
-        "evm_code_coverage": "", "callstack": False, "money_concurrency": False,
-        "time_dependency": False, "reentrancy": False, "assertion_failure": False
+        "evm_code_coverage": "",
+        "bugs": {
+            "callstack": False,
+            "money_concurrency": False,
+            "time_dependency": False,
+            "reentrancy": False,
+            "assertion_failure": False,
+        }
     }
 
     # capturing the last statement of each basic block
@@ -755,8 +761,8 @@ def sym_exec_ins(params):
     elif instr_parts[0] == "ASSERTFAIL":
         if source_map:
             source_code = source_map.find_source_code(global_state["pc"])
-            idx = source_code.index("(")
-            func_name = source_code[:idx].strip()
+            source_code = source_code.split("(")[0]
+            func_name = source_code.strip()
             if func_name == "assert":
                 global_problematic_pcs["assertion_failure"].append(Assertion(global_state["pc"], models[-1]))
             elif func_call != -1:
@@ -1999,7 +2005,7 @@ def detect_time_dependency():
         s = source_map.to_str(pcs, "Time dependency bug")
         if s:
             any_bug = True
-            results["time_dependency"] = s
+            results["bugs"]["time_dependency"] = s
         s = "\t  Time dependency bug: \t True" + s if s else "\t  Time dependency bug: \t False"
         log.info(s)
     else:
@@ -2055,28 +2061,18 @@ def detect_money_concurrency():
         s = ""
         for idx, pcs in enumerate(flows):
             pcs = validator.remove_false_positives(pcs)
-            if global_params.WEB:
-                s += "Flow " + str(idx + 1) + ":<br />"
-            else:
-                s += "\nFlow " + str(idx + 1) + ":"
+            s += "\nFlow " + str(idx + 1) + ":"
             for pc in pcs:
                 source_code = source_map.find_source_code(pc).split("\n", 1)[0]
                 if not source_code:
                     continue
                 location = source_map.get_location(pc)
-                if global_params.WEB:
-                    s += "%s:%s:%s:<br />" % (source_map.cname.split(":", 1)[1], location['begin']['line'] + 1, location['begin']['column'] + 1)
-                    s += "<span style='margin-left: 20px'>%s</span><br />" % source_code
-                    s += "<span style='margin-left: 20px'>^</span><br />"
-                else:
-                    s += "\n%s:%s:%s\n" % (source_map.cname, location['begin']['line'] + 1, location['begin']['column'] + 1)
-                    s += source_code + "\n"
-                    s += "^"
+                s += "\n%s:%s:%s\n" % (source_map.cname, location['begin']['line'] + 1, location['begin']['column'] + 1)
+                s += source_code + "\n"
+                s += "^"
         if s:
             any_bug = True
-            if global_params.WEB:
-                s = "Money concurrency bug:<br />" + "<div style='margin-left: 20px'>" + s + "</div>"
-            results["money_concurrency"] = s
+            results["bugs"]["money_concurrency"] = s
         s = "\t  Money concurrency bug: True" + s if s else "\t  Money concurrency bug: False"
         log.info(s)
     else:
@@ -2178,7 +2174,7 @@ def detect_callstack_attack():
         s = source_map.to_str(pcs, "Callstack bug")
         if s:
             any_bug = True
-            results["callstack"] = s
+            results["bugs"]["callstack"] = s
         s = "\t  Callstack bug: \t True" + s if s else "\t  Callstack bug: \t False"
         log.info(s)
     else:
@@ -2198,7 +2194,7 @@ def detect_reentrancy():
         s = source_map.to_str(pcs, "Reentrancy bug")
         if s:
             any_bug = True
-            results["reentrancy"] = s
+            results["bugs"]["reentrancy"] = s
         s = "\t  Reentrancy bug: \t True" + s if s else "\t  Reentrancy bug: \t False"
         log.info(s)
     else:
@@ -2222,30 +2218,19 @@ def detect_assertion_failure():
     for asrt in assertions:
         location = source_map.get_location(asrt.pc)
         source_code = source_map.find_source_code(asrt.pc).split("\n", 1)[0]
-        if global_params.WEB:
-            s += "%s:%s:%s: Assertion failure:<br />" % (source_map.cname.split(":", 1)[1], location['begin']['line'] + 1, location['begin']['column'] + 1)
-            s += "<span style='margin-left: 20px'>%s</span><br />" % source_code
-            s += "<span style='margin-left: 20px'>^</span><br />"
-            for variable in asrt.model.decls():
-                var_name = str(variable)
-                if len(var_name.split("-")) > 2:
-                    var_name = var_name.split("-")[2]
-                if source_map.is_a_parameter_or_state_variable(var_name):
-                    s += "<span style='margin-left: 20px'>" + var_name + " = " + str(asrt.model[variable]) + "</span>" + "<br />"
-        else:
-            s += "\n%s:%s:%s\n" % (source_map.cname, location['begin']['line'] + 1, location['begin']['column'] + 1)
-            s += source_code + "\n"
-            s += "^\n"
-            for variable in asrt.model.decls():
-                var_name = str(variable)
-                if len(var_name.split("-")) > 2:
-                    var_name = var_name.split("-")[2]
-                if source_map.is_a_parameter_or_state_variable(var_name):
-                    s += var_name + " = " + str(asrt.model[variable]) + "\n"
+        s += "%s:%s:%s: \n" % (re.sub(source_map.root_path, "", source_map.get_filename()), location['begin']['line'] + 1, location['begin']['column'] + 1)
+        s += source_code + "\n"
+        s += "^\n"
+        for variable in asrt.model.decls():
+            var_name = str(variable)
+            if len(var_name.split("-")) > 2:
+                var_name = var_name.split("-")[2]
+            if source_map.is_a_parameter_or_state_variable(var_name):
+                s += var_name + " = " + str(asrt.model[variable]) + "\n"
 
     if s:
         any_bug = True
-        results["assertion_failure"] = s
+        results["bugs"]["assertion_failure"] = s
     s = "\t  Assertion failure: \t True" + s if s else "\t  Assertion failure: \t False"
     log.info(s)
 
@@ -2299,9 +2284,6 @@ def detect_bugs():
             log.info("\t  Assertion failure: \t False")
         results["evm_code_coverage"] = "0/0"
 
-    if global_params.WEB:
-        results_for_web()
-
     if not os.path.isfile("bug_found") and any_bug:
         with open("bug_found", "w") as f:
             f.write(str(any_bug))
@@ -2320,24 +2302,14 @@ def closing_message():
 def handler(signum, frame):
     if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
         exit(TIME_OUT)
-    detect_bugs()
     raise Exception("timeout")
-
-def results_for_web():
-    global results
-    global source_map
-
-    if source_map:
-        results["filename"] = source_map.cname.split(":")[0].split("/")[-1]
-        results["cname"] = source_map.cname.split(":")[1]
-    print "======= results ======="
-    print json.dumps(results)
 
 def main(contract, contract_sol, _source_map = None):
     global c_name
     global c_name_sol
     global source_map
     global validator
+    global results
 
     c_name = contract
     c_name_sol = contract_sol
@@ -2368,9 +2340,10 @@ def main(contract, contract_sol, _source_map = None):
             exit(EXCEPTION)
         traceback.print_exc()
         raise e
+    finally:
+        detect_bugs()
+        return results
     signal.alarm(0)
-
-    detect_bugs()
 
 if __name__ == '__main__':
     main(sys.argv[1])

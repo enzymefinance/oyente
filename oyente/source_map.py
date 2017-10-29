@@ -1,6 +1,9 @@
-import json
-import global_params
+import re
 import ast
+import json
+
+import global_params
+
 from utils import run_command
 from ast_helper import AstHelper
 
@@ -24,7 +27,8 @@ class SourceMap:
     sources = {}
     ast_helper = None
 
-    def __init__(self, cname, parent_filename, input_type):
+    def __init__(self, root_path, cname, parent_filename, input_type):
+        self.root_path = root_path
         self.cname = cname
         self.input_type = input_type
         if not SourceMap.parent_filename:
@@ -59,14 +63,9 @@ class SourceMap:
                 continue
 
             location = self.get_location(pc)
-            if global_params.WEB:
-                s += "%s:%s:%s: %s:<br />" % (self.cname.split(":", 1)[1], location['begin']['line'] + 1, location['begin']['column'] + 1, bug_name)
-                s += "<span style='margin-left: 20px'>%s</span><br />" % source_code
-                s += "<span style='margin-left: 20px'>^</span><br />"
-            else:
-                s += "\n%s:%s:%s\n" % (self.cname, location['begin']['line'] + 1, location['begin']['column'] + 1)
-                s += source_code + "\n"
-                s += "^"
+            s += "%s:%s:%s: \n" % (re.sub(self.root_path, "", self.get_filename()), location['begin']['line'] + 1, location['begin']['column'] + 1)
+            s += source_code + "\n"
+            s += "^"
         return s
 
     def get_location(self, pc):
@@ -94,7 +93,7 @@ class SourceMap:
         return False
 
     def __get_source(self):
-        fname = self.__get_filename()
+        fname = self.get_filename()
         if SourceMap.sources.has_key(fname):
             return SourceMap.sources[fname]
         else:
@@ -174,5 +173,5 @@ class SourceMap:
                 length = half
         return start - 1
 
-    def __get_filename(self):
+    def get_filename(self):
         return self.cname.split(":")[0]
