@@ -211,6 +211,8 @@ def main():
 
         result = analyze(processed_evm_file, disasm_file)
 
+        bug_found = result[1]
+
         if global_params.WEB:
             print json.dumps(result)
 
@@ -221,6 +223,9 @@ def main():
             exit_code = os.WEXITSTATUS(cmd)
             if exit_code != 0:
                 exit(exit_code)
+        else:
+            if bug_found:
+                exit(1)
     elif args.standard_json:
         FNULL = open(os.devnull, 'w')
         cmd = "cat %s" % args.source
@@ -240,8 +245,7 @@ def main():
                 evm = j["contracts"][source][contract]["evm"]["deployedBytecode"]["object"]
                 contracts.append((cname, evm))
 
-        if os.path.isfile("bug_found"):
-            os.remove("bug_found")
+        bug_found = False
 
         for cname, bin_str in contracts:
             logging.info("Contract %s:", cname)
@@ -251,7 +255,15 @@ def main():
             with open(processed_evm_file, 'w') as of:
                 of.write(removeSwarmHash(bin_str))
 
-            analyze(processed_evm_file, disasm_file, SourceMap(cname, args.source, "standard json"))
+            result = analyze(processed_evm_file, disasm_file, SourceMap(cname, args.source, "standard json"))
+
+            if not bug_found:
+                bug_found = result[1]
+
+            try:
+                results[source][contract] = result[0]
+            except:
+                results[source] = {contract: result[0]}
 
             if args.evm:
                 with open(processed_evm_file, 'w') as of:
@@ -260,16 +272,14 @@ def main():
             remove_temporary_file(processed_evm_file)
             remove_temporary_file(disasm_file)
             remove_temporary_file(disasm_file + '.log')
-        if os.path.isfile("bug_found"):
-            os.remove("bug_found")
+
+        if bug_found:
             exit(1)
 
     else:
-        if os.path.isfile("bug_found"):
-            os.remove("bug_found")
-
         contracts = compileContracts(args.source)
         results = {}
+        bug_found = False
 
         for cname, bin_str in contracts:
             source, contract = cname.split(":")
@@ -283,10 +293,13 @@ def main():
 
             result = analyze(processed_evm_file, disasm_file, SourceMap(args.root_path, cname, args.source, "solidity"))
 
+            if not bug_found:
+                bug_found = result[1]
+
             try:
-                results[source][contract] = result
+                results[source][contract] = result[0]
             except:
-                results[source] = {contract: result}
+                results[source] = {contract: result[0]}
 
             if args.evm:
                 with open(processed_evm_file, 'w') as of:
@@ -299,8 +312,7 @@ def main():
         if global_params.WEB:
             print json.dumps(results)
 
-        if os.path.isfile("bug_found"):
-            os.remove("bug_found")
+        if bug_found:
             exit(1)
 
 if __name__ == '__main__':

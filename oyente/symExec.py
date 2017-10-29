@@ -63,9 +63,6 @@ def initGlobalVars():
     solver = Solver()
     solver.set("timeout", global_params.TIMEOUT)
 
-    global any_bug
-    any_bug = False
-
     global visited_pcs
     visited_pcs = set()
 
@@ -1995,7 +1992,7 @@ def sym_exec_ins(params):
 def detect_time_dependency():
     global results
     global source_map
-    global any_bug
+    global time_dependency
 
     TIMESTAMP_VAR = "IH_s"
     is_dependant = False
@@ -2017,7 +2014,6 @@ def detect_time_dependency():
     if source_map:
         s = str(time_dependency)
         if s:
-            any_bug = True
             results['vulnerabilities']['time_dependency'] = s
         s = "\t  Time dependency bug: \t True" + s if s else "\t  Time dependency bug: \t False"
         log.info(s)
@@ -2039,7 +2035,7 @@ def detect_time_dependency():
 def detect_money_concurrency():
     global results
     global source_map
-    global any_bug
+    global money_concurrency
 
     n = len(money_flow_all_paths)
     for i in range(n):
@@ -2074,7 +2070,6 @@ def detect_money_concurrency():
     if source_map:
         s = str(money_concurrency)
         if s:
-            any_bug = True
             results['vulnerabilities']['money_concurrency'] = s
         s = "\t  Money concurrency bug: True" + s if s else "\t  Money concurrency bug: False"
         log.info(s)
@@ -2163,8 +2158,8 @@ def check_callstack_attack(disasm):
 def detect_callstack_attack():
     global results
     global source_map
-    global any_bug
     global calls_affect_state
+    global callstack
 
     disasm_data = open(c_name).read()
     instr_pattern = r"([\d]+) ([A-Z]+)([\d]+)?(?: => 0x)?(\S+)?"
@@ -2176,7 +2171,6 @@ def detect_callstack_attack():
     if source_map:
         s = str(callstack)
         if s:
-            any_bug = True
             results['vulnerabilities']['callstack'] = s
         s = "\t  Callstack bug: \t True" + s if s else "\t  Callstack bug: \t False"
         log.info(s)
@@ -2186,8 +2180,8 @@ def detect_callstack_attack():
 
 def detect_reentrancy():
     global source_map
-    global any_bug
     global results
+    global reentrancy
 
     pcs = global_problematic_pcs["reentrancy_bug"]
     reentrancy = Reentrancy(source_map, pcs)
@@ -2195,7 +2189,6 @@ def detect_reentrancy():
     if source_map:
         s = str(reentrancy)
         if s:
-            any_bug = True
             results['vulnerabilities']['reentrancy'] = s
         s = "\t  Reentrancy bug: \t True" + s if s else "\t  Reentrancy bug: \t False"
         log.info(s)
@@ -2205,13 +2198,13 @@ def detect_reentrancy():
 
 def detect_assertion_failure():
     global source_map
-    global any_bug
     global results
+    global assertion_failure
 
-    s = str(AssertionFailure(source_map, global_problematic_pcs['assertion_failure']))
+    assertion_failure = AssertionFailure(source_map, global_problematic_pcs['assertion_failure'])
+    s = str(assertion_failure)
 
     if s:
-        any_bug = True
         results['vulnerabilities']['assertion_failure'] = s
     s = "\t  Assertion failure: \t True" + s if s else "\t  Assertion failure: \t False"
     log.info(s)
@@ -2224,7 +2217,6 @@ def detect_bugs():
     global source_map
     global visited_pcs
     global global_problematic_pcs
-    global any_bug
 
     if instructions:
         evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys()) * 100
@@ -2266,9 +2258,25 @@ def detect_bugs():
             log.info("\t  Assertion failure: \t False")
         results["evm_code_coverage"] = "0/0"
 
-    if not os.path.isfile("bug_found") and any_bug:
-        with open("bug_found", "w") as f:
-            f.write(str(any_bug))
+    return results, bug_found()
+
+def bug_found():
+    global source_map
+    global time_dependency
+    global callstack
+    global money_concurrency
+    global reentrancy
+    global assertion_failure
+
+    vulnerabilities = [callstack, money_concurrency, time_dependency, reentrancy]
+
+    if source_map and global_params.CHECK_ASSERTIONS:
+        vulnerabilities.append(assertion_failure)
+
+    for vul in vulnerabilities:
+        if vul.is_vulnerable():
+            return True
+    return False
 
 def closing_message():
     global c_name_sol
@@ -2321,8 +2329,7 @@ def main(contract, contract_sol, _source_map = None):
         traceback.print_exc()
         raise e
     finally:
-        detect_bugs()
-        return results
+        return detect_bugs()
     signal.alarm(0)
 
 if __name__ == '__main__':
