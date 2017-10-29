@@ -61,8 +61,8 @@ def extract_bin_str(s):
     contracts = [contract for contract in contracts if contract[1]]
     if not contracts:
         logging.critical("Solidity compilation failed")
-        print "======= error ======="
-        print "Solidity compilation failed"
+        if global_params.WEB:
+            print {"error": "Solidity compilation failed"}
         exit()
     return contracts
 
@@ -105,10 +105,10 @@ def analyze(processed_evm_file, disasm_file, source_map = None):
         of.write(disasm_out)
 
     # Run symExec
-    if source_map != None:
-        symExec.main(disasm_file, args.source, source_map)
+    if source_map:
+        return symExec.main(disasm_file, args.source, source_map)
     else:
-        symExec.main(disasm_file, args.source)
+        return symExec.main(disasm_file, args.source)
 
 def remove_temporary_file(path):
     if os.path.isfile(path):
@@ -129,11 +129,11 @@ def main():
 
     parser.add_argument("-t",   "--timeout",        help="Timeout for Z3 in ms.", action="store", type=int)
     parser.add_argument("-gl",  "--gaslimit",       help="Limit Gas", action="store", dest="gas_limit", type=int)
+    parser.add_argument("-rp",   "--root-path",      help="Root directory path used for the online version", action="store", dest="root_path", type=str)
     parser.add_argument("-ll",  "--looplimit",      help="Limit number of loops", action="store", dest="loop_limit", type=int)
     parser.add_argument("-dl",  "--depthlimit",     help="Limit DFS depth", action="store", dest="depth_limit", type=int)
     parser.add_argument("-ap",  "--allow-paths",    help="Allow a given path for imports", action="store", dest="allow_paths", type=str)
     parser.add_argument("-glt", "--global-timeout", help="Timeout for symbolic execution", action="store", dest="global_timeout", type=int)
-
 
     parser.add_argument( "-e",   "--evm",                 help="Do not remove the .evm file.", action="store_true")
     parser.add_argument( "-w",   "--web",                 help="Run Oyente for web service", action="store_true")
@@ -151,6 +151,12 @@ def main():
     parser.add_argument( "-gtc", "--generate-test-cases", help="Generate test cases each branch of symbolic execution tree", action="store_true")
 
     args = parser.parse_args()
+
+    if args.root_path:
+        if args.root_path[-1] != '/':
+            args.root_path += '/'
+    else:
+        args.root_path = ""
 
     if args.timeout:
         global_params.TIMEOUT = args.timeout
@@ -203,7 +209,12 @@ def main():
         with open(processed_evm_file, 'w') as f:
             f.write(removeSwarmHash(evm))
 
-        analyze(processed_evm_file, disasm_file)
+        result = analyze(processed_evm_file, disasm_file)
+
+        bug_found = result[1]
+
+        if global_params.WEB:
+            print json.dumps(result)
 
         remove_temporary_file(disasm_file)
         remove_temporary_file(processed_evm_file)
@@ -212,6 +223,9 @@ def main():
             exit_code = os.WEXITSTATUS(cmd)
             if exit_code != 0:
                 exit(exit_code)
+        else:
+            if bug_found:
+                exit(1)
     elif args.standard_json:
         FNULL = open(os.devnull, 'w')
         cmd = "cat %s" % args.source
@@ -231,8 +245,7 @@ def main():
                 evm = j["contracts"][source][contract]["evm"]["deployedBytecode"]["object"]
                 contracts.append((cname, evm))
 
-        if os.path.isfile("bug_found"):
-            os.remove("bug_found")
+        bug_found = False
 
         for cname, bin_str in contracts:
             logging.info("Contract %s:", cname)
@@ -242,7 +255,15 @@ def main():
             with open(processed_evm_file, 'w') as of:
                 of.write(removeSwarmHash(bin_str))
 
-            analyze(processed_evm_file, disasm_file, SourceMap(cname, args.source, "standard json"))
+            result = analyze(processed_evm_file, disasm_file, SourceMap(cname, args.source, "standard json"))
+
+            if not bug_found:
+                bug_found = result[1]
+
+            try:
+                results[source][contract] = result[0]
+            except:
+                results[source] = {contract: result[0]}
 
             if args.evm:
                 with open(processed_evm_file, 'w') as of:
@@ -251,17 +272,18 @@ def main():
             remove_temporary_file(processed_evm_file)
             remove_temporary_file(disasm_file)
             remove_temporary_file(disasm_file + '.log')
-        if os.path.isfile("bug_found"):
-            os.remove("bug_found")
+
+        if bug_found:
             exit(1)
 
     else:
-        if os.path.isfile("bug_found"):
-            os.remove("bug_found")
-
         contracts = compileContracts(args.source)
+        results = {}
+        bug_found = False
 
         for cname, bin_str in contracts:
+            source, contract = cname.split(":")
+            source = re.sub(args.root_path, "", source)
             logging.info("Contract %s:", cname)
             processed_evm_file = cname + '.evm'
             disasm_file = cname + '.evm.disasm'
@@ -269,7 +291,15 @@ def main():
             with open(processed_evm_file, 'w') as of:
                 of.write(removeSwarmHash(bin_str))
 
-            analyze(processed_evm_file, disasm_file, SourceMap(cname, args.source, "solidity"))
+            result = analyze(processed_evm_file, disasm_file, SourceMap(args.root_path, cname, args.source, "solidity"))
+
+            if not bug_found:
+                bug_found = result[1]
+
+            try:
+                results[source][contract] = result[0]
+            except:
+                results[source] = {contract: result[0]}
 
             if args.evm:
                 with open(processed_evm_file, 'w') as of:
@@ -278,8 +308,11 @@ def main():
             remove_temporary_file(processed_evm_file)
             remove_temporary_file(disasm_file)
             remove_temporary_file(disasm_file + '.log')
-        if os.path.isfile("bug_found"):
-            os.remove("bug_found")
+
+        if global_params.WEB:
+            print json.dumps(results)
+
+        if bug_found:
             exit(1)
 
 if __name__ == '__main__':

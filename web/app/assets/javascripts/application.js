@@ -12,6 +12,6 @@
 //
 //= require jquery
 //= require jquery_ujs
-//= require src/index
+//= require browser-solidity
 //= require rails-ujs
 //= require turbolinks

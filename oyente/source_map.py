@@ -1,6 +1,9 @@
-import json
-import global_params
+import re
 import ast
+import json
+
+import global_params
+
 from utils import run_command
 from ast_helper import AstHelper
 
@@ -24,7 +27,8 @@ class SourceMap:
     sources = {}
     ast_helper = None
 
-    def __init__(self, cname, parent_filename, input_type):
+    def __init__(self, root_path, cname, parent_filename, input_type):
+        self.root_path = root_path
         self.cname = cname
         self.input_type = input_type
         if not SourceMap.parent_filename:
@@ -47,39 +51,14 @@ class SourceMap:
             pos = self.instr_positions[pc]
         except:
             return ""
-        begin = pos['begin']
+        location = self.get_location(pc)
+        begin = self.source.line_break_positions[location['begin']['line'] - 1] + 1
         end = pos['end']
         return self.source.content[begin:end]
-
-    def to_str(self, pcs, bug_name):
-        s = ""
-        for pc in pcs:
-            source_code = self.find_source_code(pc).split("\n", 1)[0]
-            if not source_code:
-                continue
-
-            location = self.get_location(pc)
-            if global_params.WEB:
-                s += "%s:%s:%s: %s:<br />" % (self.cname.split(":", 1)[1], location['begin']['line'] + 1, location['begin']['column'] + 1, bug_name)
-                s += "<span style='margin-left: 20px'>%s</span><br />" % source_code
-                s += "<span style='margin-left: 20px'>^</span><br />"
-            else:
-                s += "\n%s:%s:%s\n" % (self.cname, location['begin']['line'] + 1, location['begin']['column'] + 1)
-                s += source_code + "\n"
-                s += "^"
-        return s
 
     def get_location(self, pc):
         pos = self.instr_positions[pc]
         return self.__convert_offset_to_line_column(pos)
-
-    def reduce_same_position_pcs(self, pcs):
-        d = {}
-        for pc in pcs:
-            pos = str(self.instr_positions[pc])
-            if pos not in d:
-                d[pos] = pc
-        return d.values()
 
     def is_a_parameter_or_state_variable(self, var_name):
         try:
@@ -94,7 +73,7 @@ class SourceMap:
         return False
 
     def __get_source(self):
-        fname = self.__get_filename()
+        fname = self.get_filename()
         if SourceMap.sources.has_key(fname):
             return SourceMap.sources[fname]
         else:
@@ -174,5 +153,5 @@ class SourceMap:
                 length = half
         return start - 1
 
-    def __get_filename(self):
+    def get_filename(self):
         return self.cname.split(":")[0]

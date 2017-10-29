@@ -2,11 +2,41 @@ class HomeController < ApplicationController
   def index
   end
 
+  def analyze
+    @results = {}
+
+    if bytecode_exists?
+      @results[:error] = "Error"
+      return
+    end
+
+    @results[:current_file] = oyente_params[:current_file]
+    unless check_params
+      @results[:error] = "Invalid input"
+    else
+      FileUtils::mkdir_p "tmp/contracts"
+      current_filename = oyente_params[:current_file].split("/")[-1]
+      dir_path = Dir::Tmpname.make_tmpname "tmp/contracts/#{current_filename}", nil
+      sources = eval(oyente_params[:sources])
+      structure_files sources, dir_path
+      file = File.open("#{dir_path}/#{oyente_params[:current_file]}", "r")
+      begin
+        output = oyente_cmd(file.path, "#{options} -a -rp #{dir_path}")
+        @results = eval(output)
+        UserMailer.analyzer_result_notification(dir_path, @results, oyente_params[:email]).deliver_later unless oyente_params[:email].nil?
+      rescue
+        @results[:error] = "Error"
+      ensure
+        file.close
+      end
+    end
+  end
+
   def analyze_bytecode
     @result = {}
     unless bytecode_exists?
       @result[:error] = "Error"
-      render :analyze and return
+      return
     end
 
     unless check_params
@@ -31,70 +61,30 @@ class HomeController < ApplicationController
 
     begin
       output = oyente_cmd(file.path, "#{options} -b")
-      error = output.split("======= error =======\n", 2)
-      if error.size > 1
-        @result[:error] = error[1]
-      else
-        result = output.split("======= results =======\n")[1]
-        result = eval(result)
-        @result[:result] = result
-      end
+      @result = eval(output)
       UserMailer.bytecode_analysis_result(file.path, @result, oyente_params[:email]).deliver_later unless oyente_params[:email].nil?
     rescue
       @result[:error] = "Error"
     end
   end
 
-  def analyze
-    @results = {}
-
-    if bytecode_exists?
-      @results[:error] = "Error"
-      return
-    end
-
-    @results[:current_file] = oyente_params[:current_file]
-    unless check_params
-      @results[:error] = "Invalid input"
-    else
-      FileUtils::mkdir_p "tmp/contracts"
-      dir_path = Dir::Tmpname.make_tmpname "tmp/contracts/#{oyente_params[:current_file]}", nil
-      FileUtils::mkdir_p dir_path
-      sources = eval(oyente_params[:sources])
-      sources.keys.each do |filename|
-        File.open "#{dir_path}/#{filename}", "w" do |f|
-          f.write sources[filename][:"/content"]
+  private
+  def structure_files sources, dir_path
+    sources.each do |key, value|
+      if value.key?(:"/content")
+        file = key
+        File.open "#{dir_path}/#{file}", "w" do |f|
+          f.write value[:"/content"]
         end
-      end
-      file = File.open("#{dir_path}/#{oyente_params[:current_file]}", "r")
-      begin
-        output = oyente_cmd(file.path, "#{options} -a")
-        error = output.split("======= error =======\n", 2)
-        if error.size > 1
-          @results[:error] = error[1]
-        else
-          @results[:contracts] = {}
-          output = output.split("======= results =======\n")
-          output[1..-1].each do |results|
-            results = eval(results)
-            filename = results[:filename]
-            if @results[:contracts].key?(filename)
-              @results[:contracts][filename] << results
-            else
-              @results[:contracts][filename] = [results]
-            end
-          end
-        end
-        UserMailer.analyzer_result_notification(dir_path, @results, oyente_params[:email]).deliver_later unless oyente_params[:email].nil?
-      rescue
-        @results[:error] = "Error"
-      ensure
-        file.close
+      else
+        dir = key
+        new_dir_path = "#{dir_path}/#{dir}"
+        FileUtils::mkdir_p new_dir_path
+        structure_files value, new_dir_path
       end
     end
   end
 
-  private
   def oyente_cmd filepath, options
     return `python #{ENV['OYENTE']}/oyente.py -s #{filepath} -w#{options}`
   end
