@@ -108,7 +108,7 @@ def analyze(processed_evm_file, disasm_file, source_map = None):
     if source_map:
         return symExec.main(disasm_file, args.source, source_map)
     else:
-        symExec.main(disasm_file, args.source)
+        return symExec.main(disasm_file, args.source)
 
 def remove_temporary_file(path):
     if os.path.isfile(path):
@@ -209,7 +209,10 @@ def main():
         with open(processed_evm_file, 'w') as f:
             f.write(removeSwarmHash(evm))
 
-        analyze(processed_evm_file, disasm_file)
+        result = analyze(processed_evm_file, disasm_file)
+
+        if global_params.WEB:
+            print json.dumps(result)
 
         remove_temporary_file(disasm_file)
         remove_temporary_file(processed_evm_file)

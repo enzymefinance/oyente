@@ -36,7 +36,7 @@ class HomeController < ApplicationController
     @result = {}
     unless bytecode_exists?
       @result[:error] = "Error"
-      render :analyze and return
+      return
     end
 
     unless check_params
@@ -61,14 +61,7 @@ class HomeController < ApplicationController
 
     begin
       output = oyente_cmd(file.path, "#{options} -b")
-      error = output.split("======= error =======\n", 2)
-      if error.size > 1
-        @result[:error] = error[1]
-      else
-        result = output.split("======= results =======\n")[1]
-        result = eval(result)
-        @result[:result] = result
-      end
+      @result = eval(output)
       UserMailer.bytecode_analysis_result(file.path, @result, oyente_params[:email]).deliver_later unless oyente_params[:email].nil?
     rescue
       @result[:error] = "Error"

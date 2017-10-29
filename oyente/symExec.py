@@ -57,6 +57,7 @@ class Parameter:
         return Parameter(**_kwargs)
 
 def initGlobalVars():
+    global source_map
     global solver
     # Z3 solver
     solver = Solver()
@@ -69,16 +70,27 @@ def initGlobalVars():
     visited_pcs = set()
 
     global results
-    results = {
-        "evm_code_coverage": "",
-        "bugs": {
-            "callstack": False,
-            "money_concurrency": False,
-            "time_dependency": False,
-            "reentrancy": False,
-            "assertion_failure": False,
+    if source_map:
+        results = {
+            'evm_code_coverage': '',
+            'vulnerabilities': {
+                'callstack': False,
+                'money_concurrency': False,
+                'time_dependency': False,
+                'reentrancy': False,
+                'assertion_failure': False,
+            }
         }
-    }
+    else:
+        results = {
+            'evm_code_coverage': '',
+            'vulnerabilities': {
+                'callstack': False,
+                'money_concurrency': False,
+                'time_dependency': False,
+                'reentrancy': False,
+            }
+        }
 
     global calls_affect_state
     calls_affect_state = {}
@@ -2000,16 +2012,18 @@ def detect_time_dependency():
                     is_dependant = True
                     continue
 
+    time_dependency = TimeDependency(source_map, pcs)
+
     if source_map:
-        s = str(TimeDependency(source_map, pcs))
+        s = str(time_dependency)
         if s:
             any_bug = True
-            results["bugs"]["time_dependency"] = s
+            results['vulnerabilities']['time_dependency'] = s
         s = "\t  Time dependency bug: \t True" + s if s else "\t  Time dependency bug: \t False"
         log.info(s)
     else:
-        results["time_dependency"] = bool(pcs)
-        log.info("\t  Timedependency bug: \t %s", bool(pcs))
+        results['vulnerabilities']['time_dependency'] = time_dependency.is_vulnerable()
+        log.info("\t  Timedependency bug: \t %s", time_dependency.is_vulnerable())
 
     if global_params.REPORT_MODE:
         file_name = c_name.split("/")[len(c_name.split("/"))-1].split(".")[0]
@@ -2055,16 +2069,18 @@ def detect_money_concurrency():
         if flows:
             break
 
+    money_concurrency = MoneyConcurrency(source_map, flows)
+
     if source_map:
-        s = str(MoneyConcurrency(source_map, flows))
+        s = str(money_concurrency)
         if s:
             any_bug = True
-            results["bugs"]["money_concurrency"] = s
+            results['vulnerabilities']['money_concurrency'] = s
         s = "\t  Money concurrency bug: True" + s if s else "\t  Money concurrency bug: False"
         log.info(s)
     else:
-        results["money_concurrency"] = bool(flows)
-        log.info("\t  Money concurrency bug: %s", bool(flows))
+        results['vulnerabilities']['money_concurrency'] = money_concurrency.is_vulnerable()
+        log.info("\t  Money concurrency bug: %s", money_concurrency.is_vulnerable())
 
     # if PRINT_MODE: print "All false positive cases: ", false_positive
     log.debug("Concurrency in paths: ")
@@ -2155,35 +2171,37 @@ def detect_callstack_attack():
     instr = re.findall(instr_pattern, disasm_data)
     pcs = check_callstack_attack(instr)
 
+    callstack = CallStack(source_map, pcs, calls_affect_state)
+
     if source_map:
-        s = str(CallStack(source_map, pcs, calls_affect_state))
+        s = str(callstack)
         if s:
             any_bug = True
-            results["bugs"]["callstack"] = s
+            results['vulnerabilities']['callstack'] = s
         s = "\t  Callstack bug: \t True" + s if s else "\t  Callstack bug: \t False"
         log.info(s)
     else:
-        results["callstack"] = bool(pcs)
-        log.info("\t  Callstack bug: \t %s", bool(pcs))
+        results['vulnerabilities']['callstack'] = callstack.is_vulnerable()
+        log.info("\t  Callstack bug: \t %s", callstack.is_vulnerable())
 
 def detect_reentrancy():
     global source_map
     global any_bug
     global results
 
-    reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
     pcs = global_problematic_pcs["reentrancy_bug"]
+    reentrancy = Reentrancy(source_map, pcs)
 
     if source_map:
-        s = str(Reentrancy(source_map, pcs))
+        s = str(reentrancy)
         if s:
             any_bug = True
-            results["bugs"]["reentrancy"] = s
+            results['vulnerabilities']['reentrancy'] = s
         s = "\t  Reentrancy bug: \t True" + s if s else "\t  Reentrancy bug: \t False"
         log.info(s)
     else:
-        results["reentrancy"] = reentrancy_bug_found
-        log.info("\t  Reentrancy bug: \t %s", reentrancy_bug_found)
+        results['vulnerabilities']['reentrancy'] = reentrancy.is_vulnerable()
+        log.info("\t  Reentrancy bug: \t %s", reentrancy.is_vulnerable())
 
 def detect_assertion_failure():
     global source_map
@@ -2194,7 +2212,7 @@ def detect_assertion_failure():
 
     if s:
         any_bug = True
-        results["bugs"]["assertion_failure"] = s
+        results['vulnerabilities']['assertion_failure'] = s
     s = "\t  Assertion failure: \t True" + s if s else "\t  Assertion failure: \t False"
     log.info(s)
 
