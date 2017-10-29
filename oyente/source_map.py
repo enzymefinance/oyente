@@ -51,34 +51,14 @@ class SourceMap:
             pos = self.instr_positions[pc]
         except:
             return ""
-        begin = pos['begin']
+        location = self.get_location(pc)
+        begin = self.source.line_break_positions[location['begin']['line'] - 1] + 1
         end = pos['end']
         return self.source.content[begin:end]
-
-    def to_str(self, pcs, bug_name):
-        s = ""
-        for pc in pcs:
-            source_code = self.find_source_code(pc).split("\n", 1)[0]
-            if not source_code:
-                continue
-
-            location = self.get_location(pc)
-            s += "%s:%s:%s: \n" % (re.sub(self.root_path, "", self.get_filename()), location['begin']['line'] + 1, location['begin']['column'] + 1)
-            s += source_code + "\n"
-            s += "^"
-        return s
 
     def get_location(self, pc):
         pos = self.instr_positions[pc]
         return self.__convert_offset_to_line_column(pos)
-
-    def reduce_same_position_pcs(self, pcs):
-        d = {}
-        for pc in pcs:
-            pos = str(self.instr_positions[pc])
-            if pos not in d:
-                d[pos] = pc
-        return d.values()
 
     def is_a_parameter_or_state_variable(self, var_name):
         try:

@@ -20,7 +20,7 @@ from basicblock import BasicBlock
 from analysis import *
 from test_evm.global_test_params import (TIME_OUT, UNKOWN_INSTRUCTION,
                                          EXCEPTION, PICKLE_PATH)
-from validator import Validator
+from vulnerability import CallStack, TimeDependency, MoneyConcurrency, Reentrancy, AssertionFailure
 import global_params
 
 log = logging.getLogger(__name__)
@@ -79,6 +79,9 @@ def initGlobalVars():
             "assertion_failure": False,
         }
     }
+
+    global calls_affect_state
+    calls_affect_state = {}
 
     # capturing the last statement of each basic block
     global end_ins_dict
@@ -208,8 +211,6 @@ def change_format():
         disasm_file.write("\n".join(file_contents))
 
 def build_cfg_and_analyze():
-    global source_map
-
     change_format()
     with open(c_name, 'r') as disasm_file:
         disasm_file.readline()  # Remove first line
@@ -635,7 +636,7 @@ def sym_exec_block(params):
         new_params.pre_block = block
         new_params.global_state["pc"] = successor
         if source_map:
-            source_code = source_map.find_source_code(global_state["pc"])
+            source_code = stripped_source_code(source_map, global_state['pc'])
             if source_code in source_map.func_call_names:
                 new_params.func_call = global_state["pc"]
         sym_exec_block(new_params)
@@ -737,7 +738,7 @@ def sym_exec_ins(params):
     global vertices
     global edges
     global source_map
-    global validator
+    global calls_affect_state
 
     start = params.block
     instr = params.instr
@@ -760,7 +761,7 @@ def sym_exec_ins(params):
         return
     elif instr_parts[0] == "ASSERTFAIL":
         if source_map:
-            source_code = source_map.find_source_code(global_state["pc"])
+            source_code = stripped_source_code(source_map, global_state['pc'])
             source_code = source_code.split("(")[0]
             func_name = source_code.strip()
             if func_name == "assert":
@@ -1340,7 +1341,7 @@ def sym_exec_ins(params):
             global_state["pc"] = global_state["pc"] + 1
             position = stack.pop(0)
             if source_map:
-                source_code = source_map.find_source_code(global_state["pc"] - 1)
+                source_code = stripped_source_code(source_map, global_state["pc"] - 1)
                 if source_code.startswith("function") and isReal(position):
                     idx1 = source_code.index("(") + 1
                     idx2 = source_code.index(")")
@@ -1658,7 +1659,7 @@ def sym_exec_ins(params):
                     if is_expr(address):
                         address = simplify(address)
                     if source_map:
-                        new_var_name = source_map.find_source_code(global_state["pc"] - 1)
+                        new_var_name = stripped_source_code(source_map, global_state['pc'] - 1)
                         operators = '[-+*/%|&^!><=]'
                         new_var_name = re.compile(operators).split(new_var_name)[0].strip()
                         if source_map.is_a_parameter_or_state_variable(new_var_name):
@@ -1684,7 +1685,7 @@ def sym_exec_ins(params):
     elif instr_parts[0] == "SSTORE":
         if len(stack) > 1:
             for call_pc in calls:
-                validator.instructions_vulnerable_to_callstack[call_pc] = True
+                calls_affect_state[call_pc] = True
             global_state["pc"] = global_state["pc"] + 1
             stored_address = stack.pop(0)
             stored_value = stack.pop(0)
@@ -1816,8 +1817,8 @@ def sym_exec_ins(params):
         if len(stack) > 6:
             calls.append(global_state["pc"])
             for call_pc in calls:
-                if call_pc not in validator.instructions_vulnerable_to_callstack:
-                    validator.instructions_vulnerable_to_callstack[call_pc] = False
+                if call_pc not in calls_affect_state:
+                    calls_affect_state[call_pc] = False
             global_state["pc"] = global_state["pc"] + 1
             outgas = stack.pop(0)
             recipient = stack.pop(0)
@@ -1884,8 +1885,8 @@ def sym_exec_ins(params):
         if len(stack) > 6:
             calls.append(global_state["pc"])
             for call_pc in calls:
-                if call_pc not in validator.instructions_vulnerable_to_callstack:
-                    validator.instructions_vulnerable_to_callstack[call_pc] = False
+                if call_pc not in calls_affect_state:
+                    calls_affect_state[call_pc] = False
             global_state["pc"] = global_state["pc"] + 1
             outgas = stack.pop(0)
             stack.pop(0) # this is not used as recipient
@@ -1982,7 +1983,6 @@ def sym_exec_ins(params):
 def detect_time_dependency():
     global results
     global source_map
-    global validator
     global any_bug
 
     TIMESTAMP_VAR = "IH_s"
@@ -2001,8 +2001,7 @@ def detect_time_dependency():
                     continue
 
     if source_map:
-        pcs = validator.remove_false_positives(pcs)
-        s = source_map.to_str(pcs, "Time dependency bug")
+        s = str(TimeDependency(source_map, pcs))
         if s:
             any_bug = True
             results["bugs"]["time_dependency"] = s
@@ -2026,7 +2025,6 @@ def detect_time_dependency():
 def detect_money_concurrency():
     global results
     global source_map
-    global validator
     global any_bug
 
     n = len(money_flow_all_paths)
@@ -2058,18 +2056,7 @@ def detect_money_concurrency():
             break
 
     if source_map:
-        s = ""
-        for idx, pcs in enumerate(flows):
-            pcs = validator.remove_false_positives(pcs)
-            s += "\nFlow " + str(idx + 1) + ":"
-            for pc in pcs:
-                source_code = source_map.find_source_code(pc).split("\n", 1)[0]
-                if not source_code:
-                    continue
-                location = source_map.get_location(pc)
-                s += "\n%s:%s:%s\n" % (source_map.cname, location['begin']['line'] + 1, location['begin']['column'] + 1)
-                s += source_code + "\n"
-                s += "^"
+        s = str(MoneyConcurrency(source_map, flows))
         if s:
             any_bug = True
             results["bugs"]["money_concurrency"] = s
@@ -2160,18 +2147,16 @@ def check_callstack_attack(disasm):
 def detect_callstack_attack():
     global results
     global source_map
-    global validator
     global any_bug
+    global calls_affect_state
 
     disasm_data = open(c_name).read()
     instr_pattern = r"([\d]+) ([A-Z]+)([\d]+)?(?: => 0x)?(\S+)?"
     instr = re.findall(instr_pattern, disasm_data)
     pcs = check_callstack_attack(instr)
-    pcs = validator.remove_callstack_false_positives(pcs)
 
     if source_map:
-        pcs = validator.remove_false_positives(pcs)
-        s = source_map.to_str(pcs, "Callstack bug")
+        s = str(CallStack(source_map, pcs, calls_affect_state))
         if s:
             any_bug = True
             results["bugs"]["callstack"] = s
@@ -2183,15 +2168,14 @@ def detect_callstack_attack():
 
 def detect_reentrancy():
     global source_map
-    global validator
     global any_bug
     global results
 
     reentrancy_bug_found = any([v for sublist in reentrancy_all_paths for v in sublist])
+    pcs = global_problematic_pcs["reentrancy_bug"]
+
     if source_map:
-        pcs = global_problematic_pcs["reentrancy_bug"]
-        pcs = validator.remove_false_positives(pcs)
-        s = source_map.to_str(pcs, "Reentrancy bug")
+        s = str(Reentrancy(source_map, pcs))
         if s:
             any_bug = True
             results["bugs"]["reentrancy"] = s
@@ -2206,27 +2190,7 @@ def detect_assertion_failure():
     global any_bug
     global results
 
-    assertions = global_problematic_pcs["assertion_failure"]
-    d = {}
-    for asrt in assertions:
-        pos = str(source_map.instr_positions[asrt.pc])
-        if pos not in d:
-            d[pos] = asrt
-    assertions = d.values()
-
-    s = ""
-    for asrt in assertions:
-        location = source_map.get_location(asrt.pc)
-        source_code = source_map.find_source_code(asrt.pc).split("\n", 1)[0]
-        s += "%s:%s:%s: \n" % (re.sub(source_map.root_path, "", source_map.get_filename()), location['begin']['line'] + 1, location['begin']['column'] + 1)
-        s += source_code + "\n"
-        s += "^\n"
-        for variable in asrt.model.decls():
-            var_name = str(variable)
-            if len(var_name.split("-")) > 2:
-                var_name = var_name.split("-")[2]
-            if source_map.is_a_parameter_or_state_variable(var_name):
-                s += var_name + " = " + str(asrt.model[variable]) + "\n"
+    s = str(AssertionFailure(source_map, global_problematic_pcs['assertion_failure']))
 
     if s:
         any_bug = True
@@ -2308,13 +2272,11 @@ def main(contract, contract_sol, _source_map = None):
     global c_name
     global c_name_sol
     global source_map
-    global validator
     global results
 
     c_name = contract
     c_name_sol = contract_sol
     source_map = _source_map
-    validator = Validator(source_map)
 
     check_unit_test_file()
     initGlobalVars()
