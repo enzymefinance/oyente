@@ -71,11 +71,11 @@ def initGlobalVars():
         results = {
             'evm_code_coverage': '',
             'vulnerabilities': {
-                'callstack': False,
-                'money_concurrency': False,
-                'time_dependency': False,
-                'reentrancy': False,
-                'assertion_failure': False,
+                'callstack': [],
+                'money_concurrency': [],
+                'time_dependency': [],
+                'reentrancy': [],
+                'assertion_failure': []
             }
         }
     else:
@@ -2012,9 +2012,8 @@ def detect_time_dependency():
     time_dependency = TimeDependency(source_map, pcs)
 
     if source_map:
+        results['vulnerabilities']['time_dependency'] = time_dependency.get_warnings()
         s = str(time_dependency)
-        if s:
-            results['vulnerabilities']['time_dependency'] = s
         s = "\t  Time dependency bug: \t True" + s if s else "\t  Time dependency bug: \t False"
         log.info(s)
     else:
@@ -2068,9 +2067,8 @@ def detect_money_concurrency():
     money_concurrency = MoneyConcurrency(source_map, flows)
 
     if source_map:
+        results['vulnerabilities']['money_concurrency'] = money_concurrency.get_warnings_of_flows()
         s = str(money_concurrency)
-        if s:
-            results['vulnerabilities']['money_concurrency'] = s
         s = "\t  Money concurrency bug: True" + s if s else "\t  Money concurrency bug: False"
         log.info(s)
     else:
@@ -2169,9 +2167,8 @@ def detect_callstack_attack():
     callstack = CallStack(source_map, pcs, calls_affect_state)
 
     if source_map:
+        results['vulnerabilities']['callstack'] = callstack.get_warnings()
         s = str(callstack)
-        if s:
-            results['vulnerabilities']['callstack'] = s
         s = "\t  Callstack bug: \t True" + s if s else "\t  Callstack bug: \t False"
         log.info(s)
     else:
@@ -2187,9 +2184,8 @@ def detect_reentrancy():
     reentrancy = Reentrancy(source_map, pcs)
 
     if source_map:
+        results['vulnerabilities']['reentrancy'] = reentrancy.get_warnings()
         s = str(reentrancy)
-        if s:
-            results['vulnerabilities']['reentrancy'] = s
         s = "\t  Reentrancy bug: \t True" + s if s else "\t  Reentrancy bug: \t False"
         log.info(s)
     else:
@@ -2205,7 +2201,7 @@ def detect_assertion_failure():
     s = str(assertion_failure)
 
     if s:
-        results['vulnerabilities']['assertion_failure'] = s
+        results['vulnerabilities']['assertion_failure'] = assertion_failure.get_warnings()
     s = "\t  Assertion failure: \t True" + s if s else "\t  Assertion failure: \t False"
     log.info(s)
 
