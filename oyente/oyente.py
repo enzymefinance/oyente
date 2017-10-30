@@ -214,7 +214,7 @@ def main():
         bug_found = result[1]
 
         if global_params.WEB:
-            print json.dumps(result)
+            print json.dumps(result[0])
 
         remove_temporary_file(disasm_file)
         remove_temporary_file(processed_evm_file)
