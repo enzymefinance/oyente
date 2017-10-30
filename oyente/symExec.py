@@ -18,7 +18,7 @@ from vargenerator import *
 from ethereum_data import *
 from basicblock import BasicBlock
 from analysis import *
-from test_evm.global_test_params import (TIME_OUT, UNKOWN_INSTRUCTION,
+from test_evm.global_test_params import (TIME_OUT, UNKNOWN_INSTRUCTION,
                                          EXCEPTION, PICKLE_PATH)
 from vulnerability import CallStack, TimeDependency, MoneyConcurrency, Reentrancy, AssertionFailure
 import global_params
@@ -1979,8 +1979,8 @@ def sym_exec_ins(params):
     else:
         log.debug("UNKNOWN INSTRUCTION: " + instr_parts[0])
         if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
-            log.critical("Unkown instruction: %s" % instr_parts[0])
-            exit(UNKOWN_INSTRUCTION)
+            log.critical("Unknown instruction: %s" % instr_parts[0])
+            exit(UNKNOWN_INSTRUCTION)
         raise Exception('UNKNOWN INSTRUCTION: ' + instr_parts[0])
 
     try:
