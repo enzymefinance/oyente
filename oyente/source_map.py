@@ -46,7 +46,16 @@ class SourceMap:
         self.var_names = self.__get_var_names()
         self.func_call_names = self.__get_func_call_names()
 
-    def find_source_code(self, pc):
+    def get_source_code(self, pc):
+        try:
+            pos = self.instr_positions[pc]
+        except:
+            return ""
+        begin = pos['begin']
+        end = pos['end']
+        return self.source.content[begin:end]
+
+    def get_buggy_line(self, pc):
         try:
             pos = self.instr_positions[pc]
         except:

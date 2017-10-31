@@ -645,7 +645,7 @@ def sym_exec_block(params):
         new_params.pre_block = block
         new_params.global_state["pc"] = successor
         if source_map:
-            source_code = stripped_source_code(source_map, global_state['pc'])
+            source_code = source_map.get_source_code(global_state['pc'])
             if source_code in source_map.func_call_names:
                 new_params.func_call = global_state["pc"]
         sym_exec_block(new_params)
@@ -770,7 +770,7 @@ def sym_exec_ins(params):
         return
     elif instr_parts[0] == "ASSERTFAIL":
         if source_map:
-            source_code = stripped_source_code(source_map, global_state['pc'])
+            source_code = source_map.get_source_code(global_state['pc'])
             source_code = source_code.split("(")[0]
             func_name = source_code.strip()
             if func_name == "assert":
@@ -1350,7 +1350,7 @@ def sym_exec_ins(params):
             global_state["pc"] = global_state["pc"] + 1
             position = stack.pop(0)
             if source_map:
-                source_code = stripped_source_code(source_map, global_state["pc"] - 1)
+                source_code = source_map.get_source_code(global_state['pc'] - 1)
                 if source_code.startswith("function") and isReal(position):
                     idx1 = source_code.index("(") + 1
                     idx2 = source_code.index(")")
@@ -1668,7 +1668,7 @@ def sym_exec_ins(params):
                     if is_expr(address):
                         address = simplify(address)
                     if source_map:
-                        new_var_name = stripped_source_code(source_map, global_state['pc'] - 1)
+                        new_var_name = source_map.get_source_code(global_state['pc'] - 1)
                         operators = '[-+*/%|&^!><=]'
                         new_var_name = re.compile(operators).split(new_var_name)[0].strip()
                         if source_map.is_a_parameter_or_state_variable(new_var_name):
