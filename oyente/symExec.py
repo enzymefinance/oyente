@@ -2013,12 +2013,9 @@ def detect_time_dependency():
 
     if source_map:
         results['vulnerabilities']['time_dependency'] = time_dependency.get_warnings()
-        s = str(time_dependency)
-        s = "\t  Time dependency bug: \t True" + s if s else "\t  Time dependency bug: \t False"
-        log.info(s)
     else:
         results['vulnerabilities']['time_dependency'] = time_dependency.is_vulnerable()
-        log.info("\t  Timedependency bug: \t %s", time_dependency.is_vulnerable())
+    log.info('\t  Timestamp Dependency: \t\t %s', time_dependency.is_vulnerable())
 
     if global_params.REPORT_MODE:
         file_name = c_name.split("/")[len(c_name.split("/"))-1].split(".")[0]
@@ -2068,12 +2065,9 @@ def detect_money_concurrency():
 
     if source_map:
         results['vulnerabilities']['money_concurrency'] = money_concurrency.get_warnings_of_flows()
-        s = str(money_concurrency)
-        s = "\t  Money concurrency bug: True" + s if s else "\t  Money concurrency bug: False"
-        log.info(s)
     else:
         results['vulnerabilities']['money_concurrency'] = money_concurrency.is_vulnerable()
-        log.info("\t  Money concurrency bug: %s", money_concurrency.is_vulnerable())
+    log.info('\t  Transaction-Ordering Dependence (TOD): %s', money_concurrency.is_vulnerable())
 
     # if PRINT_MODE: print "All false positive cases: ", false_positive
     log.debug("Concurrency in paths: ")
@@ -2168,12 +2162,9 @@ def detect_callstack_attack():
 
     if source_map:
         results['vulnerabilities']['callstack'] = callstack.get_warnings()
-        s = str(callstack)
-        s = "\t  Callstack bug: \t True" + s if s else "\t  Callstack bug: \t False"
-        log.info(s)
     else:
         results['vulnerabilities']['callstack'] = callstack.is_vulnerable()
-        log.info("\t  Callstack bug: \t %s", callstack.is_vulnerable())
+    log.info('\t  Callstack Depth Attack Vulnerability:  %s', callstack.is_vulnerable())
 
 def detect_reentrancy():
     global source_map
@@ -2185,12 +2176,9 @@ def detect_reentrancy():
 
     if source_map:
         results['vulnerabilities']['reentrancy'] = reentrancy.get_warnings()
-        s = str(reentrancy)
-        s = "\t  Reentrancy bug: \t True" + s if s else "\t  Reentrancy bug: \t False"
-        log.info(s)
     else:
         results['vulnerabilities']['reentrancy'] = reentrancy.is_vulnerable()
-        log.info("\t  Reentrancy bug: \t %s", reentrancy.is_vulnerable())
+    log.info("\t  Re-Entrancy Vulnerability: \t\t %s", reentrancy.is_vulnerable())
 
 def detect_assertion_failure():
     global source_map
@@ -2198,14 +2186,12 @@ def detect_assertion_failure():
     global assertion_failure
 
     assertion_failure = AssertionFailure(source_map, global_problematic_pcs['assertion_failure'])
-    s = str(assertion_failure)
 
-    if s:
-        results['vulnerabilities']['assertion_failure'] = assertion_failure.get_warnings()
-    s = "\t  Assertion failure: \t True" + s if s else "\t  Assertion failure: \t False"
+    results['vulnerabilities']['assertion_failure'] = assertion_failure.get_warnings()
+    s = "\t  Assertion Failure: \t\t\t %s" % assertion_failure.is_vulnerable()
     log.info(s)
 
-def detect_bugs():
+def detect_vulnerabilies():
     if isTesting():
         return
 
@@ -2216,7 +2202,7 @@ def detect_bugs():
 
     if instructions:
         evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys()) * 100
-        log.info("\t  EVM code coverage: \t %s%%", round(evm_code_coverage, 1))
+        log.info("\t  EVM Code Coverage: \t %s%%", round(evm_code_coverage, 1))
         results["evm_code_coverage"] = str(round(evm_code_coverage, 1))
 
         log.debug("Checking for Callstack attack...")
@@ -2244,6 +2230,10 @@ def detect_bugs():
                 detect_assertion_failure()
             else:
                 raise Exception("Assertion checks need a Source Map")
+
+        if source_map:
+            log_info()
+
     else:
         log.info("\t  EVM code coverage: \t 0/0")
         log.info("\t  Callstack bug: \t False")
@@ -2254,9 +2244,26 @@ def detect_bugs():
             log.info("\t  Assertion failure: \t False")
         results["evm_code_coverage"] = "0/0"
 
-    return results, bug_found()
+    return results, vulnerability_found()
 
-def bug_found():
+def log_info():
+    global source_map
+    global time_dependency
+    global callstack
+    global money_concurrency
+    global reentrancy
+    global assertion_failure
+
+    vulnerabilities = [callstack, money_concurrency, time_dependency, reentrancy]
+    if source_map and global_params.CHECK_ASSERTIONS:
+        vulnerabilities.append(assertion_failure)
+
+    for vul in vulnerabilities:
+        s = str(vul)
+        if s:
+            log.info(s)
+
+def vulnerability_found():
     global source_map
     global time_dependency
     global callstack
@@ -2273,6 +2280,11 @@ def bug_found():
         if vul.is_vulnerable():
             return True
     return False
+
+def print_state(stack, mem, global_state):
+    log.debug("STACK: " + str(stack))
+    log.debug("MEM: " + str(mem))
+    log.debug("GLOBAL STATE: " + str(global_state))
 
 def closing_message():
     global c_name_sol
@@ -2325,7 +2337,7 @@ def main(contract, contract_sol, _source_map = None):
         traceback.print_exc()
         raise e
     finally:
-        return detect_bugs()
+        return detect_vulnerabilies()
     signal.alarm(0)
 
 if __name__ == '__main__':
