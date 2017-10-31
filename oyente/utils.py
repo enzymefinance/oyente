@@ -48,10 +48,6 @@ def print_state(stack, mem, global_state):
     log.debug("MEM: " + str(mem))
     log.debug("GLOBAL STATE: " + str(global_state))
 
-def stripped_source_code(source_map, pc):
-    source_code = source_map.find_source_code(pc)
-    return source_code.lstrip('[ \t]')
-
 def check_solver(solver):
     try:
         ret = solver.check()
