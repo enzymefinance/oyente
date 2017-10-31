@@ -43,11 +43,6 @@ def to_signed(number):
     else:
         return number
 
-def print_state(stack, mem, global_state):
-    log.debug("STACK: " + str(stack))
-    log.debug("MEM: " + str(mem))
-    log.debug("GLOBAL STATE: " + str(global_state))
-
 def check_solver(solver):
     try:
         ret = solver.check()
