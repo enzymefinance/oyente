@@ -3,16 +3,16 @@ class HomeController < ApplicationController
   end
 
   def analyze
-    @results = {}
+    @sources = {}
 
     if bytecode_exists?
-      @results[:error] = "Error"
+      @sources[:error] = "Error"
       return
     end
 
-    @results[:current_file] = oyente_params[:current_file]
+    @sources[:current_file] = oyente_params[:current_file]
     unless check_params
-      @results[:error] = "Invalid input"
+      @sources[:error] = "Invalid input"
     else
       FileUtils::mkdir_p "tmp/contracts"
       current_filename = oyente_params[:current_file].split("/")[-1]
@@ -22,10 +22,10 @@ class HomeController < ApplicationController
       file = File.open("#{dir_path}/#{oyente_params[:current_file]}", "r")
       begin
         output = oyente_cmd(file.path, "#{options} -a -rp #{dir_path}")
-        @results = eval(output)
-        UserMailer.analyzer_result_notification(dir_path, @results, oyente_params[:email]).deliver_later unless oyente_params[:email].nil?
+        @sources = eval(output)
+        UserMailer.analyzer_result_notification(dir_path, @sources, oyente_params[:email]).deliver_later unless oyente_params[:email].nil?
       rescue
-        @results[:error] = "Error"
+        @sources[:error] = "Error"
       ensure
         file.close
       end
@@ -33,14 +33,14 @@ class HomeController < ApplicationController
   end
 
   def analyze_bytecode
-    @result = {}
+    @contract = {}
     unless bytecode_exists?
-      @result[:error] = "Error"
+      @contract[:error] = "Error"
       return
     end
 
     unless check_params
-      @result[:error] = "Invalid input"
+      @contract[:error] = "Invalid input"
       return
     end
 
@@ -53,7 +53,7 @@ class HomeController < ApplicationController
     begin
       file.write(oyente_params[:bytecode].gsub(/^0x/, ""))
     rescue
-      @result[:error] = "Error"
+      @contract[:error] = "Error"
       return
     ensure
       file.close
@@ -61,10 +61,10 @@ class HomeController < ApplicationController
 
     begin
       output = oyente_cmd(file.path, "#{options} -b")
-      @result = eval(output)
-      UserMailer.bytecode_analysis_result(file.path, @result, oyente_params[:email]).deliver_later unless oyente_params[:email].nil?
+      @contract = eval(output)
+      UserMailer.bytecode_analysis_result(file.path, @contract, oyente_params[:email]).deliver_later unless oyente_params[:email].nil?
     rescue
-      @result[:error] = "Error"
+      @contract[:error] = "Error"
     end
   end
 

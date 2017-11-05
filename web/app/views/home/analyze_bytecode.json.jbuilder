@@ -1,1 +1,1 @@
-json.result @result
+json.contract @contract
