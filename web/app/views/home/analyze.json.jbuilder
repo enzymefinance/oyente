@@ -1,1 +1,1 @@
-json.sources @results
+json.sources @sources

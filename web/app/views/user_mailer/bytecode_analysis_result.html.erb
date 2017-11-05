@@ -1,12 +1,27 @@
 <h1 style="text-align: center">Oyente analysis result</h1>
-<div class="result">
+<div class="<%= border_color_for_bytecode(@contract) %>">
   <div style="font-weight: bold">Bytecode analysis result</div>
   <br />
   <div>
-    <div>EVM code coverage: <%= @result[:result][:evm_code_coverage] %></div>
-    <div>Callstack bug: <%= bug_exists?(@result[:result][:callstack]) %></div>
-    <div>Money concurrency bug: <%= bug_exists?(@result[:result][:money_concurrency]) %></div>
-    <div>Time dependency bug: <%= bug_exists?(@result[:result][:time_dependency]) %></div>
-    <div>Reentrancy bug: <%= bug_exists?(@result[:result][:reentrancy]) %></div>
+    <div>
+      <div class="col1_1">EVM Code Coverage:</div>
+      <div><%= @contract[:evm_code_coverage] %>%</div>
+    </div>
+    <div>
+      <div class="col1_1">Callstack Depth Attack Vulnerability:</div>
+      <div><%= bug_exists_for_bytecode?(@contract[:vulnerabilities][:callstack]) %></div>
+    </div>
+    <div>
+      <div class="col1_1">Transaction-Ordering Dependence (TOD):</div>
+      <div><%= bug_exists_for_bytecode?(@contract[:vulnerabilities][:money_concurrency]) %></div>
+    </div>
+    <div>
+      <div class="col1_1">Timestamp Dependency:</div>
+      <div><%= bug_exists_for_bytecode?(@contract[:vulnerabilities][:time_dependency]) %></div>
+    </div>
+    <div>
+      <div class="col1_1">Re-Entrancy Vulnerability:</div>
+      <div><%= bug_exists_for_bytecode?(@contract[:vulnerabilities][:reentrancy]) %></div>
+    </div>
   </div>
 </div>
