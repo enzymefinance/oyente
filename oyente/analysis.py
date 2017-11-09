@@ -1,5 +1,6 @@
 import logging
 import math
+import six
 from opcodes import *
 from z3 import *
 from z3.z3util import *
@@ -100,19 +101,19 @@ def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
     # In some opcodes, gas cost is not only depend on opcode itself but also current state of evm
     # For symbolic variables, we only add base cost part for simplicity
     if opcode in ("LOG0", "LOG1", "LOG2", "LOG3", "LOG4") and len(stack) > 1:
-        if isinstance(stack[1], (int, long)):
+        if isReal(stack[1]):
             gas_increment += GCOST["Glogdata"] * stack[1]
     elif opcode == "EXP" and len(stack) > 1:
-        if isinstance(stack[1], (int, long)) and stack[1] > 0:
+        if isReal(stack[1]) and stack[1] > 0:
             gas_increment += GCOST["Gexpbyte"] * (1 + math.floor(math.log(stack[1], 256)))
     elif opcode == "EXTCODECOPY" and len(stack) > 2:
-        if isinstance(stack[2], (int, long)):
+        if isReal(stack[2]):
             gas_increment += GCOST["Gcopy"] * math.ceil(stack[2] / 32)
     elif opcode in ("CALLDATACOPY", "CODECOPY") and len(stack) > 3:
-        if isinstance(stack[3], (int, long)):
+        if isReal(stack[3]):
             gas_increment += GCOST["Gcopy"] * math.ceil(stack[3] / 32)
     elif opcode == "SSTORE" and len(stack) > 1:
-        if isinstance(stack[1], (int, long)):
+        if isReal(stack[1]):
             try:
                 try:
                     storage_value = global_state["Ia"][int(stack[0])]
@@ -152,7 +153,7 @@ def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
                     gas_increment += GCOST["Gsreset"]
                 solver.pop()
     elif opcode == "SUICIDE" and len(stack) > 1:
-        if isinstance(stack[1], (int, long)):
+        if isReal(stack[1]):
             address = stack[1] % 2**160
             if address not in global_state:
                 gas_increment += GCOST["Gnewaccount"]
@@ -163,7 +164,7 @@ def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
     elif opcode in ("CALL", "CALLCODE", "DELEGATECALL") and len(stack) > 2:
         # Not fully correct yet
         gas_increment += GCOST["Gcall"]
-        if isinstance(stack[2], (int, long)):
+        if isReal(stack[2]):
             if stack[2] != 0:
                 gas_increment += GCOST["Gcallvalue"]
         else:
@@ -172,7 +173,7 @@ def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
             if check_solver(solver) == unsat:
                 gas_increment += GCOST["Gcallvalue"]
             solver.pop()
-    elif opcode == "SHA3" and isinstance(stack[1], (int, long)):
+    elif opcode == "SHA3" and isReal(stack[1]):
         pass # Not handle
 
 
@@ -203,7 +204,7 @@ def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_
         analysis["money_flow"].append( ("Ia", str(recipient), str(transfer_amount)))
     elif opcode == "SUICIDE":
         recipient = stack[0]
-        if not isinstance(recipient, (int, long)):
+        if isSymbolic(recipient):
             recipient = simplify(recipient)
         analysis["money_flow"].append(("Ia", str(recipient), "all_remaining"))
     # this is for data flow
@@ -211,7 +212,7 @@ def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_
         if opcode == "SLOAD":
             if len(stack) > 0:
                 address = stack[0]
-                if not isinstance(address, (int, long)):
+                if isSymbolic(address):
                     address = str(address)
                 if address not in analysis["sload"]:
                     analysis["sload"].append(address)
@@ -224,7 +225,7 @@ def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_
                 log.debug(type(stored_address))
                 # a temporary fix, not a good one.
                 # TODO move to z3 4.4.2 in which BitVecRef is hashable
-                if not isinstance(stored_address, (int, long)):
+                if isSymbolic(stored_address):
                     stored_address = str(stored_address)
                 log.debug("storing value " + str(stored_value) + " to address " + str(stored_address))
                 if stored_address in analysis["sstore"]:

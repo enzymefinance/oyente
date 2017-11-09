@@ -53,6 +53,7 @@ class AstHelper:
         state_vars = []
         if node:
             base_contracts = self.get_linearized_base_contracts(node["id"], self.contracts["contractsById"])
+            base_contracts = list(base_contracts)
             base_contracts = list(reversed(base_contracts))
             for contract in base_contracts:
                 if "children" in contract:

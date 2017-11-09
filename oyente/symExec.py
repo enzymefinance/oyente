@@ -49,7 +49,7 @@ class Parameter:
             "global_state": {},
             "path_conditions_and_vars": {}
         }
-        for (attr, default) in attr_defaults.iteritems():
+        for (attr, default) in six.iteritems(attr_defaults):
             setattr(self, attr, kwargs.get(attr, default))
 
     def copy(self):
@@ -566,7 +566,7 @@ def sym_exec_block(params):
     log.debug("STACK: " + str(stack))
 
     current_edge = Edge(pre_block, block)
-    if visited_edges.has_key(current_edge):
+    if current_edge in visited_edges:
         updated_count_number = visited_edges[current_edge] + 1
         visited_edges.update({current_edge: updated_count_number})
     else:
@@ -1291,8 +1291,9 @@ def sym_exec_ins(params):
                 data = [str(x) for x in memory[s0: s0 + s1]]
                 position = ''.join(data)
                 position = re.sub('[\s+]', '', position)
-                position = zlib.compress(position, 9)
+                position = zlib.compress(six.b(position), 9)
                 position = base64.b64encode(position)
+                position = position.decode()
                 if position in sha3_list:
                     stack.insert(0, sha3_list[position])
                 else:
@@ -1357,7 +1358,7 @@ def sym_exec_ins(params):
                     params = source_code[idx1:idx2]
                     params_list = params.split(",")
                     params_list = [param.split(" ")[-1] for param in params_list]
-                    param_idx = (position - 4) / 32
+                    param_idx = (position - 4) // 32
                     new_var_name = params_list[param_idx]
                     source_map.var_names.append(new_var_name)
                 else:
@@ -1408,7 +1409,11 @@ def sym_exec_ins(params):
             current_miu_i = global_state["miu_i"]
 
             if isAllReal(mem_location, current_miu_i, code_from, no_bytes):
-                temp = long(math.ceil((mem_location + no_bytes) / float(32)))
+                if six.PY2:
+                    temp = long(math.ceil((mem_location + no_bytes) / float(32)))
+                else:
+                    temp = int(math.ceil((mem_location + no_bytes) / float(32)))
+
                 if temp > current_miu_i:
                     current_miu_i = temp
 
@@ -1474,7 +1479,10 @@ def sym_exec_ins(params):
             current_miu_i = global_state["miu_i"]
 
             if isAllReal(address, mem_location, current_miu_i, code_from, no_bytes) and USE_GLOBAL_BLOCKCHAIN:
-                temp = long(math.ceil((mem_location + no_bytes) / float(32)))
+                if six.PY2:
+                    temp = long(math.ceil((mem_location + no_bytes) / float(32)))
+                else:
+                    temp = int(math.ceil((mem_location + no_bytes) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
 
@@ -1550,7 +1558,10 @@ def sym_exec_ins(params):
             address = stack.pop(0)
             current_miu_i = global_state["miu_i"]
             if isAllReal(address, current_miu_i) and address in mem:
-                temp = long(math.ceil((address + 32) / float(32)))
+                if six.PY2:
+                    temp = long(math.ceil((address + 32) / float(32)))
+                else:
+                    temp = int(math.ceil((address + 32) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
                 value = mem[address]
@@ -1600,7 +1611,10 @@ def sym_exec_ins(params):
                     memory[stored_address + i] = value % 256
                     value /= 256
             if isAllReal(stored_address, current_miu_i):
-                temp = long(math.ceil((stored_address + 32) / float(32)))
+                if six.PY2:
+                    temp = long(math.ceil((stored_address + 32) / float(32)))
+                else:
+                    temp = int(math.ceil((stored_address + 32) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
                 mem[stored_address] = stored_value  # note that the stored_value could be symbolic
@@ -1633,7 +1647,10 @@ def sym_exec_ins(params):
             stored_value = temp_value % 256  # get the least byte
             current_miu_i = global_state["miu_i"]
             if isAllReal(stored_address, current_miu_i):
-                temp = long(math.ceil((stored_address + 1) / float(32)))
+                if six.PY2:
+                    temp = long(math.ceil((stored_address + 1) / float(32)))
+                else:
+                    temp = int(math.ceil((stored_address + 1) / float(32)))
                 if temp > current_miu_i:
                     current_miu_i = temp
                 mem[stored_address] = stored_value  # note that the stored_value could be symbolic
@@ -2124,7 +2141,7 @@ def detect_data_money_concurrency():
 def check_callstack_attack(disasm):
     problematic_instructions = ['CALL', 'CALLCODE']
     pcs = []
-    for i in xrange(0, len(disasm)):
+    for i in range(0, len(disasm)):
         instruction = disasm[i]
         if instruction[1] in problematic_instructions:
             pc = int(instruction[0])

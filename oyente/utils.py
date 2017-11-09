@@ -9,6 +9,7 @@ import os
 import csv
 import re
 import difflib
+import six
 from z3 import *
 from z3.z3util import get_vars
 
@@ -16,10 +17,10 @@ def ceil32(x):
     return x if x % 32 == 0 else x + 32 - (x % 32)
 
 def isSymbolic(value):
-    return not isinstance(value, (int, long))
+    return not isinstance(value, six.integer_types)
 
 def isReal(value):
-    return isinstance(value, (int, long))
+    return isinstance(value, six.integer_types)
 
 def isAllReal(*args):
     for element in args:
@@ -81,7 +82,7 @@ def custom_deepcopy(input):
 # check if a variable is a storage address in a contract
 # currently accept only int addresses in the storage
 def is_storage_var(var):
-    return isinstance(var, (int, long))
+    return isinstance(var, six.integer_types)
     #     return True
     # else:
     #     return isinstance(var, str) and var.startswith("Ia_store_")
@@ -209,7 +210,7 @@ def run_re_file(re_str, fn):
 
 
 def get_contract_info(contract_addr):
-    print "Getting info for contracts... " + contract_addr
+    six.print_("Getting info for contracts... " + contract_addr)
     file_name1 = "tmp/" + contract_addr + "_txs.html"
     file_name2 = "tmp/" + contract_addr + ".html"
     # get number of txs
@@ -274,7 +275,7 @@ def get_distinct_contracts(list_of_contracts = "concurr.csv"):
             npath_i = int(contracts[i].split(",")[1])
             npair_i = int(contracts[i].split(",")[2])
             file_i = "stats/tmp_" + contract_i + ".evm"
-            print " reading file " + file_i
+            six.print_(" reading file " + file_i)
             for j in range(i+1, n):
                 if flag[j] != j:
                     continue
@@ -296,9 +297,9 @@ def get_distinct_contracts(list_of_contracts = "concurr.csv"):
                                 ndiff += 1
                         if ndiff < 10:
                             flag[j] = i
-    print flag
+    six.print_(flag)
 
 def run_command(cmd):
     FNULL = open(os.devnull, 'w')
     solc_p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)
-    return solc_p.communicate()[0]
+    return solc_p.communicate()[0].decode()
