@@ -10,6 +10,7 @@ import requests
 import json
 import symExec
 import global_params
+import six
 from source_map import SourceMap
 from utils import run_command
 
@@ -62,7 +63,7 @@ def extract_bin_str(s):
     if not contracts:
         logging.critical("Solidity compilation failed")
         if global_params.WEB:
-            print {"error": "Solidity compilation failed"}
+            six.print_({"error": "Solidity compilation failed"})
         exit()
     return contracts
 
@@ -77,7 +78,7 @@ def link_libraries(filename, libs):
     cmd = "solc --link%s" %option
     p2 = subprocess.Popen(shlex.split(cmd), stdin=p1.stdout, stdout=subprocess.PIPE, stderr=FNULL)
     p1.stdout.close()
-    out = p2.communicate()[0]
+    out = p2.communicate()[0].decode()
     return extract_bin_str(out)
 
 def compileContracts(contract):
@@ -96,7 +97,7 @@ def analyze(processed_evm_file, disasm_file, source_map = None):
     try:
         disasm_p = subprocess.Popen(
             ["evm", "disasm", processed_evm_file], stdout=subprocess.PIPE)
-        disasm_out = disasm_p.communicate()[0]
+        disasm_out = disasm_p.communicate()[0].decode()
     except:
         logging.critical("Disassembly failed.")
         exit()
@@ -214,7 +215,7 @@ def main():
         bug_found = result[1]
 
         if global_params.WEB:
-            print json.dumps(result[0])
+            six.print_(json.dumps(result[0]))
 
         remove_temporary_file(disasm_file)
         remove_temporary_file(processed_evm_file)
@@ -310,7 +311,7 @@ def main():
             remove_temporary_file(disasm_file + '.log')
 
         if global_params.WEB:
-            print json.dumps(results)
+            six.print_(json.dumps(results))
 
         if bug_found:
             exit(1)
