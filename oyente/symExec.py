@@ -2148,9 +2148,8 @@ def check_callstack_attack(disasm):
             if not disasm[i+1][1] == 'SWAP':
                 continue
             swap_num = int(disasm[i+1][2])
-            for j in range(swap_num):
-                if not disasm[i+j+2][1] == 'POP':
-                    continue
+            if not all(disasm[i+j+2][1] == 'POP' for j in range(swap_num)):
+                continue
             opcode1 = disasm[i + swap_num + 2][1]
             opcode2 = disasm[i + swap_num + 3][1]
             opcode3 = disasm[i + swap_num + 4][1]
