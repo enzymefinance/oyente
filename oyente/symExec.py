@@ -2219,7 +2219,7 @@ def detect_assertion_failure():
     s = "\t  Assertion Failure: \t\t\t %s" % assertion_failure.is_vulnerable()
     log.info(s)
 
-def detect_vulnerabilies():
+def detect_vulnerabilities():
     if isTesting():
         return
 
@@ -2372,7 +2372,7 @@ def main(contract, contract_sol, _source_map = None):
         traceback.print_exc()
         raise e
     finally:
-        return detect_vulnerabilies()
+        return detect_vulnerabilities()
     signal.alarm(0)
 
 if __name__ == '__main__':
