@@ -92,6 +92,20 @@ def compileContracts(contract):
     else:
         return extract_bin_str(out)
 
+def write_disasm_file(processed_evm_file, disasm_file):
+    disasm_out = ""
+    try:
+        disasm_p = subprocess.Popen(
+            ["evm", "disasm", processed_evm_file], stdout=subprocess.PIPE)
+        disasm_out = disasm_p.communicate()[0].decode()
+    except:
+        logging.critical("Disassembly failed.")
+        exit()
+
+    with open(disasm_file, 'w') as of:
+        of.write(disasm_out)
+
+
 def analyze(processed_evm_file, disasm_file, source_map = None):
     disasm_out = ""
     try:
@@ -110,6 +124,9 @@ def analyze(processed_evm_file, disasm_file, source_map = None):
         return symExec.main(disasm_file, args.source, source_map)
     else:
         return symExec.main(disasm_file, args.source)
+
+def analyze_source_code(disasm_file, source_map):
+    return symExec.main(disasm_file, args.source, source_map)
 
 def remove_temporary_file(path):
     if os.path.isfile(path):
@@ -283,16 +300,20 @@ def main():
         bug_found = False
 
         for cname, bin_str in contracts:
+            processed_evm_file = cname + '.evm'
+            disasm_file = cname + '.evm.disasm'
+            with open(processed_evm_file, 'w') as of:
+                of.write(removeSwarmHash(bin_str))
+            write_disasm_file(processed_evm_file, disasm_file)
+
+        for cname, bin_str in contracts:
             source, contract = cname.split(":")
             source = re.sub(args.root_path, "", source)
             logging.info("Contract %s:", cname)
             processed_evm_file = cname + '.evm'
             disasm_file = cname + '.evm.disasm'
 
-            with open(processed_evm_file, 'w') as of:
-                of.write(removeSwarmHash(bin_str))
-
-            result = analyze(processed_evm_file, disasm_file, SourceMap(args.root_path, cname, args.source, "solidity"))
+            result = analyze_source_code(disasm_file, SourceMap(args.root_path, cname, args.source, "solidity"))
 
             if not bug_found:
                 bug_found = result[1]
@@ -306,6 +327,9 @@ def main():
                 with open(processed_evm_file, 'w') as of:
                     of.write(bin_str)
 
+        for cname, bin_str in contracts:
+            processed_evm_file = cname + '.evm'
+            disasm_file = cname + '.evm.disasm'
             remove_temporary_file(processed_evm_file)
             remove_temporary_file(disasm_file)
             remove_temporary_file(disasm_file + '.log')

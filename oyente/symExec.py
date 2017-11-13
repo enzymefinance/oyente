@@ -11,6 +11,7 @@ import traceback
 import signal
 import time
 import logging
+import six
 from collections import namedtuple
 from z3 import *
 
@@ -20,7 +21,7 @@ from basicblock import BasicBlock
 from analysis import *
 from test_evm.global_test_params import (TIME_OUT, UNKNOWN_INSTRUCTION,
                                          EXCEPTION, PICKLE_PATH)
-from vulnerability import CallStack, TimeDependency, MoneyConcurrency, Reentrancy, AssertionFailure
+from vulnerability import CallStack, TimeDependency, MoneyConcurrency, Reentrancy, AssertionFailure, ParityMultisigBug2
 import global_params
 
 log = logging.getLogger(__name__)
@@ -75,7 +76,8 @@ def initGlobalVars():
                 'money_concurrency': [],
                 'time_dependency': [],
                 'reentrancy': [],
-                'assertion_failure': []
+                'assertion_failure': [],
+                'parity_multisig_bug_2': []
             }
         }
     else:
@@ -2137,6 +2139,16 @@ def detect_data_money_concurrency():
     log.debug("Concurrency in data that affects money flow: " + str(set(concurrency_addr)))
 
 
+def detect_parity_multisig_bug_2():
+    global source_map
+    global results
+    global parity_multisig_bug_2
+
+    parity_multisig_bug_2 = ParityMultisigBug2(source_map)
+
+    results['vulnerabilities']['parity_multisig_bug_2'] = parity_multisig_bug_2.get_warnings()
+    s = "\t  Parity Multisig Bug 2: \t\t %s" % parity_multisig_bug_2.is_vulnerable()
+    log.info(s)
 
 def check_callstack_attack(disasm):
     problematic_instructions = ['CALL', 'CALLCODE']
@@ -2218,8 +2230,11 @@ def detect_vulnerabilies():
 
     if instructions:
         evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys()) * 100
-        log.info("\t  EVM Code Coverage: \t %s%%", round(evm_code_coverage, 1))
+        log.info("\t  EVM Code Coverage: \t\t\t %s%%", round(evm_code_coverage, 1))
         results["evm_code_coverage"] = str(round(evm_code_coverage, 1))
+
+        if source_map:
+            detect_parity_multisig_bug_2()
 
         log.debug("Checking for Callstack attack...")
         detect_callstack_attack()
@@ -2269,10 +2284,12 @@ def log_info():
     global money_concurrency
     global reentrancy
     global assertion_failure
+    global parity_multisig_bug_2
 
     vulnerabilities = [callstack, money_concurrency, time_dependency, reentrancy]
     if source_map and global_params.CHECK_ASSERTIONS:
         vulnerabilities.append(assertion_failure)
+        vulnerabilities.append(parity_multisig_bug_2)
 
     for vul in vulnerabilities:
         s = str(vul)
@@ -2286,11 +2303,13 @@ def vulnerability_found():
     global money_concurrency
     global reentrancy
     global assertion_failure
+    global parity_multisig_bug_2
 
     vulnerabilities = [callstack, money_concurrency, time_dependency, reentrancy]
 
     if source_map and global_params.CHECK_ASSERTIONS:
         vulnerabilities.append(assertion_failure)
+        vulnerabilities.append(parity_multisig_bug_2)
 
     for vul in vulnerabilities:
         if vul.is_vulnerable():

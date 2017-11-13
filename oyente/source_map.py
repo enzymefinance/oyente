@@ -45,6 +45,7 @@ class SourceMap:
         self.instr_positions = {}
         self.var_names = self.__get_var_names()
         self.func_call_names = self.__get_func_call_names()
+        self.callee_src_pairs = self._get_callee_src_pairs()
 
     def get_source_code(self, pc):
         try:
@@ -54,6 +55,12 @@ class SourceMap:
         begin = pos['begin']
         end = pos['end']
         return self.source.content[begin:end]
+
+    def get_source_code_from_src(self, src):
+        src = src.split(":")
+        start = int(src[0])
+        end = start + int(src[1])
+        return self.source.content[start:end]
 
     def get_buggy_line(self, pc):
         try:
@@ -65,8 +72,19 @@ class SourceMap:
         end = pos['end']
         return self.source.content[begin:end]
 
+    def get_buggy_line_from_src(self, src):
+        pos = self._convert_src_to_pos(src)
+        location = self.get_location_from_src(src)
+        begin = self.source.line_break_positions[location['begin']['line'] - 1] + 1
+        end = pos['end']
+        return self.source.content[begin:end]
+
     def get_location(self, pc):
         pos = self.instr_positions[pc]
+        return self.__convert_offset_to_line_column(pos)
+
+    def get_location_from_src(self, src):
+        pos = self._convert_src_to_pos(src)
         return self.__convert_offset_to_line_column(pos)
 
     def is_a_parameter_or_state_variable(self, var_name):
@@ -81,6 +99,14 @@ class SourceMap:
             return False
         return False
 
+    def _convert_src_to_pos(self, src):
+        pos = {}
+        src = src.split(":")
+        pos['begin'] = int(src[0])
+        length = int(src[1])
+        pos['end'] = pos['begin'] + length - 1
+        return pos
+
     def __get_source(self):
         fname = self.get_filename()
         if fname in SourceMap.sources:
@@ -88,6 +114,9 @@ class SourceMap:
         else:
             SourceMap.sources[fname] = Source(fname)
             return SourceMap.sources[fname]
+
+    def _get_callee_src_pairs(self):
+        return SourceMap.ast_helper.get_callee_src_pairs(self.cname)
 
     def __get_var_names(self):
         return SourceMap.ast_helper.extract_state_variable_names(self.cname)

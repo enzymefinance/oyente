@@ -38,7 +38,7 @@ class AstHelper:
             else:
                 ast = sourcesList[k]["legacyAST"]
             nodes = []
-            walker.walk(ast, "ContractDefinition", nodes)
+            walker.walk(ast, {"name": "ContractDefinition"}, nodes)
             for node in nodes:
                 ret["contractsById"][node["id"]] = node
                 ret["sourcesByContract"][node["id"]] = k
@@ -76,7 +76,7 @@ class AstHelper:
         walker = AstWalker()
         nodes = []
         if node:
-            walker.walk(node, "FunctionCall", nodes)
+            walker.walk(node, {"name":  "FunctionCall"}, nodes)
         return nodes
 
     def extract_func_calls_definitions(self):
@@ -101,3 +101,32 @@ class AstHelper:
         for func_call in func_calls:
             func_call_srcs.append(func_call["src"])
         return func_call_srcs
+
+    def get_callee_src_pairs(self, c_name):
+        node = self.contracts["contractsByName"][c_name]
+        walker = AstWalker()
+        nodes = []
+        if node:
+            list_of_attributes = [
+                {"attributes": {"member_name": "delegatecall"}},
+                {"attributes": {"member_name": "call"}},
+                {"attributes": {"member_name": "callcode"}}
+            ]
+            walker.walk(node, list_of_attributes, nodes)
+
+        callee_src_pairs = []
+        for node in nodes:
+            if "children" in node and node["children"]:
+                type_of_first_child = node["children"][0]["attributes"]["type"]
+                if type_of_first_child.split(" ")[0] == "contract":
+                    contract = type_of_first_child.split(" ")[1]
+                    contract_path = self._find_contract_path(self.contracts["contractsByName"].keys(), contract)
+                    callee_src_pairs.append((contract_path, node["src"]))
+        return callee_src_pairs
+
+    def _find_contract_path(self, contract_paths, contract):
+        for path in contract_paths:
+            cname = path.split(":")[-1]
+            if contract == cname:
+                return path
+        return ""
