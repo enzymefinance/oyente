@@ -64,6 +64,9 @@ def initGlobalVars():
     solver = Solver()
     solver.set("timeout", global_params.TIMEOUT)
 
+    global addresses
+    addresses = []
+
     global visited_pcs
     visited_pcs = set()
 
@@ -519,6 +522,9 @@ def get_init_global_state(path_conditions_and_vars):
     global_state["currentNumber"] = currentNumber
     global_state["currentDifficulty"] = currentDifficulty
     global_state["currentGasLimit"] = currentGasLimit
+    global_state["Ia"][0] = int( "0xe26b13ef141ff3139319fabe62cb1846b5226344", 16)
+    global_state["Ia"][1] = int( "0xf6d45ee15e4b06a6e4d28c88366b47a80e0cf87c", 16)
+    global_state["Ia"][2] = 20
 
     return global_state
 
@@ -750,6 +756,7 @@ def sym_exec_ins(params):
     global edges
     global source_map
     global calls_affect_state
+    global addresses
 
     start = params.block
     instr = params.instr
@@ -1679,6 +1686,10 @@ def sym_exec_ins(params):
             if isReal(address) and address in global_state["Ia"]:
                 value = global_state["Ia"][address]
                 stack.insert(0, value)
+            elif isReal(address) and address not in global_state["Ia"]:
+                value = data_source.getStorageAt(address)
+                global_state["Ia"][address] = value
+                stack.insert(0, value)
             else:
                 if str(address) in global_state["Ia"]:
                     value = global_state["Ia"][str(address)]
@@ -1917,7 +1928,11 @@ def sym_exec_ins(params):
                     calls_affect_state[call_pc] = False
             global_state["pc"] = global_state["pc"] + 1
             outgas = stack.pop(0)
-            stack.pop(0) # this is not used as recipient
+            recipient = stack.pop(0) # this is not used as recipient
+            recipient = hex(recipient)
+            if recipient[-1] == "L":
+                recipient = recipient[:-1]
+            addresses.append(recipient)
             transfer_amount = stack.pop(0)
             start_data_input = stack.pop(0)
             size_data_input = stack.pop(0)
@@ -1955,7 +1970,11 @@ def sym_exec_ins(params):
         if len(stack) > 5:
             global_state["pc"] += 1
             stack.pop(0)
-            stack.pop(0)
+            recipient = stack.pop(0)
+            recipient = hex(recipient)
+            if recipient[-1] == "L":
+                recipient = recipient[:-1]
+            addresses.append(recipient)
             stack.pop(0)
             stack.pop(0)
             stack.pop(0)
@@ -2275,7 +2294,7 @@ def detect_vulnerabilities():
             log.info("\t  Assertion failure: \t False")
         results["evm_code_coverage"] = "0/0"
 
-    return results, vulnerability_found()
+    return results, vulnerability_found(), addresses
 
 def log_info():
     global source_map

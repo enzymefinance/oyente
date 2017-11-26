@@ -147,9 +147,10 @@ def main():
 
     parser.add_argument("-t",   "--timeout",        help="Timeout for Z3 in ms.", action="store", type=int)
     parser.add_argument("-gl",  "--gaslimit",       help="Limit Gas", action="store", dest="gas_limit", type=int)
-    parser.add_argument("-rp",   "--root-path",      help="Root directory path used for the online version", action="store", dest="root_path", type=str)
+    parser.add_argument("-addr", "--address",       help="Address of current contract", action="store", dest="address", type=str)
     parser.add_argument("-ll",  "--looplimit",      help="Limit number of loops", action="store", dest="loop_limit", type=int)
     parser.add_argument("-dl",  "--depthlimit",     help="Limit DFS depth", action="store", dest="depth_limit", type=int)
+    parser.add_argument("-rp",   "--root-path",     help="Root directory path used for the online version", action="store", dest="root_path", type=str)
     parser.add_argument("-ap",  "--allow-paths",    help="Allow a given path for imports", action="store", dest="allow_paths", type=str)
     parser.add_argument("-glt", "--global-timeout", help="Timeout for symbolic execution", action="store", dest="global_timeout", type=int)
 
@@ -219,6 +220,8 @@ def main():
             f.write(code)
 
     if args.bytecode:
+        if args.address:
+            global_params.ADDRESS = args.address
         processed_evm_file = args.source + '.1'
         disasm_file = args.source + '.disasm'
         with open(args.source) as f:
@@ -228,13 +231,14 @@ def main():
             f.write(removeSwarmHash(evm))
 
         result = analyze(processed_evm_file, disasm_file)
+        print result[2]
 
         bug_found = result[1]
 
         if global_params.WEB:
             six.print_(json.dumps(result[0]))
 
-        remove_temporary_file(disasm_file)
+        #  remove_temporary_file(disasm_file)
         remove_temporary_file(processed_evm_file)
 
         if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
@@ -288,7 +292,7 @@ def main():
                     of.write(bin_str)
 
             remove_temporary_file(processed_evm_file)
-            remove_temporary_file(disasm_file)
+            #  remove_temporary_file(disasm_file)
             remove_temporary_file(disasm_file + '.log')
 
         if bug_found:
@@ -331,7 +335,7 @@ def main():
             processed_evm_file = cname + '.evm'
             disasm_file = cname + '.evm.disasm'
             remove_temporary_file(processed_evm_file)
-            remove_temporary_file(disasm_file)
+            #  remove_temporary_file(disasm_file)
             remove_temporary_file(disasm_file + '.log')
 
         if global_params.WEB:
