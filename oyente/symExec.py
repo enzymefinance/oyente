@@ -2313,8 +2313,8 @@ def vulnerability_found():
 
     for vul in vulnerabilities:
         if vul.is_vulnerable():
-            return True
-    return False
+            return 1
+    return 0
 
 def print_state(stack, mem, global_state):
     log.debug("STACK: " + str(stack))

@@ -81,22 +81,64 @@ def link_libraries(filename, libs):
     out = p2.communicate()[0].decode()
     return extract_bin_str(out)
 
-def compileContracts(contract):
-    cmd = "solc --bin-runtime %s" % contract
+def compileContracts():
+    cmd = "solc --bin-runtime %s" % args.source
     out = run_command(cmd)
 
     libs = re.findall(r"_+(.*?)_+", out)
     libs = set(libs)
     if libs:
-        return link_libraries(contract, libs)
+        return link_libraries(args.source, libs)
     else:
         return extract_bin_str(out)
 
-def write_disasm_file(processed_evm_file, disasm_file):
+def compile_standard_json():
+    global args
+
+    FNULL = open(os.devnull, 'w')
+    cmd = "cat %s" % args.source
+    p1 = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)
+    cmd = "solc --allow-paths %s --standard-json" % args.allow_paths
+    p2 = subprocess.Popen(shlex.split(cmd), stdin=p1.stdout, stdout=subprocess.PIPE, stderr=FNULL)
+    p1.stdout.close()
+    out = p2.communicate()[0]
+    with open('standard_json_output', 'w') as of:
+        of.write(out)
+    # should handle the case without allow-paths option
+    j = json.loads(out)
+    contracts = []
+    for source in j["sources"]:
+        for contract in j["contracts"][source]:
+            cname = source + ":" + contract
+            evm = j["contracts"][source][contract]["evm"]["deployedBytecode"]["object"]
+            contracts.append((cname, evm))
+    return contracts
+
+def prepare_disasm_files_for_analysis(contracts):
+    for contract, bin_str in contracts:
+        write_evm_file(contract, bin_str)
+        write_disasm_file(contract)
+
+def get_temporary_files(contract):
+    return {
+        "evm": contract + ".evm",
+        "disasm": contract + ".evm.disasm",
+        "log": contract + ".evm.disasm.log"
+    }
+
+def write_evm_file(contract, bin_str):
+    evm_file = get_temporary_files(contract)["evm"]
+    with open(evm_file, 'w') as of:
+        of.write(removeSwarmHash(bin_str))
+
+def write_disasm_file(contract):
+    tmp_files = get_temporary_files(contract)
+    evm_file = tmp_files["evm"]
+    disasm_file = tmp_files["disasm"]
     disasm_out = ""
     try:
         disasm_p = subprocess.Popen(
-            ["evm", "disasm", processed_evm_file], stdout=subprocess.PIPE)
+            ["evm", "disasm", evm_file], stdout=subprocess.PIPE)
         disasm_out = disasm_p.communicate()[0].decode()
     except:
         logging.critical("Disassembly failed.")
@@ -105,32 +147,114 @@ def write_disasm_file(processed_evm_file, disasm_file):
     with open(disasm_file, 'w') as of:
         of.write(disasm_out)
 
+def remove_temporary_files_of_contracts(contracts):
+    for contract, _ in contracts:
+        remove_temporary_files(contract)
 
-def analyze(processed_evm_file, disasm_file, source_map = None):
-    disasm_out = ""
-    try:
-        disasm_p = subprocess.Popen(
-            ["evm", "disasm", processed_evm_file], stdout=subprocess.PIPE)
-        disasm_out = disasm_p.communicate()[0].decode()
-    except:
-        logging.critical("Disassembly failed.")
-        exit()
+def remove_temporary_files(contract):
+    global args
 
-    with open(disasm_file, 'w') as of:
-        of.write(disasm_out)
+    tmp_files = get_temporary_files(contract)
+    if not args.evm:
+        remove_temporary_file(tmp_files["evm"])
+    remove_temporary_file(tmp_files["disasm"])
+    remove_temporary_file(tmp_files["log"])
 
-    # Run symExec
-    if source_map:
-        return symExec.main(disasm_file, args.source, source_map)
-    else:
-        return symExec.main(disasm_file, args.source)
+def run_bytecode_analysis(contract):
+    tmp_files = get_temporary_files(contract)
+    return symExec.main(tmp_files["disasm"], contract)
 
-def analyze_source_code(disasm_file, source_map):
-    return symExec.main(disasm_file, args.source, source_map)
+def run_standard_json_analysis(contracts):
+    global args
+    results = {}
+    exit_code = 0
+
+    for contract, _ in contracts:
+        source, cname = cname.split(":")
+        source = re.sub(args.root_path, "", source)
+        logging.info("Contract %s:", contract)
+        source_map = SourceMap(contract, args.source, "standard json")
+
+        result, return_code = run_source_code_analysis(contract, source_map)
+
+        try:
+            results[source][cname] = result
+        except:
+            results[source] = {cname: result}
+
+        if return_code == 1:
+            exit_code = 1
+    return results, exit_code
+
+def run_source_codes_analysis(contracts):
+    global args
+    results = {}
+    exit_code = 0
+
+    for contract, _ in contracts:
+        source, cname = contract.split(":")
+        source = re.sub(args.root_path, "", source)
+        logging.info("Contract %s:", cname)
+        source_map = SourceMap(args.root_path, contract, args.source, "solidity")
+
+        result, return_code = run_source_code_analysis(contract, source_map)
+
+        try:
+            results[source][cname] = result
+        except:
+            results[source] = {cname: result}
+
+        if return_code == 1:
+            exit_code = 1
+    return results, exit_code
+
+def run_source_code_analysis(contract, source_map):
+    tmp_files = get_temporary_files(contract)
+    return symExec.main(tmp_files["disasm"], args.source, source_map)
 
 def remove_temporary_file(path):
     if os.path.isfile(path):
         os.unlink(path)
+
+def analyze_bytecode():
+    global args
+    contract = args.source
+    with open(contract, "r") as f:
+        bin_str = f.read()
+    write_evm_file(contract, bin_str)
+    write_disasm_file(contract)
+
+    result, exit_code = run_bytecode_analysis(contract)
+
+    if global_params.WEB:
+        six.print_(json.dumps(result))
+
+    remove_temporary_files(contract)
+
+    if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
+        exit_code = os.WEXITSTATUS(cmd)
+        if exit_code != 0:
+            exit(exit_code)
+    return exit_code
+
+def analyze_standard_json():
+    contracts = compile_standard_json()
+
+    prepare_disasm_files_for_analysis(contracts)
+    results, exit_code = run_standard_json_analysis(contracts)
+    remove_temporary_files_of_contracts(contracts)
+    return exit_code
+
+def analyze_source_codes():
+    contracts = compileContracts()
+
+    prepare_disasm_files_for_analysis(contracts)
+    results, exit_code = run_source_codes_analysis(contracts)
+    remove_temporary_files_of_contracts(contracts)
+
+    if global_params.WEB:
+        six.print_(json.dumps(results))
+    return exit_code
 
 def main():
     # TODO: Implement -o switch.
@@ -218,127 +342,15 @@ def main():
         with open(filename, 'w') as f:
             f.write(code)
 
+    exit_code = 0
     if args.bytecode:
-        processed_evm_file = args.source + '.1'
-        disasm_file = args.source + '.disasm'
-        with open(args.source) as f:
-            evm = f.read()
-
-        with open(processed_evm_file, 'w') as f:
-            f.write(removeSwarmHash(evm))
-
-        result = analyze(processed_evm_file, disasm_file)
-
-        bug_found = result[1]
-
-        if global_params.WEB:
-            six.print_(json.dumps(result[0]))
-
-        remove_temporary_file(disasm_file)
-        remove_temporary_file(processed_evm_file)
-
-        if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
-            exit_code = os.WEXITSTATUS(cmd)
-            if exit_code != 0:
-                exit(exit_code)
-        else:
-            if bug_found:
-                exit(1)
+        exit_code = analyze_bytecode()
     elif args.standard_json:
-        FNULL = open(os.devnull, 'w')
-        cmd = "cat %s" % args.source
-        p1 = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)
-        cmd = "solc --allow-paths %s --standard-json" % args.allow_paths
-        p2 = subprocess.Popen(shlex.split(cmd), stdin=p1.stdout, stdout=subprocess.PIPE, stderr=FNULL)
-        p1.stdout.close()
-        out = p2.communicate()[0]
-        with open('standard_json_output', 'w') as f:
-            f.write(out)
-        # should handle the case without allow-paths option
-        j = json.loads(out)
-        contracts = []
-        for source in j["sources"]:
-            for contract in j["contracts"][source]:
-                cname = source + ":" + contract
-                evm = j["contracts"][source][contract]["evm"]["deployedBytecode"]["object"]
-                contracts.append((cname, evm))
-
-        bug_found = False
-
-        for cname, bin_str in contracts:
-            logging.info("Contract %s:", cname)
-            processed_evm_file = cname + '.evm'
-            disasm_file = cname + '.evm.disasm'
-
-            with open(processed_evm_file, 'w') as of:
-                of.write(removeSwarmHash(bin_str))
-
-            result = analyze(processed_evm_file, disasm_file, SourceMap(cname, args.source, "standard json"))
-
-            if not bug_found:
-                bug_found = result[1]
-
-            try:
-                results[source][contract] = result[0]
-            except:
-                results[source] = {contract: result[0]}
-
-            if args.evm:
-                with open(processed_evm_file, 'w') as of:
-                    of.write(bin_str)
-
-            remove_temporary_file(processed_evm_file)
-            remove_temporary_file(disasm_file)
-            remove_temporary_file(disasm_file + '.log')
-
-        if bug_found:
-            exit(1)
-
+        exit_code = analyze_standard_json()
     else:
-        contracts = compileContracts(args.source)
-        results = {}
-        bug_found = False
+        exit_code = analyze_source_codes()
 
-        for cname, bin_str in contracts:
-            processed_evm_file = cname + '.evm'
-            disasm_file = cname + '.evm.disasm'
-            with open(processed_evm_file, 'w') as of:
-                of.write(removeSwarmHash(bin_str))
-            write_disasm_file(processed_evm_file, disasm_file)
-
-        for cname, bin_str in contracts:
-            source, contract = cname.split(":")
-            source = re.sub(args.root_path, "", source)
-            logging.info("Contract %s:", cname)
-            processed_evm_file = cname + '.evm'
-            disasm_file = cname + '.evm.disasm'
-
-            result = analyze_source_code(disasm_file, SourceMap(args.root_path, cname, args.source, "solidity"))
-
-            if not bug_found:
-                bug_found = result[1]
-
-            try:
-                results[source][contract] = result[0]
-            except:
-                results[source] = {contract: result[0]}
-
-            if args.evm:
-                with open(processed_evm_file, 'w') as of:
-                    of.write(bin_str)
-
-        for cname, bin_str in contracts:
-            processed_evm_file = cname + '.evm'
-            disasm_file = cname + '.evm.disasm'
-            remove_temporary_file(processed_evm_file)
-            remove_temporary_file(disasm_file)
-            remove_temporary_file(disasm_file + '.log')
-
-        if global_params.WEB:
-            six.print_(json.dumps(results))
-
-        if bug_found:
-            exit(1)
+    exit(exit_code)
 
 if __name__ == '__main__':
     main()
