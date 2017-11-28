@@ -27,7 +27,7 @@ class SourceMap:
     sources = {}
     ast_helper = None
 
-    def __init__(self, root_path, cname, parent_filename, input_type):
+    def __init__(self, cname, parent_filename, input_type, root_path=""):
         self.root_path = root_path
         self.cname = cname
         self.input_type = input_type

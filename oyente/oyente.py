@@ -81,7 +81,7 @@ def link_libraries(filename, libs):
     out = p2.communicate()[0].decode()
     return extract_bin_str(out)
 
-def compileContracts():
+def compile_contracts():
     cmd = "solc --bin-runtime %s" % args.source
     out = run_command(cmd)
 
@@ -148,6 +148,10 @@ def write_disasm_file(contract):
         of.write(disasm_out)
 
 def remove_temporary_files_of_contracts(contracts):
+    global args
+
+    if args.standard_json:
+        remove_temporary_file('standard_json_output')
     for contract, _ in contracts:
         remove_temporary_files(contract)
 
@@ -170,7 +174,7 @@ def run_standard_json_analysis(contracts):
     exit_code = 0
 
     for contract, _ in contracts:
-        source, cname = cname.split(":")
+        source, cname = contract.split(":")
         source = re.sub(args.root_path, "", source)
         logging.info("Contract %s:", contract)
         source_map = SourceMap(contract, args.source, "standard json")
@@ -194,8 +198,8 @@ def run_source_codes_analysis(contracts):
     for contract, _ in contracts:
         source, cname = contract.split(":")
         source = re.sub(args.root_path, "", source)
-        logging.info("Contract %s:", cname)
-        source_map = SourceMap(args.root_path, contract, args.source, "solidity")
+        logging.info("Contract %s:", contract)
+        source_map = SourceMap(contract, args.source, "solidity", args.root_path)
 
         result, return_code = run_source_code_analysis(contract, source_map)
 
@@ -246,7 +250,7 @@ def analyze_standard_json():
     return exit_code
 
 def analyze_source_codes():
-    contracts = compileContracts()
+    contracts = compile_contracts()
 
     prepare_disasm_files_for_analysis(contracts)
     results, exit_code = run_source_codes_analysis(contracts)
