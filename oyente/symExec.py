@@ -767,10 +767,11 @@ def sym_exec_ins(params):
     visited_pcs.add(global_state["pc"])
 
     instr_parts = str.split(instr, ' ')
+    opcode = instr_parts[0]
 
-    if instr_parts[0] == "INVALID":
+    if opcode == "INVALID":
         return
-    elif instr_parts[0] == "ASSERTFAIL":
+    elif opcode == "ASSERTFAIL":
         if source_map:
             source_code = source_map.get_source_code(global_state['pc'])
             source_code = source_code.split("(")[0]
@@ -786,8 +787,8 @@ def sym_exec_ins(params):
     # collecting the analysis result by calling this skeletal function
     # this should be done before symbolically executing the instruction,
     # since SE will modify the stack and mem
-    update_analysis(analysis, instr_parts[0], stack, mem, global_state, path_conditions_and_vars, solver)
-    if instr_parts[0] == "CALL" and analysis["reentrancy_bug"] and analysis["reentrancy_bug"][-1]:
+    update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_and_vars, solver)
+    if opcode == "CALL" and analysis["reentrancy_bug"] and analysis["reentrancy_bug"][-1]:
         global_problematic_pcs["reentrancy_bug"].append(global_state["pc"])
 
     log.debug("==============================")
@@ -796,10 +797,10 @@ def sym_exec_ins(params):
     #
     #  0s: Stop and Arithmetic Operations
     #
-    if instr_parts[0] == "STOP":
+    if opcode == "STOP":
         global_state["pc"] = global_state["pc"] + 1
         return
-    elif instr_parts[0] == "ADD":
+    elif opcode == "ADD":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -819,7 +820,7 @@ def sym_exec_ins(params):
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "MUL":
+    elif opcode == "MUL":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -833,7 +834,7 @@ def sym_exec_ins(params):
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "SUB":
+    elif opcode == "SUB":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -850,7 +851,7 @@ def sym_exec_ins(params):
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "DIV":
+    elif opcode == "DIV":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -876,7 +877,7 @@ def sym_exec_ins(params):
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "SDIV":
+    elif opcode == "SDIV":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -918,7 +919,7 @@ def sym_exec_ins(params):
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "MOD":
+    elif opcode == "MOD":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -948,7 +949,7 @@ def sym_exec_ins(params):
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "SMOD":
+    elif opcode == "SMOD":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -989,7 +990,7 @@ def sym_exec_ins(params):
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "ADDMOD":
+    elif opcode == "ADDMOD":
         if len(stack) > 2:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -1019,7 +1020,7 @@ def sym_exec_ins(params):
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "MULMOD":
+    elif opcode == "MULMOD":
         if len(stack) > 2:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -1049,7 +1050,7 @@ def sym_exec_ins(params):
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "EXP":
+    elif opcode == "EXP":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             base = stack.pop(0)
@@ -1066,7 +1067,7 @@ def sym_exec_ins(params):
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "SIGNEXTEND":
+    elif opcode == "SIGNEXTEND":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -1104,7 +1105,7 @@ def sym_exec_ins(params):
     #
     #  10s: Comparison and Bitwise Logic Operations
     #
-    elif instr_parts[0] == "LT":
+    elif opcode == "LT":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -1122,7 +1123,7 @@ def sym_exec_ins(params):
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "GT":
+    elif opcode == "GT":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -1140,7 +1141,7 @@ def sym_exec_ins(params):
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "SLT":  # Not fully faithful to signed comparison
+    elif opcode == "SLT":  # Not fully faithful to signed comparison
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -1158,7 +1159,7 @@ def sym_exec_ins(params):
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "SGT":  # Not fully faithful to signed comparison
+    elif opcode == "SGT":  # Not fully faithful to signed comparison
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -1176,7 +1177,7 @@ def sym_exec_ins(params):
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "EQ":
+    elif opcode == "EQ":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -1192,7 +1193,7 @@ def sym_exec_ins(params):
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "ISZERO":
+    elif opcode == "ISZERO":
         # Tricky: this instruction works on both boolean and integer,
         # when we have a symbolic expression, type error might occur
         # Currently handled by try and catch
@@ -1210,7 +1211,7 @@ def sym_exec_ins(params):
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "AND":
+    elif opcode == "AND":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -1220,7 +1221,7 @@ def sym_exec_ins(params):
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "OR":
+    elif opcode == "OR":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -1232,7 +1233,7 @@ def sym_exec_ins(params):
 
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "XOR":
+    elif opcode == "XOR":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -1244,7 +1245,7 @@ def sym_exec_ins(params):
 
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "NOT":
+    elif opcode == "NOT":
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -1253,7 +1254,7 @@ def sym_exec_ins(params):
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "BYTE":
+    elif opcode == "BYTE":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             first = stack.pop(0)
@@ -1283,7 +1284,7 @@ def sym_exec_ins(params):
     #
     # 20s: SHA3
     #
-    elif instr_parts[0] == "SHA3":
+    elif opcode == "SHA3":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             s0 = stack.pop(0)
@@ -1314,10 +1315,10 @@ def sym_exec_ins(params):
     #
     # 30s: Environment Information
     #
-    elif instr_parts[0] == "ADDRESS":  # get address of currently executing account
+    elif opcode == "ADDRESS":  # get address of currently executing account
         global_state["pc"] = global_state["pc"] + 1
         stack.insert(0, path_conditions_and_vars["Ia"])
-    elif instr_parts[0] == "BALANCE":
+    elif opcode == "BALANCE":
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             address = stack.pop(0)
@@ -1338,17 +1339,17 @@ def sym_exec_ins(params):
             stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "CALLER":  # get caller address
+    elif opcode == "CALLER":  # get caller address
         # that is directly responsible for this execution
         global_state["pc"] = global_state["pc"] + 1
         stack.insert(0, global_state["sender_address"])
-    elif instr_parts[0] == "ORIGIN":  # get execution origination address
+    elif opcode == "ORIGIN":  # get execution origination address
         global_state["pc"] = global_state["pc"] + 1
         stack.insert(0, global_state["origin"])
-    elif instr_parts[0] == "CALLVALUE":  # get value of this transaction
+    elif opcode == "CALLVALUE":  # get value of this transaction
         global_state["pc"] = global_state["pc"] + 1
         stack.insert(0, global_state["value"])
-    elif instr_parts[0] == "CALLDATALOAD":  # from input data from environment
+    elif opcode == "CALLDATALOAD":  # from input data from environment
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             position = stack.pop(0)
@@ -1375,7 +1376,7 @@ def sym_exec_ins(params):
             stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "CALLDATASIZE":
+    elif opcode == "CALLDATASIZE":
         global_state["pc"] = global_state["pc"] + 1
         new_var_name = gen.gen_data_size()
         if new_var_name in path_conditions_and_vars:
@@ -1384,7 +1385,7 @@ def sym_exec_ins(params):
             new_var = BitVec(new_var_name, 256)
             path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
-    elif instr_parts[0] == "CALLDATACOPY":  # Copy input data to memory
+    elif opcode == "CALLDATACOPY":  # Copy input data to memory
         #  TODO: Don't know how to simulate this yet
         if len(stack) > 2:
             global_state["pc"] = global_state["pc"] + 1
@@ -1393,7 +1394,7 @@ def sym_exec_ins(params):
             stack.pop(0)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "CODESIZE":
+    elif opcode == "CODESIZE":
         if c_name.endswith('.disasm'):
             evm_file_name = c_name[:-7]
         else:
@@ -1402,7 +1403,7 @@ def sym_exec_ins(params):
             evm = evm_file.read()[:-1]
             code_size = len(evm)/2
             stack.insert(0, code_size)
-    elif instr_parts[0] == "CODECOPY":
+    elif opcode == "CODECOPY":
         if len(stack) > 2:
             global_state["pc"] = global_state["pc"] + 1
             mem_location = stack.pop(0)
@@ -1450,10 +1451,23 @@ def sym_exec_ins(params):
             global_state["miu_i"] = current_miu_i
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "GASPRICE":
+    elif opcode == "RETURNDATACOPY":
+        if len(stack) > 2:
+            global_state["pc"] += 1
+            stack.pop(0)
+            stack.pop(0)
+            stack.pop(0)
+        else:
+            raise ValueError('STACK underflow')
+    elif opcode == "RETURNDATASIZE":
+        global_state["pc"] += 1
+        new_var_name = gen.gen_arbitrary_var()
+        new_var = BitVec(new_var_name, 256)
+        stack.insert(0, new_var)
+    elif opcode == "GASPRICE":
         global_state["pc"] = global_state["pc"] + 1
         stack.insert(0, global_state["gas_price"])
-    elif instr_parts[0] == "EXTCODESIZE":
+    elif opcode == "EXTCODESIZE":
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             address = stack.pop(0)
@@ -1471,7 +1485,7 @@ def sym_exec_ins(params):
                 stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "EXTCODECOPY":
+    elif opcode == "EXTCODECOPY":
         if len(stack) > 3:
             global_state["pc"] = global_state["pc"] + 1
             address = stack.pop(0)
@@ -1517,7 +1531,7 @@ def sym_exec_ins(params):
     #
     #  40s: Block Information
     #
-    elif instr_parts[0] == "BLOCKHASH":  # information from block header
+    elif opcode == "BLOCKHASH":  # information from block header
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             stack.pop(0)
@@ -1530,31 +1544,31 @@ def sym_exec_ins(params):
             stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "COINBASE":  # information from block header
+    elif opcode == "COINBASE":  # information from block header
         global_state["pc"] = global_state["pc"] + 1
         stack.insert(0, global_state["currentCoinbase"])
-    elif instr_parts[0] == "TIMESTAMP":  # information from block header
+    elif opcode == "TIMESTAMP":  # information from block header
         global_state["pc"] = global_state["pc"] + 1
         stack.insert(0, global_state["currentTimestamp"])
-    elif instr_parts[0] == "NUMBER":  # information from block header
+    elif opcode == "NUMBER":  # information from block header
         global_state["pc"] = global_state["pc"] + 1
         stack.insert(0, global_state["currentNumber"])
-    elif instr_parts[0] == "DIFFICULTY":  # information from block header
+    elif opcode == "DIFFICULTY":  # information from block header
         global_state["pc"] = global_state["pc"] + 1
         stack.insert(0, global_state["currentDifficulty"])
-    elif instr_parts[0] == "GASLIMIT":  # information from block header
+    elif opcode == "GASLIMIT":  # information from block header
         global_state["pc"] = global_state["pc"] + 1
         stack.insert(0, global_state["currentGasLimit"])
     #
     #  50s: Stack, Memory, Storage, and Flow Information
     #
-    elif instr_parts[0] == "POP":
+    elif opcode == "POP":
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             stack.pop(0)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "MLOAD":
+    elif opcode == "MLOAD":
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             address = stack.pop(0)
@@ -1596,7 +1610,7 @@ def sym_exec_ins(params):
             global_state["miu_i"] = current_miu_i
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "MSTORE":
+    elif opcode == "MSTORE":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             stored_address = stack.pop(0)
@@ -1641,7 +1655,7 @@ def sym_exec_ins(params):
             global_state["miu_i"] = current_miu_i
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "MSTORE8":
+    elif opcode == "MSTORE8":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
             stored_address = stack.pop(0)
@@ -1672,7 +1686,7 @@ def sym_exec_ins(params):
             global_state["miu_i"] = current_miu_i
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "SLOAD":
+    elif opcode == "SLOAD":
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             address = stack.pop(0)
@@ -1710,7 +1724,7 @@ def sym_exec_ins(params):
         else:
             raise ValueError('STACK underflow')
 
-    elif instr_parts[0] == "SSTORE":
+    elif opcode == "SSTORE":
         if len(stack) > 1:
             for call_pc in calls:
                 calls_affect_state[call_pc] = True
@@ -1725,7 +1739,7 @@ def sym_exec_ins(params):
                 global_state["Ia"][str(stored_address)] = stored_value
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "JUMP":
+    elif opcode == "JUMP":
         if len(stack) > 0:
             target_address = stack.pop(0)
             if isSymbolic(target_address):
@@ -1738,7 +1752,7 @@ def sym_exec_ins(params):
                 edges[start].append(target_address)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "JUMPI":
+    elif opcode == "JUMPI":
         # We need to prepare two branches
         if len(stack) > 1:
             target_address = stack.pop(0)
@@ -1760,14 +1774,14 @@ def sym_exec_ins(params):
                 edges[start].append(target_address)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "PC":
+    elif opcode == "PC":
         stack.insert(0, global_state["pc"])
         global_state["pc"] = global_state["pc"] + 1
-    elif instr_parts[0] == "MSIZE":
+    elif opcode == "MSIZE":
         global_state["pc"] = global_state["pc"] + 1
         msize = 32 * global_state["miu_i"]
         stack.insert(0, msize)
-    elif instr_parts[0] == "GAS":
+    elif opcode == "GAS":
         # In general, we do not have this precisely. It depends on both
         # the initial gas and the amount has been depleted
         # we need o think about this in the future, in case precise gas
@@ -1777,14 +1791,14 @@ def sym_exec_ins(params):
         new_var = BitVec(new_var_name, 256)
         path_conditions_and_vars[new_var_name] = new_var
         stack.insert(0, new_var)
-    elif instr_parts[0] == "JUMPDEST":
+    elif opcode == "JUMPDEST":
         # Literally do nothing
         global_state["pc"] = global_state["pc"] + 1
     #
     #  60s & 70s: Push Operations
     #
-    elif instr_parts[0].startswith('PUSH', 0):  # this is a push instruction
-        position = int(instr_parts[0][4:], 10)
+    elif opcode.startswith('PUSH', 0):  # this is a push instruction
+        position = int(opcode[4:], 10)
         global_state["pc"] = global_state["pc"] + 1 + position
         pushed_value = int(instr_parts[1], 16)
         stack.insert(0, pushed_value)
@@ -1793,9 +1807,9 @@ def sym_exec_ins(params):
     #
     #  80s: Duplication Operations
     #
-    elif instr_parts[0].startswith("DUP", 0):
+    elif opcode.startswith("DUP", 0):
         global_state["pc"] = global_state["pc"] + 1
-        position = int(instr_parts[0][3:], 10) - 1
+        position = int(opcode[3:], 10) - 1
         if len(stack) > position:
             duplicate = stack[position]
             stack.insert(0, duplicate)
@@ -1805,9 +1819,9 @@ def sym_exec_ins(params):
     #
     #  90s: Swap Operations
     #
-    elif instr_parts[0].startswith("SWAP", 0):
+    elif opcode.startswith("SWAP", 0):
         global_state["pc"] = global_state["pc"] + 1
-        position = int(instr_parts[0][4:], 10)
+        position = int(opcode[4:], 10)
         if len(stack) > position:
             temp = stack[position]
             stack[position] = stack[0]
@@ -1818,10 +1832,10 @@ def sym_exec_ins(params):
     #
     #  a0s: Logging Operations
     #
-    elif instr_parts[0] in ("LOG0", "LOG1", "LOG2", "LOG3", "LOG4"):
+    elif opcode in ("LOG0", "LOG1", "LOG2", "LOG3", "LOG4"):
         global_state["pc"] = global_state["pc"] + 1
         # We do not simulate these log operations
-        num_of_pops = 2 + int(instr_parts[0][3:])
+        num_of_pops = 2 + int(opcode[3:])
         while num_of_pops > 0:
             stack.pop(0)
             num_of_pops -= 1
@@ -1829,7 +1843,7 @@ def sym_exec_ins(params):
     #
     #  f0s: System Operations
     #
-    elif instr_parts[0] == "CREATE":
+    elif opcode == "CREATE":
         if len(stack) > 2:
             global_state["pc"] += 1
             stack.pop(0)
@@ -1840,7 +1854,7 @@ def sym_exec_ins(params):
             stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "CALL":
+    elif opcode == "CALL":
         # TODO: Need to handle miu_i
         if len(stack) > 6:
             calls.append(global_state["pc"])
@@ -1908,7 +1922,7 @@ def sym_exec_ins(params):
                     global_state["balance"][new_address_name] = new_balance
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "CALLCODE":
+    elif opcode == "CALLCODE":
         # TODO: Need to handle miu_i
         if len(stack) > 6:
             calls.append(global_state["pc"])
@@ -1951,7 +1965,7 @@ def sym_exec_ins(params):
                 analysis["time_dependency_bug"][last_idx] = global_state["pc"] - 1
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "DELEGATECALL":
+    elif opcode in ("DELEGATECALL", "STATICCALL"):
         if len(stack) > 5:
             global_state["pc"] += 1
             stack.pop(0)
@@ -1965,7 +1979,7 @@ def sym_exec_ins(params):
             stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "RETURN" or instr_parts[0] == "REVERT":
+    elif opcode in ("RETURN", "REVERT"):
         # TODO: Need to handle miu_i
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
@@ -1975,7 +1989,7 @@ def sym_exec_ins(params):
             pass
         else:
             raise ValueError('STACK underflow')
-    elif instr_parts[0] == "SUICIDE":
+    elif opcode == "SUICIDE":
         global_state["pc"] = global_state["pc"] + 1
         recipient = stack.pop(0)
         transfer_amount = global_state["balance"]["Ia"]
@@ -1996,11 +2010,11 @@ def sym_exec_ins(params):
         return
 
     else:
-        log.debug("UNKNOWN INSTRUCTION: " + instr_parts[0])
+        log.debug("UNKNOWN INSTRUCTION: " + opcode)
         if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
-            log.critical("Unknown instruction: %s" % instr_parts[0])
+            log.critical("Unknown instruction: %s" % opcode)
             exit(UNKNOWN_INSTRUCTION)
-        raise Exception('UNKNOWN INSTRUCTION: ' + instr_parts[0])
+        raise Exception('UNKNOWN INSTRUCTION: ' + opcode)
 
     try:
         print_state(stack, mem, global_state)
