@@ -2351,14 +2351,14 @@ def handler(signum, frame):
         exit(TIME_OUT)
     raise Exception("timeout")
 
-def main(contract, contract_sol, _source_map = None):
+def analyze(disasm_file, _source_map, source_file):
     global c_name
     global c_name_sol
     global source_map
     global results
 
-    c_name = contract
-    c_name_sol = contract_sol
+    c_name = disasm_file
+    c_name_sol = source_file
     source_map = _source_map
 
     check_unit_test_file()
@@ -2388,6 +2388,3 @@ def main(contract, contract_sol, _source_map = None):
     finally:
         return detect_vulnerabilities()
     signal.alarm(0)
-
-if __name__ == '__main__':
-    main(sys.argv[1])

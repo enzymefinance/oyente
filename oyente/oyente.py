@@ -8,11 +8,11 @@ import argparse
 import logging
 import requests
 import json
-import symExec
 import global_params
 import six
 from source_map import SourceMap
 from utils import run_command
+from symExec import analyze
 
 def cmd_exists(cmd):
     return subprocess.call("type " + cmd, shell=True,
@@ -164,9 +164,10 @@ def remove_temporary_files(contract):
     remove_temporary_file(tmp_files["disasm"])
     remove_temporary_file(tmp_files["log"])
 
-def run_bytecode_analysis(contract):
-    tmp_files = get_temporary_files(contract)
-    return symExec.main(tmp_files["disasm"], contract)
+def remove_temporary_file(path):
+    if os.path.isfile(path):
+        os.unlink(path)
+
 
 def run_standard_json_analysis(contracts):
     global args
@@ -178,8 +179,9 @@ def run_standard_json_analysis(contracts):
         source = re.sub(args.root_path, "", source)
         logging.info("Contract %s:", contract)
         source_map = SourceMap(contract, args.source, "standard json")
+        disasm_file = get_temporary_files(contract)["disasm"]
 
-        result, return_code = run_source_code_analysis(contract, source_map)
+        result, return_code = analyze(disasm_file, source_map, args.source)
 
         try:
             results[source][cname] = result
@@ -200,8 +202,9 @@ def run_source_codes_analysis(contracts):
         source = re.sub(args.root_path, "", source)
         logging.info("Contract %s:", contract)
         source_map = SourceMap(contract, args.source, "solidity", args.root_path)
+        disasm_file = get_temporary_files(contract)["disasm"]
 
-        result, return_code = run_source_code_analysis(contract, source_map)
+        result, return_code = analyze(disasm_file, source_map, args.source)
 
         try:
             results[source][cname] = result
@@ -212,14 +215,6 @@ def run_source_codes_analysis(contracts):
             exit_code = 1
     return results, exit_code
 
-def run_source_code_analysis(contract, source_map):
-    tmp_files = get_temporary_files(contract)
-    return symExec.main(tmp_files["disasm"], args.source, source_map)
-
-def remove_temporary_file(path):
-    if os.path.isfile(path):
-        os.unlink(path)
-
 def analyze_bytecode():
     global args
     contract = args.source
@@ -227,8 +222,9 @@ def analyze_bytecode():
         bin_str = f.read()
     write_evm_file(contract, bin_str)
     write_disasm_file(contract)
+    disasm_file = get_temporary_files(contract)["disasm"]
 
-    result, exit_code = run_bytecode_analysis(contract)
+    result, exit_code = analyze(disasm_file, None, None)
 
     if global_params.WEB:
         six.print_(json.dumps(result))
