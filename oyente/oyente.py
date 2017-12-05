@@ -181,7 +181,7 @@ def run_standard_json_analysis(contracts):
         source_map = SourceMap(contract, args.source, "standard json")
         disasm_file = get_temporary_files(contract)["disasm"]
 
-        result, return_code = analyze(disasm_file, source_map, args.source)
+        result, return_code = analyze(disasm_file=disasm_file, source_map=source_map, source_file=args.source)
 
         try:
             results[source][cname] = result
@@ -204,7 +204,7 @@ def run_source_codes_analysis(contracts):
         source_map = SourceMap(contract, args.source, "solidity", args.root_path)
         disasm_file = get_temporary_files(contract)["disasm"]
 
-        result, return_code = analyze(disasm_file, source_map, args.source)
+        result, return_code = analyze(disasm_file=disasm_file, source_map=source_map, source_file=args.source)
 
         try:
             results[source][cname] = result
@@ -224,7 +224,7 @@ def analyze_bytecode():
     write_disasm_file(contract)
     disasm_file = get_temporary_files(contract)["disasm"]
 
-    result, exit_code = analyze(disasm_file, None, None)
+    result, exit_code = analyze(disasm_file=disasm_file, source_file=None, source_map=None)
 
     if global_params.WEB:
         six.print_(json.dumps(result))

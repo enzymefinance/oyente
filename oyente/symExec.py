@@ -750,6 +750,7 @@ def sym_exec_ins(params):
     global edges
     global source_map
     global calls_affect_state
+    global data_source
 
     start = params.block
     instr = params.instr
@@ -1689,27 +1690,31 @@ def sym_exec_ins(params):
     elif opcode == "SLOAD":
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
-            address = stack.pop(0)
-            if isReal(address) and address in global_state["Ia"]:
-                value = global_state["Ia"][address]
+            position = stack.pop(0)
+            if isReal(position) and position in global_state["Ia"]:
+                value = global_state["Ia"][position]
+                stack.insert(0, value)
+            elif global_params.USE_GLOBAL_STORAGE and isReal(position) and position not in global_state["Ia"]:
+                value = data_source.getStorageAt(position)
+                global_state["Ia"][position] = value
                 stack.insert(0, value)
             else:
-                if str(address) in global_state["Ia"]:
-                    value = global_state["Ia"][str(address)]
+                if str(position) in global_state["Ia"]:
+                    value = global_state["Ia"][str(position)]
                     stack.insert(0, value)
                 else:
-                    if is_expr(address):
-                        address = simplify(address)
+                    if is_expr(position):
+                        position = simplify(position)
                     if source_map:
                         new_var_name = source_map.get_source_code(global_state['pc'] - 1)
                         operators = '[-+*/%|&^!><=]'
                         new_var_name = re.compile(operators).split(new_var_name)[0].strip()
                         if source_map.is_a_parameter_or_state_variable(new_var_name):
-                            new_var_name = "Ia_store" + "-" + str(address) + "-" + new_var_name
+                            new_var_name = "Ia_store" + "-" + str(position) + "-" + new_var_name
                         else:
-                            new_var_name = gen.gen_owner_store_var(address)
+                            new_var_name = gen.gen_owner_store_var(position)
                     else:
-                        new_var_name = gen.gen_owner_store_var(address)
+                        new_var_name = gen.gen_owner_store_var(position)
 
                     if new_var_name in path_conditions_and_vars:
                         new_var = path_conditions_and_vars[new_var_name]
@@ -1717,10 +1722,10 @@ def sym_exec_ins(params):
                         new_var = BitVec(new_var_name, 256)
                         path_conditions_and_vars[new_var_name] = new_var
                     stack.insert(0, new_var)
-                    if isReal(address):
-                        global_state["Ia"][address] = new_var
+                    if isReal(position):
+                        global_state["Ia"][position] = new_var
                     else:
-                        global_state["Ia"][str(address)] = new_var
+                        global_state["Ia"][str(position)] = new_var
         else:
             raise ValueError('STACK underflow')
 
@@ -2351,15 +2356,19 @@ def handler(signum, frame):
         exit(TIME_OUT)
     raise Exception("timeout")
 
-def analyze(disasm_file, _source_map, source_file):
+def analyze(**kwargs):
     global c_name
     global c_name_sol
     global source_map
     global results
 
-    c_name = disasm_file
-    c_name_sol = source_file
-    source_map = _source_map
+    if global_params.USE_GLOBAL_STORAGE:
+        global data_source
+        data_source = EthereumData(kwargs["contract_address"])
+
+    c_name = kwargs["disasm_file"]
+    c_name_sol = kwargs["source_file"]
+    source_map = kwargs["source_map"]
 
     check_unit_test_file()
     initGlobalVars()
