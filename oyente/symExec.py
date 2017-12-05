@@ -691,6 +691,9 @@ def sym_exec_block(params):
                 sym_exec_block(new_params)
         except Exception as e:
             log_file.write(str(e))
+            if global_params.USE_GLOBAL_STORAGE and str(e) == "unspecific external address":
+                raise e
+
             if global_params.DEBUG_MODE:
                 traceback.print_exc()
             if not global_params.IGNORE_EXCEPTIONS:
@@ -728,6 +731,9 @@ def sym_exec_block(params):
                 sym_exec_block(new_params)
         except Exception as e:
             log_file.write(str(e))
+            if global_params.USE_GLOBAL_STORAGE and str(e) == "unspecific external address":
+                raise e
+
             if global_params.DEBUG_MODE:
                 traceback.print_exc()
             if not global_params.IGNORE_EXCEPTIONS:
@@ -1936,7 +1942,16 @@ def sym_exec_ins(params):
                     calls_affect_state[call_pc] = False
             global_state["pc"] = global_state["pc"] + 1
             outgas = stack.pop(0)
-            stack.pop(0) # this is not used as recipient
+            recipient = stack.pop(0) # this is not used as recipient
+            if global_params.USE_GLOBAL_STORAGE:
+                if isReal(recipient):
+                    recipient = hex(recipient)
+                    if recipient[-1] == "L":
+                        recipient = recipient[:-1]
+                    recipients.append(recipient)
+                else:
+                    raise Exception("unspecific external address")
+
             transfer_amount = stack.pop(0)
             start_data_input = stack.pop(0)
             size_data_input = stack.pop(0)
@@ -1974,7 +1989,16 @@ def sym_exec_ins(params):
         if len(stack) > 5:
             global_state["pc"] += 1
             stack.pop(0)
-            stack.pop(0)
+            recipient = stack.pop(0)
+            if global_params.USE_GLOBAL_STORAGE:
+                if isReal(recipient):
+                    recipient = hex(recipient)
+                    if recipient[-1] == "L":
+                        recipient = recipient[:-1]
+                    recipients.append(recipient)
+                else:
+                    raise Exception("unspecific external address")
+
             stack.pop(0)
             stack.pop(0)
             stack.pop(0)
@@ -2294,7 +2318,7 @@ def detect_vulnerabilities():
             log.info("\t  Assertion failure: \t False")
         results["evm_code_coverage"] = "0/0"
 
-    return results, vulnerability_found()
+    return results, vulnerability_found(), recipients
 
 def log_info():
     global source_map
@@ -2363,6 +2387,7 @@ def analyze(**kwargs):
     global results
 
     if global_params.USE_GLOBAL_STORAGE:
+        global recipients
         global data_source
         data_source = EthereumData(kwargs["contract_address"])
 
