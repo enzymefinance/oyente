@@ -691,9 +691,6 @@ def sym_exec_block(params):
                 sym_exec_block(new_params)
         except Exception as e:
             log_file.write(str(e))
-            if global_params.USE_GLOBAL_STORAGE and str(e) == "unspecific external address":
-                raise e
-
             if global_params.DEBUG_MODE:
                 traceback.print_exc()
             if not global_params.IGNORE_EXCEPTIONS:
@@ -731,9 +728,6 @@ def sym_exec_block(params):
                 sym_exec_block(new_params)
         except Exception as e:
             log_file.write(str(e))
-            if global_params.USE_GLOBAL_STORAGE and str(e) == "unspecific external address":
-                raise e
-
             if global_params.DEBUG_MODE:
                 traceback.print_exc()
             if not global_params.IGNORE_EXCEPTIONS:
@@ -1950,7 +1944,7 @@ def sym_exec_ins(params):
                         recipient = recipient[:-1]
                     recipients.append(recipient)
                 else:
-                    raise Exception("unspecific external address")
+                    recipients.append(None)
 
             transfer_amount = stack.pop(0)
             start_data_input = stack.pop(0)
@@ -1997,7 +1991,7 @@ def sym_exec_ins(params):
                         recipient = recipient[:-1]
                     recipients.append(recipient)
                 else:
-                    raise Exception("unspecific external address")
+                    recipients.append(None)
 
             stack.pop(0)
             stack.pop(0)
