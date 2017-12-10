@@ -37,10 +37,14 @@ class EthereumData:
 
         def getStorageAt(self, position):
             try:
-                apiEndPoint = "%s?module=proxy&action=eth_getStorageAt&address=%s&position=%s&tag=latest&apikey=%s" % (self.apiDomain, self.contract_addr, hex(position), self.apikey)
+                position = hex(position)
+                if position[-1] == "L":
+                    position = position[:-1]
+                apiEndPoint = "%s?module=proxy&action=eth_getStorageAt&address=%s&position=%s&tag=latest&apikey=%s" % (self.apiDomain, self.contract_addr, position, self.apikey)
                 r = requests.get(apiEndPoint)
                 result = r.json()["result"]
             except Exception as e:
+                print "Error at: contract address: %s, position: %s" % (self.contract_addr, position)
                 log.exception("Error at: contract address: %s, position: %s" % (self.contract_addr, position))
                 raise e
             return int(result, 16)

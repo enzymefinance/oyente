@@ -2318,7 +2318,7 @@ def detect_vulnerabilities():
             log.info("\t  Assertion failure: \t False")
         results["evm_code_coverage"] = "0/0"
 
-    return results, vulnerability_found(), recipients
+    return results, vulnerability_found()
 
 def log_info():
     global source_map
@@ -2380,16 +2380,46 @@ def handler(signum, frame):
         exit(TIME_OUT)
     raise Exception("timeout")
 
+def get_external_addresses(disasm_file, contract_address):
+    global recipients
+    global data_source
+    global source_map
+    global c_name
+    global c_name_sol
+
+    source_map = None
+    c_name = disasm_file
+    c_name_sol = None
+    data_source = EthereumData(contract_address)
+    recipients = []
+
+    initGlobalVars()
+    set_cur_file(c_name[4:] if len(c_name) > 5 else c_name)
+    start = time.time()
+    signal.signal(signal.SIGALRM, handler)
+    signal.alarm(global_params.GLOBAL_TIMEOUT)
+    atexit.register(closing_message)
+
+    log.info("Running, please wait...")
+    log.info("\t============ Results ===========")
+
+    try:
+        build_cfg_and_analyze()
+        log.debug("Done Symbolic execution")
+    except Exception as e:
+        traceback.print_exc()
+        raise e
+    finally:
+        evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys()) * 100
+        log.info("\t  EVM Code Coverage: \t\t\t %s%%", round(evm_code_coverage, 1))
+        return recipients
+    signal.alarm(0)
+
 def analyze(**kwargs):
     global c_name
     global c_name_sol
     global source_map
     global results
-
-    if global_params.USE_GLOBAL_STORAGE:
-        global recipients
-        global data_source
-        data_source = EthereumData(kwargs["contract_address"])
 
     c_name = kwargs["disasm_file"]
     c_name_sol = kwargs["source_file"]
