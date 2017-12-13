@@ -149,9 +149,6 @@ def initGlobalVars():
     if global_params.USE_GLOBAL_BLOCKCHAIN:
         data_source = EthereumData()
 
-    global log_file
-    log_file = open(c_name + '.log', "w")
-
     global rfile
     if global_params.REPORT_MODE:
         rfile = open(c_name + '.report', 'w')
@@ -565,7 +562,6 @@ def sym_exec_block(params):
         return ["ERROR"]
 
     log.debug("Reach block address %d \n", block)
-    log.debug("STACK: " + str(stack))
 
     current_edge = Edge(pre_block, block)
     if current_edge in visited_edges:
@@ -690,7 +686,6 @@ def sym_exec_block(params):
                     pass
                 sym_exec_block(new_params)
         except Exception as e:
-            log_file.write(str(e))
             if global_params.DEBUG_MODE:
                 traceback.print_exc()
             if not global_params.IGNORE_EXCEPTIONS:
@@ -727,7 +722,6 @@ def sym_exec_block(params):
                     pass
                 sym_exec_block(new_params)
         except Exception as e:
-            log_file.write(str(e))
             if global_params.DEBUG_MODE:
                 traceback.print_exc()
             if not global_params.IGNORE_EXCEPTIONS:
@@ -744,12 +738,14 @@ def sym_exec_block(params):
 
 # Symbolically executing an instruction
 def sym_exec_ins(params):
+    global MSIZE
     global visited_pcs
     global solver
     global vertices
     global edges
     global source_map
     global calls_affect_state
+    global data_source
 
     start = params.block
     instr = params.instr
@@ -1443,8 +1439,9 @@ def sym_exec_ins(params):
                 expression = current_miu_i < temp
                 solver.push()
                 solver.add(expression)
-                if check_solver(solver) != unsat:
-                    current_miu_i = If(expression, temp, current_miu_i)
+                if MSIZE:
+                    if check_solver(solver) != unsat:
+                        current_miu_i = If(expression, temp, current_miu_i)
                 solver.pop()
                 mem.clear() # very conservative
                 mem[str(mem_location)] = new_var
@@ -1520,8 +1517,9 @@ def sym_exec_ins(params):
                 expression = current_miu_i < temp
                 solver.push()
                 solver.add(expression)
-                if check_solver(solver) != unsat:
-                    current_miu_i = If(expression, temp, current_miu_i)
+                if MSIZE:
+                    if check_solver(solver) != unsat:
+                        current_miu_i = If(expression, temp, current_miu_i)
                 solver.pop()
                 mem.clear() # very conservative
                 mem[str(mem_location)] = new_var
@@ -1582,17 +1580,16 @@ def sym_exec_ins(params):
                     current_miu_i = temp
                 value = mem[address]
                 stack.insert(0, value)
-                log.debug("temp: " + str(temp))
-                log.debug("current_miu_i: " + str(current_miu_i))
             else:
                 temp = ((address + 31) / 32) + 1
                 current_miu_i = to_symbolic(current_miu_i)
                 expression = current_miu_i < temp
                 solver.push()
                 solver.add(expression)
-                if check_solver(solver) != unsat:
-                    # this means that it is possibly that current_miu_i < temp
-                    current_miu_i = If(expression,temp,current_miu_i)
+                if MSIZE:
+                    if check_solver(solver) != unsat:
+                        # this means that it is possibly that current_miu_i < temp
+                        current_miu_i = If(expression,temp,current_miu_i)
                 solver.pop()
                 new_var_name = gen.gen_mem_var(address)
                 if new_var_name in path_conditions_and_vars:
@@ -1605,8 +1602,6 @@ def sym_exec_ins(params):
                     mem[address] = new_var
                 else:
                     mem[str(address)] = new_var
-                log.debug("temp: " + str(temp))
-                log.debug("current_miu_i: " + str(current_miu_i))
             global_state["miu_i"] = current_miu_i
         else:
             raise ValueError('STACK underflow')
@@ -1634,24 +1629,18 @@ def sym_exec_ins(params):
                 if temp > current_miu_i:
                     current_miu_i = temp
                 mem[stored_address] = stored_value  # note that the stored_value could be symbolic
-                log.debug("temp: " + str(temp))
-                log.debug("current_miu_i: " + str(current_miu_i))
             else:
-                log.debug("temp: " + str(stored_address))
                 temp = ((stored_address + 31) / 32) + 1
-                log.debug("current_miu_i: " + str(current_miu_i))
                 expression = current_miu_i < temp
-                log.debug("Expression: " + str(expression))
                 solver.push()
                 solver.add(expression)
-                if check_solver(solver) != unsat:
-                    # this means that it is possibly that current_miu_i < temp
-                    current_miu_i = If(expression,temp,current_miu_i)
+                if MSIZE:
+                    if check_solver(solver) != unsat:
+                        # this means that it is possibly that current_miu_i < temp
+                        current_miu_i = If(expression,temp,current_miu_i)
                 solver.pop()
                 mem.clear()  # very conservative
                 mem[str(stored_address)] = stored_value
-                log.debug("temp: " + str(temp))
-                log.debug("current_miu_i: " + str(current_miu_i))
             global_state["miu_i"] = current_miu_i
         else:
             raise ValueError('STACK underflow')
@@ -1677,9 +1666,10 @@ def sym_exec_ins(params):
                 expression = current_miu_i < temp
                 solver.push()
                 solver.add(expression)
-                if check_solver(solver) != unsat:
-                    # this means that it is possibly that current_miu_i < temp
-                    current_miu_i = If(expression,temp,current_miu_i)
+                if MSIZE:
+                    if check_solver(solver) != unsat:
+                        # this means that it is possibly that current_miu_i < temp
+                        current_miu_i = If(expression,temp,current_miu_i)
                 solver.pop()
                 mem.clear()  # very conservative
                 mem[str(stored_address)] = stored_value
@@ -1689,27 +1679,31 @@ def sym_exec_ins(params):
     elif opcode == "SLOAD":
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
-            address = stack.pop(0)
-            if isReal(address) and address in global_state["Ia"]:
-                value = global_state["Ia"][address]
+            position = stack.pop(0)
+            if isReal(position) and position in global_state["Ia"]:
+                value = global_state["Ia"][position]
+                stack.insert(0, value)
+            elif global_params.USE_GLOBAL_STORAGE and isReal(position) and position not in global_state["Ia"]:
+                value = data_source.getStorageAt(position)
+                global_state["Ia"][position] = value
                 stack.insert(0, value)
             else:
-                if str(address) in global_state["Ia"]:
-                    value = global_state["Ia"][str(address)]
+                if str(position) in global_state["Ia"]:
+                    value = global_state["Ia"][str(position)]
                     stack.insert(0, value)
                 else:
-                    if is_expr(address):
-                        address = simplify(address)
+                    if is_expr(position):
+                        position = simplify(position)
                     if source_map:
                         new_var_name = source_map.get_source_code(global_state['pc'] - 1)
                         operators = '[-+*/%|&^!><=]'
                         new_var_name = re.compile(operators).split(new_var_name)[0].strip()
                         if source_map.is_a_parameter_or_state_variable(new_var_name):
-                            new_var_name = "Ia_store" + "-" + str(address) + "-" + new_var_name
+                            new_var_name = "Ia_store" + "-" + str(position) + "-" + new_var_name
                         else:
-                            new_var_name = gen.gen_owner_store_var(address)
+                            new_var_name = gen.gen_owner_store_var(position)
                     else:
-                        new_var_name = gen.gen_owner_store_var(address)
+                        new_var_name = gen.gen_owner_store_var(position)
 
                     if new_var_name in path_conditions_and_vars:
                         new_var = path_conditions_and_vars[new_var_name]
@@ -1717,10 +1711,10 @@ def sym_exec_ins(params):
                         new_var = BitVec(new_var_name, 256)
                         path_conditions_and_vars[new_var_name] = new_var
                     stack.insert(0, new_var)
-                    if isReal(address):
-                        global_state["Ia"][address] = new_var
+                    if isReal(position):
+                        global_state["Ia"][position] = new_var
                     else:
-                        global_state["Ia"][str(address)] = new_var
+                        global_state["Ia"][str(position)] = new_var
         else:
             raise ValueError('STACK underflow')
 
@@ -1931,7 +1925,16 @@ def sym_exec_ins(params):
                     calls_affect_state[call_pc] = False
             global_state["pc"] = global_state["pc"] + 1
             outgas = stack.pop(0)
-            stack.pop(0) # this is not used as recipient
+            recipient = stack.pop(0) # this is not used as recipient
+            if global_params.USE_GLOBAL_STORAGE:
+                if isReal(recipient):
+                    recipient = hex(recipient)
+                    if recipient[-1] == "L":
+                        recipient = recipient[:-1]
+                    recipients.add(recipient)
+                else:
+                    recipients.add(None)
+
             transfer_amount = stack.pop(0)
             start_data_input = stack.pop(0)
             size_data_input = stack.pop(0)
@@ -1969,7 +1972,16 @@ def sym_exec_ins(params):
         if len(stack) > 5:
             global_state["pc"] += 1
             stack.pop(0)
-            stack.pop(0)
+            recipient = stack.pop(0)
+            if global_params.USE_GLOBAL_STORAGE:
+                if isReal(recipient):
+                    recipient = hex(recipient)
+                    if recipient[-1] == "L":
+                        recipient = recipient[:-1]
+                    recipients.add(recipient)
+                else:
+                    recipients.add(None)
+
             stack.pop(0)
             stack.pop(0)
             stack.pop(0)
@@ -2015,11 +2027,6 @@ def sym_exec_ins(params):
             log.critical("Unknown instruction: %s" % opcode)
             exit(UNKNOWN_INSTRUCTION)
         raise Exception('UNKNOWN INSTRUCTION: ' + opcode)
-
-    try:
-        print_state(stack, mem, global_state)
-    except:
-        log.debug("Error: Debugging states")
 
 # Detect if a money flow depends on the timestamp
 def detect_time_dependency():
@@ -2330,11 +2337,6 @@ def vulnerability_found():
             return 1
     return 0
 
-def print_state(stack, mem, global_state):
-    log.debug("STACK: " + str(stack))
-    log.debug("MEM: " + str(mem))
-    log.debug("GLOBAL STATE: " + str(global_state))
-
 def closing_message():
     global c_name_sol
     global results
@@ -2351,15 +2353,57 @@ def handler(signum, frame):
         exit(TIME_OUT)
     raise Exception("timeout")
 
-def main(contract, contract_sol, _source_map = None):
+def get_recipients(disasm_file, contract_address):
+    global recipients
+    global data_source
+    global source_map
+    global c_name
+    global c_name_sol
+
+    source_map = None
+    c_name = disasm_file
+    c_name_sol = None
+    data_source = EthereumData(contract_address)
+    recipients = set()
+
+    initGlobalVars()
+    set_cur_file(c_name[4:] if len(c_name) > 5 else c_name)
+    start = time.time()
+    signal.signal(signal.SIGALRM, handler)
+    signal.alarm(global_params.GLOBAL_TIMEOUT)
+    timeout = False
+
+    try:
+        build_cfg_and_analyze()
+        signal.alarm(0)
+    except Exception as e:
+        if str(e) == 'timeout':
+            timeout = True
+        else:
+            raise
+    evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys())
+    return {
+        'addrs': list(recipients),
+        'evm_code_coverage': evm_code_coverage,
+        'timeout': timeout
+    }
+
+def analyze(**kwargs):
     global c_name
     global c_name_sol
     global source_map
     global results
+    global MSIZE
 
-    c_name = contract
-    c_name_sol = contract_sol
-    source_map = _source_map
+    c_name = kwargs["disasm_file"]
+    c_name_sol = kwargs["source_file"]
+    source_map = kwargs["source_map"]
+    MSIZE = False
+
+    with open(c_name, 'r') as f:
+        disasm = f.read()
+    if 'MSIZE' in disasm:
+        MSIZE = True
 
     check_unit_test_file()
     initGlobalVars()
@@ -2388,6 +2432,3 @@ def main(contract, contract_sol, _source_map = None):
     finally:
         return detect_vulnerabilities()
     signal.alarm(0)
-
-if __name__ == '__main__':
-    main(sys.argv[1])
