@@ -64,7 +64,7 @@ def extract_bin_str(s):
         logging.critical("Solidity compilation failed")
         if global_params.WEB:
             six.print_({"error": "Solidity compilation failed"})
-        exit()
+        exit(1)
     return contracts
 
 def link_libraries(filename, libs):
