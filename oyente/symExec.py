@@ -2365,16 +2365,15 @@ def get_external_addresses(disasm_file, contract_address):
     start = time.time()
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(global_params.GLOBAL_TIMEOUT)
-    atexit.register(closing_message)
 
     try:
         build_cfg_and_analyze()
     except Exception as e:
-        traceback.print_exc()
-        raise e
-    finally:
-        evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys()) * 100
-        return list(recipients)
+        if str(e) != 'timeout':
+            log.exception("Error at get_external_addresses()")
+            raise e
+    evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys())
+    return list(recipients), evm_code_coverage
     signal.alarm(0)
 
 def analyze(**kwargs):
