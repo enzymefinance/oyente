@@ -149,9 +149,6 @@ def initGlobalVars():
     if global_params.USE_GLOBAL_BLOCKCHAIN:
         data_source = EthereumData()
 
-    global log_file
-    log_file = open(c_name + '.log', "w")
-
     global rfile
     if global_params.REPORT_MODE:
         rfile = open(c_name + '.report', 'w')
@@ -565,7 +562,6 @@ def sym_exec_block(params):
         return ["ERROR"]
 
     log.debug("Reach block address %d \n", block)
-    log.debug("STACK: " + str(stack))
 
     current_edge = Edge(pre_block, block)
     if current_edge in visited_edges:
@@ -690,7 +686,6 @@ def sym_exec_block(params):
                     pass
                 sym_exec_block(new_params)
         except Exception as e:
-            log_file.write(str(e))
             if global_params.DEBUG_MODE:
                 traceback.print_exc()
             if not global_params.IGNORE_EXCEPTIONS:
@@ -727,7 +722,6 @@ def sym_exec_block(params):
                     pass
                 sym_exec_block(new_params)
         except Exception as e:
-            log_file.write(str(e))
             if global_params.DEBUG_MODE:
                 traceback.print_exc()
             if not global_params.IGNORE_EXCEPTIONS:
@@ -1583,8 +1577,6 @@ def sym_exec_ins(params):
                     current_miu_i = temp
                 value = mem[address]
                 stack.insert(0, value)
-                log.debug("temp: " + str(temp))
-                log.debug("current_miu_i: " + str(current_miu_i))
             else:
                 temp = ((address + 31) / 32) + 1
                 current_miu_i = to_symbolic(current_miu_i)
@@ -1606,8 +1598,6 @@ def sym_exec_ins(params):
                     mem[address] = new_var
                 else:
                     mem[str(address)] = new_var
-                log.debug("temp: " + str(temp))
-                log.debug("current_miu_i: " + str(current_miu_i))
             global_state["miu_i"] = current_miu_i
         else:
             raise ValueError('STACK underflow')
@@ -1635,14 +1625,9 @@ def sym_exec_ins(params):
                 if temp > current_miu_i:
                     current_miu_i = temp
                 mem[stored_address] = stored_value  # note that the stored_value could be symbolic
-                log.debug("temp: " + str(temp))
-                log.debug("current_miu_i: " + str(current_miu_i))
             else:
-                log.debug("temp: " + str(stored_address))
                 temp = ((stored_address + 31) / 32) + 1
-                log.debug("current_miu_i: " + str(current_miu_i))
                 expression = current_miu_i < temp
-                log.debug("Expression: " + str(expression))
                 solver.push()
                 solver.add(expression)
                 if check_solver(solver) != unsat:
@@ -1651,8 +1636,6 @@ def sym_exec_ins(params):
                 solver.pop()
                 mem.clear()  # very conservative
                 mem[str(stored_address)] = stored_value
-                log.debug("temp: " + str(temp))
-                log.debug("current_miu_i: " + str(current_miu_i))
             global_state["miu_i"] = current_miu_i
         else:
             raise ValueError('STACK underflow')
@@ -2039,11 +2022,6 @@ def sym_exec_ins(params):
             exit(UNKNOWN_INSTRUCTION)
         raise Exception('UNKNOWN INSTRUCTION: ' + opcode)
 
-    try:
-        print_state(stack, mem, global_state)
-    except:
-        log.debug("Error: Debugging states")
-
 # Detect if a money flow depends on the timestamp
 def detect_time_dependency():
     global results
@@ -2353,11 +2331,6 @@ def vulnerability_found():
             return 1
     return 0
 
-def print_state(stack, mem, global_state):
-    log.debug("STACK: " + str(stack))
-    log.debug("MEM: " + str(mem))
-    log.debug("GLOBAL STATE: " + str(global_state))
-
 def closing_message():
     global c_name_sol
     global results
@@ -2394,18 +2367,13 @@ def get_external_addresses(disasm_file, contract_address):
     signal.alarm(global_params.GLOBAL_TIMEOUT)
     atexit.register(closing_message)
 
-    log.info("Running, please wait...")
-    log.info("\t============ Results ===========")
-
     try:
         build_cfg_and_analyze()
-        log.debug("Done Symbolic execution")
     except Exception as e:
         traceback.print_exc()
         raise e
     finally:
         evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys()) * 100
-        log.info("\t  EVM Code Coverage: \t\t\t %s%%", round(evm_code_coverage, 1))
         return list(recipients)
     signal.alarm(0)
 
