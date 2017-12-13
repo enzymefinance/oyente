@@ -2347,7 +2347,7 @@ def handler(signum, frame):
         exit(TIME_OUT)
     raise Exception("timeout")
 
-def get_external_addresses(disasm_file, contract_address):
+def get_recipients(disasm_file, contract_address):
     global recipients
     global data_source
     global source_map
@@ -2365,15 +2365,21 @@ def get_external_addresses(disasm_file, contract_address):
     start = time.time()
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(global_params.GLOBAL_TIMEOUT)
+    timeout = False
 
     try:
         build_cfg_and_analyze()
     except Exception as e:
         if str(e) != 'timeout':
-            log.exception("Error at get_external_addresses()")
-            raise e
+            raise
+        else:
+            timeout = True
     evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys())
-    return list(recipients), evm_code_coverage
+    return {
+        'addrs': list(recipients),
+        'evm_code_coverage': evm_code_coverage,
+        'timeout': timeout
+    }
     signal.alarm(0)
 
 def analyze(**kwargs):

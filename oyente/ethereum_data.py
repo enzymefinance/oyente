@@ -44,7 +44,7 @@ class EthereumData:
                 r = requests.get(apiEndPoint)
                 result = r.json()["result"]
             except Exception as e:
-                print "Error at: contract address: %s, position: %s" % (self.contract_addr, position)
-                log.exception("Error at: contract address: %s, position: %s" % (self.contract_addr, position))
-                raise e
+                if str(e) != 'timeout':
+                    log.exception("Error at: contract address: %s, position: %s" % (self.contract_addr, position))
+                raise
             return int(result, 16)
