@@ -2375,18 +2375,18 @@ def get_recipients(disasm_file, contract_address):
 
     try:
         build_cfg_and_analyze()
+        signal.alarm(0)
     except Exception as e:
-        if str(e) != 'timeout':
-            raise
-        else:
+        if str(e) == 'timeout':
             timeout = True
+        else:
+            raise
     evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys())
     return {
         'addrs': list(recipients),
         'evm_code_coverage': evm_code_coverage,
         'timeout': timeout
     }
-    signal.alarm(0)
 
 def analyze(**kwargs):
     global c_name
