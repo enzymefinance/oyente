@@ -1942,9 +1942,9 @@ def sym_exec_ins(params):
                     recipient = hex(recipient)
                     if recipient[-1] == "L":
                         recipient = recipient[:-1]
-                    recipients.append(recipient)
+                    recipients.add(recipient)
                 else:
-                    recipients.append(None)
+                    recipients.add(None)
 
             transfer_amount = stack.pop(0)
             start_data_input = stack.pop(0)
@@ -1989,9 +1989,9 @@ def sym_exec_ins(params):
                     recipient = hex(recipient)
                     if recipient[-1] == "L":
                         recipient = recipient[:-1]
-                    recipients.append(recipient)
+                    recipients.add(recipient)
                 else:
-                    recipients.append(None)
+                    recipients.add(None)
 
             stack.pop(0)
             stack.pop(0)
@@ -2385,7 +2385,7 @@ def get_external_addresses(disasm_file, contract_address):
     c_name = disasm_file
     c_name_sol = None
     data_source = EthereumData(contract_address)
-    recipients = []
+    recipients = set()
 
     initGlobalVars()
     set_cur_file(c_name[4:] if len(c_name) > 5 else c_name)
@@ -2406,7 +2406,7 @@ def get_external_addresses(disasm_file, contract_address):
     finally:
         evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys()) * 100
         log.info("\t  EVM Code Coverage: \t\t\t %s%%", round(evm_code_coverage, 1))
-        return recipients
+        return list(recipients)
     signal.alarm(0)
 
 def analyze(**kwargs):
