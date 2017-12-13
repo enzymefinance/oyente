@@ -2393,10 +2393,17 @@ def analyze(**kwargs):
     global c_name_sol
     global source_map
     global results
+    global MSIZE
 
     c_name = kwargs["disasm_file"]
     c_name_sol = kwargs["source_file"]
     source_map = kwargs["source_map"]
+    MSIZE = False
+
+    with open(c_name, 'r') as f:
+        disasm = f.read()
+    if 'MSIZE' in disasm:
+        MSIZE = True
 
     check_unit_test_file()
     initGlobalVars()
