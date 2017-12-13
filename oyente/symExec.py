@@ -738,6 +738,7 @@ def sym_exec_block(params):
 
 # Symbolically executing an instruction
 def sym_exec_ins(params):
+    global MSIZE
     global visited_pcs
     global solver
     global vertices
@@ -1438,8 +1439,9 @@ def sym_exec_ins(params):
                 expression = current_miu_i < temp
                 solver.push()
                 solver.add(expression)
-                if check_solver(solver) != unsat:
-                    current_miu_i = If(expression, temp, current_miu_i)
+                if MSIZE:
+                    if check_solver(solver) != unsat:
+                        current_miu_i = If(expression, temp, current_miu_i)
                 solver.pop()
                 mem.clear() # very conservative
                 mem[str(mem_location)] = new_var
@@ -1515,8 +1517,9 @@ def sym_exec_ins(params):
                 expression = current_miu_i < temp
                 solver.push()
                 solver.add(expression)
-                if check_solver(solver) != unsat:
-                    current_miu_i = If(expression, temp, current_miu_i)
+                if MSIZE:
+                    if check_solver(solver) != unsat:
+                        current_miu_i = If(expression, temp, current_miu_i)
                 solver.pop()
                 mem.clear() # very conservative
                 mem[str(mem_location)] = new_var
@@ -1583,9 +1586,10 @@ def sym_exec_ins(params):
                 expression = current_miu_i < temp
                 solver.push()
                 solver.add(expression)
-                if check_solver(solver) != unsat:
-                    # this means that it is possibly that current_miu_i < temp
-                    current_miu_i = If(expression,temp,current_miu_i)
+                if MSIZE:
+                    if check_solver(solver) != unsat:
+                        # this means that it is possibly that current_miu_i < temp
+                        current_miu_i = If(expression,temp,current_miu_i)
                 solver.pop()
                 new_var_name = gen.gen_mem_var(address)
                 if new_var_name in path_conditions_and_vars:
@@ -1630,9 +1634,10 @@ def sym_exec_ins(params):
                 expression = current_miu_i < temp
                 solver.push()
                 solver.add(expression)
-                if check_solver(solver) != unsat:
-                    # this means that it is possibly that current_miu_i < temp
-                    current_miu_i = If(expression,temp,current_miu_i)
+                if MSIZE:
+                    if check_solver(solver) != unsat:
+                        # this means that it is possibly that current_miu_i < temp
+                        current_miu_i = If(expression,temp,current_miu_i)
                 solver.pop()
                 mem.clear()  # very conservative
                 mem[str(stored_address)] = stored_value
@@ -1661,9 +1666,10 @@ def sym_exec_ins(params):
                 expression = current_miu_i < temp
                 solver.push()
                 solver.add(expression)
-                if check_solver(solver) != unsat:
-                    # this means that it is possibly that current_miu_i < temp
-                    current_miu_i = If(expression,temp,current_miu_i)
+                if MSIZE:
+                    if check_solver(solver) != unsat:
+                        # this means that it is possibly that current_miu_i < temp
+                        current_miu_i = If(expression,temp,current_miu_i)
                 solver.pop()
                 mem.clear()  # very conservative
                 mem[str(stored_address)] = stored_value
