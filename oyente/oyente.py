@@ -11,7 +11,7 @@ import json
 import global_params
 import six
 from source_map import SourceMap
-from utils import run_command
+from utils import run_command, compare_versions
 from symExec import analyze
 
 def cmd_exists(cmd):
@@ -23,8 +23,10 @@ def has_dependencies_installed():
     try:
         import z3
         import z3.z3util
-        if z3.get_version_string() != '4.5.0':
-            logging.warning("You are using an untested version of z3. 4.5.0 is the officially tested version")
+        z3_version =  z3.get_version_string()
+        tested_z3_version = '4.5.1'
+        if compare_versions(z3_version, tested_z3_version) > 0:
+            logging.warning("You are using an untested version of z3. %s is the officially tested version" % tested_z3_version)
     except:
         logging.critical("Z3 is not available. Please install z3 from https://github.com/Z3Prover/z3.")
         return False
@@ -35,9 +37,10 @@ def has_dependencies_installed():
     else:
         cmd = "evm --version"
         out = run_command(cmd).strip()
-        version = re.findall(r"evm version (\d*.\d*.\d*)", out)[0]
-        if version != '1.6.6':
-            logging.warning("You are using evm version %s. The supported version is 1.6.6" % version)
+        evm_version = re.findall(r"evm version (\d*.\d*.\d*)", out)[0]
+        tested_evm_version = '1.7.3'
+        if compare_versions(evm_version, tested_evm_version) > 0:
+            logging.warning("You are using evm version %s. The supported version is %s" % (evm_version, tested_evm_version))
 
     if not cmd_exists("solc"):
         logging.critical("solc is missing. Please install the solidity compiler and make sure solc is in the path.")
@@ -45,9 +48,10 @@ def has_dependencies_installed():
     else:
         cmd = "solc --version"
         out = run_command(cmd).strip()
-        version = re.findall(r"Version: (\d*.\d*.\d*)", out)[0]
-        if version != '0.4.17':
-            logging.warning("You are using solc version %s, The latest supported version is 0.4.17" % version)
+        solc_version = re.findall(r"Version: (\d*.\d*.\d*)", out)[0]
+        tested_solc_version = '0.4.19'
+        if compare_versions(solc_version, tested_solc_version) > 0:
+            logging.warning("You are using solc version %s, The latest supported version is %s" % (solc_version, tested_solc_version))
 
     return True
 
