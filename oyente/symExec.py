@@ -2177,21 +2177,28 @@ def check_callstack_attack(disasm):
     for i in range(0, len(disasm)):
         instruction = disasm[i]
         if instruction[1] in problematic_instructions:
-            pc = int(instruction[0])
-            if not disasm[i+1][1] == 'SWAP':
+            try:
+                pc = int(instruction[0])
+                if not disasm[i+1][1] == 'SWAP':
+                    continue
+                swap_num = int(disasm[i+1][2])
+                if not all(disasm[i+j+2][1] == 'POP' for j in range(swap_num)):
+                    continue
+            except IndexError:
                 continue
-            swap_num = int(disasm[i+1][2])
-            if not all(disasm[i+j+2][1] == 'POP' for j in range(swap_num)):
-                continue
-            opcode1 = disasm[i + swap_num + 2][1]
-            opcode2 = disasm[i + swap_num + 3][1]
-            opcode3 = disasm[i + swap_num + 4][1]
-            if opcode1 == "ISZERO" \
-                or opcode1 == "DUP" and opcode2 == "ISZERO" \
-                or opcode1 == "JUMPDEST" and opcode2 == "ISZERO" \
-                or opcode1 == "JUMPDEST" and opcode2 == "DUP" and opcode3 == "ISZERO":
-                    pass
-            else:
+
+            try:
+                opcode1 = disasm[i + swap_num + 2][1]
+                opcode2 = disasm[i + swap_num + 3][1]
+                opcode3 = disasm[i + swap_num + 4][1]
+                if opcode1 == "ISZERO" \
+                    or opcode1 == "DUP" and opcode2 == "ISZERO" \
+                    or opcode1 == "JUMPDEST" and opcode2 == "ISZERO" \
+                    or opcode1 == "JUMPDEST" and opcode2 == "DUP" and opcode3 == "ISZERO":
+                        pass
+                else:
+                    pcs.append(pc)
+            except IndexError:
                 pcs.append(pc)
     return pcs
 
