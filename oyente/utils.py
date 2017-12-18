@@ -303,3 +303,13 @@ def run_command(cmd):
     FNULL = open(os.devnull, 'w')
     solc_p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)
     return solc_p.communicate()[0].decode()
+
+def compare_versions(version1, version2):
+    def normalize(v):
+        return [int(x) for x in re.sub(r'(\.0+)*$','', v).split(".")]
+    version1 = normalize(version1)
+    version2 = normalize(version2)
+    if six.PY2:
+        return cmp(version1, version2)
+    else:
+        return (version1 > version2) - (version1 < version2)
