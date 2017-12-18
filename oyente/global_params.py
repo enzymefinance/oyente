@@ -49,6 +49,8 @@ LOOP_LIMIT = 10
 # Use a public blockchain to speed up the symbolic execution
 USE_GLOBAL_BLOCKCHAIN = 0
 
+USE_GLOBAL_STORAGE = 0
+
 # Take state data from state.json to speed up the symbolic execution
 INPUT_STATE = 0
 
