@@ -58,7 +58,7 @@ def analyze_bytecode():
     helper = InputHelper(InputHelper.BYTECODE, source=args.source)
     inp = helper.get_inputs()[0]
 
-    result, exit_code = analyze(disasm_file=inp['disasm_file'], source_file=None, source_map=None)
+    result, exit_code = analyze(disasm_file=inp['disasm_file'])
     helper.rm_tmp_files()
 
     if global_params.WEB:

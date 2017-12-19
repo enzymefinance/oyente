@@ -25,8 +25,6 @@ def init_analysis():
         "gas": 0,
         "gas_mem": 0,
         "money_flow": [("Is", "Ia", "Iv")],  # (source, destination, amount)
-        "sload": [],
-        "sstore": {},
         "reentrancy_bug":[],
         "money_concurrency_bug": [],
         "time_dependency_bug": {}
@@ -207,35 +205,6 @@ def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_
         if isSymbolic(recipient):
             recipient = simplify(recipient)
         analysis["money_flow"].append(("Ia", str(recipient), "all_remaining"))
-    # this is for data flow
-    elif global_params.DATA_FLOW:
-        if opcode == "SLOAD":
-            if len(stack) > 0:
-                address = stack[0]
-                if isSymbolic(address):
-                    address = str(address)
-                if address not in analysis["sload"]:
-                    analysis["sload"].append(address)
-            else:
-                raise ValueError('STACK underflow')
-        elif opcode == "SSTORE":
-            if len(stack) > 1:
-                stored_address = stack[0]
-                stored_value = stack[1]
-                log.debug(type(stored_address))
-                # a temporary fix, not a good one.
-                # TODO move to z3 4.4.2 in which BitVecRef is hashable
-                if isSymbolic(stored_address):
-                    stored_address = str(stored_address)
-                log.debug("storing value " + str(stored_value) + " to address " + str(stored_address))
-                if stored_address in analysis["sstore"]:
-                    # recording the new values of the item in storage
-                    analysis["sstore"][stored_address].append(stored_value)
-                else:
-                    analysis["sstore"][stored_address] = [stored_value]
-            else:
-                raise ValueError('STACK underflow')
-
 
 # Check if it is possible to execute a path after a previous path
 # Previous path has prev_pc (previous path condition) and set global state variables as in gstate (only storage values)
