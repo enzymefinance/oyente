@@ -58,7 +58,7 @@ class Parameter:
         return Parameter(**_kwargs)
 
 def initGlobalVars():
-    global source_map
+    global g_src_map
     global solver
     # Z3 solver
     solver = Solver()
@@ -68,7 +68,7 @@ def initGlobalVars():
     visited_pcs = set()
 
     global results
-    if source_map:
+    if g_src_map:
         results = {
             'evm_code_coverage': '',
             'vulnerabilities': {
@@ -151,7 +151,7 @@ def initGlobalVars():
 
     global rfile
     if global_params.REPORT_MODE:
-        rfile = open(c_name + '.report', 'w')
+        rfile = open(g_disasm_file + '.report', 'w')
 
 def check_unit_test_file():
     if global_params.UNIT_TEST == 1:
@@ -186,7 +186,7 @@ def compare_storage_and_gas_unit_test(global_state, analysis):
     exit(test_status)
 
 def change_format():
-    with open(c_name) as disasm_file:
+    with open(g_disasm_file) as disasm_file:
         file_contents = disasm_file.readlines()
         i = 0
         firstLine = file_contents[0].strip('\n')
@@ -215,12 +215,12 @@ def change_format():
         file_contents[0] = firstLine
         file_contents[-1] += '\n'
 
-    with open(c_name, 'w') as disasm_file:
+    with open(g_disasm_file, 'w') as disasm_file:
         disasm_file.write("\n".join(file_contents))
 
 def build_cfg_and_analyze():
     change_format()
-    with open(c_name, 'r') as disasm_file:
+    with open(g_disasm_file, 'r') as disasm_file:
         disasm_file.readline()  # Remove first line
         tokens = tokenize.generate_tokens(disasm_file.readline)
         collect_vertices(tokens)
@@ -236,7 +236,7 @@ def print_cfg():
 
 
 def mapping_push_instruction(current_line_content, current_ins_address, idx, positions, length):
-    global source_map
+    global g_src_map
 
     while (idx < length):
         if not positions[idx]:
@@ -250,13 +250,13 @@ def mapping_push_instruction(current_line_content, current_ins_address, idx, pos
                     value = positions[idx]['value']
                     instr_value = current_line_content.split(" ")[1]
                     if int(value, 16) == int(instr_value, 16):
-                        source_map.instr_positions[current_ins_address] = source_map.positions[idx]
+                        g_src_map.instr_positions[current_ins_address] = g_src_map.positions[idx]
                         idx += 1
                         break;
                     else:
                         raise Exception("Source map error")
                 else:
-                    source_map.instr_positions[current_ins_address] = source_map.positions[idx]
+                    g_src_map.instr_positions[current_ins_address] = g_src_map.positions[idx]
                     idx += 1
                     break;
             else:
@@ -264,7 +264,7 @@ def mapping_push_instruction(current_line_content, current_ins_address, idx, pos
     return idx
 
 def mapping_non_push_instruction(current_line_content, current_ins_address, idx, positions, length):
-    global source_map
+    global g_src_map
 
     while (idx < length):
         if not positions[idx]:
@@ -275,7 +275,7 @@ def mapping_non_push_instruction(current_line_content, current_ins_address, idx,
         else:
             instr_name = current_line_content.split(" ")[0]
             if name == instr_name or name == "INVALID" and instr_name == "ASSERTFAIL" or name == "KECCAK256" and instr_name == "SHA3" or name == "SELFDESTRUCT" and instr_name == "SUICIDE":
-                source_map.instr_positions[current_ins_address] = source_map.positions[idx]
+                g_src_map.instr_positions[current_ins_address] = g_src_map.positions[idx]
                 idx += 1
                 break;
             else:
@@ -286,10 +286,10 @@ def mapping_non_push_instruction(current_line_content, current_ins_address, idx,
 # 2. Then identify each basic block (i.e. one-in, one-out)
 # 3. Store them in vertices
 def collect_vertices(tokens):
-    global source_map
-    if source_map:
+    global g_src_map
+    if g_src_map:
         idx = 0
-        positions = source_map.positions
+        positions = g_src_map.positions
         length = len(positions)
     global end_ins_dict
     global instructions
@@ -311,7 +311,7 @@ def collect_vertices(tokens):
                     is_new_line = True
                     current_line_content += push_val + ' '
                     instructions[current_ins_address] = current_line_content
-                    idx = mapping_push_instruction(current_line_content, current_ins_address, idx, positions, length) if source_map else None
+                    idx = mapping_push_instruction(current_line_content, current_ins_address, idx, positions, length) if g_src_map else None
                     log.debug(current_line_content)
                     current_line_content = ""
                     wait_for_push = False
@@ -339,7 +339,7 @@ def collect_vertices(tokens):
             is_new_line = True
             log.debug(current_line_content)
             instructions[current_ins_address] = current_line_content
-            idx = mapping_non_push_instruction(current_line_content, current_ins_address, idx, positions, length) if source_map else None
+            idx = mapping_non_push_instruction(current_line_content, current_ins_address, idx, positions, length) if g_src_map else None
             current_line_content = ""
             continue
         elif tok_type == NAME:
@@ -539,7 +539,7 @@ def sym_exec_block(params):
     global global_problematic_pcs
     global all_gs
     global results
-    global source_map
+    global g_src_map
 
     block = params.block
     pre_block = params.pre_block
@@ -642,9 +642,9 @@ def sym_exec_block(params):
         new_params.block = successor
         new_params.pre_block = block
         new_params.global_state["pc"] = successor
-        if source_map:
-            source_code = source_map.get_source_code(global_state['pc'])
-            if source_code in source_map.func_call_names:
+        if g_src_map:
+            source_code = g_src_map.get_source_code(global_state['pc'])
+            if source_code in g_src_map.func_call_names:
                 new_params.func_call = global_state["pc"]
         sym_exec_block(new_params)
     elif jump_type[block] == "falls_to":  # just follow to the next basic block
@@ -743,7 +743,7 @@ def sym_exec_ins(params):
     global solver
     global vertices
     global edges
-    global source_map
+    global g_src_map
     global calls_affect_state
     global data_source
 
@@ -768,8 +768,8 @@ def sym_exec_ins(params):
     if opcode == "INVALID":
         return
     elif opcode == "ASSERTFAIL":
-        if source_map:
-            source_code = source_map.get_source_code(global_state['pc'])
+        if g_src_map:
+            source_code = g_src_map.get_source_code(global_state['pc'])
             source_code = source_code.split("(")[0]
             func_name = source_code.strip()
             if func_name == "assert":
@@ -1349,8 +1349,8 @@ def sym_exec_ins(params):
         if len(stack) > 0:
             global_state["pc"] = global_state["pc"] + 1
             position = stack.pop(0)
-            if source_map:
-                source_code = source_map.get_source_code(global_state['pc'] - 1)
+            if g_src_map:
+                source_code = g_src_map.get_source_code(global_state['pc'] - 1)
                 if source_code.startswith("function") and isReal(position):
                     idx1 = source_code.index("(") + 1
                     idx2 = source_code.index(")")
@@ -1359,7 +1359,7 @@ def sym_exec_ins(params):
                     params_list = [param.split(" ")[-1] for param in params_list]
                     param_idx = (position - 4) // 32
                     new_var_name = params_list[param_idx]
-                    source_map.var_names.append(new_var_name)
+                    g_src_map.var_names.append(new_var_name)
                 else:
                     new_var_name = gen.gen_data_var(position)
             else:
@@ -1391,10 +1391,10 @@ def sym_exec_ins(params):
         else:
             raise ValueError('STACK underflow')
     elif opcode == "CODESIZE":
-        if c_name.endswith('.disasm'):
-            evm_file_name = c_name[:-7]
+        if g_disasm_file.endswith('.disasm'):
+            evm_file_name = g_disasm_file[:-7]
         else:
-            evm_file_name = c_name
+            evm_file_name = g_disasm_file
         with open(evm_file_name, 'r') as evm_file:
             evm = evm_file.read()[:-1]
             code_size = len(evm)/2
@@ -1416,10 +1416,10 @@ def sym_exec_ins(params):
                 if temp > current_miu_i:
                     current_miu_i = temp
 
-                if c_name.endswith('.disasm'):
-                    evm_file_name = c_name[:-7]
+                if g_disasm_file.endswith('.disasm'):
+                    evm_file_name = g_disasm_file[:-7]
                 else:
-                    evm_file_name = c_name
+                    evm_file_name = g_disasm_file
                 with open(evm_file_name, 'r') as evm_file:
                     evm = evm_file.read()[:-1]
                     start = code_from * 2
@@ -1694,11 +1694,11 @@ def sym_exec_ins(params):
                 else:
                     if is_expr(position):
                         position = simplify(position)
-                    if source_map:
-                        new_var_name = source_map.get_source_code(global_state['pc'] - 1)
+                    if g_src_map:
+                        new_var_name = g_src_map.get_source_code(global_state['pc'] - 1)
                         operators = '[-+*/%|&^!><=]'
                         new_var_name = re.compile(operators).split(new_var_name)[0].strip()
-                        if source_map.is_a_parameter_or_state_variable(new_var_name):
+                        if g_src_map.is_a_parameter_or_state_variable(new_var_name):
                             new_var_name = "Ia_store" + "-" + str(position) + "-" + new_var_name
                         else:
                             new_var_name = gen.gen_owner_store_var(position)
@@ -2031,7 +2031,7 @@ def sym_exec_ins(params):
 # Detect if a money flow depends on the timestamp
 def detect_time_dependency():
     global results
-    global source_map
+    global g_src_map
     global time_dependency
 
     TIMESTAMP_VAR = "IH_s"
@@ -2049,16 +2049,16 @@ def detect_time_dependency():
                     is_dependant = True
                     continue
 
-    time_dependency = TimeDependency(source_map, pcs)
+    time_dependency = TimeDependency(g_src_map, pcs)
 
-    if source_map:
+    if g_src_map:
         results['vulnerabilities']['time_dependency'] = time_dependency.get_warnings()
     else:
         results['vulnerabilities']['time_dependency'] = time_dependency.is_vulnerable()
     log.info('\t  Timestamp Dependency: \t\t %s', time_dependency.is_vulnerable())
 
     if global_params.REPORT_MODE:
-        file_name = c_name.split("/")[len(c_name.split("/"))-1].split(".")[0]
+        file_name = g_disasm_file.split("/")[len(g_disasm_file.split("/"))-1].split(".")[0]
         report_file = file_name + '.report'
         with open(report_file, 'w') as rfile:
             if is_dependant:
@@ -2070,7 +2070,7 @@ def detect_time_dependency():
 # detect if two paths send money to different people
 def detect_money_concurrency():
     global results
-    global source_map
+    global g_src_map
     global money_concurrency
 
     n = len(money_flow_all_paths)
@@ -2101,9 +2101,9 @@ def detect_money_concurrency():
         if flows:
             break
 
-    money_concurrency = MoneyConcurrency(source_map, flows)
+    money_concurrency = MoneyConcurrency(g_src_map, flows)
 
-    if source_map:
+    if g_src_map:
         results['vulnerabilities']['money_concurrency'] = money_concurrency.get_warnings_of_flows()
     else:
         results['vulnerabilities']['money_concurrency'] = money_concurrency.is_vulnerable()
@@ -2161,11 +2161,11 @@ def detect_data_money_concurrency():
 
 
 def detect_parity_multisig_bug_2():
-    global source_map
+    global g_src_map
     global results
     global parity_multisig_bug_2
 
-    parity_multisig_bug_2 = ParityMultisigBug2(source_map)
+    parity_multisig_bug_2 = ParityMultisigBug2(g_src_map)
 
     results['vulnerabilities']['parity_multisig_bug_2'] = parity_multisig_bug_2.get_warnings()
     s = "\t  Parity Multisig Bug 2: \t\t %s" % parity_multisig_bug_2.is_vulnerable()
@@ -2205,43 +2205,43 @@ def check_callstack_attack(disasm):
 
 def detect_callstack_attack():
     global results
-    global source_map
+    global g_src_map
     global calls_affect_state
     global callstack
 
-    disasm_data = open(c_name).read()
+    disasm_data = open(g_disasm_file).read()
     instr_pattern = r"([\d]+) ([A-Z]+)([\d]+)?(?: => 0x)?(\S+)?"
     instr = re.findall(instr_pattern, disasm_data)
     pcs = check_callstack_attack(instr)
 
-    callstack = CallStack(source_map, pcs, calls_affect_state)
+    callstack = CallStack(g_src_map, pcs, calls_affect_state)
 
-    if source_map:
+    if g_src_map:
         results['vulnerabilities']['callstack'] = callstack.get_warnings()
     else:
         results['vulnerabilities']['callstack'] = callstack.is_vulnerable()
     log.info('\t  Callstack Depth Attack Vulnerability:  %s', callstack.is_vulnerable())
 
 def detect_reentrancy():
-    global source_map
+    global g_src_map
     global results
     global reentrancy
 
     pcs = global_problematic_pcs["reentrancy_bug"]
-    reentrancy = Reentrancy(source_map, pcs)
+    reentrancy = Reentrancy(g_src_map, pcs)
 
-    if source_map:
+    if g_src_map:
         results['vulnerabilities']['reentrancy'] = reentrancy.get_warnings()
     else:
         results['vulnerabilities']['reentrancy'] = reentrancy.is_vulnerable()
     log.info("\t  Re-Entrancy Vulnerability: \t\t %s", reentrancy.is_vulnerable())
 
 def detect_assertion_failure():
-    global source_map
+    global g_src_map
     global results
     global assertion_failure
 
-    assertion_failure = AssertionFailure(source_map, global_problematic_pcs['assertion_failure'])
+    assertion_failure = AssertionFailure(g_src_map, global_problematic_pcs['assertion_failure'])
 
     results['vulnerabilities']['assertion_failure'] = assertion_failure.get_warnings()
     s = "\t  Assertion Failure: \t\t\t %s" % assertion_failure.is_vulnerable()
@@ -2252,7 +2252,7 @@ def detect_vulnerabilities():
         return
 
     global results
-    global source_map
+    global g_src_map
     global visited_pcs
     global global_problematic_pcs
 
@@ -2261,7 +2261,7 @@ def detect_vulnerabilities():
         log.info("\t  EVM Code Coverage: \t\t\t %s%%", round(evm_code_coverage, 1))
         results["evm_code_coverage"] = str(round(evm_code_coverage, 1))
 
-        if source_map:
+        if g_src_map:
             detect_parity_multisig_bug_2()
 
         log.debug("Checking for Callstack attack...")
@@ -2285,12 +2285,12 @@ def detect_vulnerabilities():
         detect_reentrancy()
 
         if global_params.CHECK_ASSERTIONS:
-            if source_map:
+            if g_src_map:
                 detect_assertion_failure()
             else:
                 raise Exception("Assertion checks need a Source Map")
 
-        if source_map:
+        if g_src_map:
             log_info()
 
     else:
@@ -2306,7 +2306,7 @@ def detect_vulnerabilities():
     return results, vulnerability_found()
 
 def log_info():
-    global source_map
+    global g_src_map
     global time_dependency
     global callstack
     global money_concurrency
@@ -2315,7 +2315,7 @@ def log_info():
     global parity_multisig_bug_2
 
     vulnerabilities = [callstack, money_concurrency, time_dependency, reentrancy]
-    if source_map and global_params.CHECK_ASSERTIONS:
+    if g_src_map and global_params.CHECK_ASSERTIONS:
         vulnerabilities.append(assertion_failure)
         vulnerabilities.append(parity_multisig_bug_2)
 
@@ -2325,7 +2325,7 @@ def log_info():
             log.info(s)
 
 def vulnerability_found():
-    global source_map
+    global g_src_map
     global time_dependency
     global callstack
     global money_concurrency
@@ -2335,7 +2335,7 @@ def vulnerability_found():
 
     vulnerabilities = [callstack, money_concurrency, time_dependency, reentrancy]
 
-    if source_map and global_params.CHECK_ASSERTIONS:
+    if g_src_map and global_params.CHECK_ASSERTIONS:
         vulnerabilities.append(assertion_failure)
         vulnerabilities.append(parity_multisig_bug_2)
 
@@ -2345,12 +2345,12 @@ def vulnerability_found():
     return 0
 
 def closing_message():
-    global c_name_sol
+    global g_source_file
     global results
 
     log.info("\t====== Analysis Completed ======")
     if global_params.STORE_RESULT:
-        result_file = c_name_sol + '.json'
+        result_file = g_source_file + '.json'
         with open(result_file, 'w') as of:
             of.write(json.dumps(results, indent=1))
         log.info("Wrote results to %s.", result_file)
@@ -2363,18 +2363,18 @@ def handler(signum, frame):
 def get_recipients(disasm_file, contract_address):
     global recipients
     global data_source
-    global source_map
-    global c_name
-    global c_name_sol
+    global g_src_map
+    global g_disasm_file
+    global g_source_file
 
-    source_map = None
-    c_name = disasm_file
-    c_name_sol = None
+    g_src_map = None
+    g_disasm_file = disasm_file
+    g_source_file = None
     data_source = EthereumData(contract_address)
     recipients = set()
 
     initGlobalVars()
-    set_cur_file(c_name[4:] if len(c_name) > 5 else c_name)
+    set_cur_file(g_disasm_file[4:] if len(g_disasm_file) > 5 else g_disasm_file)
     start = time.time()
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(global_params.GLOBAL_TIMEOUT)
@@ -2395,26 +2395,26 @@ def get_recipients(disasm_file, contract_address):
         'timeout': timeout
     }
 
-def analyze(**kwargs):
-    global c_name
-    global c_name_sol
-    global source_map
+def analyze(disasm_file=None, source_file=None, source_map=None):
+    global g_disasm_file
+    global g_source_file
+    global g_src_map
     global results
     global MSIZE
 
-    c_name = kwargs["disasm_file"]
-    c_name_sol = kwargs["source_file"]
-    source_map = kwargs["source_map"]
+    g_disasm_file = disasm_file
+    g_source_file = source_file
+    g_src_map = source_map
     MSIZE = False
 
-    with open(c_name, 'r') as f:
+    with open(g_disasm_file, 'r') as f:
         disasm = f.read()
     if 'MSIZE' in disasm:
         MSIZE = True
 
     check_unit_test_file()
     initGlobalVars()
-    set_cur_file(c_name[4:] if len(c_name) > 5 else c_name)
+    set_cur_file(g_disasm_file[4:] if len(g_disasm_file) > 5 else g_disasm_file)
     start = time.time()
     signal.signal(signal.SIGALRM, handler)
     if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
