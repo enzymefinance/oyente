@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-import shlex
 import subprocess
-import os
 import re
 import argparse
 import logging
@@ -10,14 +8,13 @@ import requests
 import json
 import global_params
 import six
-from source_map import SourceMap
 from utils import run_command, compare_versions
 from symExec import analyze
+from input_helper import InputHelper
 
 def cmd_exists(cmd):
     return subprocess.call("type " + cmd, shell=True,
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
-
 
 def has_dependencies_installed():
     try:
@@ -55,185 +52,17 @@ def has_dependencies_installed():
 
     return True
 
-
-def removeSwarmHash(evm):
-    evm_without_hash = re.sub(r"a165627a7a72305820\S{64}0029$", "", evm)
-    return evm_without_hash
-
-def extract_bin_str(s):
-    binary_regex = r"\n======= (.*?) =======\nBinary of the runtime part: \n(.*?)\n"
-    contracts = re.findall(binary_regex, s)
-    contracts = [contract for contract in contracts if contract[1]]
-    if not contracts:
-        logging.critical("Solidity compilation failed")
-        if global_params.WEB:
-            six.print_({"error": "Solidity compilation failed"})
-        exit(1)
-    return contracts
-
-def link_libraries(filename, libs):
-    option = ""
-    for idx, lib in enumerate(libs):
-        lib_address = "0x" + hex(idx+1)[2:].zfill(40)
-        option += " --libraries %s:%s" % (lib, lib_address)
-    FNULL = open(os.devnull, 'w')
-    cmd = "solc --bin-runtime %s" % filename
-    p1 = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)
-    cmd = "solc --link%s" %option
-    p2 = subprocess.Popen(shlex.split(cmd), stdin=p1.stdout, stdout=subprocess.PIPE, stderr=FNULL)
-    p1.stdout.close()
-    out = p2.communicate()[0].decode()
-    return extract_bin_str(out)
-
-def compile_contracts():
-    cmd = "solc --bin-runtime %s" % args.source
-    out = run_command(cmd)
-
-    libs = re.findall(r"_+(.*?)_+", out)
-    libs = set(libs)
-    if libs:
-        return link_libraries(args.source, libs)
-    else:
-        return extract_bin_str(out)
-
-def compile_standard_json():
-    global args
-
-    FNULL = open(os.devnull, 'w')
-    cmd = "cat %s" % args.source
-    p1 = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)
-    cmd = "solc --allow-paths %s --standard-json" % args.allow_paths
-    p2 = subprocess.Popen(shlex.split(cmd), stdin=p1.stdout, stdout=subprocess.PIPE, stderr=FNULL)
-    p1.stdout.close()
-    out = p2.communicate()[0]
-    with open('standard_json_output', 'w') as of:
-        of.write(out)
-    # should handle the case without allow-paths option
-    j = json.loads(out)
-    contracts = []
-    for source in j["sources"]:
-        for contract in j["contracts"][source]:
-            cname = source + ":" + contract
-            evm = j["contracts"][source][contract]["evm"]["deployedBytecode"]["object"]
-            contracts.append((cname, evm))
-    return contracts
-
-def prepare_disasm_files_for_analysis(contracts):
-    for contract, bin_str in contracts:
-        write_evm_file(contract, bin_str)
-        write_disasm_file(contract)
-
-def get_temporary_files(contract):
-    return {
-        "evm": contract + ".evm",
-        "disasm": contract + ".evm.disasm",
-        "log": contract + ".evm.disasm.log"
-    }
-
-def write_evm_file(contract, bin_str):
-    evm_file = get_temporary_files(contract)["evm"]
-    with open(evm_file, 'w') as of:
-        of.write(removeSwarmHash(bin_str))
-
-def write_disasm_file(contract):
-    tmp_files = get_temporary_files(contract)
-    evm_file = tmp_files["evm"]
-    disasm_file = tmp_files["disasm"]
-    disasm_out = ""
-    try:
-        disasm_p = subprocess.Popen(
-            ["evm", "disasm", evm_file], stdout=subprocess.PIPE)
-        disasm_out = disasm_p.communicate()[0].decode()
-    except:
-        logging.critical("Disassembly failed.")
-        exit()
-
-    with open(disasm_file, 'w') as of:
-        of.write(disasm_out)
-
-def remove_temporary_files_of_contracts(contracts):
-    global args
-
-    if args.standard_json:
-        remove_temporary_file('standard_json_output')
-    for contract, _ in contracts:
-        remove_temporary_files(contract)
-
-def remove_temporary_files(contract):
-    global args
-
-    tmp_files = get_temporary_files(contract)
-    if not args.evm:
-        remove_temporary_file(tmp_files["evm"])
-    remove_temporary_file(tmp_files["disasm"])
-    remove_temporary_file(tmp_files["log"])
-
-def remove_temporary_file(path):
-    if os.path.isfile(path):
-        os.unlink(path)
-
-
-def run_standard_json_analysis(contracts):
-    global args
-    results = {}
-    exit_code = 0
-
-    for contract, _ in contracts:
-        source, cname = contract.split(":")
-        source = re.sub(args.root_path, "", source)
-        logging.info("Contract %s:", contract)
-        source_map = SourceMap(contract, args.source, "standard json")
-        disasm_file = get_temporary_files(contract)["disasm"]
-
-        result, return_code = analyze(disasm_file=disasm_file, source_map=source_map, source_file=args.source)
-
-        try:
-            results[source][cname] = result
-        except:
-            results[source] = {cname: result}
-
-        if return_code == 1:
-            exit_code = 1
-    return results, exit_code
-
-def run_source_codes_analysis(contracts):
-    global args
-    results = {}
-    exit_code = 0
-
-    for contract, _ in contracts:
-        source, cname = contract.split(":")
-        source = re.sub(args.root_path, "", source)
-        logging.info("Contract %s:", contract)
-        source_map = SourceMap(contract, args.source, "solidity", args.root_path)
-        disasm_file = get_temporary_files(contract)["disasm"]
-
-        result, return_code = analyze(disasm_file=disasm_file, source_map=source_map, source_file=args.source)
-
-        try:
-            results[source][cname] = result
-        except:
-            results[source] = {cname: result}
-
-        if return_code == 1:
-            exit_code = 1
-    return results, exit_code
-
 def analyze_bytecode():
     global args
-    contract = args.source
-    with open(contract, "r") as f:
-        bin_str = f.read()
-    write_evm_file(contract, bin_str)
-    write_disasm_file(contract)
-    disasm_file = get_temporary_files(contract)["disasm"]
 
-    result, exit_code = analyze(disasm_file=disasm_file, source_file=None, source_map=None)
+    helper = InputHelper(InputHelper.BYTECODE, source=args.source)
+    inp = helper.get_inputs()[0]
+
+    result, exit_code = analyze(disasm_file=inp['disasm_file'], source_file=None, source_map=None)
+    helper.rm_tmp_files()
 
     if global_params.WEB:
         six.print_(json.dumps(result))
-
-    remove_temporary_files(contract)
 
     if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
         exit_code = os.WEXITSTATUS(cmd)
@@ -241,20 +70,35 @@ def analyze_bytecode():
             exit(exit_code)
     return exit_code
 
-def analyze_standard_json():
-    contracts = compile_standard_json()
+def run_solidity_analysis(inputs):
+    results = {}
+    exit_code = 0
 
-    prepare_disasm_files_for_analysis(contracts)
-    results, exit_code = run_standard_json_analysis(contracts)
-    remove_temporary_files_of_contracts(contracts)
-    return exit_code
+    for inp in inputs:
+        logging.info("contract %s:", inp['contract'])
+        result, return_code = analyze(disasm_file=inp['disasm_file'], source_map=inp['source_map'], source_file=inp['source'])
 
-def analyze_source_codes():
-    contracts = compile_contracts()
+        try:
+            c_source = inp['c_source']
+            c_name = inp['c_name']
+            results[c_source][c_name] = result
+        except:
+            results[c_source] = {c_name: result}
 
-    prepare_disasm_files_for_analysis(contracts)
-    results, exit_code = run_source_codes_analysis(contracts)
-    remove_temporary_files_of_contracts(contracts)
+        if return_code == 1:
+            exit_code = 1
+    return results, exit_code
+
+def analyze_solidity(input_type='solidity'):
+    global args
+
+    if input_type == 'solidity':
+        helper = InputHelper(InputHelper.SOLIDITY, source=args.source)
+    elif input_type == 'standard_json':
+        helper = InputHelper(InputHelper.STANDARD_JSON, source=args.source, allow_paths=args.allow_paths)
+    inputs = helper.get_inputs()
+    results, exit_code = run_solidity_analysis(inputs)
+    helper.rm_tmp_files()
 
     if global_params.WEB:
         six.print_(json.dumps(results))
@@ -350,9 +194,9 @@ def main():
     if args.bytecode:
         exit_code = analyze_bytecode()
     elif args.standard_json:
-        exit_code = analyze_standard_json()
+        exit_code = analyze_solidity(input_type='standard_json')
     else:
-        exit_code = analyze_source_codes()
+        exit_code = analyze_solidity()
 
     exit(exit_code)
 
