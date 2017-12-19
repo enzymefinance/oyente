@@ -7,9 +7,6 @@ REPORT_MODE = 0
 #print everything in the console
 PRINT_MODE = 0
 
-# enable data flow analysis (incomplete yet)
-DATA_FLOW = 0
-
 # enable log file to print all exception
 DEBUG_MODE = 0
 

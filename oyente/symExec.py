@@ -121,9 +121,6 @@ def initGlobalVars():
     global reentrancy_all_paths
     reentrancy_all_paths = []
 
-    global data_flow_all_paths
-    data_flow_all_paths = [[], []] # store all storage addresses
-
     # store the path condition corresponding to each path in money_flow_all_paths
     global path_conditions
     path_conditions = []
@@ -534,7 +531,6 @@ def sym_exec_block(params):
     global solver
     global visited_edges
     global money_flow_all_paths
-    global data_flow_all_paths
     global path_conditions
     global global_problematic_pcs
     global all_gs
@@ -601,11 +597,6 @@ def sym_exec_block(params):
         path_conditions.append(path_conditions_and_vars["path_condition"])
         global_problematic_pcs["time_dependency_bug"].append(analysis["time_dependency_bug"])
         all_gs.append(copy_global_values(global_state))
-    if global_params.DATA_FLOW:
-        if analysis["sload"] not in data_flow_all_paths[0]:
-            data_flow_all_paths[0].append(analysis["sload"])
-        if analysis["sstore"] not in data_flow_all_paths[1]:
-            data_flow_all_paths[1].append(analysis["sstore"])
 
     # Go to next Basic Block(s)
     if jump_type[block] == "terminal" or depth > global_params.DEPTH_LIMIT:
@@ -2121,45 +2112,6 @@ def detect_money_concurrency():
         # all the races
         rfile.write(str(concurrency_paths) + "\n")
 
-
-# Detect if there is data concurrency in two different flows.
-# e.g. if a flow modifies a value stored in the storage address and
-# the other one reads that value in its execution
-def detect_data_concurrency():
-    sload_flows = data_flow_all_paths[0]
-    sstore_flows = data_flow_all_paths[1]
-    concurrency_addr = []
-    for sflow in sstore_flows:
-        for addr in sflow:
-            for lflow in sload_flows:
-                if addr in lflow:
-                    if not addr in concurrency_addr:
-                        concurrency_addr.append(addr)
-                    break
-    log.debug("data concurrency in storage " + str(concurrency_addr))
-
-# Detect if any change in a storage address will result in a different
-# flow of money. Currently I implement this detection by
-# considering if a path condition contains
-# a variable which is a storage address.
-def detect_data_money_concurrency():
-    n = len(money_flow_all_paths)
-    sstore_flows = data_flow_all_paths[1]
-    concurrency_addr = []
-    for i in range(n):
-        cond = path_conditions[i]
-        list_vars = []
-        for expr in cond:
-            list_vars += get_vars(expr)
-        set_vars = set(i.decl().name() for i in list_vars)
-        for sflow in sstore_flows:
-            for addr in sflow:
-                var_name = gen.gen_owner_store_var(addr)
-                if var_name in set_vars:
-                    concurrency_addr.append(var_name)
-    log.debug("Concurrency in data that affects money flow: " + str(set(concurrency_addr)))
-
-
 def detect_parity_multisig_bug_2():
     global g_src_map
     global results
@@ -2277,9 +2229,6 @@ def detect_vulnerabilities():
         if global_params.REPORT_MODE:
             rfile.write(str(stop-start))
             rfile.close()
-        if global_params.DATA_FLOW:
-            detect_data_concurrency()
-            detect_data_money_concurrency()
 
         log.debug("Results for Reentrancy Bug: " + str(reentrancy_all_paths))
         detect_reentrancy()
