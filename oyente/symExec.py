@@ -150,32 +150,8 @@ def initGlobalVars():
     if global_params.REPORT_MODE:
         rfile = open(g_disasm_file + '.report', 'w')
 
-def check_unit_test_file():
-    if global_params.UNIT_TEST == 1:
-        try:
-            open('unit_test.json', 'r')
-        except:
-            log.critical("Could not open result file for unit test")
-            exit()
-
-def isTesting():
+def is_testing_evm():
     return global_params.UNIT_TEST != 0
-
-# A simple function to compare the end stack with the expected stack
-# configurations specified in a test file
-def compare_stack_unit_test(stack):
-    try:
-        size = int(result_file.readline())
-        content = result_file.readline().strip('\n')
-        if size == len(stack) and str(stack) == content:
-            log.debug("PASSED UNIT-TEST")
-        else:
-            log.warning("FAILED UNIT-TEST")
-            log.warning("Expected size %d, Resulted size %d", size, len(stack))
-            log.warning("Expected content %s \nResulted content %s", content, str(stack))
-    except Exception as e:
-        log.warning("FAILED UNIT-TEST")
-        log.warning(e.message)
 
 def compare_storage_and_gas_unit_test(global_state, analysis):
     unit_test = pickle.load(open(PICKLE_PATH, 'rb'))
@@ -621,9 +597,7 @@ def sym_exec_block(params):
 
         log.debug("TERMINATING A PATH ...")
         display_analysis(analysis)
-        if global_params.UNIT_TEST == 1:
-            compare_stack_unit_test(stack)
-        if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
+        if is_testing_evm():
             compare_storage_and_gas_unit_test(global_state, analysis)
 
     elif jump_type[block] == "unconditional":  # executing "JUMP"
@@ -2200,9 +2174,6 @@ def detect_assertion_failure():
     log.info(s)
 
 def detect_vulnerabilities():
-    if isTesting():
-        return
-
     global results
     global g_src_map
     global visited_pcs
@@ -2361,30 +2332,29 @@ def analyze(disasm_file=None, source_file=None, source_map=None):
     if 'MSIZE' in disasm:
         MSIZE = True
 
-    check_unit_test_file()
     initGlobalVars()
-    set_cur_file(g_disasm_file[4:] if len(g_disasm_file) > 5 else g_disasm_file)
-    start = time.time()
-    signal.signal(signal.SIGALRM, handler)
-    if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
+
+    if is_testing_evm():
         global_params.GLOBAL_TIMEOUT = global_params.GLOBAL_TIMEOUT_TEST
-    signal.alarm(global_params.GLOBAL_TIMEOUT)
-    atexit.register(closing_message)
 
-    log.info("Running, please wait...")
-
-    if not isTesting():
-        log.info("\t============ Results ===========")
-
-    try:
-        build_cfg_and_analyze()
-        log.debug("Done Symbolic execution")
-    except Exception as e:
-        if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
-            log.exception(e)
+        try:
+            build_cfg_and_analyze()
+        except Exception as e:
+            traceback.print_exc()
             exit(EXCEPTION)
-        traceback.print_exc()
-        raise e
-    finally:
-        return detect_vulnerabilities()
-    signal.alarm(0)
+    else:
+        start = time.time()
+        signal.signal(signal.SIGALRM, handler)
+        signal.alarm(global_params.GLOBAL_TIMEOUT)
+        atexit.register(closing_message)
+
+        set_cur_file(g_disasm_file[4:] if len(g_disasm_file) > 5 else g_disasm_file)
+        log.info("\t============ Results ===========")
+        try:
+            build_cfg_and_analyze()
+            log.debug("Done Symbolic execution")
+            signal.alarm(0)
+        except Exception as e:
+            traceback.print_exc()
+        finally:
+            return detect_vulnerabilities()

@@ -8,9 +8,18 @@ import pickle
 os.chdir(os.path.dirname(__file__))
 
 from test_evm.global_test_params import (
-    PASS, FAIL, TIME_OUT, UNKOWN_INSTRUCTION, EXCEPTION, EMPTY_RESULT,
+    PASS, FAIL, TIME_OUT, UNKNOWN_INSTRUCTION, EXCEPTION, EMPTY_RESULT,
     INCORRECT_GAS, PICKLE_PATH)
 from test_evm.evm_unit_test import EvmUnitTest
+
+def remove_temporary_files():
+    rm_file('bytecode')
+    rm_file('bytecode.disasm')
+    rm_file(PICKLE_PATH)
+
+def rm_file(path):
+    if os.path.isfile(path):
+        os.unlink(path)
 
 
 def status(exit_code):
@@ -74,7 +83,7 @@ def main():
         elif exit_code == TIME_OUT:
             time_outs.append(testname)
             num_time_outs += 1
-        elif exit_code == UNKOWN_INSTRUCTION:
+        elif exit_code == UNKNOWN_INSTRUCTION:
             unkown_instrs.append(testname)
             num_unkown_instrs += 1
         elif exit_code == EXCEPTION:
@@ -86,6 +95,7 @@ def main():
         elif exit_code == INCORRECT_GAS:
             incorrect_gas.append(testname)
             num_incorrect_gas += 1
+        remove_temporary_files()
 
     print "Done!"
     print "Total: ", num_tests
@@ -103,16 +113,6 @@ def main():
     print "Empty result: ", num_empty_res, empty_res
     print
     print "Incorrect gas tracked", num_incorrect_gas, incorrect_gas
-
-    remove_temporary_files()
-
-
-def remove_temporary_files():
-    if os.path.isfile('./bytecode'):
-        os.unlink('./bytecode')
-
-    if os.path.isfile(PICKLE_PATH):
-        os.unlink(PICKLE_PATH)
 
 
 if __name__ == '__main__':

@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
-import subprocess
+import os
 import re
-import argparse
+import six
+import json
 import logging
 import requests
-import json
+import argparse
+import subprocess
 import global_params
-import six
 from utils import run_command, compare_versions
 from symExec import analyze
 from input_helper import InputHelper
@@ -64,10 +65,6 @@ def analyze_bytecode():
     if global_params.WEB:
         six.print_(json.dumps(result))
 
-    if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
-        exit_code = os.WEXITSTATUS(cmd)
-        if exit_code != 0:
-            exit(exit_code)
     return exit_code
 
 def run_solidity_analysis(inputs):
