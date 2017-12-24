@@ -2286,12 +2286,19 @@ def get_recipients(disasm_file, contract_address):
     global g_src_map
     global g_disasm_file
     global g_source_file
+    global MSIZE
 
     g_src_map = None
     g_disasm_file = disasm_file
     g_source_file = None
     data_source = EthereumData(contract_address)
     recipients = set()
+    MSIZE = False
+
+    with open(g_disasm_file, 'r') as f:
+        disasm = f.read()
+    if 'MSIZE' in disasm:
+        MSIZE = True
 
     initGlobalVars()
     set_cur_file(g_disasm_file[4:] if len(g_disasm_file) > 5 else g_disasm_file)
