@@ -682,7 +682,7 @@ def sym_exec_block(params, block, pre_block, depth):
 
 
 # Symbolically executing an instruction
-def sym_exec_ins(params, start, instr):
+def sym_exec_ins(params, block, instr):
     global MSIZE
     global visited_pcs
     global solver
@@ -1684,9 +1684,9 @@ def sym_exec_ins(params, start, instr):
                     target_address = int(str(simplify(target_address)))
                 except:
                     raise TypeError("Target address must be an integer")
-            vertices[start].set_jump_target(target_address)
-            if target_address not in edges[start]:
-                edges[start].append(target_address)
+            vertices[block].set_jump_target(target_address)
+            if target_address not in edges[block]:
+                edges[block].append(target_address)
         else:
             raise ValueError('STACK underflow')
     elif opcode == "JUMPI":
@@ -1698,7 +1698,7 @@ def sym_exec_ins(params, start, instr):
                     target_address = int(str(simplify(target_address)))
                 except:
                     raise TypeError("Target address must be an integer")
-            vertices[start].set_jump_target(target_address)
+            vertices[block].set_jump_target(target_address)
             flag = stack.pop(0)
             branch_expression = (BitVecVal(0, 1) == BitVecVal(1, 1))
             if isReal(flag):
@@ -1706,9 +1706,9 @@ def sym_exec_ins(params, start, instr):
                     branch_expression = True
             else:
                 branch_expression = (flag != 0)
-            vertices[start].set_branch_expression(branch_expression)
-            if target_address not in edges[start]:
-                edges[start].append(target_address)
+            vertices[block].set_branch_expression(branch_expression)
+            if target_address not in edges[block]:
+                edges[block].append(target_address)
         else:
             raise ValueError('STACK underflow')
     elif opcode == "PC":
