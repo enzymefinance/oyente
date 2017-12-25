@@ -34,15 +34,9 @@ Assertion = namedtuple('Assertion', ['pc', 'model'])
 class Parameter:
     def __init__(self, **kwargs):
         attr_defaults = {
-            "instr": "",
-            "block": 0,
-            "depth": 0,
-            "pre_block": 0,
-            "func_call": -1,
             "stack": [],
             "calls": [],
             "memory": [],
-            "models": [],
             "visited": [],
             "mem": {},
             "analysis": {},
@@ -150,32 +144,8 @@ def initGlobalVars():
     if global_params.REPORT_MODE:
         rfile = open(g_disasm_file + '.report', 'w')
 
-def check_unit_test_file():
-    if global_params.UNIT_TEST == 1:
-        try:
-            open('unit_test.json', 'r')
-        except:
-            log.critical("Could not open result file for unit test")
-            exit()
-
-def isTesting():
+def is_testing_evm():
     return global_params.UNIT_TEST != 0
-
-# A simple function to compare the end stack with the expected stack
-# configurations specified in a test file
-def compare_stack_unit_test(stack):
-    try:
-        size = int(result_file.readline())
-        content = result_file.readline().strip('\n')
-        if size == len(stack) and str(stack) == content:
-            log.debug("PASSED UNIT-TEST")
-        else:
-            log.warning("FAILED UNIT-TEST")
-            log.warning("Expected size %d, Resulted size %d", size, len(stack))
-            log.warning("Expected content %s \nResulted content %s", content, str(stack))
-    except Exception as e:
-        log.warning("FAILED UNIT-TEST")
-        log.warning(e.message)
 
 def compare_storage_and_gas_unit_test(global_state, analysis):
     unit_test = pickle.load(open(PICKLE_PATH, 'rb'))
@@ -523,11 +493,11 @@ def full_sym_exec():
     global_state = get_init_global_state(path_conditions_and_vars)
     analysis = init_analysis()
     params = Parameter(path_conditions_and_vars=path_conditions_and_vars, global_state=global_state, analysis=analysis)
-    return sym_exec_block(params)
+    return sym_exec_block(params, 0, 0, 0, -1)
 
 
 # Symbolically executing a block from the start address
-def sym_exec_block(params):
+def sym_exec_block(params, block, pre_block, depth, func_call):
     global solver
     global visited_edges
     global money_flow_all_paths
@@ -537,10 +507,7 @@ def sym_exec_block(params):
     global results
     global g_src_map
 
-    block = params.block
-    pre_block = params.pre_block
     visited = params.visited
-    depth = params.depth
     stack = params.stack
     mem = params.mem
     memory = params.memory
@@ -548,9 +515,7 @@ def sym_exec_block(params):
     sha3_list = params.sha3_list
     path_conditions_and_vars = params.path_conditions_and_vars
     analysis = params.analysis
-    models = params.models
     calls = params.calls
-    func_call = params.func_call
 
     Edge = namedtuple("Edge", ["v1", "v2"]) # Factory Function for tuples is used as dictionary key
     if block < 0:
@@ -583,8 +548,7 @@ def sym_exec_block(params):
         return ["ERROR"]
 
     for instr in block_ins:
-        params.instr = instr
-        sym_exec_ins(params)
+        sym_exec_ins(params, block, instr, func_call)
 
     # Mark that this basic block in the visited blocks
     visited.append(block)
@@ -621,31 +585,23 @@ def sym_exec_block(params):
 
         log.debug("TERMINATING A PATH ...")
         display_analysis(analysis)
-        if global_params.UNIT_TEST == 1:
-            compare_stack_unit_test(stack)
-        if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
+        if is_testing_evm():
             compare_storage_and_gas_unit_test(global_state, analysis)
 
     elif jump_type[block] == "unconditional":  # executing "JUMP"
         successor = vertices[block].get_jump_target()
         new_params = params.copy()
-        new_params.depth = depth
-        new_params.block = successor
-        new_params.pre_block = block
         new_params.global_state["pc"] = successor
         if g_src_map:
             source_code = g_src_map.get_source_code(global_state['pc'])
             if source_code in g_src_map.func_call_names:
-                new_params.func_call = global_state["pc"]
-        sym_exec_block(new_params)
+                func_call = global_state['pc']
+        sym_exec_block(new_params, successor, block, depth, func_call)
     elif jump_type[block] == "falls_to":  # just follow to the next basic block
         successor = vertices[block].get_falls_to()
         new_params = params.copy()
-        new_params.depth = depth
-        new_params.block = successor
-        new_params.pre_block = block
         new_params.global_state["pc"] = successor
-        sym_exec_block(new_params)
+        sym_exec_block(new_params, successor, block, depth, func_call)
     elif jump_type[block] == "conditional":  # executing "JUMPI"
 
         # A choice point, we proceed with depth first search
@@ -663,25 +619,16 @@ def sym_exec_block(params):
             else:
                 left_branch = vertices[block].get_jump_target()
                 new_params = params.copy()
-                new_params.depth = depth
-                new_params.block = left_branch
-                new_params.pre_block = block
                 new_params.global_state["pc"] = left_branch
                 new_params.path_conditions_and_vars["path_condition"].append(branch_expression)
                 last_idx = len(new_params.path_conditions_and_vars["path_condition"]) - 1
                 new_params.analysis["time_dependency_bug"][last_idx] = global_state["pc"]
-                try:
-                    model = [solver.model()]
-                    new_params.models += model
-                except:
-                    pass
-                sym_exec_block(new_params)
+                sym_exec_block(new_params, left_branch, block, depth, func_call)
+        except TimeoutError:
+            raise
         except Exception as e:
             if global_params.DEBUG_MODE:
                 traceback.print_exc()
-            if not global_params.IGNORE_EXCEPTIONS:
-                if str(e) == "timeout":
-                    raise e
 
         solver.pop()  # POP SOLVER CONTEXT
 
@@ -700,24 +647,16 @@ def sym_exec_block(params):
             else:
                 right_branch = vertices[block].get_falls_to()
                 new_params = params.copy()
-                new_params.depth = depth
-                new_params.block = right_branch
-                new_params.pre_block = block
                 new_params.global_state["pc"] = right_branch
                 new_params.path_conditions_and_vars["path_condition"].append(negated_branch_expression)
                 last_idx = len(new_params.path_conditions_and_vars["path_condition"]) - 1
                 new_params.analysis["time_dependency_bug"][last_idx] = global_state["pc"]
-                try:
-                    new_params.models.append(solver.model())
-                except:
-                    pass
-                sym_exec_block(new_params)
+                sym_exec_block(new_params, right_branch, block, depth, func_call)
+        except TimeoutError:
+            raise
         except Exception as e:
             if global_params.DEBUG_MODE:
                 traceback.print_exc()
-            if not global_params.IGNORE_EXCEPTIONS:
-                if str(e) == "timeout":
-                    raise e
         solver.pop()  # POP SOLVER CONTEXT
         updated_count_number = visited_edges[current_edge] - 1
         visited_edges.update({current_edge: updated_count_number})
@@ -728,7 +667,7 @@ def sym_exec_block(params):
 
 
 # Symbolically executing an instruction
-def sym_exec_ins(params):
+def sym_exec_ins(params, block, instr, func_call):
     global MSIZE
     global visited_pcs
     global solver
@@ -738,8 +677,6 @@ def sym_exec_ins(params):
     global calls_affect_state
     global data_source
 
-    start = params.block
-    instr = params.instr
     stack = params.stack
     mem = params.mem
     memory = params.memory
@@ -747,9 +684,7 @@ def sym_exec_ins(params):
     sha3_list = params.sha3_list
     path_conditions_and_vars = params.path_conditions_and_vars
     analysis = params.analysis
-    models = params.models
     calls = params.calls
-    func_call = params.func_call
 
     visited_pcs.add(global_state["pc"])
 
@@ -763,12 +698,14 @@ def sym_exec_ins(params):
             source_code = g_src_map.get_source_code(global_state['pc'])
             source_code = source_code.split("(")[0]
             func_name = source_code.strip()
+            if check_sat(solver, False) != unsat:
+                model = solver.model()
             if func_name == "assert":
-                global_problematic_pcs["assertion_failure"].append(Assertion(global_state["pc"], models[-1]))
+                global_problematic_pcs["assertion_failure"].append(Assertion(global_state["pc"], model))
             elif func_call != -1:
-                global_problematic_pcs["assertion_failure"].append(Assertion(func_call, models[-1]))
+                global_problematic_pcs["assertion_failure"].append(Assertion(func_call, model))
         else:
-            global_problematic_pcs["assertion_failure"].append(Assertion(global_state["pc"], models[-1]))
+            global_problematic_pcs["assertion_failure"].append(Assertion(global_state["pc"], model))
         return
 
     # collecting the analysis result by calling this skeletal function
@@ -855,7 +792,7 @@ def sym_exec_ins(params):
                 second = to_symbolic(second)
                 solver.push()
                 solver.add( Not (second == 0) )
-                if check_solver(solver) == unsat:
+                if check_sat(solver) == unsat:
                     computed = 0
                 else:
                     computed = UDiv(first, second)
@@ -884,17 +821,17 @@ def sym_exec_ins(params):
                 second = to_symbolic(second)
                 solver.push()
                 solver.add(Not(second == 0))
-                if check_solver(solver) == unsat:
+                if check_sat(solver) == unsat:
                     computed = 0
                 else:
                     solver.push()
                     solver.add( Not( And(first == -2**255, second == -1 ) ))
-                    if check_solver(solver) == unsat:
+                    if check_sat(solver) == unsat:
                         computed = -2**255
                     else:
                         solver.push()
                         solver.add(first / second < 0)
-                        sign = -1 if check_solver(solver) == sat else 1
+                        sign = -1 if check_sat(solver) == sat else 1
                         z3_abs = lambda x: If(x >= 0, x, -x)
                         first = z3_abs(first)
                         second = z3_abs(second)
@@ -925,7 +862,7 @@ def sym_exec_ins(params):
 
                 solver.push()
                 solver.add(Not(second == 0))
-                if check_solver(solver) == unsat:
+                if check_sat(solver) == unsat:
                     # it is provable that second is indeed equal to zero
                     computed = 0
                 else:
@@ -955,14 +892,14 @@ def sym_exec_ins(params):
 
                 solver.push()
                 solver.add(Not(second == 0))
-                if check_solver(solver) == unsat:
+                if check_sat(solver) == unsat:
                     # it is provable that second is indeed equal to zero
                     computed = 0
                 else:
 
                     solver.push()
                     solver.add(first < 0) # check sign of first element
-                    sign = BitVecVal(-1, 256) if check_solver(solver) == sat \
+                    sign = BitVecVal(-1, 256) if check_sat(solver) == sat \
                         else BitVecVal(1, 256)
                     solver.pop()
 
@@ -994,7 +931,7 @@ def sym_exec_ins(params):
                 second = to_symbolic(second)
                 solver.push()
                 solver.add( Not(third == 0) )
-                if check_solver(solver) == unsat:
+                if check_sat(solver) == unsat:
                     computed = 0
                 else:
                     first = ZeroExt(256, first)
@@ -1024,7 +961,7 @@ def sym_exec_ins(params):
                 second = to_symbolic(second)
                 solver.push()
                 solver.add( Not(third == 0) )
-                if check_solver(solver) == unsat:
+                if check_sat(solver) == unsat:
                     computed = 0
                 else:
                     first = ZeroExt(256, first)
@@ -1073,13 +1010,13 @@ def sym_exec_ins(params):
                 second = to_symbolic(second)
                 solver.push()
                 solver.add( Not( Or(first >= 32, first < 0 ) ) )
-                if check_solver(solver) == unsat:
+                if check_sat(solver) == unsat:
                     computed = second
                 else:
                     signbit_index_from_right = 8 * first + 7
                     solver.push()
                     solver.add(second & (1 << signbit_index_from_right) == 0)
-                    if check_solver(solver) == unsat:
+                    if check_sat(solver) == unsat:
                         computed = second | (2 ** 256 - (1 << signbit_index_from_right))
                     else:
                         computed = second & ((1 << signbit_index_from_right) - 1)
@@ -1259,11 +1196,12 @@ def sym_exec_ins(params):
                 second = to_symbolic(second)
                 solver.push()
                 solver.add( Not (Or( first >= 32, first < 0 ) ) )
-                if check_solver(solver) == unsat:
+                if check_sat(solver) == unsat:
                     computed = 0
                 else:
                     computed = second & (255 << (8 * byte_index))
                     computed = computed >> (8 * byte_index)
+                solver.pop()
             computed = simplify(computed) if is_expr(computed) else computed
             stack.insert(0, computed)
         else:
@@ -1431,7 +1369,7 @@ def sym_exec_ins(params):
                 solver.push()
                 solver.add(expression)
                 if MSIZE:
-                    if check_solver(solver) != unsat:
+                    if check_sat(solver) != unsat:
                         current_miu_i = If(expression, temp, current_miu_i)
                 solver.pop()
                 mem.clear() # very conservative
@@ -1509,7 +1447,7 @@ def sym_exec_ins(params):
                 solver.push()
                 solver.add(expression)
                 if MSIZE:
-                    if check_solver(solver) != unsat:
+                    if check_sat(solver) != unsat:
                         current_miu_i = If(expression, temp, current_miu_i)
                 solver.pop()
                 mem.clear() # very conservative
@@ -1578,7 +1516,7 @@ def sym_exec_ins(params):
                 solver.push()
                 solver.add(expression)
                 if MSIZE:
-                    if check_solver(solver) != unsat:
+                    if check_sat(solver) != unsat:
                         # this means that it is possibly that current_miu_i < temp
                         current_miu_i = If(expression,temp,current_miu_i)
                 solver.pop()
@@ -1626,7 +1564,7 @@ def sym_exec_ins(params):
                 solver.push()
                 solver.add(expression)
                 if MSIZE:
-                    if check_solver(solver) != unsat:
+                    if check_sat(solver) != unsat:
                         # this means that it is possibly that current_miu_i < temp
                         current_miu_i = If(expression,temp,current_miu_i)
                 solver.pop()
@@ -1658,7 +1596,7 @@ def sym_exec_ins(params):
                 solver.push()
                 solver.add(expression)
                 if MSIZE:
-                    if check_solver(solver) != unsat:
+                    if check_sat(solver) != unsat:
                         # this means that it is possibly that current_miu_i < temp
                         current_miu_i = If(expression,temp,current_miu_i)
                 solver.pop()
@@ -1732,9 +1670,9 @@ def sym_exec_ins(params):
                     target_address = int(str(simplify(target_address)))
                 except:
                     raise TypeError("Target address must be an integer")
-            vertices[start].set_jump_target(target_address)
-            if target_address not in edges[start]:
-                edges[start].append(target_address)
+            vertices[block].set_jump_target(target_address)
+            if target_address not in edges[block]:
+                edges[block].append(target_address)
         else:
             raise ValueError('STACK underflow')
     elif opcode == "JUMPI":
@@ -1746,7 +1684,7 @@ def sym_exec_ins(params):
                     target_address = int(str(simplify(target_address)))
                 except:
                     raise TypeError("Target address must be an integer")
-            vertices[start].set_jump_target(target_address)
+            vertices[block].set_jump_target(target_address)
             flag = stack.pop(0)
             branch_expression = (BitVecVal(0, 1) == BitVecVal(1, 1))
             if isReal(flag):
@@ -1754,9 +1692,9 @@ def sym_exec_ins(params):
                     branch_expression = True
             else:
                 branch_expression = (flag != 0)
-            vertices[start].set_branch_expression(branch_expression)
-            if target_address not in edges[start]:
-                edges[start].append(target_address)
+            vertices[block].set_branch_expression(branch_expression)
+            if target_address not in edges[block]:
+                edges[block].append(target_address)
         else:
             raise ValueError('STACK underflow')
     elif opcode == "PC":
@@ -1868,7 +1806,7 @@ def sym_exec_ins(params):
             solver.push()
             solver.add(is_enough_fund)
 
-            if check_solver(solver) == unsat:
+            if check_sat(solver) == unsat:
                 # this means not enough fund, thus the execution will result in exception
                 solver.pop()
                 stack.insert(0, 0)   # x = 0
@@ -1887,7 +1825,7 @@ def sym_exec_ins(params):
                 boolean_expression = (recipient != address_is)
                 solver.push()
                 solver.add(boolean_expression)
-                if check_solver(solver) == unsat:
+                if check_sat(solver) == unsat:
                     solver.pop()
                     new_balance_is = (global_state["balance"]["Is"] + transfer_amount)
                     global_state["balance"]["Is"] = new_balance_is
@@ -1945,7 +1883,7 @@ def sym_exec_ins(params):
             solver.push()
             solver.add(is_enough_fund)
 
-            if check_solver(solver) == unsat:
+            if check_sat(solver) == unsat:
                 # this means not enough fund, thus the execution will result in exception
                 solver.pop()
                 stack.insert(0, 0)   # x = 0
@@ -2200,9 +2138,6 @@ def detect_assertion_failure():
     log.info(s)
 
 def detect_vulnerabilities():
-    if isTesting():
-        return
-
     global results
     global g_src_map
     global visited_pcs
@@ -2304,10 +2239,25 @@ def closing_message():
             of.write(json.dumps(results, indent=1))
         log.info("Wrote results to %s.", result_file)
 
-def handler(signum, frame):
-    if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
-        exit(TIME_OUT)
-    raise Exception("timeout")
+class TimeoutError(Exception):
+    pass
+
+class Timeout:
+   """Timeout class using ALARM signal."""
+
+   def __init__(self, sec=10, error_message=os.strerror(errno.ETIME)):
+       self.sec = sec
+       self.error_message = error_message
+
+   def __enter__(self):
+       signal.signal(signal.SIGALRM, self._handle_timeout)
+       signal.alarm(self.sec)
+
+   def __exit__(self, *args):
+       signal.alarm(0)    # disable alarm
+
+   def _handle_timeout(self, signum, frame):
+       raise TimeoutError(self.error_message)
 
 def get_recipients(disasm_file, contract_address):
     global recipients
@@ -2315,28 +2265,30 @@ def get_recipients(disasm_file, contract_address):
     global g_src_map
     global g_disasm_file
     global g_source_file
+    global MSIZE
 
     g_src_map = None
     g_disasm_file = disasm_file
     g_source_file = None
     data_source = EthereumData(contract_address)
     recipients = set()
+    MSIZE = False
+
+    with open(g_disasm_file, 'r') as f:
+        disasm = f.read()
+    if 'MSIZE' in disasm:
+        MSIZE = True
 
     initGlobalVars()
-    set_cur_file(g_disasm_file[4:] if len(g_disasm_file) > 5 else g_disasm_file)
     start = time.time()
-    signal.signal(signal.SIGALRM, handler)
-    signal.alarm(global_params.GLOBAL_TIMEOUT)
     timeout = False
 
     try:
-        build_cfg_and_analyze()
-        signal.alarm(0)
-    except Exception as e:
-        if str(e) == 'timeout':
-            timeout = True
-        else:
-            raise
+        with Timeout(sec=global_params.GLOBAL_TIMEOUT):
+            build_cfg_and_analyze()
+    except TimeoutError:
+        timeout = True
+
     evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys())
     return {
         'addrs': list(recipients),
@@ -2361,30 +2313,28 @@ def analyze(disasm_file=None, source_file=None, source_map=None):
     if 'MSIZE' in disasm:
         MSIZE = True
 
-    check_unit_test_file()
     initGlobalVars()
-    set_cur_file(g_disasm_file[4:] if len(g_disasm_file) > 5 else g_disasm_file)
-    start = time.time()
-    signal.signal(signal.SIGALRM, handler)
-    if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
+
+    if is_testing_evm():
         global_params.GLOBAL_TIMEOUT = global_params.GLOBAL_TIMEOUT_TEST
-    signal.alarm(global_params.GLOBAL_TIMEOUT)
-    atexit.register(closing_message)
 
-    log.info("Running, please wait...")
-
-    if not isTesting():
+        try:
+            with Timeout(sec=global_params.GLOBAL_TIMEOUT):
+                build_cfg_and_analyze()
+        except Exception:
+            traceback.print_exc()
+            exit(EXCEPTION)
+    else:
+        start = time.time()
+        atexit.register(closing_message)
         log.info("\t============ Results ===========")
 
-    try:
-        build_cfg_and_analyze()
-        log.debug("Done Symbolic execution")
-    except Exception as e:
-        if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
-            log.exception(e)
-            exit(EXCEPTION)
-        traceback.print_exc()
-        raise e
-    finally:
-        return detect_vulnerabilities()
-    signal.alarm(0)
+        try:
+            with Timeout(sec=global_params.GLOBAL_TIMEOUT):
+                build_cfg_and_analyze()
+            log.debug("Done Symbolic execution")
+        except TimeoutError:
+            if global_params.DEBUG_MODE:
+                traceback.print_exc()
+        finally:
+            return detect_vulnerabilities()

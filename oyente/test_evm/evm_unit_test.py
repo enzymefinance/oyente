@@ -5,7 +5,7 @@ from z3 import *
 from global_params import *
 from utils import to_unsigned
 
-from .global_test_params import *
+from global_test_params import *
 
 
 class EvmUnitTest(object):
@@ -28,18 +28,6 @@ class EvmUnitTest(object):
     def run_test(self):
         return self._execute_vm(self.bytecode())
 
-    def _execute_vm(self, bytecode):
-        self._create_bytecode_file(bytecode)
-        cmd = os.system('python oyente.py -b -s bytecode')
-        exit_code = os.WEXITSTATUS(cmd)
-        return exit_code
-
-    def _create_bytecode_file(self, bytecode):
-        with open('bytecode', 'w') as code_file:
-            code_file.write(bytecode)
-            code_file.write('\n')
-            code_file.close()
-
     def compare_with_symExec_result(self, global_state, analysis):
         if UNIT_TEST == 2: return self.compare_real_value(global_state, analysis)
         if UNIT_TEST == 3: return self.compare_symbolic(global_state)
@@ -50,27 +38,6 @@ class EvmUnitTest(object):
         if storage_status != PASS: return storage_status
         if gas_status != PASS: return gas_status
         return PASS
-
-    def _compare_storage_value(self, global_state):
-        for key, value in self.storage().items():
-            key, value = long(key, 0), long(value, 0)
-
-            try:
-                storage = to_unsigned(long(global_state['Ia'][key]))
-            except:
-                return EMPTY_RESULT
-
-            if storage != value:
-                return FAIL
-        return PASS
-
-    def _compare_gas_value(self, analysis):
-        gas_used = analysis['gas']
-        gas_limit, gas_remaining = self.gas_info()
-        if gas_used == gas_limit - gas_remaining:
-            return PASS
-        else:
-            return INCORRECT_GAS
 
     def compare_symbolic(self, global_state):
         for key, value in self.storage().items():
@@ -93,3 +60,36 @@ class EvmUnitTest(object):
             return False
         except:
             return True
+
+    def _execute_vm(self, bytecode):
+        self._create_bytecode_file(bytecode)
+        cmd = os.system('python oyente.py -b -s bytecode')
+        exit_code = os.WEXITSTATUS(cmd)
+        return exit_code
+
+    def _create_bytecode_file(self, bytecode):
+        with open('bytecode', 'w') as code_file:
+            code_file.write(bytecode)
+            code_file.write('\n')
+            code_file.close()
+
+    def _compare_storage_value(self, global_state):
+        for key, value in self.storage().items():
+            key, value = long(key, 0), long(value, 0)
+
+            try:
+                storage = to_unsigned(long(global_state['Ia'][key]))
+            except:
+                return EMPTY_RESULT
+
+            if storage != value:
+                return FAIL
+        return PASS
+
+    def _compare_gas_value(self, analysis):
+        gas_used = analysis['gas']
+        gas_limit, gas_remaining = self.gas_info()
+        if gas_used == gas_limit - gas_remaining:
+            return PASS
+        else:
+            return INCORRECT_GAS

@@ -12,9 +12,6 @@ log = logging.getLogger(__name__)
 
 # THIS IS TO DEFINE A SKELETON FOR ANALYSIS
 # FOR NEW TYPE OF ANALYSIS: add necessary details to the skeleton functions
-cur_file = ""
-reported = False
-reentrancy_report_file = "re_report.report"
 
 def set_cur_file(c_file):
     global cur_file
@@ -86,11 +83,6 @@ def check_reentrancy_bug(path_conditions_and_vars, stack, global_state):
     ret_val = not (solver.check() == unsat)
     if global_params.DEBUG_MODE:
         log.info("Reentrancy_bug? " + str(ret_val))
-    global reported
-    if not reported:
-        with open(reentrancy_report_file, 'a') as r_report:
-            r_report.write('\n'+cur_file)
-        reported = True
     return ret_val
 
 def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
@@ -168,7 +160,7 @@ def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
         else:
             solver.push()
             solver.add(Not (stack[2] != 0))
-            if check_solver(solver) == unsat:
+            if check_sat(solver) == unsat:
                 gas_increment += GCOST["Gcallvalue"]
             solver.pop()
     elif opcode == "SHA3" and isReal(stack[1]):

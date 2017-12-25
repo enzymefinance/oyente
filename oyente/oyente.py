@@ -1,20 +1,31 @@
 #!/usr/bin/env python
 
-import subprocess
+import os
 import re
-import argparse
+import six
+import json
 import logging
 import requests
-import json
+import argparse
+import subprocess
 import global_params
-import six
-from utils import run_command, compare_versions
+from utils import run_command
 from symExec import analyze
 from input_helper import InputHelper
 
 def cmd_exists(cmd):
     return subprocess.call("type " + cmd, shell=True,
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
+
+def compare_versions(version1, version2):
+    def normalize(v):
+        return [int(x) for x in re.sub(r'(\.0+)*$','', v).split(".")]
+    version1 = normalize(version1)
+    version2 = normalize(version2)
+    if six.PY2:
+        return cmp(version1, version2)
+    else:
+        return (version1 > version2) - (version1 < version2)
 
 def has_dependencies_installed():
     try:
@@ -64,10 +75,6 @@ def analyze_bytecode():
     if global_params.WEB:
         six.print_(json.dumps(result))
 
-    if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
-        exit_code = os.WEXITSTATUS(cmd)
-        if exit_code != 0:
-            exit(exit_code)
     return exit_code
 
 def run_solidity_analysis(inputs):
