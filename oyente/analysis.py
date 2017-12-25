@@ -168,7 +168,7 @@ def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
         else:
             solver.push()
             solver.add(Not (stack[2] != 0))
-            if check_solver(solver) == unsat:
+            if check_sat(solver) == unsat:
                 gas_increment += GCOST["Gcallvalue"]
             solver.pop()
     elif opcode == "SHA3" and isReal(stack[1]):

@@ -44,11 +44,14 @@ def to_signed(number):
     else:
         return number
 
-def check_solver(solver):
+def check_sat(solver, pop_if_exception=True):
     try:
         ret = solver.check()
+        if ret == unknown:
+            raise Z3Exception(solver.reason_unknown())
     except Exception as e:
-        solver.pop()
+        if pop_if_exception:
+            solver.pop()
         raise e
     return ret
 

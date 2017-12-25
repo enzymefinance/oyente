@@ -37,7 +37,6 @@ class Parameter:
             "stack": [],
             "calls": [],
             "memory": [],
-            "models": [],
             "visited": [],
             "mem": {},
             "analysis": {},
@@ -516,7 +515,6 @@ def sym_exec_block(params, block, pre_block, depth, func_call):
     sha3_list = params.sha3_list
     path_conditions_and_vars = params.path_conditions_and_vars
     analysis = params.analysis
-    models = params.models
     calls = params.calls
 
     Edge = namedtuple("Edge", ["v1", "v2"]) # Factory Function for tuples is used as dictionary key
@@ -625,11 +623,6 @@ def sym_exec_block(params, block, pre_block, depth, func_call):
                 new_params.path_conditions_and_vars["path_condition"].append(branch_expression)
                 last_idx = len(new_params.path_conditions_and_vars["path_condition"]) - 1
                 new_params.analysis["time_dependency_bug"][last_idx] = global_state["pc"]
-                try:
-                    model = [solver.model()]
-                    new_params.models += model
-                except:
-                    pass
                 sym_exec_block(new_params, left_branch, block, depth, func_call)
         except Exception as e:
             if global_params.DEBUG_MODE:
@@ -659,10 +652,6 @@ def sym_exec_block(params, block, pre_block, depth, func_call):
                 new_params.path_conditions_and_vars["path_condition"].append(negated_branch_expression)
                 last_idx = len(new_params.path_conditions_and_vars["path_condition"]) - 1
                 new_params.analysis["time_dependency_bug"][last_idx] = global_state["pc"]
-                try:
-                    new_params.models.append(solver.model())
-                except:
-                    pass
                 sym_exec_block(new_params, right_branch, block, depth, func_call)
         except Exception as e:
             if global_params.DEBUG_MODE:
@@ -697,7 +686,6 @@ def sym_exec_ins(params, block, instr, func_call):
     sha3_list = params.sha3_list
     path_conditions_and_vars = params.path_conditions_and_vars
     analysis = params.analysis
-    models = params.models
     calls = params.calls
 
     visited_pcs.add(global_state["pc"])
@@ -712,12 +700,14 @@ def sym_exec_ins(params, block, instr, func_call):
             source_code = g_src_map.get_source_code(global_state['pc'])
             source_code = source_code.split("(")[0]
             func_name = source_code.strip()
+            if check_sat(solver, False) != unsat:
+                model = solver.model()
             if func_name == "assert":
-                global_problematic_pcs["assertion_failure"].append(Assertion(global_state["pc"], models[-1]))
+                global_problematic_pcs["assertion_failure"].append(Assertion(global_state["pc"], model))
             elif func_call != -1:
-                global_problematic_pcs["assertion_failure"].append(Assertion(func_call, models[-1]))
+                global_problematic_pcs["assertion_failure"].append(Assertion(func_call, model))
         else:
-            global_problematic_pcs["assertion_failure"].append(Assertion(global_state["pc"], models[-1]))
+            global_problematic_pcs["assertion_failure"].append(Assertion(global_state["pc"], model))
         return
 
     # collecting the analysis result by calling this skeletal function
@@ -804,7 +794,7 @@ def sym_exec_ins(params, block, instr, func_call):
                 second = to_symbolic(second)
                 solver.push()
                 solver.add( Not (second == 0) )
-                if check_solver(solver) == unsat:
+                if check_sat(solver) == unsat:
                     computed = 0
                 else:
                     computed = UDiv(first, second)
@@ -833,17 +823,17 @@ def sym_exec_ins(params, block, instr, func_call):
                 second = to_symbolic(second)
                 solver.push()
                 solver.add(Not(second == 0))
-                if check_solver(solver) == unsat:
+                if check_sat(solver) == unsat:
                     computed = 0
                 else:
                     solver.push()
                     solver.add( Not( And(first == -2**255, second == -1 ) ))
-                    if check_solver(solver) == unsat:
+                    if check_sat(solver) == unsat:
                         computed = -2**255
                     else:
                         solver.push()
                         solver.add(first / second < 0)
-                        sign = -1 if check_solver(solver) == sat else 1
+                        sign = -1 if check_sat(solver) == sat else 1
                         z3_abs = lambda x: If(x >= 0, x, -x)
                         first = z3_abs(first)
                         second = z3_abs(second)
@@ -874,7 +864,7 @@ def sym_exec_ins(params, block, instr, func_call):
 
                 solver.push()
                 solver.add(Not(second == 0))
-                if check_solver(solver) == unsat:
+                if check_sat(solver) == unsat:
                     # it is provable that second is indeed equal to zero
                     computed = 0
                 else:
@@ -904,14 +894,14 @@ def sym_exec_ins(params, block, instr, func_call):
 
                 solver.push()
                 solver.add(Not(second == 0))
-                if check_solver(solver) == unsat:
+                if check_sat(solver) == unsat:
                     # it is provable that second is indeed equal to zero
                     computed = 0
                 else:
 
                     solver.push()
                     solver.add(first < 0) # check sign of first element
-                    sign = BitVecVal(-1, 256) if check_solver(solver) == sat \
+                    sign = BitVecVal(-1, 256) if check_sat(solver) == sat \
                         else BitVecVal(1, 256)
                     solver.pop()
 
@@ -943,7 +933,7 @@ def sym_exec_ins(params, block, instr, func_call):
                 second = to_symbolic(second)
                 solver.push()
                 solver.add( Not(third == 0) )
-                if check_solver(solver) == unsat:
+                if check_sat(solver) == unsat:
                     computed = 0
                 else:
                     first = ZeroExt(256, first)
@@ -973,7 +963,7 @@ def sym_exec_ins(params, block, instr, func_call):
                 second = to_symbolic(second)
                 solver.push()
                 solver.add( Not(third == 0) )
-                if check_solver(solver) == unsat:
+                if check_sat(solver) == unsat:
                     computed = 0
                 else:
                     first = ZeroExt(256, first)
@@ -1022,13 +1012,13 @@ def sym_exec_ins(params, block, instr, func_call):
                 second = to_symbolic(second)
                 solver.push()
                 solver.add( Not( Or(first >= 32, first < 0 ) ) )
-                if check_solver(solver) == unsat:
+                if check_sat(solver) == unsat:
                     computed = second
                 else:
                     signbit_index_from_right = 8 * first + 7
                     solver.push()
                     solver.add(second & (1 << signbit_index_from_right) == 0)
-                    if check_solver(solver) == unsat:
+                    if check_sat(solver) == unsat:
                         computed = second | (2 ** 256 - (1 << signbit_index_from_right))
                     else:
                         computed = second & ((1 << signbit_index_from_right) - 1)
@@ -1208,7 +1198,7 @@ def sym_exec_ins(params, block, instr, func_call):
                 second = to_symbolic(second)
                 solver.push()
                 solver.add( Not (Or( first >= 32, first < 0 ) ) )
-                if check_solver(solver) == unsat:
+                if check_sat(solver) == unsat:
                     computed = 0
                 else:
                     computed = second & (255 << (8 * byte_index))
@@ -1381,7 +1371,7 @@ def sym_exec_ins(params, block, instr, func_call):
                 solver.push()
                 solver.add(expression)
                 if MSIZE:
-                    if check_solver(solver) != unsat:
+                    if check_sat(solver) != unsat:
                         current_miu_i = If(expression, temp, current_miu_i)
                 solver.pop()
                 mem.clear() # very conservative
@@ -1459,7 +1449,7 @@ def sym_exec_ins(params, block, instr, func_call):
                 solver.push()
                 solver.add(expression)
                 if MSIZE:
-                    if check_solver(solver) != unsat:
+                    if check_sat(solver) != unsat:
                         current_miu_i = If(expression, temp, current_miu_i)
                 solver.pop()
                 mem.clear() # very conservative
@@ -1528,7 +1518,7 @@ def sym_exec_ins(params, block, instr, func_call):
                 solver.push()
                 solver.add(expression)
                 if MSIZE:
-                    if check_solver(solver) != unsat:
+                    if check_sat(solver) != unsat:
                         # this means that it is possibly that current_miu_i < temp
                         current_miu_i = If(expression,temp,current_miu_i)
                 solver.pop()
@@ -1576,7 +1566,7 @@ def sym_exec_ins(params, block, instr, func_call):
                 solver.push()
                 solver.add(expression)
                 if MSIZE:
-                    if check_solver(solver) != unsat:
+                    if check_sat(solver) != unsat:
                         # this means that it is possibly that current_miu_i < temp
                         current_miu_i = If(expression,temp,current_miu_i)
                 solver.pop()
@@ -1608,7 +1598,7 @@ def sym_exec_ins(params, block, instr, func_call):
                 solver.push()
                 solver.add(expression)
                 if MSIZE:
-                    if check_solver(solver) != unsat:
+                    if check_sat(solver) != unsat:
                         # this means that it is possibly that current_miu_i < temp
                         current_miu_i = If(expression,temp,current_miu_i)
                 solver.pop()
@@ -1818,7 +1808,7 @@ def sym_exec_ins(params, block, instr, func_call):
             solver.push()
             solver.add(is_enough_fund)
 
-            if check_solver(solver) == unsat:
+            if check_sat(solver) == unsat:
                 # this means not enough fund, thus the execution will result in exception
                 solver.pop()
                 stack.insert(0, 0)   # x = 0
@@ -1837,7 +1827,7 @@ def sym_exec_ins(params, block, instr, func_call):
                 boolean_expression = (recipient != address_is)
                 solver.push()
                 solver.add(boolean_expression)
-                if check_solver(solver) == unsat:
+                if check_sat(solver) == unsat:
                     solver.pop()
                     new_balance_is = (global_state["balance"]["Is"] + transfer_amount)
                     global_state["balance"]["Is"] = new_balance_is
@@ -1895,7 +1885,7 @@ def sym_exec_ins(params, block, instr, func_call):
             solver.push()
             solver.add(is_enough_fund)
 
-            if check_solver(solver) == unsat:
+            if check_sat(solver) == unsat:
                 # this means not enough fund, thus the execution will result in exception
                 solver.pop()
                 stack.insert(0, 0)   # x = 0
