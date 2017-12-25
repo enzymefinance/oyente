@@ -34,10 +34,6 @@ Assertion = namedtuple('Assertion', ['pc', 'model'])
 class Parameter:
     def __init__(self, **kwargs):
         attr_defaults = {
-            "instr": "",
-            "block": 0,
-            "depth": 0,
-            "pre_block": 0,
             "func_call": -1,
             "stack": [],
             "calls": [],
@@ -499,11 +495,11 @@ def full_sym_exec():
     global_state = get_init_global_state(path_conditions_and_vars)
     analysis = init_analysis()
     params = Parameter(path_conditions_and_vars=path_conditions_and_vars, global_state=global_state, analysis=analysis)
-    return sym_exec_block(params)
+    return sym_exec_block(params, 0, 0, 0)
 
 
 # Symbolically executing a block from the start address
-def sym_exec_block(params):
+def sym_exec_block(params, block, pre_block, depth):
     global solver
     global visited_edges
     global money_flow_all_paths
@@ -513,10 +509,7 @@ def sym_exec_block(params):
     global results
     global g_src_map
 
-    block = params.block
-    pre_block = params.pre_block
     visited = params.visited
-    depth = params.depth
     stack = params.stack
     mem = params.mem
     memory = params.memory
@@ -559,8 +552,7 @@ def sym_exec_block(params):
         return ["ERROR"]
 
     for instr in block_ins:
-        params.instr = instr
-        sym_exec_ins(params)
+        sym_exec_ins(params, block, instr)
 
     # Mark that this basic block in the visited blocks
     visited.append(block)
@@ -603,23 +595,17 @@ def sym_exec_block(params):
     elif jump_type[block] == "unconditional":  # executing "JUMP"
         successor = vertices[block].get_jump_target()
         new_params = params.copy()
-        new_params.depth = depth
-        new_params.block = successor
-        new_params.pre_block = block
         new_params.global_state["pc"] = successor
         if g_src_map:
             source_code = g_src_map.get_source_code(global_state['pc'])
             if source_code in g_src_map.func_call_names:
                 new_params.func_call = global_state["pc"]
-        sym_exec_block(new_params)
+        sym_exec_block(new_params, successor, block, depth)
     elif jump_type[block] == "falls_to":  # just follow to the next basic block
         successor = vertices[block].get_falls_to()
         new_params = params.copy()
-        new_params.depth = depth
-        new_params.block = successor
-        new_params.pre_block = block
         new_params.global_state["pc"] = successor
-        sym_exec_block(new_params)
+        sym_exec_block(new_params, successor, block, depth)
     elif jump_type[block] == "conditional":  # executing "JUMPI"
 
         # A choice point, we proceed with depth first search
@@ -637,9 +623,6 @@ def sym_exec_block(params):
             else:
                 left_branch = vertices[block].get_jump_target()
                 new_params = params.copy()
-                new_params.depth = depth
-                new_params.block = left_branch
-                new_params.pre_block = block
                 new_params.global_state["pc"] = left_branch
                 new_params.path_conditions_and_vars["path_condition"].append(branch_expression)
                 last_idx = len(new_params.path_conditions_and_vars["path_condition"]) - 1
@@ -649,7 +632,7 @@ def sym_exec_block(params):
                     new_params.models += model
                 except:
                     pass
-                sym_exec_block(new_params)
+                sym_exec_block(new_params, left_branch, block, depth)
         except Exception as e:
             if global_params.DEBUG_MODE:
                 traceback.print_exc()
@@ -674,9 +657,6 @@ def sym_exec_block(params):
             else:
                 right_branch = vertices[block].get_falls_to()
                 new_params = params.copy()
-                new_params.depth = depth
-                new_params.block = right_branch
-                new_params.pre_block = block
                 new_params.global_state["pc"] = right_branch
                 new_params.path_conditions_and_vars["path_condition"].append(negated_branch_expression)
                 last_idx = len(new_params.path_conditions_and_vars["path_condition"]) - 1
@@ -685,7 +665,7 @@ def sym_exec_block(params):
                     new_params.models.append(solver.model())
                 except:
                     pass
-                sym_exec_block(new_params)
+                sym_exec_block(new_params, right_branch, block, depth)
         except Exception as e:
             if global_params.DEBUG_MODE:
                 traceback.print_exc()
@@ -702,7 +682,7 @@ def sym_exec_block(params):
 
 
 # Symbolically executing an instruction
-def sym_exec_ins(params):
+def sym_exec_ins(params, start, instr):
     global MSIZE
     global visited_pcs
     global solver
@@ -712,8 +692,6 @@ def sym_exec_ins(params):
     global calls_affect_state
     global data_source
 
-    start = params.block
-    instr = params.instr
     stack = params.stack
     mem = params.mem
     memory = params.memory
