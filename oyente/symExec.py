@@ -624,12 +624,11 @@ def sym_exec_block(params, block, pre_block, depth, func_call):
                 last_idx = len(new_params.path_conditions_and_vars["path_condition"]) - 1
                 new_params.analysis["time_dependency_bug"][last_idx] = global_state["pc"]
                 sym_exec_block(new_params, left_branch, block, depth, func_call)
+        except TimeoutError:
+            raise
         except Exception as e:
             if global_params.DEBUG_MODE:
                 traceback.print_exc()
-            if not global_params.IGNORE_EXCEPTIONS:
-                if str(e) == "timeout":
-                    raise e
 
         solver.pop()  # POP SOLVER CONTEXT
 
@@ -653,12 +652,11 @@ def sym_exec_block(params, block, pre_block, depth, func_call):
                 last_idx = len(new_params.path_conditions_and_vars["path_condition"]) - 1
                 new_params.analysis["time_dependency_bug"][last_idx] = global_state["pc"]
                 sym_exec_block(new_params, right_branch, block, depth, func_call)
+        except TimeoutError:
+            raise
         except Exception as e:
             if global_params.DEBUG_MODE:
                 traceback.print_exc()
-            if not global_params.IGNORE_EXCEPTIONS:
-                if str(e) == "timeout":
-                    raise e
         solver.pop()  # POP SOLVER CONTEXT
         updated_count_number = visited_edges[current_edge] - 1
         visited_edges.update({current_edge: updated_count_number})
@@ -2241,10 +2239,25 @@ def closing_message():
             of.write(json.dumps(results, indent=1))
         log.info("Wrote results to %s.", result_file)
 
-def handler(signum, frame):
-    if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
-        exit(TIME_OUT)
-    raise Exception("timeout")
+class TimeoutError(Exception):
+    pass
+
+class Timeout:
+   """Timeout class using ALARM signal."""
+
+   def __init__(self, sec=10, error_message=os.strerror(errno.ETIME)):
+       self.sec = sec
+       self.error_message = error_message
+
+   def __enter__(self):
+       signal.signal(signal.SIGALRM, self._handle_timeout)
+       signal.alarm(self.sec)
+
+   def __exit__(self, *args):
+       signal.alarm(0)    # disable alarm
+
+   def _handle_timeout(self, signum, frame):
+       raise TimeoutError(self.error_message)
 
 def get_recipients(disasm_file, contract_address):
     global recipients
@@ -2269,18 +2282,14 @@ def get_recipients(disasm_file, contract_address):
     initGlobalVars()
     set_cur_file(g_disasm_file[4:] if len(g_disasm_file) > 5 else g_disasm_file)
     start = time.time()
-    signal.signal(signal.SIGALRM, handler)
-    signal.alarm(global_params.GLOBAL_TIMEOUT)
     timeout = False
 
     try:
-        build_cfg_and_analyze()
-        signal.alarm(0)
-    except Exception as e:
-        if str(e) == 'timeout':
-            timeout = True
-        else:
-            raise
+        with Timeout(sec=global_params.GLOBAL_TIMEOUT):
+            build_cfg_and_analyze()
+    except TimeoutError:
+        timeout = True
+
     evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys())
     return {
         'addrs': list(recipients),
@@ -2311,23 +2320,23 @@ def analyze(disasm_file=None, source_file=None, source_map=None):
         global_params.GLOBAL_TIMEOUT = global_params.GLOBAL_TIMEOUT_TEST
 
         try:
-            build_cfg_and_analyze()
-        except Exception as e:
+            with Timeout(sec=global_params.GLOBAL_TIMEOUT):
+                build_cfg_and_analyze()
+        except Exception:
             traceback.print_exc()
             exit(EXCEPTION)
     else:
         start = time.time()
-        signal.signal(signal.SIGALRM, handler)
-        signal.alarm(global_params.GLOBAL_TIMEOUT)
         atexit.register(closing_message)
-
         set_cur_file(g_disasm_file[4:] if len(g_disasm_file) > 5 else g_disasm_file)
         log.info("\t============ Results ===========")
+
         try:
-            build_cfg_and_analyze()
+            with Timeout(sec=global_params.GLOBAL_TIMEOUT):
+                build_cfg_and_analyze()
             log.debug("Done Symbolic execution")
-            signal.alarm(0)
-        except Exception as e:
-            traceback.print_exc()
+        except TimeoutError:
+            if global_params.DEBUG_MODE:
+                traceback.print_exc()
         finally:
             return detect_vulnerabilities()

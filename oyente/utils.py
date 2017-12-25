@@ -6,6 +6,8 @@ import subprocess
 import json
 import mmap
 import os
+import errno
+import signal
 import csv
 import re
 import difflib
@@ -65,22 +67,6 @@ def custom_deepcopy(input):
         else:
             output[key] = input[key]
     return output
-
-# class Timeout():
-#     """Timeout class using ALARM signal."""
-#
-#     def __init__(self, sec):
-#         self.sec = sec
-#
-#     def __enter__(self):
-#         signal.signal(signal.SIGALRM, self.raise_timeout)
-#         signal.alarm(self.sec)
-#
-#     def __exit__(self, *args):
-#         signal.alarm(0)    # disable alarm
-#
-#     def raise_timeout(self, *args):
-#         raise Exception("Timeout")
 
 # check if a variable is a storage address in a contract
 # currently accept only int addresses in the storage
@@ -306,13 +292,3 @@ def run_command(cmd):
     FNULL = open(os.devnull, 'w')
     solc_p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)
     return solc_p.communicate()[0].decode()
-
-def compare_versions(version1, version2):
-    def normalize(v):
-        return [int(x) for x in re.sub(r'(\.0+)*$','', v).split(".")]
-    version1 = normalize(version1)
-    version2 = normalize(version2)
-    if six.PY2:
-        return cmp(version1, version2)
-    else:
-        return (version1 > version2) - (version1 < version2)
