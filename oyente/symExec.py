@@ -2280,7 +2280,6 @@ def get_recipients(disasm_file, contract_address):
         MSIZE = True
 
     initGlobalVars()
-    set_cur_file(g_disasm_file[4:] if len(g_disasm_file) > 5 else g_disasm_file)
     start = time.time()
     timeout = False
 
@@ -2328,7 +2327,6 @@ def analyze(disasm_file=None, source_file=None, source_map=None):
     else:
         start = time.time()
         atexit.register(closing_message)
-        set_cur_file(g_disasm_file[4:] if len(g_disasm_file) > 5 else g_disasm_file)
         log.info("\t============ Results ===========")
 
         try:
