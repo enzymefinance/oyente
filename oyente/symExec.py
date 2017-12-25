@@ -34,7 +34,6 @@ Assertion = namedtuple('Assertion', ['pc', 'model'])
 class Parameter:
     def __init__(self, **kwargs):
         attr_defaults = {
-            "func_call": -1,
             "stack": [],
             "calls": [],
             "memory": [],
@@ -495,11 +494,11 @@ def full_sym_exec():
     global_state = get_init_global_state(path_conditions_and_vars)
     analysis = init_analysis()
     params = Parameter(path_conditions_and_vars=path_conditions_and_vars, global_state=global_state, analysis=analysis)
-    return sym_exec_block(params, 0, 0, 0)
+    return sym_exec_block(params, 0, 0, 0, -1)
 
 
 # Symbolically executing a block from the start address
-def sym_exec_block(params, block, pre_block, depth):
+def sym_exec_block(params, block, pre_block, depth, func_call):
     global solver
     global visited_edges
     global money_flow_all_paths
@@ -519,7 +518,6 @@ def sym_exec_block(params, block, pre_block, depth):
     analysis = params.analysis
     models = params.models
     calls = params.calls
-    func_call = params.func_call
 
     Edge = namedtuple("Edge", ["v1", "v2"]) # Factory Function for tuples is used as dictionary key
     if block < 0:
@@ -552,7 +550,7 @@ def sym_exec_block(params, block, pre_block, depth):
         return ["ERROR"]
 
     for instr in block_ins:
-        sym_exec_ins(params, block, instr)
+        sym_exec_ins(params, block, instr, func_call)
 
     # Mark that this basic block in the visited blocks
     visited.append(block)
@@ -599,13 +597,13 @@ def sym_exec_block(params, block, pre_block, depth):
         if g_src_map:
             source_code = g_src_map.get_source_code(global_state['pc'])
             if source_code in g_src_map.func_call_names:
-                new_params.func_call = global_state["pc"]
-        sym_exec_block(new_params, successor, block, depth)
+                func_call = global_state['pc']
+        sym_exec_block(new_params, successor, block, depth, func_call)
     elif jump_type[block] == "falls_to":  # just follow to the next basic block
         successor = vertices[block].get_falls_to()
         new_params = params.copy()
         new_params.global_state["pc"] = successor
-        sym_exec_block(new_params, successor, block, depth)
+        sym_exec_block(new_params, successor, block, depth, func_call)
     elif jump_type[block] == "conditional":  # executing "JUMPI"
 
         # A choice point, we proceed with depth first search
@@ -632,7 +630,7 @@ def sym_exec_block(params, block, pre_block, depth):
                     new_params.models += model
                 except:
                     pass
-                sym_exec_block(new_params, left_branch, block, depth)
+                sym_exec_block(new_params, left_branch, block, depth, func_call)
         except Exception as e:
             if global_params.DEBUG_MODE:
                 traceback.print_exc()
@@ -665,7 +663,7 @@ def sym_exec_block(params, block, pre_block, depth):
                     new_params.models.append(solver.model())
                 except:
                     pass
-                sym_exec_block(new_params, right_branch, block, depth)
+                sym_exec_block(new_params, right_branch, block, depth, func_call)
         except Exception as e:
             if global_params.DEBUG_MODE:
                 traceback.print_exc()
@@ -682,7 +680,7 @@ def sym_exec_block(params, block, pre_block, depth):
 
 
 # Symbolically executing an instruction
-def sym_exec_ins(params, block, instr):
+def sym_exec_ins(params, block, instr, func_call):
     global MSIZE
     global visited_pcs
     global solver
@@ -701,7 +699,6 @@ def sym_exec_ins(params, block, instr):
     analysis = params.analysis
     models = params.models
     calls = params.calls
-    func_call = params.func_call
 
     visited_pcs.add(global_state["pc"])
 
@@ -1216,6 +1213,7 @@ def sym_exec_ins(params, block, instr):
                 else:
                     computed = second & (255 << (8 * byte_index))
                     computed = computed >> (8 * byte_index)
+                solver.pop()
             computed = simplify(computed) if is_expr(computed) else computed
             stack.insert(0, computed)
         else:
