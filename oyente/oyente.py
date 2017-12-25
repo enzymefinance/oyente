@@ -135,7 +135,6 @@ def main():
     parser.add_argument( "-e",   "--evm",                 help="Do not remove the .evm file.", action="store_true")
     parser.add_argument( "-w",   "--web",                 help="Run Oyente for web service", action="store_true")
     parser.add_argument( "-j",   "--json",                help="Redirect results to a json file.", action="store_true")
-    parser.add_argument( "-err", "--error",               help="Enable exceptions and print output. Monsters here.", action="store_true")
     parser.add_argument( "-p",   "--paths",               help="Print path condition information.", action="store_true")
     parser.add_argument( "-db",  "--debug",               help="Display debug information", action="store_true")
     parser.add_argument( "-st",  "--state",               help="Get input state from state.json", action="store_true")
@@ -164,7 +163,6 @@ def main():
         logging.basicConfig(level=logging.INFO)
     global_params.PRINT_PATHS = 1 if args.paths else 0
     global_params.REPORT_MODE = 1 if args.report else 0
-    global_params.IGNORE_EXCEPTIONS = 1 if args.error else 0
     global_params.USE_GLOBAL_BLOCKCHAIN = 1 if args.globalblockchain else 0
     global_params.INPUT_STATE = 1 if args.state else 0
     global_params.WEB = 1 if args.web else 0
