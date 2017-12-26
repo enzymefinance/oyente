@@ -4,13 +4,13 @@ import os
 import re
 import six
 import json
+import symExec
 import logging
 import requests
 import argparse
 import subprocess
 import global_params
 from utils import run_command
-from symExec import analyze
 from input_helper import InputHelper
 
 def cmd_exists(cmd):
@@ -69,7 +69,7 @@ def analyze_bytecode():
     helper = InputHelper(InputHelper.BYTECODE, source=args.source)
     inp = helper.get_inputs()[0]
 
-    result, exit_code = analyze(disasm_file=inp['disasm_file'])
+    result, exit_code = symExec.run(disasm_file=inp['disasm_file'])
     helper.rm_tmp_files()
 
     if global_params.WEB:
@@ -83,7 +83,7 @@ def run_solidity_analysis(inputs):
 
     for inp in inputs:
         logging.info("contract %s:", inp['contract'])
-        result, return_code = analyze(disasm_file=inp['disasm_file'], source_map=inp['source_map'], source_file=inp['source'])
+        result, return_code = symExec.run(disasm_file=inp['disasm_file'], source_map=inp['source_map'], source_file=inp['source'])
 
         try:
             c_source = inp['c_source']

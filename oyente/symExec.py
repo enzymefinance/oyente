@@ -58,6 +58,18 @@ def initGlobalVars():
     solver = Solver()
     solver.set("timeout", global_params.TIMEOUT)
 
+    global MSIZE
+    MSIZE = False
+
+    global g_disasm_file
+    with open(g_disasm_file, 'r') as f:
+        disasm = f.read()
+    if 'MSIZE' in disasm:
+        MSIZE = True
+
+    global g_timeout
+    g_timeout = False
+
     global visited_pcs
     visited_pcs = set()
 
@@ -2142,6 +2154,7 @@ def detect_vulnerabilities():
     global g_src_map
     global visited_pcs
     global global_problematic_pcs
+    global begin
 
     if instructions:
         evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys()) * 100
@@ -2162,7 +2175,7 @@ def detect_vulnerabilities():
 
         stop = time.time()
         if global_params.REPORT_MODE:
-            rfile.write(str(stop-start))
+            rfile.write(str(stop-begin))
             rfile.close()
 
         log.debug("Results for Reentrancy Bug: " + str(reentrancy_all_paths))
@@ -2259,82 +2272,76 @@ class Timeout:
    def _handle_timeout(self, signum, frame):
        raise TimeoutError(self.error_message)
 
+def do_nothing():
+    pass
+
+def run_build_cfg_and_analyze(timeout_cb=do_nothing):
+    initGlobalVars()
+    global g_timeout
+
+    try:
+        with Timeout(sec=global_params.GLOBAL_TIMEOUT):
+            build_cfg_and_analyze()
+        log.debug('Done Symbolic execution')
+    except TimeoutError:
+        g_timeout = True
+        timeout_cb()
+
 def get_recipients(disasm_file, contract_address):
     global recipients
     global data_source
     global g_src_map
     global g_disasm_file
     global g_source_file
-    global MSIZE
 
     g_src_map = None
     g_disasm_file = disasm_file
     g_source_file = None
     data_source = EthereumData(contract_address)
     recipients = set()
-    MSIZE = False
-
-    with open(g_disasm_file, 'r') as f:
-        disasm = f.read()
-    if 'MSIZE' in disasm:
-        MSIZE = True
-
-    initGlobalVars()
-    start = time.time()
-    timeout = False
-
-    try:
-        with Timeout(sec=global_params.GLOBAL_TIMEOUT):
-            build_cfg_and_analyze()
-    except TimeoutError:
-        timeout = True
 
     evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys())
+
+    run_build_cfg_and_analyze()
+
     return {
         'addrs': list(recipients),
         'evm_code_coverage': evm_code_coverage,
-        'timeout': timeout
+        'timeout': g_timeout
     }
 
-def analyze(disasm_file=None, source_file=None, source_map=None):
+def test():
+    global_params.GLOBAL_TIMEOUT = global_params.GLOBAL_TIMEOUT_TEST
+
+    def timeout_cb():
+        traceback.print_exc()
+        exit(EXCEPTION)
+
+    run_build_cfg_and_analyze(timeout_cb=timeout_cb)
+
+def analyze():
+    def timeout_cb():
+        if global_params.DEBUG_MODE:
+            traceback.print_exc()
+
+    run_build_cfg_and_analyze(timeout_cb=timeout_cb)
+
+def run(disasm_file=None, source_file=None, source_map=None):
     global g_disasm_file
     global g_source_file
     global g_src_map
     global results
-    global MSIZE
 
     g_disasm_file = disasm_file
     g_source_file = source_file
     g_src_map = source_map
-    MSIZE = False
 
-    with open(g_disasm_file, 'r') as f:
-        disasm = f.read()
-    if 'MSIZE' in disasm:
-        MSIZE = True
-
-    initGlobalVars()
+    atexit.register(closing_message)
 
     if is_testing_evm():
-        global_params.GLOBAL_TIMEOUT = global_params.GLOBAL_TIMEOUT_TEST
-
-        try:
-            with Timeout(sec=global_params.GLOBAL_TIMEOUT):
-                build_cfg_and_analyze()
-        except Exception:
-            traceback.print_exc()
-            exit(EXCEPTION)
+        test()
     else:
-        start = time.time()
-        atexit.register(closing_message)
+        begin = time.time()
         log.info("\t============ Results ===========")
-
-        try:
-            with Timeout(sec=global_params.GLOBAL_TIMEOUT):
-                build_cfg_and_analyze()
-            log.debug("Done Symbolic execution")
-        except TimeoutError:
-            if global_params.DEBUG_MODE:
-                traceback.print_exc()
-        finally:
-            return detect_vulnerabilities()
+        analyze()
+        return detect_vulnerabilities()
