@@ -196,6 +196,7 @@ def update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_
         recipient = stack[0]
         if isSymbolic(recipient):
             recipient = simplify(recipient)
+        analysis['money_concurrency_bug'].append(global_state['pc'])
         analysis["money_flow"].append(("Ia", str(recipient), "all_remaining"))
 
 # Check if it is possible to execute a path after a previous path
