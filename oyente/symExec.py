@@ -716,8 +716,6 @@ def sym_exec_ins(params, block, instr, func_call):
                 global_problematic_pcs["assertion_failure"].append(Assertion(global_state["pc"], model))
             elif func_call != -1:
                 global_problematic_pcs["assertion_failure"].append(Assertion(func_call, model))
-        else:
-            global_problematic_pcs["assertion_failure"].append(Assertion(global_state["pc"], model))
         return
 
     # collecting the analysis result by calling this skeletal function
