@@ -140,6 +140,7 @@ def main():
     parser.add_argument( "-st",  "--state",               help="Get input state from state.json", action="store_true")
     parser.add_argument( "-r",   "--report",              help="Create .report file.", action="store_true")
     parser.add_argument( "-v",   "--verbose",             help="Verbose output, print everything.", action="store_true")
+    parser.add_argument( "-pl",  "--parallel",            help="Run Oyente in parallel. Note: The performance may depend on the contract", action="store_true")
     parser.add_argument( "-b",   "--bytecode",            help="read bytecode in source instead of solidity file.", action="store_true")
     parser.add_argument( "-a",   "--assertion",           help="Check assertion failures.", action="store_true")
     parser.add_argument( "-sj",  "--standard-json",       help="Support Standard JSON input", action="store_true")
@@ -170,6 +171,7 @@ def main():
     global_params.CHECK_ASSERTIONS = 1 if args.assertion else 0
     global_params.DEBUG_MODE = 1 if args.debug else 0
     global_params.GENERATE_TEST_CASES = 1 if args.generate_test_cases else 0
+    global_params.PARALLEL = 1 if args.parallel else 0
 
     if args.depth_limit:
         global_params.DEPTH_LIMIT = args.depth_limit
