@@ -13,6 +13,7 @@ class InputHelper:
     BYTECODE = 0
     SOLIDITY = 1
     STANDARD_JSON = 2
+    STANDARD_JSON_OUTPUT = 3
 
     def __init__(self, input_type, **kwargs):
         self.input_type = input_type
@@ -36,6 +37,13 @@ class InputHelper:
                 'root_path': "",
                 'allow_paths': None,
                 'compiled_contracts': []
+            }
+        elif input_type == InputHelper.STANDARD_JSON_OUTPUT:
+            attr_defaults = {
+                'source': None,
+                'evm': False,
+                'root_path': "",
+                'compiled_contracts': [],
             }
 
         for (attr, default) in six.iteritems(attr_defaults):
@@ -85,8 +93,11 @@ class InputHelper:
         if not self.compiled_contracts:
             if self.input_type == InputHelper.SOLIDITY:
                 self.compiled_contracts = self._compile_solidity()
-            else:
+            elif self.input_type == InputHelper.STANDARD_JSON:
                 self.compiled_contracts = self._compile_standard_json()
+            elif self.input_type == InputHelper.STANDARD_JSON_OUTPUT:
+                self.compiled_contracts = self._compile_standard_json_output(self.source)
+
         return self.compiled_contracts
 
     def _compile_solidity(self):
@@ -110,7 +121,12 @@ class InputHelper:
         out = p2.communicate()[0]
         with open('standard_json_output', 'w') as of:
             of.write(out)
-        # should handle the case without allow-paths option
+
+        return self._compile_standard_json_output('standard_json_output')
+
+    def _compile_standard_json_output(self, json_output_file):
+        with open(json_output_file, 'r') as f:
+            out = f.read()
         j = json.loads(out)
         contracts = []
         for source in j['sources']:
@@ -186,7 +202,7 @@ class InputHelper:
             of.write(disasm_out)
 
     def _rm_tmp_files_of_multiple_contracts(self, contracts):
-        if self.input_type == InputHelper.STANDARD_JSON:
+        if self.input_type in ['standard_json', 'standard_json_output']:
             self._rm_file('standard_json_output')
         for contract, _ in contracts:
             self._rm_tmp_files(contract)
