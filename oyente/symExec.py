@@ -55,7 +55,15 @@ def initGlobalVars():
     global g_src_map
     global solver
     # Z3 solver
-    solver = Solver()
+
+    if global_params.PARALLEL:
+        t2 = Then('simplify', 'solve-eqs', 'smt')
+        _t = Then('tseitin-cnf-core', 'split-clause')
+        t1 = ParThen(_t, t2)
+        solver = OrElse(t1, t2).solver()
+    else:
+        solver = Solver()
+
     solver.set("timeout", global_params.TIMEOUT)
 
     global MSIZE
