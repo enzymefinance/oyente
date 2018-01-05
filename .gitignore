@@ -17,3 +17,5 @@ current_test.pickle
 
 bytecode
 bytecode.1
+
+!oyente/tests/contracts/*/*
