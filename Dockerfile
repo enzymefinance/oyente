@@ -27,4 +27,5 @@ COPY . /oyente/
 RUN cd /oyente/web && node -v && npm -v && npm install
 RUN cd /oyente/web && gem install bundler && bundle install
 
-WORKDIR /oyente/
+WORKDIR /oyente/web
+CMD ["./bin/rails", "server"]
