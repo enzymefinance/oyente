@@ -100,7 +100,7 @@ def analyze_solidity(input_type='solidity'):
     global args
 
     if input_type == 'solidity':
-        helper = InputHelper(InputHelper.SOLIDITY, source=args.source)
+        helper = InputHelper(InputHelper.SOLIDITY, source=args.source, compilation_err=args.compilation_error, root_path=args.root_path)
     elif input_type == 'standard_json':
         helper = InputHelper(InputHelper.STANDARD_JSON, source=args.source, allow_paths=args.allow_paths)
     elif input_type == 'standard_json_output':
@@ -147,8 +147,9 @@ def main():
     parser.add_argument( "-a",   "--assertion",              help="Check assertion failures.", action="store_true")
     parser.add_argument( "-sj",  "--standard-json",          help="Support Standard JSON input", action="store_true")
     parser.add_argument( "-gb",  "--globalblockchain",       help="Integrate with the global ethereum blockchain", action="store_true")
+    parser.add_argument( "-ce",  "--compilation-error",      help="Display compilation errors", action="store_true")
     parser.add_argument( "-gtc", "--generate-test-cases",    help="Generate test cases each branch of symbolic execution tree", action="store_true")
-    parser.add_argument( "-sjo",  "--standard-json-output",  help="Support Standard JSON output", action="store_true")
+    parser.add_argument( "-sjo", "--standard-json-output",   help="Support Standard JSON output", action="store_true")
 
     args = parser.parse_args()
 
