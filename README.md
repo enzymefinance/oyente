@@ -26,7 +26,25 @@ and you are done!
 
 Note - If need the [version of Oyente](https://github.com/melonproject/oyente/tree/290f1ae1bbb295b8e61cbf0eed93dbde6f287e69) referred to in the paper, run the container from [here](https://hub.docker.com/r/hrishioa/oyente/)
 
+To run the web interface, execute  
+`docker run -w /oyente/web -p 3000:3000 oyente:latest ./bin/rails server`
+
+## Custom Docker image build
+
+```
+docker build .
+docker tag <image id> oyente
+docker run -w /oyente/oyente oyente:latest python oyente.py -ru https://contract_url
+```
+
 ## Installation
+
+Execute a python virtualenv
+
+```
+python -m virtualenv env
+source env/bin/activate
+```
 
 Install Oyente via pip:
 
@@ -34,6 +52,9 @@ Install Oyente via pip:
 $ pip2 install oyente
 ```
 Dependencies:
+
+The following require a Linux system to fufill. macOS instructions forthcoming.
+
 [solc](https://github.com/melonproject/oyente#solc)
 [evm](https://github.com/melonproject/oyente#evm-from-go-ethereum)
 
