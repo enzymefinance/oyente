@@ -4,9 +4,11 @@ LABEL maintainer "Luong Nguyen <luongnt.58@gmail.com>"
 
 SHELL ["/bin/bash", "-c"]
 RUN apt-get update
-RUN apt-get install -y wget unzip python-virtualenv git build-essential software-properties-common
+RUN apt-get install -y wget unzip python-virtualenv git build-essential software-properties-common curl
 RUN add-apt-repository -y ppa:ethereum/ethereum-dev
 RUN add-apt-repository -y ppa:ethereum/ethereum
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 RUN apt-get update
 RUN apt-get install -y build-essential golang-go solc ethereum python python-pip \
 						ruby ruby-rails ruby-dev rake git-core curl zlib1g-dev build-essential libssl-dev \
@@ -24,7 +26,9 @@ RUN mkdir -p /deps/z3/ &&  wget https://github.com/Z3Prover/z3/archive/z3-4.5.0.
 
 COPY . /oyente/
 
-RUN cd /oyente/web && node -v && npm -v && npm install
+RUN apt-get install yarn
+RUN cd /oyente/web && ./bin/yarn install
 RUN cd /oyente/web && gem install bundler && bundle install
 
-WORKDIR /oyente/
+WORKDIR /oyente/web
+CMD ["./bin/rails", "server"]
