@@ -7,7 +7,7 @@ import json
 import global_params
 import six
 from source_map import SourceMap
-from utils import run_command
+from utils import run_command, run_command_with_err
 
 class InputHelper:
     BYTECODE = 0
@@ -28,7 +28,8 @@ class InputHelper:
                 'source': None,
                 'evm': False,
                 'root_path': "",
-                'compiled_contracts': []
+                'compiled_contracts': [],
+                'compilation_err': False
             }
         elif input_type == InputHelper.STANDARD_JSON:
             attr_defaults = {
@@ -102,14 +103,19 @@ class InputHelper:
 
     def _compile_solidity(self):
         cmd = "solc --bin-runtime %s" % self.source
-        out = run_command(cmd)
+        err = ''
+        if self.compilation_err:
+            out, err = run_command_with_err(cmd)
+            err = re.sub(self.root_path, "", err)
+        else:
+            out = run_command(cmd)
 
         libs = re.findall(r"_+(.*?)_+", out)
         libs = set(libs)
         if libs:
             return self._link_libraries(self.source, libs)
         else:
-            return self._extract_bin_str(out)
+            return self._extract_bin_str(out, err)
 
     def _compile_standard_json(self):
         FNULL = open(os.devnull, 'w')
@@ -140,14 +146,21 @@ class InputHelper:
         evm_without_hash = re.sub(r"a165627a7a72305820\S{64}0029$", "", evm)
         return evm_without_hash
 
-    def _extract_bin_str(self, s):
+    def _extract_bin_str(self, s, err=''):
         binary_regex = r"\n======= (.*?) =======\nBinary of the runtime part: \n(.*?)\n"
         contracts = re.findall(binary_regex, s)
         contracts = [contract for contract in contracts if contract[1]]
         if not contracts:
-            logging.critical("Solidity compilation failed")
-            if global_params.WEB:
-                six.print_({"error": "Solidity compilation failed"})
+            if not self.compilation_err:
+                logging.critical("Solidity compilation failed. Please use -ce flag to see the detail.")
+                if global_params.WEB:
+                    six.print_({"error": "Solidity compilation failed."})
+            else:
+                logging.critical(err)
+                logging.critical("Solidity compilation failed.")
+                if global_params.WEB:
+                    six.print_({"error": err})
+
             exit(1)
         return contracts
 
