@@ -2218,9 +2218,10 @@ def log_info():
     global parity_multisig_bug_2
 
     vulnerabilities = [callstack, money_concurrency, time_dependency, reentrancy]
-    if g_src_map and global_params.CHECK_ASSERTIONS:
-        vulnerabilities.append(assertion_failure)
+    if g_src_map:
         vulnerabilities.append(parity_multisig_bug_2)
+        if global_params.CHECK_ASSERTIONS:
+            vulnerabilities.append(assertion_failure)
 
     for vul in vulnerabilities:
         s = str(vul)
