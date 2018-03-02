@@ -2249,12 +2249,12 @@ def vulnerability_found():
     return 0
 
 def closing_message():
-    global g_source_file
+    global g_disasm_file
     global results
 
     log.info("\t====== Analysis Completed ======")
     if global_params.STORE_RESULT:
-        result_file = g_source_file + '.json'
+        result_file = g_disasm_file.split('.evm.disasm')[0] + '.json'
         with open(result_file, 'w') as of:
             of.write(json.dumps(results, indent=1))
         log.info("Wrote results to %s.", result_file)
@@ -2343,12 +2343,12 @@ def run(disasm_file=None, source_file=None, source_map=None):
     g_source_file = source_file
     g_src_map = source_map
 
-    atexit.register(closing_message)
-
     if is_testing_evm():
         test()
     else:
         begin = time.time()
         log.info("\t============ Results ===========")
         analyze()
-        return detect_vulnerabilities()
+        ret = detect_vulnerabilities()
+        closing_message()
+        return ret
