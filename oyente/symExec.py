@@ -4,7 +4,6 @@ from tokenize import NUMBER, NAME, NEWLINE
 import re
 import math
 import sys
-import atexit
 import pickle
 import json
 import traceback
@@ -1645,7 +1644,8 @@ def sym_exec_ins(params, block, instr, func_call):
                         new_var_name = g_src_map.get_source_code(global_state['pc'] - 1)
                         operators = '[-+*/%|&^!><=]'
                         new_var_name = re.compile(operators).split(new_var_name)[0].strip()
-                        if g_src_map.is_a_parameter_or_state_variable(new_var_name):
+                        new_var_name = g_src_map.get_parameter_or_state_var(new_var_name)
+                        if new_var_name:
                             new_var_name = "Ia_store" + "-" + str(position) + "-" + new_var_name
                         else:
                             new_var_name = gen.gen_owner_store_var(position)
