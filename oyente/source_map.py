@@ -87,17 +87,17 @@ class SourceMap:
         pos = self._convert_src_to_pos(src)
         return self._convert_offset_to_line_column(pos)
 
-    def is_a_parameter_or_state_variable(self, var_name):
+    def get_parameter_or_state_var(self, var_name):
         try:
             names = [
                 node.id for node in ast.walk(ast.parse(var_name))
                 if isinstance(node, ast.Name)
             ]
             if names[0] in self.var_names:
-                return True
+                return names[0]
         except:
-            return False
-        return False
+            return None
+        return None
 
     def _convert_src_to_pos(self, src):
         pos = {}
