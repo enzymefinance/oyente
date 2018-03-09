@@ -4,7 +4,6 @@ from tokenize import NUMBER, NAME, NEWLINE
 import re
 import math
 import sys
-import atexit
 import pickle
 import json
 import traceback
@@ -1645,7 +1644,8 @@ def sym_exec_ins(params, block, instr, func_call):
                         new_var_name = g_src_map.get_source_code(global_state['pc'] - 1)
                         operators = '[-+*/%|&^!><=]'
                         new_var_name = re.compile(operators).split(new_var_name)[0].strip()
-                        if g_src_map.is_a_parameter_or_state_variable(new_var_name):
+                        new_var_name = g_src_map.get_parameter_or_state_var(new_var_name)
+                        if new_var_name:
                             new_var_name = "Ia_store" + "-" + str(position) + "-" + new_var_name
                         else:
                             new_var_name = gen.gen_owner_store_var(position)
@@ -2218,9 +2218,10 @@ def log_info():
     global parity_multisig_bug_2
 
     vulnerabilities = [callstack, money_concurrency, time_dependency, reentrancy]
-    if g_src_map and global_params.CHECK_ASSERTIONS:
-        vulnerabilities.append(assertion_failure)
+    if g_src_map:
         vulnerabilities.append(parity_multisig_bug_2)
+        if global_params.CHECK_ASSERTIONS:
+            vulnerabilities.append(assertion_failure)
 
     for vul in vulnerabilities:
         s = str(vul)
@@ -2248,12 +2249,12 @@ def vulnerability_found():
     return 0
 
 def closing_message():
-    global g_source_file
+    global g_disasm_file
     global results
 
     log.info("\t====== Analysis Completed ======")
     if global_params.STORE_RESULT:
-        result_file = g_source_file + '.json'
+        result_file = g_disasm_file.split('.evm.disasm')[0] + '.json'
         with open(result_file, 'w') as of:
             of.write(json.dumps(results, indent=1))
         log.info("Wrote results to %s.", result_file)
@@ -2342,12 +2343,12 @@ def run(disasm_file=None, source_file=None, source_map=None):
     g_source_file = source_file
     g_src_map = source_map
 
-    atexit.register(closing_message)
-
     if is_testing_evm():
         test()
     else:
         begin = time.time()
         log.info("\t============ Results ===========")
         analyze()
-        return detect_vulnerabilities()
+        ret = detect_vulnerabilities()
+        closing_message()
+        return ret
