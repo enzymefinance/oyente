@@ -291,4 +291,4 @@ def get_distinct_contracts(list_of_contracts = "concurr.csv"):
 def run_command(cmd):
     FNULL = open(os.devnull, 'w')
     solc_p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)
-    return solc_p.communicate()[0].decode()
+    return solc_p.communicate()[0].decode('utf-8', 'strict')

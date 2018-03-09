@@ -162,7 +162,7 @@ class InputHelper:
         cmd = "solc --link%s" %option
         p2 = subprocess.Popen(shlex.split(cmd), stdin=p1.stdout, stdout=subprocess.PIPE, stderr=FNULL)
         p1.stdout.close()
-        out = p2.communicate()[0].decode()
+        out = p2.communicate()[0].decode('utf-8', 'strict')
         return self._extract_bin_str(out)
 
     def _prepare_disasm_files_for_analysis(self, contracts):
@@ -193,7 +193,7 @@ class InputHelper:
         try:
             disasm_p = subprocess.Popen(
                 ["evm", "disasm", evm_file], stdout=subprocess.PIPE)
-            disasm_out = disasm_p.communicate()[0].decode()
+            disasm_out = disasm_p.communicate()[0].decode('utf-8', 'strict')
         except:
             logging.critical("Disassembly failed.")
             exit()

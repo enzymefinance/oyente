@@ -1239,7 +1239,7 @@ def sym_exec_ins(params, block, instr, func_call):
                 position = re.sub('[\s+]', '', position)
                 position = zlib.compress(six.b(position), 9)
                 position = base64.b64encode(position)
-                position = position.decode()
+                position = position.decode('utf-8', 'strict')
                 if position in sha3_list:
                     stack.insert(0, sha3_list[position])
                 else:
