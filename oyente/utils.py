@@ -291,7 +291,7 @@ def get_distinct_contracts(list_of_contracts = "concurr.csv"):
 def run_command(cmd):
     FNULL = open(os.devnull, 'w')
     solc_p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)
-    return solc_p.communicate()[0].decode()
+    return solc_p.communicate()[0].decode('utf-8', 'strict')
 
 def run_command_with_err(cmd):
     FNULL = open(os.devnull, 'w')
@@ -299,3 +299,4 @@ def run_command_with_err(cmd):
     out, err = solc_p.communicate()
     out = out.decode()
     return out, err
+
