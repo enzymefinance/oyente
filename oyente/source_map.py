@@ -46,6 +46,7 @@ class SourceMap:
         self.var_names = self._get_var_names()
         self.func_call_names = self._get_func_call_names()
         self.callee_src_pairs = self._get_callee_src_pairs()
+        self.params_by_func_name = self._get_params_by_func_name()
 
     def get_source_code(self, pc):
         try:
@@ -107,13 +108,23 @@ class SourceMap:
         pos['end'] = pos['begin'] + length - 1
         return pos
 
+    def _get_params_by_func_name(self):
+        params_by_func_name = SourceMap.ast_helper.get_params_by_func_name(self.cname)
+        for func_name in params_by_func_name:
+            calldataload_position = 0
+            for param in params_by_func_name[func_name]:
+                if param['type'] == 'ElementaryTypeName':
+                    calldataload_position += 1
+                elif param['type'] == 'ArrayTypeName':
+                    calldataload_position += param['value']
+                param['position'] = calldataload_position
+        return params_by_func_name
+
     def _get_source(self):
         fname = self.get_filename()
-        if fname in SourceMap.sources:
-            return SourceMap.sources[fname]
-        else:
+        if fname not in SourceMap.sources:
             SourceMap.sources[fname] = Source(fname)
-            return SourceMap.sources[fname]
+        return SourceMap.sources[fname]
 
     def _get_callee_src_pairs(self):
         return SourceMap.ast_helper.get_callee_src_pairs(self.cname)

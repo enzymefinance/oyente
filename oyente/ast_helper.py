@@ -124,6 +124,42 @@ class AstHelper:
                     callee_src_pairs.append((contract_path, node["src"]))
         return callee_src_pairs
 
+    def get_params_by_func_name(self, c_name):
+        node = self.contracts['contractsByName'][c_name]
+        walker = AstWalker()
+        func_def_nodes = []
+        if node:
+            walker.walk(node, {'name': 'FunctionDefinition'}, func_def_nodes)
+
+        params_by_func_name = {}
+        for func_def_node in func_def_nodes:
+            func_name = func_def_node['attributes']['name']
+            params_nodes = []
+            walker.walk(func_def_node, {'name': 'ParameterList'}, params_nodes)
+
+            params_node = params_nodes[0]
+            param_nodes = []
+            walker.walk(params_node, {'name': 'VariableDeclaration'}, param_nodes)
+
+            for param_node in param_nodes:
+                var_name = param_node['attributes']['name']
+                type_name = param_node['children'][0]['name']
+                if type_name == 'ArrayTypeName':
+                    literal_nodes = []
+                    walker.walk(param_node, {'name': 'Literal'}, literal_nodes)
+                    literal_node = literal_nodes[0]
+                    param = {'name': var_name, 'type': type_name, 'value': int(literal_node['attributes']['value'])}
+                elif type_name == 'ElementaryTypeName':
+                    param = {'name': var_name, 'type': type_name}
+                else:
+                    raise Exception('There is no parameter type named %s' % type_name)
+
+                if not params_by_func_name:
+                    params_by_func_name[func_name] = [param]
+                else:
+                    params_by_func_name[func_name].append(param)
+        return params_by_func_name
+
     def _find_contract_path(self, contract_paths, contract):
         for path in contract_paths:
             cname = path.split(":")[-1]
