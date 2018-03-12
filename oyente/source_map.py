@@ -1,4 +1,5 @@
 import re
+import six
 import ast
 import json
 
@@ -26,6 +27,7 @@ class SourceMap:
     position_groups = {}
     sources = {}
     ast_helper = None
+    func_to_sig_by_contract = {}
 
     def __init__(self, cname, parent_filename, input_type, root_path=""):
         self.root_path = root_path
@@ -40,6 +42,7 @@ class SourceMap:
             else:
                 raise Exception("There is no such type of input")
             SourceMap.ast_helper = AstHelper(SourceMap.parent_filename, input_type)
+            SourceMap.func_to_sig_by_contract = SourceMap._get_sig_to_func_by_contract()
         self.source = self._get_source()
         self.positions = self._get_positions()
         self.instr_positions = {}
@@ -47,6 +50,7 @@ class SourceMap:
         self.func_call_names = self._get_func_call_names()
         self.callee_src_pairs = self._get_callee_src_pairs()
         self.params_by_func_name = self._get_params_by_func_name()
+        self.sig_to_func = self._get_sig_to_func()
 
     def get_source_code(self, pc):
         try:
@@ -108,6 +112,10 @@ class SourceMap:
         pos['end'] = pos['begin'] + length - 1
         return pos
 
+    def _get_sig_to_func(self):
+        func_to_sig = SourceMap.func_to_sig_by_contract[self.cname]['hashes']
+        return dict((sig, func) for func, sig in six.iteritems(func_to_sig))
+
     def _get_params_by_func_name(self):
         params_by_func_name = SourceMap.ast_helper.get_params_by_func_name(self.cname)
         for func_name in params_by_func_name:
@@ -141,6 +149,13 @@ class SourceMap:
             end = start + int(src[1])
             func_call_names.append(self.source.content[start:end])
         return func_call_names
+
+    @classmethod
+    def _get_sig_to_func_by_contract(cls):
+        cmd = 'solc --combined-json hashes %s' % cls.parent_filename
+        out = run_command(cmd)
+        out = json.loads(out)
+        return out['contracts']
 
     @classmethod
     def _load_position_groups_standard_json(cls):
