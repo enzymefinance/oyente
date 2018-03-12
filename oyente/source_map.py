@@ -1,4 +1,5 @@
 import re
+import six
 import ast
 import json
 
@@ -26,6 +27,7 @@ class SourceMap:
     position_groups = {}
     sources = {}
     ast_helper = None
+    func_to_sig_by_contract = {}
 
     def __init__(self, cname, parent_filename, input_type, root_path=""):
         self.root_path = root_path
@@ -40,12 +42,15 @@ class SourceMap:
             else:
                 raise Exception("There is no such type of input")
             SourceMap.ast_helper = AstHelper(SourceMap.parent_filename, input_type)
+            SourceMap.func_to_sig_by_contract = SourceMap._get_sig_to_func_by_contract()
         self.source = self._get_source()
         self.positions = self._get_positions()
         self.instr_positions = {}
         self.var_names = self._get_var_names()
         self.func_call_names = self._get_func_call_names()
         self.callee_src_pairs = self._get_callee_src_pairs()
+        self.func_name_to_params = self._get_func_name_to_params()
+        self.sig_to_func = self._get_sig_to_func()
 
     def get_source_code(self, pc):
         try:
@@ -107,13 +112,28 @@ class SourceMap:
         pos['end'] = pos['begin'] + length - 1
         return pos
 
+    def _get_sig_to_func(self):
+        func_to_sig = SourceMap.func_to_sig_by_contract[self.cname]['hashes']
+        return dict((sig, func) for func, sig in six.iteritems(func_to_sig))
+
+    def _get_func_name_to_params(self):
+        func_name_to_params = SourceMap.ast_helper.get_func_name_to_params(self.cname)
+        for func_name in func_name_to_params:
+            calldataload_position = 0
+            for param in func_name_to_params[func_name]:
+                if param['type'] == 'ElementaryTypeName':
+                    param['position'] = calldataload_position
+                    calldataload_position += 1
+                elif param['type'] == 'ArrayTypeName':
+                    param['position'] = calldataload_position
+                    calldataload_position += param['value']
+        return func_name_to_params
+
     def _get_source(self):
         fname = self.get_filename()
-        if fname in SourceMap.sources:
-            return SourceMap.sources[fname]
-        else:
+        if fname not in SourceMap.sources:
             SourceMap.sources[fname] = Source(fname)
-            return SourceMap.sources[fname]
+        return SourceMap.sources[fname]
 
     def _get_callee_src_pairs(self):
         return SourceMap.ast_helper.get_callee_src_pairs(self.cname)
@@ -130,6 +150,13 @@ class SourceMap:
             end = start + int(src[1])
             func_call_names.append(self.source.content[start:end])
         return func_call_names
+
+    @classmethod
+    def _get_sig_to_func_by_contract(cls):
+        cmd = 'solc --combined-json hashes %s' % cls.parent_filename
+        out = run_command(cmd)
+        out = json.loads(out)
+        return out['contracts']
 
     @classmethod
     def _load_position_groups_standard_json(cls):
