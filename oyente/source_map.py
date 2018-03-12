@@ -49,7 +49,7 @@ class SourceMap:
         self.var_names = self._get_var_names()
         self.func_call_names = self._get_func_call_names()
         self.callee_src_pairs = self._get_callee_src_pairs()
-        self.params_by_func_name = self._get_params_by_func_name()
+        self.func_name_to_params = self._get_func_name_to_params()
         self.sig_to_func = self._get_sig_to_func()
 
     def get_source_code(self, pc):
@@ -116,17 +116,18 @@ class SourceMap:
         func_to_sig = SourceMap.func_to_sig_by_contract[self.cname]['hashes']
         return dict((sig, func) for func, sig in six.iteritems(func_to_sig))
 
-    def _get_params_by_func_name(self):
-        params_by_func_name = SourceMap.ast_helper.get_params_by_func_name(self.cname)
-        for func_name in params_by_func_name:
+    def _get_func_name_to_params(self):
+        func_name_to_params = SourceMap.ast_helper.get_func_name_to_params(self.cname)
+        for func_name in func_name_to_params:
             calldataload_position = 0
-            for param in params_by_func_name[func_name]:
+            for param in func_name_to_params[func_name]:
                 if param['type'] == 'ElementaryTypeName':
+                    param['position'] = calldataload_position
                     calldataload_position += 1
                 elif param['type'] == 'ArrayTypeName':
+                    param['position'] = calldataload_position
                     calldataload_position += param['value']
-                param['position'] = calldataload_position
-        return params_by_func_name
+        return func_name_to_params
 
     def _get_source(self):
         fname = self.get_filename()

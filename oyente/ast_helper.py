@@ -124,14 +124,14 @@ class AstHelper:
                     callee_src_pairs.append((contract_path, node["src"]))
         return callee_src_pairs
 
-    def get_params_by_func_name(self, c_name):
+    def get_func_name_to_params(self, c_name):
         node = self.contracts['contractsByName'][c_name]
         walker = AstWalker()
         func_def_nodes = []
         if node:
             walker.walk(node, {'name': 'FunctionDefinition'}, func_def_nodes)
 
-        params_by_func_name = {}
+        func_name_to_params = {}
         for func_def_node in func_def_nodes:
             func_name = func_def_node['attributes']['name']
             params_nodes = []
@@ -154,11 +154,11 @@ class AstHelper:
                 else:
                     raise Exception('There is no parameter type named %s' % type_name)
 
-                if not params_by_func_name:
-                    params_by_func_name[func_name] = [param]
+                if not func_name_to_params:
+                    func_name_to_params[func_name] = [param]
                 else:
-                    params_by_func_name[func_name].append(param)
-        return params_by_func_name
+                    func_name_to_params[func_name].append(param)
+        return func_name_to_params
 
     def _find_contract_path(self, contract_paths, contract):
         for path in contract_paths:

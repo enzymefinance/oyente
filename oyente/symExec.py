@@ -82,6 +82,9 @@ def initGlobalVars():
 
     global results
     if g_src_map:
+        global start_block_to_func_sig
+        start_block_to_func_sig = {}
+
         results = {
             'evm_code_coverage': '',
             'vulnerabilities': {
@@ -505,6 +508,23 @@ def get_init_global_state(path_conditions_and_vars):
 
     return global_state
 
+def get_start_block_to_func_sig():
+    state = 0
+    func_sig = None
+    for pc, instr in six.iteritems(instructions):
+        if state == 0 and instr.startswith('PUSH4'):
+            state += 1
+            func_sig = instr.split(' ')[1][2:]
+        elif state == 1 and instr.startswith('EQ'):
+            state += 1
+        elif state == 2 and instr.startswith('PUSH'):
+            state = 0
+            pc = instr.split(' ')[1]
+            pc = int(pc, 16)
+            start_block_to_func_sig[pc] = func_sig
+        else:
+            state = 0
+    return start_block_to_func_sig
 
 def full_sym_exec():
     # executing, starting from beginning
@@ -512,11 +532,12 @@ def full_sym_exec():
     global_state = get_init_global_state(path_conditions_and_vars)
     analysis = init_analysis()
     params = Parameter(path_conditions_and_vars=path_conditions_and_vars, global_state=global_state, analysis=analysis)
-    return sym_exec_block(params, 0, 0, 0, -1)
+    start_block_to_func_sig = get_start_block_to_func_sig()
+    return sym_exec_block(params, 0, 0, 0, -1, 'fallback')
 
 
 # Symbolically executing a block from the start address
-def sym_exec_block(params, block, pre_block, depth, func_call):
+def sym_exec_block(params, block, pre_block, depth, func_call, current_func_name):
     global solver
     global visited_edges
     global money_flow_all_paths
@@ -543,6 +564,14 @@ def sym_exec_block(params, block, pre_block, depth, func_call):
 
     log.debug("Reach block address %d \n", block)
 
+    if block in start_block_to_func_sig:
+        func_sig = start_block_to_func_sig[block]
+        current_func_name = g_src_map.sig_to_func[func_sig]
+        pattern = r'(\w[\w\d_]*)\((.*)\)$'
+        match = re.match(pattern, current_func_name)
+        if match:
+            current_func_name =  list(match.groups())[0]
+
     current_edge = Edge(pre_block, block)
     if current_edge in visited_edges:
         updated_count_number = visited_edges[current_edge] + 1
@@ -567,7 +596,7 @@ def sym_exec_block(params, block, pre_block, depth, func_call):
         return ["ERROR"]
 
     for instr in block_ins:
-        sym_exec_ins(params, block, instr, func_call)
+        sym_exec_ins(params, block, instr, func_call, current_func_name)
 
     # Mark that this basic block in the visited blocks
     visited.append(block)
@@ -615,12 +644,12 @@ def sym_exec_block(params, block, pre_block, depth, func_call):
             source_code = g_src_map.get_source_code(global_state['pc'])
             if source_code in g_src_map.func_call_names:
                 func_call = global_state['pc']
-        sym_exec_block(new_params, successor, block, depth, func_call)
+        sym_exec_block(new_params, successor, block, depth, func_call, current_func_name)
     elif jump_type[block] == "falls_to":  # just follow to the next basic block
         successor = vertices[block].get_falls_to()
         new_params = params.copy()
         new_params.global_state["pc"] = successor
-        sym_exec_block(new_params, successor, block, depth, func_call)
+        sym_exec_block(new_params, successor, block, depth, func_call, current_func_name)
     elif jump_type[block] == "conditional":  # executing "JUMPI"
 
         # A choice point, we proceed with depth first search
@@ -642,7 +671,7 @@ def sym_exec_block(params, block, pre_block, depth, func_call):
                 new_params.path_conditions_and_vars["path_condition"].append(branch_expression)
                 last_idx = len(new_params.path_conditions_and_vars["path_condition"]) - 1
                 new_params.analysis["time_dependency_bug"][last_idx] = global_state["pc"]
-                sym_exec_block(new_params, left_branch, block, depth, func_call)
+                sym_exec_block(new_params, left_branch, block, depth, func_call, current_func_name)
         except TimeoutError:
             raise
         except Exception as e:
@@ -670,7 +699,7 @@ def sym_exec_block(params, block, pre_block, depth, func_call):
                 new_params.path_conditions_and_vars["path_condition"].append(negated_branch_expression)
                 last_idx = len(new_params.path_conditions_and_vars["path_condition"]) - 1
                 new_params.analysis["time_dependency_bug"][last_idx] = global_state["pc"]
-                sym_exec_block(new_params, right_branch, block, depth, func_call)
+                sym_exec_block(new_params, right_branch, block, depth, func_call, current_func_name)
         except TimeoutError:
             raise
         except Exception as e:
@@ -686,7 +715,7 @@ def sym_exec_block(params, block, pre_block, depth, func_call):
 
 
 # Symbolically executing an instruction
-def sym_exec_ins(params, block, instr, func_call):
+def sym_exec_ins(params, block, instr, func_call, current_func_name):
     global MSIZE
     global visited_pcs
     global solver
@@ -1297,15 +1326,13 @@ def sym_exec_ins(params, block, instr, func_call):
             position = stack.pop(0)
             if g_src_map:
                 source_code = g_src_map.get_source_code(global_state['pc'] - 1)
-                if source_code.startswith("function") and isReal(position):
-                    idx1 = source_code.index("(") + 1
-                    idx2 = source_code.index(")")
-                    params = source_code[idx1:idx2]
-                    params_list = params.split(",")
-                    params_list = [param.split(" ")[-1] for param in params_list]
+                if source_code.startswith("function") and isReal(position) and current_func_name in g_src_map.func_name_to_params:
+                    params =  g_src_map.func_name_to_params[current_func_name]
                     param_idx = (position - 4) // 32
-                    new_var_name = params_list[param_idx]
-                    g_src_map.var_names.append(new_var_name)
+                    for param in params:
+                        if param_idx == param['position']:
+                            new_var_name = param['name']
+                            g_src_map.var_names.append(new_var_name)
                 else:
                     new_var_name = gen.gen_data_var(position)
             else:
