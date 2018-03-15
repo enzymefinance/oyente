@@ -100,7 +100,7 @@ def analyze_solidity(input_type='solidity'):
     global args
 
     if input_type == 'solidity':
-        helper = InputHelper(InputHelper.SOLIDITY, source=args.source, compilation_err=args.compilation_error, root_path=args.root_path)
+        helper = InputHelper(InputHelper.SOLIDITY, source=args.source, compilation_err=args.compilation_error, root_path=args.root_path, remap=args.remap)
     elif input_type == 'standard_json':
         helper = InputHelper(InputHelper.STANDARD_JSON, source=args.source, allow_paths=args.allow_paths)
     elif input_type == 'standard_json_output':
@@ -126,6 +126,7 @@ def main():
 
     parser.add_argument("--version", action="version", version="oyente version 0.2.7 - Commonwealth")
 
+    parser.add_argument("-rmp", "--remap",          help="Remap directory paths", action="store", type=str)
     parser.add_argument("-t",   "--timeout",        help="Timeout for Z3 in ms.", action="store", type=int)
     parser.add_argument("-gl",  "--gaslimit",       help="Limit Gas", action="store", dest="gas_limit", type=int)
     parser.add_argument("-rp",   "--root-path",     help="Root directory path used for the online version", action="store", dest="root_path", type=str)
@@ -158,6 +159,8 @@ def main():
             args.root_path += '/'
     else:
         args.root_path = ""
+
+    args.remap = args.remap if args.remap else ""
 
     if args.timeout:
         global_params.TIMEOUT = args.timeout

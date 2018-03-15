@@ -532,7 +532,8 @@ def full_sym_exec():
     global_state = get_init_global_state(path_conditions_and_vars)
     analysis = init_analysis()
     params = Parameter(path_conditions_and_vars=path_conditions_and_vars, global_state=global_state, analysis=analysis)
-    start_block_to_func_sig = get_start_block_to_func_sig()
+    if g_src_map:
+        start_block_to_func_sig = get_start_block_to_func_sig()
     return sym_exec_block(params, 0, 0, 0, -1, 'fallback')
 
 
@@ -564,13 +565,14 @@ def sym_exec_block(params, block, pre_block, depth, func_call, current_func_name
 
     log.debug("Reach block address %d \n", block)
 
-    if block in start_block_to_func_sig:
-        func_sig = start_block_to_func_sig[block]
-        current_func_name = g_src_map.sig_to_func[func_sig]
-        pattern = r'(\w[\w\d_]*)\((.*)\)$'
-        match = re.match(pattern, current_func_name)
-        if match:
-            current_func_name =  list(match.groups())[0]
+    if g_src_map:
+        if block in start_block_to_func_sig:
+            func_sig = start_block_to_func_sig[block]
+            current_func_name = g_src_map.sig_to_func[func_sig]
+            pattern = r'(\w[\w\d_]*)\((.*)\)$'
+            match = re.match(pattern, current_func_name)
+            if match:
+                current_func_name =  list(match.groups())[0]
 
     current_edge = Edge(pre_block, block)
     if current_edge in visited_edges:
