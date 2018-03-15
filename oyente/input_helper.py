@@ -29,7 +29,8 @@ class InputHelper:
                 'evm': False,
                 'root_path': "",
                 'compiled_contracts': [],
-                'compilation_err': False
+                'compilation_err': False,
+                'remap': ""
             }
         elif input_type == InputHelper.STANDARD_JSON:
             attr_defaults = {
@@ -70,7 +71,7 @@ class InputHelper:
                 c_source, cname = contract.split(':')
                 c_source = re.sub(self.root_path, "", c_source)
                 if self.input_type == InputHelper.SOLIDITY:
-                    source_map = SourceMap(contract, self.source, 'solidity', self.root_path)
+                    source_map = SourceMap(contract, self.source, 'solidity', self.root_path, self.remap)
                 else:
                     source_map = SourceMap(contract, self.source, 'standard json', self.root_path)
                 disasm_file = self._get_temporary_files(contract)['disasm']
@@ -102,7 +103,7 @@ class InputHelper:
         return self.compiled_contracts
 
     def _compile_solidity(self):
-        cmd = "solc --bin-runtime %s" % self.source
+        cmd = "solc --bin-runtime %s %s" % (self.remap, self.source)
         err = ''
         if self.compilation_err:
             out, err = run_command_with_err(cmd)
