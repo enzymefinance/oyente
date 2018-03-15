@@ -297,6 +297,7 @@ def run_command_with_err(cmd):
     FNULL = open(os.devnull, 'w')
     solc_p = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = solc_p.communicate()
-    out = out.decode()
+    out = out.decode('utf-8', 'strict')
+    err = err.decode('utf-8', 'strict')
     return out, err
 
