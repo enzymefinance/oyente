@@ -154,7 +154,7 @@ class AstHelper:
                 else:
                     raise Exception('There is no parameter type named %s' % type_name)
 
-                if not func_name_to_params:
+                if func_name not in func_name_to_params:
                     func_name_to_params[func_name] = [param]
                 else:
                     func_name_to_params[func_name].append(param)
