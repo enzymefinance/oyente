@@ -153,7 +153,7 @@ class AstHelper:
                 elif type_name == 'ElementaryTypeName':
                     param = {'name': var_name, 'type': type_name}
                 else:
-                    raise Exception('There is no parameter type named %s' % type_name)
+                    param = {'name': var_name, 'type': type_name}
 
                 if func_name not in func_name_to_params:
                     func_name_to_params[func_name] = [param]
