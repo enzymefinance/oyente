@@ -148,8 +148,11 @@ class AstHelper:
                 if type_name == 'ArrayTypeName':
                     literal_nodes = []
                     walker.walk(param_node, {'name': 'Literal'}, literal_nodes)
-                    literal_node = literal_nodes[0]
-                    param = {'name': var_name, 'type': type_name, 'value': int(literal_node['attributes']['value'])}
+                    if literal_nodes:
+                        array_size = int(literal_nodes[0]['attributes']['value'])
+                    else:
+                        array_size = 1
+                    param = {'name': var_name, 'type': type_name, 'value': array_size}
                 elif type_name == 'ElementaryTypeName':
                     param = {'name': var_name, 'type': type_name}
                 else:
