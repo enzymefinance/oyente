@@ -100,7 +100,7 @@ def analyze_solidity(input_type='solidity'):
     global args
 
     if input_type == 'solidity':
-        helper = InputHelper(InputHelper.SOLIDITY, source=args.source, compilation_err=args.compilation_error, root_path=args.root_path, remap=args.remap)
+        helper = InputHelper(InputHelper.SOLIDITY, source=args.source, compilation_err=args.compilation_error, root_path=args.root_path, remap=args.remap, allow_paths=args.allow_paths)
     elif input_type == 'standard_json':
         helper = InputHelper(InputHelper.STANDARD_JSON, source=args.source, allow_paths=args.allow_paths)
     elif input_type == 'standard_json_output':
@@ -161,6 +161,7 @@ def main():
         args.root_path = ""
 
     args.remap = args.remap if args.remap else ""
+    args.allow_paths = args.allow_paths if args.allow_paths else ""
 
     if args.timeout:
         global_params.TIMEOUT = args.timeout

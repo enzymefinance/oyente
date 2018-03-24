@@ -20,7 +20,7 @@ from basicblock import BasicBlock
 from analysis import *
 from test_evm.global_test_params import (TIME_OUT, UNKNOWN_INSTRUCTION,
                                          EXCEPTION, PICKLE_PATH)
-from vulnerability import CallStack, TimeDependency, MoneyConcurrency, Reentrancy, AssertionFailure, ParityMultisigBug2
+from vulnerability import CallStack, TimeDependency, MoneyConcurrency, Reentrancy, AssertionFailure, ParityMultisigBug2, IntegerUnderflow
 import global_params
 
 log = logging.getLogger(__name__)
@@ -29,6 +29,7 @@ UNSIGNED_BOUND_NUMBER = 2**256 - 1
 CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 
 Assertion = namedtuple('Assertion', ['pc', 'model'])
+Underflow = namedtuple('Underflow', ['pc', 'model'])
 
 class Parameter:
     def __init__(self, **kwargs):
@@ -88,18 +89,20 @@ def initGlobalVars():
         results = {
             'evm_code_coverage': '',
             'vulnerabilities': {
+                'integer_underflow': [],
                 'callstack': [],
                 'money_concurrency': [],
                 'time_dependency': [],
                 'reentrancy': [],
                 'assertion_failure': [],
-                'parity_multisig_bug_2': []
+                'parity_multisig_bug_2': [],
             }
         }
     else:
         results = {
             'evm_code_coverage': '',
             'vulnerabilities': {
+                'integer_underflow': [],
                 'callstack': False,
                 'money_concurrency': False,
                 'time_dependency': False,
@@ -142,7 +145,7 @@ def initGlobalVars():
     path_conditions = []
 
     global global_problematic_pcs
-    global_problematic_pcs = {"money_concurrency_bug": [], "reentrancy_bug": [], "time_dependency_bug": [], "assertion_failure": []}
+    global_problematic_pcs = {"money_concurrency_bug": [], "reentrancy_bug": [], "time_dependency_bug": [], "assertion_failure": [], "integer_underflow": []}
 
     # store global variables, e.g. storage, balance of all paths
     global all_gs
@@ -820,6 +823,14 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
             else:
                 computed = (first - second) % (2 ** 256)
             computed = simplify(computed) if is_expr(computed) else computed
+
+            if not isAllReal(first, second):
+                solver.push()
+                solver.add(UGT(second, first))
+                if check_sat(solver) == sat:
+                    global_problematic_pcs['integer_underflow'].append(Underflow(global_state['pc'] - 1, solver.model()))
+                solver.pop()
+
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
@@ -2173,6 +2184,17 @@ def detect_reentrancy():
         results['vulnerabilities']['reentrancy'] = reentrancy.is_vulnerable()
     log.info("\t  Re-Entrancy Vulnerability: \t\t %s", reentrancy.is_vulnerable())
 
+def detect_integer_underflow():
+    global integer_underflow
+
+    integer_underflow = IntegerUnderflow(g_src_map, global_problematic_pcs['integer_underflow'])
+
+    if g_src_map:
+        results['vulnerabilities']['integer_underflow'] = integer_underflow.get_warnings()
+    else:
+        results['vulnerabilities']['integer_underflow'] = integer_underflow.is_vulnerable()
+    log.info('\t  Integer Underflow: \t\t\t %s', integer_underflow.is_vulnerable())
+
 def detect_assertion_failure():
     global g_src_map
     global results
@@ -2195,6 +2217,8 @@ def detect_vulnerabilities():
         evm_code_coverage = float(len(visited_pcs)) / len(instructions.keys()) * 100
         log.info("\t  EVM Code Coverage: \t\t\t %s%%", round(evm_code_coverage, 1))
         results["evm_code_coverage"] = str(round(evm_code_coverage, 1))
+
+        detect_integer_underflow()
 
         if g_src_map:
             detect_parity_multisig_bug_2()
@@ -2246,7 +2270,7 @@ def log_info():
     global assertion_failure
     global parity_multisig_bug_2
 
-    vulnerabilities = [callstack, money_concurrency, time_dependency, reentrancy]
+    vulnerabilities = [integer_underflow, callstack, money_concurrency, time_dependency, reentrancy]
     if g_src_map:
         vulnerabilities.append(parity_multisig_bug_2)
         if global_params.CHECK_ASSERTIONS:
