@@ -29,13 +29,15 @@ class SourceMap:
     ast_helper = None
     func_to_sig_by_contract = {}
     remap = ""
+    allow_paths = ""
 
-    def __init__(self, cname, parent_filename, input_type, root_path="", remap=""):
+    def __init__(self, cname, parent_filename, input_type, root_path="", remap="", allow_paths=""):
         self.root_path = root_path
-        SourceMap.remap = remap
         self.cname = cname
         self.input_type = input_type
         if not SourceMap.parent_filename:
+            SourceMap.remap = remap
+            SourceMap.allow_paths = allow_paths
             SourceMap.parent_filename = parent_filename
             if input_type == "solidity":
                 SourceMap.position_groups = SourceMap._load_position_groups()
@@ -43,7 +45,7 @@ class SourceMap:
                 SourceMap.position_groups = SourceMap._load_position_groups_standard_json()
             else:
                 raise Exception("There is no such type of input")
-            SourceMap.ast_helper = AstHelper(SourceMap.parent_filename, input_type, SourceMap.remap)
+            SourceMap.ast_helper = AstHelper(SourceMap.parent_filename, input_type, SourceMap.remap, SourceMap.allow_paths)
             SourceMap.func_to_sig_by_contract = SourceMap._get_sig_to_func_by_contract()
         self.source = self._get_source()
         self.positions = self._get_positions()
@@ -155,7 +157,10 @@ class SourceMap:
 
     @classmethod
     def _get_sig_to_func_by_contract(cls):
-        cmd = 'solc --combined-json hashes %s %s' % (cls.remap, cls.parent_filename)
+        if cls.allow_paths:
+            cmd = 'solc --combined-json hashes %s %s --allow-paths %s' % (cls.remap, cls.parent_filename, cls.allow_paths)
+        else:
+            cmd = 'solc --combined-json hashes %s %s' % (cls.remap, cls.parent_filename)
         out = run_command(cmd)
         out = json.loads(out)
         return out['contracts']
@@ -169,7 +174,10 @@ class SourceMap:
 
     @classmethod
     def _load_position_groups(cls):
-        cmd = "solc --combined-json asm %s %s" % (cls.remap, cls.parent_filename)
+        if cls.allow_paths:
+            cmd = "solc --combined-json asm %s %s --allow-paths %s" % (cls.remap, cls.parent_filename, cls.allow_paths)
+        else:
+            cmd = "solc --combined-json asm %s %s" % (cls.remap, cls.parent_filename)
         out = run_command(cmd)
         out = json.loads(out)
         return out['contracts']
