@@ -111,7 +111,7 @@ pip install web3
 python oyente.py -s <contract filename>
 
 #evaluate a local solidity with option -a to verify assertions in the contract
-pyhon oyente.py -a -s <contract filename>
+python oyente.py -a -s <contract filename>
 
 #evaluate a local evm contract
 python oyente.py -s <contract filename> -b
