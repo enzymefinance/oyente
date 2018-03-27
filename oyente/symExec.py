@@ -824,12 +824,21 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
                 computed = (first - second) % (2 ** 256)
             computed = simplify(computed) if is_expr(computed) else computed
 
-            if not isAllReal(first, second):
-                solver.push()
-                solver.add(UGT(second, first))
-                if check_sat(solver) == sat:
-                    global_problematic_pcs['integer_underflow'].append(Underflow(global_state['pc'] - 1, solver.model()))
-                solver.pop()
+            check_revert = False
+            if jump_type[block] == 'conditional':
+                jump_target = vertices[block].get_jump_target()
+                falls_to = vertices[block].get_falls_to()
+                check_revert = any([True for instruction in vertices[jump_target].get_instructions() if instruction.startswith('REVERT')])
+                if not check_revert:
+                    check_revert = any([True for instruction in vertices[falls_to].get_instructions() if instruction.startswith('REVERT')])
+
+            if jump_type[block] != 'conditional' or not check_revert:
+                if not isAllReal(first, second):
+                    solver.push()
+                    solver.add(UGT(second, first))
+                    if check_sat(solver) == sat:
+                        global_problematic_pcs['integer_underflow'].append(Underflow(global_state['pc'] - 1, solver.model()))
+                    solver.pop()
 
             stack.insert(0, computed)
         else:
