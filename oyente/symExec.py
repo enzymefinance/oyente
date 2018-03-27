@@ -2258,10 +2258,9 @@ def detect_vulnerabilities():
         log.info("\t  EVM Code Coverage: \t\t\t %s%%", round(evm_code_coverage, 1))
         results["evm_code_coverage"] = str(round(evm_code_coverage, 1))
 
-        detect_integer_underflow()
-        detect_integer_overflow()
-
         if g_src_map:
+            detect_integer_underflow()
+            detect_integer_overflow()
             detect_parity_multisig_bug_2()
 
         log.debug("Checking for Callstack attack...")
