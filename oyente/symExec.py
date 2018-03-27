@@ -20,7 +20,7 @@ from basicblock import BasicBlock
 from analysis import *
 from test_evm.global_test_params import (TIME_OUT, UNKNOWN_INSTRUCTION,
                                          EXCEPTION, PICKLE_PATH)
-from vulnerability import CallStack, TimeDependency, MoneyConcurrency, Reentrancy, AssertionFailure, ParityMultisigBug2, IntegerUnderflow
+from vulnerability import CallStack, TimeDependency, MoneyConcurrency, Reentrancy, AssertionFailure, ParityMultisigBug2, IntegerUnderflow, IntegerOverflow
 import global_params
 
 log = logging.getLogger(__name__)
@@ -30,6 +30,7 @@ CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 
 Assertion = namedtuple('Assertion', ['pc', 'model'])
 Underflow = namedtuple('Underflow', ['pc', 'model'])
+Overflow = namedtuple('Overflow', ['pc', 'model'])
 
 class Parameter:
     def __init__(self, **kwargs):
@@ -90,6 +91,7 @@ def initGlobalVars():
             'evm_code_coverage': '',
             'vulnerabilities': {
                 'integer_underflow': [],
+                'integer_overflow': [],
                 'callstack': [],
                 'money_concurrency': [],
                 'time_dependency': [],
@@ -103,6 +105,7 @@ def initGlobalVars():
             'evm_code_coverage': '',
             'vulnerabilities': {
                 'integer_underflow': [],
+                'integer_overflow': [],
                 'callstack': False,
                 'money_concurrency': False,
                 'time_dependency': False,
@@ -145,7 +148,7 @@ def initGlobalVars():
     path_conditions = []
 
     global global_problematic_pcs
-    global_problematic_pcs = {"money_concurrency_bug": [], "reentrancy_bug": [], "time_dependency_bug": [], "assertion_failure": [], "integer_underflow": []}
+    global_problematic_pcs = {"money_concurrency_bug": [], "reentrancy_bug": [], "time_dependency_bug": [], "assertion_failure": [], "integer_underflow": [], "integer_overflow": []}
 
     # store global variables, e.g. storage, balance of all paths
     global all_gs
@@ -792,6 +795,23 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
                 # if both are symbolic z3 takes care of modulus automatically
                 computed = (first + second) % (2 ** 256)
             computed = simplify(computed) if is_expr(computed) else computed
+
+            check_revert = False
+            if jump_type[block] == 'conditional':
+                jump_target = vertices[block].get_jump_target()
+                falls_to = vertices[block].get_falls_to()
+                check_revert = any([True for instruction in vertices[jump_target].get_instructions() if instruction.startswith('REVERT')])
+                if not check_revert:
+                    check_revert = any([True for instruction in vertices[falls_to].get_instructions() if instruction.startswith('REVERT')])
+
+            if jump_type[block] != 'conditional' or not check_revert:
+                if not isAllReal(computed, first):
+                    solver.push()
+                    solver.add(UGT(first, computed))
+                    if check_sat(solver) == sat:
+                        global_problematic_pcs['integer_overflow'].append(Overflow(global_state['pc'] - 1, solver.model()))
+                    solver.pop()
+
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
@@ -824,12 +844,21 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
                 computed = (first - second) % (2 ** 256)
             computed = simplify(computed) if is_expr(computed) else computed
 
-            if not isAllReal(first, second):
-                solver.push()
-                solver.add(UGT(second, first))
-                if check_sat(solver) == sat:
-                    global_problematic_pcs['integer_underflow'].append(Underflow(global_state['pc'] - 1, solver.model()))
-                solver.pop()
+            check_revert = False
+            if jump_type[block] == 'conditional':
+                jump_target = vertices[block].get_jump_target()
+                falls_to = vertices[block].get_falls_to()
+                check_revert = any([True for instruction in vertices[jump_target].get_instructions() if instruction.startswith('REVERT')])
+                if not check_revert:
+                    check_revert = any([True for instruction in vertices[falls_to].get_instructions() if instruction.startswith('REVERT')])
+
+            if jump_type[block] != 'conditional' or not check_revert:
+                if not isAllReal(first, second):
+                    solver.push()
+                    solver.add(UGT(second, first))
+                    if check_sat(solver) == sat:
+                        global_problematic_pcs['integer_underflow'].append(Underflow(global_state['pc'] - 1, solver.model()))
+                    solver.pop()
 
             stack.insert(0, computed)
         else:
@@ -2195,6 +2224,17 @@ def detect_integer_underflow():
         results['vulnerabilities']['integer_underflow'] = integer_underflow.is_vulnerable()
     log.info('\t  Integer Underflow: \t\t\t %s', integer_underflow.is_vulnerable())
 
+def detect_integer_overflow():
+    global integer_overflow
+
+    integer_overflow = IntegerOverflow(g_src_map, global_problematic_pcs['integer_overflow'])
+
+    if g_src_map:
+        results['vulnerabilities']['integer_overflow'] = integer_overflow.get_warnings()
+    else:
+        results['vulnerabilities']['integer_overflow'] = integer_overflow.is_vulnerable()
+    log.info('\t  Integer Overflow: \t\t\t %s', integer_overflow.is_vulnerable())
+
 def detect_assertion_failure():
     global g_src_map
     global results
@@ -2219,6 +2259,7 @@ def detect_vulnerabilities():
         results["evm_code_coverage"] = str(round(evm_code_coverage, 1))
 
         detect_integer_underflow()
+        detect_integer_overflow()
 
         if g_src_map:
             detect_parity_multisig_bug_2()
@@ -2270,7 +2311,7 @@ def log_info():
     global assertion_failure
     global parity_multisig_bug_2
 
-    vulnerabilities = [integer_underflow, callstack, money_concurrency, time_dependency, reentrancy]
+    vulnerabilities = [integer_underflow, integer_overflow, callstack, money_concurrency, time_dependency, reentrancy]
     if g_src_map:
         vulnerabilities.append(parity_multisig_bug_2)
         if global_params.CHECK_ASSERTIONS:
