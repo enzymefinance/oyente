@@ -194,7 +194,6 @@ DEPENDENCIES
   jquery-rails (~> 4.3, >= 4.3.1)
   letter_opener (~> 1.4, >= 1.4.1)
   listen (>= 3.0.5, < 3.2)
-  loofah (~> 2.2.1)
   puma (~> 3.7)
   rails (~> 5.1.0)
   sass-rails (~> 5.0)
