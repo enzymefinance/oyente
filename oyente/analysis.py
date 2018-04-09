@@ -79,6 +79,8 @@ def check_reentrancy_bug(path_conditions_and_vars, stack, global_state):
     # 2300 is the outgas used by transfer and send.
     # If outgas > 2300 when using call.gas.value then the contract will be considered to contain reentrancy bug
     solver.add(stack[0] > 2300)
+    # transfer_amount > deposit_amount => reentrancy
+    solver.add(stack[2] > BitVec('Iv', 256))
     # if it is not feasible to re-execute the call, its not a bug
     ret_val = not (solver.check() == unsat)
     if global_params.DEBUG_MODE:
