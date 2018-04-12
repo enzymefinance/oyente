@@ -44,31 +44,16 @@ def check_reentrancy_bug(path_conditions_and_vars, stack, global_state):
             continue
         list_vars = get_vars(expr)
         for var in list_vars:
-            var_name = var.decl().name()
             # check if a var is global
-            if var_name.startswith("Ia_store"):
-                try:
-                    storage_key = var_name.split("-")[1]
-                except:
-                    storage_key = var_name.split("Ia_store_")[1]
-                try:
-                    if int(storage_key) in global_state["Ia"]:
-                        new_path_condition.append(var == global_state["Ia"][int(storage_key)])
-                except:
-                    if storage_key in global_state["Ia"]:
-                        new_path_condition.append(var == global_state["Ia"][storage_key])
+            if is_storage_var(var):
+                pos = get_storage_position(var)
+                if pos in global_state['Ia']:
+                    new_path_condition.append(var == global_state['Ia'][pos])
     transfer_amount = stack[2]
-    if isSymbolic(transfer_amount) and str(transfer_amount).startswith("Ia_store"):
-        try:
-            storage_key = str(transfer_amount).split("-")[1]
-        except:
-            storage_key = str(transfer_amount).split("Ia_store_")[1]
-        try:
-            if int(storage_key) in global_state["Ia"]:
-                new_path_condition.append(global_state["Ia"][int(storage_key)] != 0)
-        except:
-            if storage_key in global_state["Ia"]:
-                new_path_condition.append(global_state["Ia"][storage_key] != 0)
+    if isSymbolic(transfer_amount) and is_storage_var(transfer_amount):
+        pos = get_storage_position(transfer_amount)
+        if pos in global_state['Ia']:
+            new_path_condition.append(global_state['Ia'][pos] != 0)
     if global_params.DEBUG_MODE:
         log.info("=>>>>>> New PC: " + str(new_path_condition))
 
@@ -208,10 +193,10 @@ def is_feasible(prev_pc, gstate, curr_pc):
     curr_pc = list(curr_pc)
     new_pc = []
     for var in get_all_vars(curr_pc):
-        var_name = var.decl().name()
-        if var_name.startswith('Ia_store'):
-            position = var_name.split('-')[1]
-            new_pc.append(var == gstate[int(position)])
+        if is_storage_var(var):
+            pos = get_storage_position(var)
+            if pos in gstate:
+                new_pc.append(var == gstate[pos])
     curr_pc += new_pc
     curr_pc += prev_pc
     solver = Solver()

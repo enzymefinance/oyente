@@ -30,8 +30,8 @@ class Generator:
         self.count += 1
         return "some_address_" + str(self.count)
 
-    def gen_owner_store_var(self, position):
-        return "Ia_store_" + str(position)
+    def gen_owner_store_var(self, position, var_name=""):
+        return "Ia_store-%s-%s" % (str(position), var_name)
 
     def gen_gas_var(self):
         self.count += 1
