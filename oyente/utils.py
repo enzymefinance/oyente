@@ -104,12 +104,12 @@ def has_storage_vars(expr, storage_vars):
     return False
 
 
-def get_all_vars(list_of_storage_exprs):
+def get_all_vars(list_of_exprs):
     ret_vars = []
-    for expr in list_of_storage_exprs:
-        ret_vars += get_vars(list_of_storage_exprs[expr])
+    for expr in list_of_exprs:
+        if is_expr(expr):
+            ret_vars += get_vars(expr)
     return ret_vars
-
 
 # Rename variables to distinguish variables in two different paths.
 # e.g. Ia_store_0 in path i becomes Ia_store_0_old if Ia_store_0 is modified
