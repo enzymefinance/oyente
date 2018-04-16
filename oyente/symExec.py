@@ -1715,7 +1715,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
                         new_var_name = re.compile(operators).split(new_var_name)[0].strip()
                         new_var_name = g_src_map.get_parameter_or_state_var(new_var_name)
                         if new_var_name:
-                            new_var_name = "Ia_store" + "-" + str(position) + "-" + new_var_name
+                            new_var_name = gen.gen_owner_store_var(position, new_var_name)
                         else:
                             new_var_name = gen.gen_owner_store_var(position)
                     else:
