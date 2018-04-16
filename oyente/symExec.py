@@ -39,6 +39,7 @@ class Parameter:
             "calls": [],
             "memory": [],
             "visited": [],
+            "overflow_pcs": [],
             "mem": {},
             "analysis": {},
             "sha3_list": {},
@@ -69,6 +70,9 @@ def initGlobalVars():
 
     global MSIZE
     MSIZE = False
+
+    global revertible_overflow_pcs
+    revertible_overflow_pcs = set()
 
     global g_disasm_file
     with open(g_disasm_file, 'r') as f:
@@ -563,6 +567,7 @@ def sym_exec_block(params, block, pre_block, depth, func_call, current_func_name
     path_conditions_and_vars = params.path_conditions_and_vars
     analysis = params.analysis
     calls = params.calls
+    overflow_pcs = params.overflow_pcs
 
     Edge = namedtuple("Edge", ["v1", "v2"]) # Factory Function for tuples is used as dictionary key
     if block < 0:
@@ -741,6 +746,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
     path_conditions_and_vars = params.path_conditions_and_vars
     analysis = params.analysis
     calls = params.calls
+    overflow_pcs = params.overflow_pcs
 
     visited_pcs.add(global_state["pc"])
 
@@ -810,6 +816,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
                     solver.add(UGT(first, computed))
                     if check_sat(solver) == sat:
                         global_problematic_pcs['integer_overflow'].append(Overflow(global_state['pc'] - 1, solver.model()))
+                        overflow_pcs.append(global_state['pc'] - 1)
                     solver.pop()
 
             stack.insert(0, computed)
@@ -2010,6 +2017,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
     elif opcode in ("RETURN", "REVERT"):
         # TODO: Need to handle miu_i
         if len(stack) > 1:
+            revertible_overflow_pcs.update(overflow_pcs)
             global_state["pc"] = global_state["pc"] + 1
             stack.pop(0)
             stack.pop(0)
@@ -2227,7 +2235,11 @@ def detect_integer_underflow():
 def detect_integer_overflow():
     global integer_overflow
 
-    integer_overflow = IntegerOverflow(g_src_map, global_problematic_pcs['integer_overflow'])
+    overflows = []
+    for overflow in global_problematic_pcs['integer_overflow']:
+        if overflow.pc not in revertible_overflow_pcs:
+            overflows.append(overflow)
+    integer_overflow = IntegerOverflow(g_src_map, overflows)
 
     if g_src_map:
         results['vulnerabilities']['integer_overflow'] = integer_overflow.get_warnings()
