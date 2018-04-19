@@ -103,7 +103,7 @@ class SourceMap:
                 if isinstance(node, ast.Name)
             ]
             if names[0] in self.var_names:
-                return names[0]
+                return var_name
         except:
             return None
         return None
