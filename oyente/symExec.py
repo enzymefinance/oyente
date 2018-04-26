@@ -2017,8 +2017,9 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
     elif opcode in ("RETURN", "REVERT"):
         # TODO: Need to handle miu_i
         if len(stack) > 1:
-            revertible_overflow_pcs.update(overflow_pcs)
-            global_state["pc"] = global_state["pc"] + 1
+            if opcode == "REVERT":
+                revertible_overflow_pcs.update(overflow_pcs)
+                global_state["pc"] = global_state["pc"] + 1
             stack.pop(0)
             stack.pop(0)
             # TODO
