@@ -5,6 +5,7 @@ An Analysis Tool for Smart Contracts
 
 [![Gitter][gitter-badge]][gitter-url]
 [![License: GPL v3][license-badge]][license-badge-url]
+[![Build Status](https://travis-ci.org/melonproject/oyente.svg?branch=master)](https://travis-ci.org/melonproject/oyente)
 
 ## Quick Start
 
@@ -26,7 +27,7 @@ and you are done!
 
 Note - If need the [version of Oyente](https://github.com/melonproject/oyente/tree/290f1ae1bbb295b8e61cbf0eed93dbde6f287e69) referred to in the paper, run the container from [here](https://hub.docker.com/r/hrishioa/oyente/)
 
-To run the web interface, execute  
+To run the web interface, execute
 `docker run -w /oyente/web -p 3000:3000 oyente:latest ./bin/rails server`
 
 ## Custom Docker image build
