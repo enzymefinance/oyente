@@ -66,7 +66,7 @@ def has_dependencies_installed():
 def analyze_bytecode():
     global args
 
-    helper = InputHelper(InputHelper.BYTECODE, source=args.source)
+    helper = InputHelper(InputHelper.BYTECODE, source=args.source,evm=args.evm)
     inp = helper.get_inputs()[0]
 
     result, exit_code = symExec.run(disasm_file=inp['disasm_file'])
@@ -100,11 +100,11 @@ def analyze_solidity(input_type='solidity'):
     global args
 
     if input_type == 'solidity':
-        helper = InputHelper(InputHelper.SOLIDITY, source=args.source, compilation_err=args.compilation_error, root_path=args.root_path, remap=args.remap, allow_paths=args.allow_paths)
+        helper = InputHelper(InputHelper.SOLIDITY, source=args.source, evm=args.evm, compilation_err=args.compilation_error, root_path=args.root_path, remap=args.remap, allow_paths=args.allow_paths)
     elif input_type == 'standard_json':
-        helper = InputHelper(InputHelper.STANDARD_JSON, source=args.source, allow_paths=args.allow_paths)
+        helper = InputHelper(InputHelper.STANDARD_JSON, source=args.source, evm=args.evm, allow_paths=args.allow_paths)
     elif input_type == 'standard_json_output':
-        helper = InputHelper(InputHelper.STANDARD_JSON_OUTPUT, source=args.source)
+        helper = InputHelper(InputHelper.STANDARD_JSON_OUTPUT, source=args.source, evm=args.evm)
     inputs = helper.get_inputs()
     results, exit_code = run_solidity_analysis(inputs)
     helper.rm_tmp_files()
