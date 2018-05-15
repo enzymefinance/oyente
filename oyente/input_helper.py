@@ -229,7 +229,7 @@ class InputHelper:
         tmp_files = self._get_temporary_files(target)
         if not self.evm:
             self._rm_file(tmp_files["evm"])
-        self._rm_file(tmp_files["disasm"])
+            self._rm_file(tmp_files["disasm"])
         self._rm_file(tmp_files["log"])
 
     def _rm_file(self, path):
