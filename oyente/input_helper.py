@@ -175,7 +175,10 @@ class InputHelper:
             lib_address = "0x" + hex(idx+1)[2:].zfill(40)
             option += " --libraries %s:%s" % (lib, lib_address)
         FNULL = open(os.devnull, 'w')
-        cmd = "solc --bin-runtime %s %s" % (self.remap, self.source)
+        if not self.allow_paths:
+            cmd = "solc --bin-runtime %s %s" % (self.remap, self.source)
+        else:
+            cmd = "solc --bin-runtime %s %s --allow-paths %s" % (self.remap, self.source, self.allow_paths)
         p1 = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)
         cmd = "solc --link%s" %option
         p2 = subprocess.Popen(shlex.split(cmd), stdin=p1.stdout, stdout=subprocess.PIPE, stderr=FNULL)
