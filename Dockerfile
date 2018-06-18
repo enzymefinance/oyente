@@ -32,7 +32,7 @@ COPY . /oyente/
 RUN wget -O ruby-install-0.6.1.tar.gz https://github.com/postmodern/ruby-install/archive/v0.6.1.tar.gz
 RUN tar -xzvf ruby-install-0.6.1.tar.gz
 RUN cd ruby-install-0.6.1/ && make install
-RUN ruby-install --system ruby 2.5.1
+RUN ruby-install --system ruby 2.4.4
 WORKDIR /oyente/web
 RUN ./bin/yarn install && gem install bundler && bundle install --with development
 
