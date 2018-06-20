@@ -10,12 +10,12 @@ RUN add-apt-repository -y ppa:ethereum/ethereum
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 RUN apt-get update
-RUN apt-get install -y build-essential golang-go solc ethereum python3 python3-pip python-pip \
-        bison zlib1g-dev libyaml-dev libssl-dev libgdbm-dev libreadline-dev libffi-dev \
-	git-core curl zlib1g-dev build-essential libssl-dev \
-        libreadline-dev npm libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev \
-        libcurl4-openssl-dev python-software-properties libffi-dev nodejs yarn && \
+RUN apt-get install -y golang-go solc ethereum python3 python3-pip python-pip \
+        bison zlib1g-dev libyaml-dev libssl-dev libgdbm-dev libreadline-dev \
+	zlib1g-dev libreadline-dev npm libyaml-dev libsqlite3-dev sqlite3 \
+        libxml2-dev libxslt1-dev libcurl4-openssl-dev libffi-dev nodejs yarn && \
         apt-get clean
+
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.6 2
 RUN update-alternatives --install /usr/bin/pip pip /usr/bin/pip2 1
