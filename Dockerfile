@@ -1,4 +1,4 @@
-FROM ubuntu:rolling
+FROM ubuntu:bionic
 
 LABEL maintainer "Luong Nguyen <luongnt.58@gmail.com>"
 
