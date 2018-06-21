@@ -33,10 +33,11 @@ To run the web interface, execute
 ## Custom Docker image build
 
 ```
-docker build .
-docker tag <image id> oyente
-docker run -w /oyente/oyente oyente:latest python oyente.py -ru https://contract_url
+docker build -t oyente .
+docker run -it -p 3000:3000 -e "OYENTE=/oyente/oyente" oyente:latest
 ```
+
+Open a web browser to `http://localhost:3000` for the graphical interface.
 
 ## Installation
 
