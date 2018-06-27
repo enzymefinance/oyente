@@ -19,3 +19,4 @@ bytecode
 bytecode.1
 
 !oyente/tests/contracts/*/*
+web/vendor/
