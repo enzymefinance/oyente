@@ -1,16 +1,21 @@
+ARG ETHEREUM_VERSION=alltools-v1.7.3
+ARG SOLC_VERSION=0.4.19
+
+FROM ethereum/client-go:${ETHEREUM_VERSION} as geth
+FROM ethereum/solc:${SOLC_VERSION} as solc
+
 FROM ubuntu:bionic
+
 
 LABEL maintainer "Luong Nguyen <luongnt.58@gmail.com>"
 
 SHELL ["/bin/bash", "-c", "-l"]
 RUN apt-get update && apt-get -y upgrade
 RUN apt-get install -y wget unzip python-virtualenv git build-essential software-properties-common curl
-RUN add-apt-repository -y ppa:ethereum/ethereum-dev
-RUN add-apt-repository -y ppa:ethereum/ethereum
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 RUN apt-get update
-RUN apt-get install -y golang-go solc ethereum python3 python3-pip python-pip \
+RUN apt-get install -y golang-go python3 python3-pip python-pip \
         bison zlib1g-dev libyaml-dev libssl-dev libgdbm-dev libreadline-dev \
 	zlib1g-dev libreadline-dev npm libyaml-dev libsqlite3-dev sqlite3 \
         libxml2-dev libxslt1-dev libcurl4-openssl-dev libffi-dev nodejs yarn && \
@@ -27,6 +32,12 @@ RUN mkdir -p /deps/z3/ &&  wget https://github.com/Z3Prover/z3/archive/z3-4.5.0.
         cd /deps/z3/ && unzip /deps/z3/z3.zip && \
         ls /deps/z3 && mv /deps/z3/z3-z3-4.5.0/* /deps/z3/ &&  rm /deps/z3/z3.zip && \
         python scripts/mk_make.py --python && cd build && make && make install
+
+# Instsall geth from official geth image
+COPY --from=geth /usr/local/bin/geth /usr/local/bin/geth
+
+# Install solc from official solc image
+COPY --from=solc /usr/bin/solc /usr/bin/solc
 
 COPY . /oyente/
 RUN wget -O ruby-install-0.6.1.tar.gz https://github.com/postmodern/ruby-install/archive/v0.6.1.tar.gz
