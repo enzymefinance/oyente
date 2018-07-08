@@ -34,7 +34,7 @@ RUN mkdir -p /deps/z3/ &&  wget https://github.com/Z3Prover/z3/archive/z3-4.5.0.
         python scripts/mk_make.py --python && cd build && make && make install
 
 # Instsall geth from official geth image
-COPY --from=geth /usr/local/bin/geth /usr/local/bin/geth
+COPY --from=geth /usr/local/bin/evm /usr/local/bin/evm
 
 # Install solc from official solc image
 COPY --from=solc /usr/bin/solc /usr/bin/solc
