@@ -15,7 +15,7 @@ RUN apt-get install -y wget unzip python-virtualenv git build-essential software
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 RUN apt-get update
-RUN apt-get install -y golang-go python3 python3-pip python-pip \
+RUN apt-get install -y musl-dev golang-go python3 python3-pip python-pip \
         bison zlib1g-dev libyaml-dev libssl-dev libgdbm-dev libreadline-dev \
 	zlib1g-dev libreadline-dev npm libyaml-dev libsqlite3-dev sqlite3 \
         libxml2-dev libxslt1-dev libcurl4-openssl-dev libffi-dev nodejs yarn && \
