@@ -14,14 +14,14 @@ import six
 from collections import namedtuple
 from z3 import *
 
-from vargenerator import *
-from ethereum_data import *
-from basicblock import BasicBlock
-from analysis import *
-from test_evm.global_test_params import (TIME_OUT, UNKNOWN_INSTRUCTION,
+from . import global_params
+from .vargenerator import *
+from .ethereum_data import *
+from .basicblock import BasicBlock
+from .analysis import *
+from .test_evm.global_test_params import (TIME_OUT, UNKNOWN_INSTRUCTION,
                                          EXCEPTION, PICKLE_PATH)
-from vulnerability import CallStack, TimeDependency, MoneyConcurrency, Reentrancy, AssertionFailure, ParityMultisigBug2, IntegerUnderflow, IntegerOverflow
-import global_params
+from .vulnerability import CallStack, TimeDependency, MoneyConcurrency, Reentrancy, AssertionFailure, ParityMultisigBug2, IntegerUnderflow, IntegerOverflow
 
 log = logging.getLogger(__name__)
 

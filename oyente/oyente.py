@@ -4,14 +4,14 @@ import os
 import re
 import six
 import json
-import symExec
 import logging
 import requests
 import argparse
 import subprocess
-import global_params
-from utils import run_command
-from input_helper import InputHelper
+from . import global_params
+from . import symExec
+from .utils import run_command
+from .input_helper import InputHelper
 
 def cmd_exists(cmd):
     return subprocess.call("type " + cmd, shell=True,

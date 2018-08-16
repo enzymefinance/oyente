@@ -1,12 +1,13 @@
 import logging
 import math
 import six
-from opcodes import *
 from z3 import *
 from z3.z3util import *
-from vargenerator import *
-from utils import *
-import global_params
+
+from . import global_params
+from .opcodes import *
+from .utils import *
+from .vargenerator import *
 
 log = logging.getLogger(__name__)
 
