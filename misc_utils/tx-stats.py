@@ -47,10 +47,10 @@ def pprint(fn):
 	outj.close()
 
 txs_dir = "../transaction-scraper/transactions"
-print "Loading transactions..."
+print("Loading transactions...")
 txs = load_txdir(txs_dir)
-print "Saving..."
+print("Saving...")
 with open('transactions.json','w') as tfile:
 	tfile.write(json.dumps(txs, indent=1))
 	tfile.close()
-print "Done."
+print("Done.")

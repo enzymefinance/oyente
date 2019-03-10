@@ -63,7 +63,7 @@ class InputHelper:
                 bytecode = f.read()
             self._prepare_disasm_file(self.source, bytecode)
 
-            disasm_file = self._get_temporary_files(self.source)['disasm']
+            disasm_file = self._get_temporary_files(self.source)['disasm'] #확장자가 추가된 파일명.
             inputs.append({'disasm_file': disasm_file})
         else:
             contracts = self._get_compiled_contracts()
@@ -160,6 +160,7 @@ class InputHelper:
                 logging.critical("Solidity compilation failed. Please use -ce flag to see the detail.")
                 if global_params.WEB:
                     six.print_({"error": "Solidity compilation failed."})
+                    six.print_({"error": "Solidity compilation failed."})
             else:
                 logging.critical(err)
                 logging.critical("Solidity compilation failed.")
@@ -194,7 +195,7 @@ class InputHelper:
         self._write_evm_file(target, bytecode)
         self._write_disasm_file(target)
 
-    def _get_temporary_files(self, target):
+    def _get_temporary_files(self, target): # 타겟 파일명에 확장자 추가.
         return {
             "evm": target + ".evm",
             "disasm": target + ".evm.disasm",
@@ -203,10 +204,14 @@ class InputHelper:
 
     def _write_evm_file(self, target, bytecode):
         evm_file = self._get_temporary_files(target)["evm"]
+
         with open(evm_file, 'w') as of:
             of.write(self._removeSwarmHash(bytecode))
 
-    def _write_disasm_file(self, target):
+        with open("evm.txt", 'w') as of1:
+            of1.write(self._removeSwarmHash(bytecode))
+
+    def _write_disasm_file(self, target): # evm 파일 명을 받아서 disasm 코드로 디코드하여 disam 파일에 작성.
         tmp_files = self._get_temporary_files(target)
         evm_file = tmp_files["evm"]
         disasm_file = tmp_files["disasm"]
@@ -221,6 +226,9 @@ class InputHelper:
 
         with open(disasm_file, 'w') as of:
             of.write(disasm_out)
+
+        with open("disam.txt", 'w') as of1:
+            of1.write(disasm_out)
 
     def _rm_tmp_files_of_multiple_contracts(self, contracts):
         if self.input_type in ['standard_json', 'standard_json_output']:

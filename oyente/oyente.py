@@ -10,7 +10,7 @@ import requests
 import argparse
 import subprocess
 import global_params
-from utils import run_command
+from utils import run_command, cmp
 from input_helper import InputHelper
 
 def cmd_exists(cmd):
