@@ -22,11 +22,11 @@ def get_contract_disasm(inp):
 
 def check_callstack_attack(disasm):
     problematic_instructions = ['CALL', 'CALLCODE']
-    for i in xrange(0, len(disasm)):
+    for i in range(0, len(disasm)):
         instruction = disasm[i]
         if instruction[1] in problematic_instructions:
             error = True
-            for j in xrange(i+1, len(disasm)):
+            for j in range(i+1, len(disasm)):
                 if disasm[j][1] in problematic_instructions:
                     break
                 if disasm[j][1] == 'ISZERO':
@@ -107,8 +107,8 @@ def load_contract_file(path):
 def load_contracts_dir(path):
     files = os.listdir(path)
     if path[-1] != '/': path += '/'
-    print "Files loaded from path %s" % path
-    for i in tqdm(xrange(0, len(files))):
+    print("Files loaded from path %s" % path)
+    for i in tqdm(range(0, len(files))):
         if(files[i].endswith('.json')):
             load_contract_file(path+files[i])
     if(write_out):

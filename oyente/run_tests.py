@@ -50,13 +50,13 @@ def main():
     for f in files:
         test_cases.update(json.loads(open(f).read()))
 
-    print "*****************************************************"
-    print "                  *************                      "
-    print "                      Start                          "
+    print("*****************************************************")
+    print("                  *************                      ")
+    print("                      Start                          ")
     for testname, testdata in list(test_cases.items()):
-        print
-        print
-        print "===============Loading: %s====================" % testname
+        print()
+        print()
+        print("===============Loading: %s====================" % testname)
 
         current_test = EvmUnitTest(testname, testdata)
 
@@ -69,9 +69,9 @@ def main():
             exit_code = PASS
 
         if exit_code:
-            print "===============%s!====================" % status(exit_code).upper()
+            print("===============%s!====================" % status(exit_code).upper())
         else:
-            print "no exit code returned"
+            print("no exit code returned")
 
         testname = testname.encode('utf8')
         num_tests += 1
@@ -97,22 +97,22 @@ def main():
             num_incorrect_gas += 1
         remove_temporary_files()
 
-    print "Done!"
-    print "Total: ", num_tests
-    print
-    print "Pass: ", num_passes
-    print
-    print "Fail: ", num_fails, fails
-    print
-    print "Time out: ", num_time_outs, time_outs
-    print
-    print "Unkown instruction: ", num_unkown_instrs, unkown_instrs
-    print
-    print "Exception: ", num_exceptions, exceptions
-    print
-    print "Empty result: ", num_empty_res, empty_res
-    print
-    print "Incorrect gas tracked", num_incorrect_gas, incorrect_gas
+    print("Done!")
+    print("Total: ", num_tests)
+    print()
+    print("Pass: ", num_passes)
+    print()
+    print("Fail: ", num_fails, fails)
+    print()
+    print("Time out: ", num_time_outs, time_outs)
+    print()
+    print("Unkown instruction: ", num_unkown_instrs, unkown_instrs)
+    print()
+    print("Exception: ", num_exceptions, exceptions)
+    print()
+    print("Empty result: ", num_empty_res, empty_res)
+    print()
+    print("Incorrect gas tracked", num_incorrect_gas, incorrect_gas)
 
 
 if __name__ == '__main__':

@@ -17,7 +17,7 @@ savedcontracts = []
 
 def save_callstack_source(dirname):
     if not dirname.endswith('/'): dirname += '/'
-    print "Loading callstack file..."
+    print("Loading callstack file...")
     cstkfile = json.load(open('callstack_stats.json'))
     cstbfile = json.load(open('cterror_balances.json'))
     for contract in tqdm(cstkfile):

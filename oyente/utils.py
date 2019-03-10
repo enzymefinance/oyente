@@ -15,6 +15,9 @@ import six
 from z3 import *
 from z3.z3util import get_vars
 
+def cmp(a, b):
+    return (a > b) - (a < b)
+
 def ceil32(x):
     return x if x % 32 == 0 else x + 32 - (x % 32)
 
@@ -68,11 +71,9 @@ def custom_deepcopy(input):
             output[key] = input[key]
     return output
 
-
 def is_storage_var(var):
     if not isinstance(var, str): var = var.decl().name()
     return var.startswith('Ia_store')
-
 
 # copy only storage values/ variables from a given global state
 # TODO: add balance in the future
@@ -84,7 +85,6 @@ def is_in_expr(var, expr):
     list_vars = get_vars(expr)
     set_vars = set(i.decl().name() for i in list_vars)
     return var in set_vars
-
 
 # check if an expression has any storage variables
 def has_storage_vars(expr, storage_vars):

@@ -13,7 +13,6 @@ import logging
 import six
 from collections import namedtuple
 from z3 import *
-
 from vargenerator import *
 from ethereum_data import *
 from basicblock import BasicBlock
@@ -190,15 +189,14 @@ def change_format():
         i = 0
         firstLine = file_contents[0].strip('\n')
         for line in file_contents:
-            line = line.replace('SELFDESTRUCT', 'SUICIDE')
-            line = line.replace('Missing opcode 0xfd', 'REVERT')
-            line = line.replace('Missing opcode 0xfe', 'ASSERTFAIL')
-            line = line.replace('Missing opcode', 'INVALID')
+            line = line.replace("SELFDESTRUCT", "SUICIDE")
+            line = line.replace("Missing opcode 0xfd", "REVERT")
+            line = line.replace("Missing opcode 0xfe", "ASSERTFAIL")
+            line = line.replace("Missing opcode", 'INVALID')
             line = line.replace(':', '')
             lineParts = line.split(' ')
             try: # removing initial zeroes
-                lineParts[0] = str(int(lineParts[0]))
-
+                lineParts[0] = str(int(lineParts[0],16))
             except:
                 lineParts[0] = lineParts[0]
             lineParts[-1] = lineParts[-1].strip('\n')
@@ -217,7 +215,11 @@ def change_format():
     with open(g_disasm_file, 'w') as disasm_file:
         disasm_file.write("\n".join(file_contents))
 
-def build_cfg_and_analyze():
+    with open("disam_m.txt", 'w') as disasm_file1:
+        disasm_file1.write("\n".join(file_contents))
+
+
+def build_cfg_and_analyze(): #cfg 생성 및 실볼릭 실행 수행.
     change_format()
     with open(g_disasm_file, 'r') as disasm_file:
         disasm_file.readline()  # Remove first line
@@ -226,7 +228,6 @@ def build_cfg_and_analyze():
         construct_bb()
         construct_static_edges()
         full_sym_exec()  # jump targets are constructed on the fly
-
 
 def print_cfg():
     for block in vertices.values():
@@ -551,6 +552,7 @@ def full_sym_exec():
 def sym_exec_block(params, block, pre_block, depth, func_call, current_func_name):
     global solver
     global visited_edges
+    global visited_edges
     global money_flow_all_paths
     global path_conditions
     global global_problematic_pcs
@@ -586,6 +588,8 @@ def sym_exec_block(params, block, pre_block, depth, func_call, current_func_name
                 current_func_name =  list(match.groups())[0]
 
     current_edge = Edge(pre_block, block)
+
+
     if current_edge in visited_edges:
         updated_count_number = visited_edges[current_edge] + 1
         visited_edges.update({current_edge: updated_count_number})
@@ -607,10 +611,16 @@ def sym_exec_block(params, block, pre_block, depth, func_call, current_func_name
     except KeyError:
         log.debug("This path results in an exception, possibly an invalid jump address")
         return ["ERROR"]
-
+    print("---------------------------")
+    print("Edge : ", current_edge)
+    print("jumptype : ", jump_type[block])
+    print("func_name : ", current_func_name)
     for instr in block_ins:
+        print("     instr : ", instr)
         sym_exec_ins(params, block, instr, func_call, current_func_name)
-
+        # print("     after stack :", stack)
+        # print("     after solver : ", solver)
+    print("---------------------------")
     # Mark that this basic block in the visited blocks
     visited.append(block)
     depth += 1
@@ -658,22 +668,21 @@ def sym_exec_block(params, block, pre_block, depth, func_call, current_func_name
             if source_code in g_src_map.func_call_names:
                 func_call = global_state['pc']
         sym_exec_block(new_params, successor, block, depth, func_call, current_func_name)
+
     elif jump_type[block] == "falls_to":  # just follow to the next basic block
         successor = vertices[block].get_falls_to()
         new_params = params.copy()
         new_params.global_state["pc"] = successor
         sym_exec_block(new_params, successor, block, depth, func_call, current_func_name)
+
     elif jump_type[block] == "conditional":  # executing "JUMPI"
 
         # A choice point, we proceed with depth first search
 
         branch_expression = vertices[block].get_branch_expression()
-
         log.debug("Branch expression: " + str(branch_expression))
-
         solver.push()  # SET A BOUNDARY FOR SOLVER
         solver.add(branch_expression)
-
         try:
             if solver.check() == unsat:
                 log.debug("INFEASIBLE PATH DETECTED")
@@ -692,7 +701,6 @@ def sym_exec_block(params, block, pre_block, depth, func_call, current_func_name
                 traceback.print_exc()
 
         solver.pop()  # POP SOLVER CONTEXT
-
         solver.push()  # SET A BOUNDARY FOR SOLVER
         negated_branch_expression = Not(branch_expression)
         solver.add(negated_branch_expression)
@@ -718,9 +726,11 @@ def sym_exec_block(params, block, pre_block, depth, func_call, current_func_name
         except Exception as e:
             if global_params.DEBUG_MODE:
                 traceback.print_exc()
+
         solver.pop()  # POP SOLVER CONTEXT
         updated_count_number = visited_edges[current_edge] - 1
         visited_edges.update({current_edge: updated_count_number})
+
     else:
         updated_count_number = visited_edges[current_edge] - 1
         visited_edges.update({current_edge: updated_count_number})
@@ -728,6 +738,7 @@ def sym_exec_block(params, block, pre_block, depth, func_call, current_func_name
 
 
 # Symbolically executing an instruction
+
 def sym_exec_ins(params, block, instr, func_call, current_func_name):
     global MSIZE
     global visited_pcs
@@ -747,7 +758,6 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
     analysis = params.analysis
     calls = params.calls
     overflow_pcs = params.overflow_pcs
-
     visited_pcs.add(global_state["pc"])
 
     instr_parts = str.split(instr, ' ')
@@ -772,6 +782,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
     # this should be done before symbolically executing the instruction,
     # since SE will modify the stack and mem
     update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_and_vars, solver)
+
     if opcode == "CALL" and analysis["reentrancy_bug"] and analysis["reentrancy_bug"][-1]:
         global_problematic_pcs["reentrancy_bug"].append(global_state["pc"])
 
@@ -801,7 +812,6 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
                 # if both are symbolic z3 takes care of modulus automatically
                 computed = (first + second) % (2 ** 256)
             computed = simplify(computed) if is_expr(computed) else computed
-
             check_revert = False
             if jump_type[block] == 'conditional':
                 jump_target = vertices[block].get_jump_target()
@@ -818,7 +828,6 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
                         global_problematic_pcs['integer_overflow'].append(Overflow(global_state['pc'] - 1, solver.model()))
                         overflow_pcs.append(global_state['pc'] - 1)
                     solver.pop()
-
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
@@ -1356,6 +1365,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
             else:
                 hashed_address = str(address)
             global_state["balance"][hashed_address] = new_var
+
             stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
@@ -1431,7 +1441,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
 
             if isAllReal(mem_location, current_miu_i, code_from, no_bytes):
                 if six.PY2:
-                    temp = long(math.ceil((mem_location + no_bytes) / float(32)))
+                    temp = int(math.ceil((mem_location + no_bytes) / float(32)))
                 else:
                     temp = int(math.ceil((mem_location + no_bytes) / float(32)))
 
@@ -1513,9 +1523,9 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
             no_bytes = stack.pop(0)
             current_miu_i = global_state["miu_i"]
 
-            if isAllReal(address, mem_location, current_miu_i, code_from, no_bytes) and USE_GLOBAL_BLOCKCHAIN:
+            if isAllReal(address, mem_location, current_miu_i, code_from, no_bytes) and global_params.USE_GLOBAL_BLOCKCHAIN:
                 if six.PY2:
-                    temp = long(math.ceil((mem_location + no_bytes) / float(32)))
+                    temp = int(math.ceil((mem_location + no_bytes) / float(32)))
                 else:
                     temp = int(math.ceil((mem_location + no_bytes) / float(32)))
                 if temp > current_miu_i:
@@ -1595,7 +1605,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
             current_miu_i = global_state["miu_i"]
             if isAllReal(address, current_miu_i) and address in mem:
                 if six.PY2:
-                    temp = long(math.ceil((address + 32) / float(32)))
+                    temp = int(math.ceil((address + 32) / float(32)))
                 else:
                     temp = int(math.ceil((address + 32) / float(32)))
                 if temp > current_miu_i:
@@ -1645,7 +1655,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
                     value /= 256
             if isAllReal(stored_address, current_miu_i):
                 if six.PY2:
-                    temp = long(math.ceil((stored_address + 32) / float(32)))
+                    temp = int(math.ceil((stored_address + 32) / float(32)))
                 else:
                     temp = int(math.ceil((stored_address + 32) / float(32)))
                 if temp > current_miu_i:
@@ -1675,7 +1685,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
             current_miu_i = global_state["miu_i"]
             if isAllReal(stored_address, current_miu_i):
                 if six.PY2:
-                    temp = long(math.ceil((stored_address + 1) / float(32)))
+                    temp = int(math.ceil((stored_address + 1) / float(32)))
                 else:
                     temp = int(math.ceil((stored_address + 1) / float(32)))
                 if temp > current_miu_i:
@@ -1939,6 +1949,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
                     global_state["balance"][new_address_name] = new_balance
         else:
             raise ValueError('STACK underflow')
+
     elif opcode == "CALLCODE":
         # TODO: Need to handle miu_i
         if len(stack) > 6:
@@ -2052,6 +2063,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
             log.critical("Unknown instruction: %s" % opcode)
             exit(UNKNOWN_INSTRUCTION)
         raise Exception('UNKNOWN INSTRUCTION: ' + opcode)
+
 
 # Detect if a money flow depends on the timestamp
 def detect_time_dependency():
@@ -2454,7 +2466,7 @@ def run(disasm_file=None, source_file=None, source_map=None):
     else:
         begin = time.time()
         log.info("\t============ Results ===========")
-        analyze()
+        analyze() # cfg 생성 및 symnolic execution
         ret = detect_vulnerabilities()
         closing_message()
         return ret

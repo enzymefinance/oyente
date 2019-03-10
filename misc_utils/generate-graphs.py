@@ -16,18 +16,18 @@ def gen_opcode_hist():
     opcodes = [(opcode, opcodes[opcode]['freq']) for opcode in opcodes]
     opcodes = sorted(opcodes, key = lambda k: k[1], reverse=True)
 
-    print "length: %d" % len(opcodes)
+    print("length: %d" % len(opcodes))
 
     with open('opcodehist.dat', 'w') as of:
         of.write('opcode frequency\n')
-        for i in xrange(0,25):
+        for i in range(0,25):
             of.write('%s %d\n' % (opcodes[i][0], opcodes[i][1]))
         of.flush()
         of.close()
 
     with open('opcodecont.dat', 'w') as of:
         of.write('opcode contracts\n')
-        for i in xrange(0,25):
+        for i in range(0,25):
             of.write('%s %d\n' % (opc_contracts[i][0], opc_contracts[i][1]))
         of.flush()
         of.close()        
@@ -37,7 +37,7 @@ def gen_contract_hist():
     oplengths = [contracts[contract]['oplength'] for contract in contracts]
     oplengths = sorted(oplengths, reverse=True)
 
-    print "Max: %d, Min: %d, Mean: %d, Median: %d" % (max(oplengths), min(oplengths), np.mean(oplengths), np.median(oplengths))
+    print("Max: %d, Min: %d, Mean: %d, Median: %d" % (max(oplengths), min(oplengths), np.mean(oplengths), np.median(oplengths)))
 
     with open('contract_length.dat', 'w') as of:
         for oplength in oplengths:
@@ -65,7 +65,7 @@ def gen_txnesting_hist(tfile):
     nesting = [(transaction['txid'],len(transaction['transactions'])) for transaction in tqdm(tfile)]
     nesting = sorted(nesting, key = lambda k: k[1], reverse=True)
     nestingvals = [element[1] for element in nesting]
-    print "Writing..."
+    print("Writing...")
     with open('txnesting.csv', 'w') as of:
         for element in tqdm(nestingvals):
             of.write('%d\n' % element)
@@ -85,7 +85,7 @@ def gen_txworth_hist(tfile):
     txworth = [(transaction['txid'], process_worth_str(transaction['transactions'][0]['worth'])) for transaction in tqdm(tfile)]
     txworth = sorted(txworth, key = lambda k : k[1], reverse=True)
     txvalues = [element[1] for element in txworth]
-    print "Transaction value - min:%f, max:%f, mean:%f, median:%f" % (np.min(txvalues), np.max(txvalues), np.mean(txvalues), np.median(txvalues))
+    print("Transaction value - min:%f, max:%f, mean:%f, median:%f" % (np.min(txvalues), np.max(txvalues), np.mean(txvalues), np.median(txvalues)))
     with open('txvalueslog.csv', 'w') as of:
         i=0
         for element in txworth:
@@ -94,7 +94,7 @@ def gen_txworth_hist(tfile):
                 of.write('%f\n' % np.log(element[1]))
         of.flush()
         of.close()
-    print "Wrote %d elements." % i
+    print("Wrote %d elements." % i)
     # with open('txworth.dat', 'w') as of:
     #     of.write('txid worth\n')
     #     for element in txworth:
@@ -118,7 +118,7 @@ def gen_contract_tx(tfile):
     # Build unique transaction count for contracts
     txcount = {}
     contract_balance = {}
-    print "Collecting transaction count..."
+    print("Collecting transaction count...")
     for transaction in tqdm(tfile):
         for tx in transaction['transactions']:
             if 'from' in tx:
@@ -132,7 +132,7 @@ def gen_contract_tx(tfile):
     cbalancefile = json.load(open('../contracts/contract_data/contract_balance.json'))
     cfile = json.load(open('contracts.json'))
     transactions = []
-    print "Filtering..."
+    print("Filtering...")
     for contract in tqdm(cfile):
         if contract in txcount:
             transactions.append(txcount[contract])
@@ -141,17 +141,17 @@ def gen_contract_tx(tfile):
     # transactions = sorted(transactions, reverse=True)
     downscale_binsize = 100
     dstxs = []
-    print "Downscaling..."
-    for i in tqdm(xrange(0, len(transactions), downscale_binsize)):
+    print("Downscaling...")
+    for i in tqdm(range(0, len(transactions), downscale_binsize)):
         dstxs.append(np.mean(transactions[i:(i+downscale_binsize)]))
     transactions = dstxs
-    print "Writing..."
+    print("Writing...")
     with open('ctxcount.csv', 'w') as of:
         for tcount in transactions:
             of.write('%f\n' % tcount)
         of.flush()
         of.close()
-    print "loading balances.."
+    print("loading balances..")
     balances = []
     weiconst = 1000000000000000000
     for contract in tqdm(cfile):
@@ -160,11 +160,11 @@ def gen_contract_tx(tfile):
         else:
             balances.append(0)
 
-    print "Min Balance: %d, Max Balance: %d, Sum: %f, Mean Balance: %f, Median Balance: %f" % (np.min(balances), np.max(balances), np.sum(balances), np.mean(balances), np.median(balances))
+    print("Min Balance: %d, Max Balance: %d, Sum: %f, Mean Balance: %f, Median Balance: %f" % (np.min(balances), np.max(balances), np.sum(balances), np.mean(balances), np.median(balances)))
     balances = sorted(balances, reverse=True)
     dsbalances = []
-    print "Downscaling..."
-    for i in tqdm(xrange(0, len(balances), downscale_binsize)):
+    print("Downscaling...")
+    for i in tqdm(range(0, len(balances), downscale_binsize)):
         dsbalances.append(np.mean(balances[i:(i+downscale_binsize)]))
     balances = dsbalances
 
@@ -173,7 +173,7 @@ def gen_contract_tx(tfile):
             of.write('%f\n' % tbalance)
         of.flush()
         of.close()
-    print "Done."
+    print("Done.")
 
 def load_report(filen, contract_name, contract_sats, failed):
     try:
@@ -202,9 +202,9 @@ def load_report(filen, contract_name, contract_sats, failed):
             contract_sats.append((contract_name, explored_paths, pathno, concurrency_pairs, timestamp_dependent, exec_time))
     except ValueError:
         return
-        print "ValueError in file %s. contents - " % filen
+        print("ValueError in file %s. contents - " % filen)
         with open(filen) as f:
-            print f.read()
+            print(f.read())
 
 def load_sat_stats():
     dirname = "stats"
@@ -216,19 +216,19 @@ def load_sat_stats():
         if filen.endswith(".report"):
             contract_name = re.findall(pattern,filen)[0]
             load_report(dirname + "/" + filen, contract_name, contract_sats, failed)
-    print "Loading contract db..."
+    print("Loading contract db...")
     contracts = json.loads(open('contracts.json').read())
     stats = []
     for entry in contract_sats:
         if entry[0] in contracts:
             stats.append((entry[1], entry[5]))
     stats = sorted(stats, key = lambda k : k[0])
-    print "Writing..."
+    print("Writing...")
     with open('running-time.csv', 'w') as rtcsv:
         rtcsv.write("contract,paths,time\n")
-        for i in tqdm(xrange(0, len(stats))):
+        for i in tqdm(range(0, len(stats))):
             rtcsv.write("%d,%d,%f\n" % (i, stats[i][0], stats[i][1]))
-    print "Done."
+    print("Done.")
     with open('sat_stats.json','w') as of:
         of.write(json.dumps(contract_sats, indent=1))
     transaction_race = 0
@@ -238,10 +238,10 @@ def load_sat_stats():
         paths.append(entry[1])
         if entry[3] > 0: transaction_race+=1
         if entry[4] == True: timestamp += 1 
-    print "Average number of paths: %d" % np.mean(paths)
-    print "Transaction Race: %d" % transaction_race
-    print "TimeStamp Dependence: %d" % timestamp
-    print "Average time: %f" % np.mean([entry[5] for entry in contract_sats])
+    print("Average number of paths: %d" % np.mean(paths))
+    print("Transaction Race: %d" % transaction_race)
+    print("TimeStamp Dependence: %d" % timestamp)
+    print("Average time: %f" % np.mean([entry[5] for entry in contract_sats]))
 
 # load_sat_stats()
 
@@ -260,8 +260,8 @@ def check_unique():
         for contract in cjson:
             cmains[contract] = cjson[contract][1]
 
-    print "Loaded %d contracts." % len(cmains)
-    print "Removing duplicates..."
+    print("Loaded %d contracts." % len(cmains))
+    print("Removing duplicates...")
 
     original_cmains = {}
 
@@ -274,14 +274,14 @@ def check_unique():
         if not found:
             original_cmains[element] = cmains[element]
 
-    print "%d original contracts." % len(original_cmains)
+    print("%d original contracts." % len(original_cmains))
 
     with open('unique_contracts.json', 'w') as of:
         of.write(json.dumps(original_cmains, indent=1))
         of.flush()
         of.close()
 
-    print "merging..."
+    print("merging...")
 
     duplicates = []
 
@@ -295,7 +295,7 @@ def check_unique():
         if not found:
             duplicates.append([contract])
 
-    print "%d elements in merge list." % len(duplicates)
+    print("%d elements in merge list." % len(duplicates))
 
     with open('duplicate_contracts.json', 'w') as of:
         of.write(json.dumps(duplicates, indent=1))
@@ -333,10 +333,10 @@ def get_all():
     for c in reentrancy:
         all_problematic.append(c)
 
-    print "%d transaction race, %d timestamp, %d in cstack, %d in reentrancy." % (len(t_race), len(ts_depend), len(cstack), len(reentrancy))
+    print("%d transaction race, %d timestamp, %d in cstack, %d in reentrancy." % (len(t_race), len(ts_depend), len(cstack), len(reentrancy)))
 
-    print "%d problematic contracts" % len(all_problematic)
-    print "Loading contract bytecode..."
+    print("%d problematic contracts" % len(all_problematic))
+    print("Loading contract bytecode...")
     # cpath = "../contracts/contract_data"
     # cfiles = os.listdir(cpath)
 
@@ -362,7 +362,7 @@ def get_all():
 
     threshold = 99
 
-    print "Removing duplicates..."
+    print("Removing duplicates...")
 
     duplicates = 0
 
@@ -371,7 +371,7 @@ def get_all():
     new_cstack = []
     new_reentrancy = []
 
-    print "Transaction Race..."
+    print("Transaction Race...")
     for c in tqdm(t_race):
         found = False
         for cont in new_t_race:
@@ -381,7 +381,7 @@ def get_all():
         if not found:
             new_t_race.append(c)
 
-    print "Timestamp..."
+    print("Timestamp...")
     for c in tqdm(ts_depend):
         found = False
         for cont in new_ts_depend:
@@ -391,7 +391,7 @@ def get_all():
         if not found:
             new_ts_depend.append(c)
 
-    print "Callstack..."
+    print("Callstack...")
     for c in tqdm(cstack):
         found = False
         for cont in new_cstack:
@@ -401,7 +401,7 @@ def get_all():
         if not found:
             new_cstack.append(c)
 
-    print "Reentrancy..."
+    print("Reentrancy...")
     for c in tqdm(reentrancy):
         found = False
         for cont in new_reentrancy:
@@ -411,7 +411,7 @@ def get_all():
         if not found:
             new_reentrancy.append(c)
 
-    print "All..."
+    print("All...")
     for contract in tqdm(cmains):
         found = False
         for c in cmains_sorted:
@@ -425,10 +425,10 @@ def get_all():
             duplicates += 1
             # print "duplicate count: %d, original len: %d" % (duplicates, len(cmains_sorted))
 
-    print "Original Contracts: %d" % len(cmains_sorted)
+    print("Original Contracts: %d" % len(cmains_sorted))
 
-    print "Original Counts - "
-    print "CallStack - %d, Transaction Race - %d, Timestamp Dependence - %d, Reentrancy - %d" % (len(new_cstack), len(new_t_race), len(new_ts_depend), len(new_reentrancy))
+    print("Original Counts - ")
+    print("CallStack - %d, Transaction Race - %d, Timestamp Dependence - %d, Reentrancy - %d" % (len(new_cstack), len(new_t_race), len(new_ts_depend), len(new_reentrancy)))
 
     return old_prob
 
@@ -481,7 +481,7 @@ def get_source_stats():
     cpath = "../contracts/contract_data"
     cfiles = os.listdir(cpath)
 
-    print "Loading contracts..."
+    print("Loading contracts...")
 
     for cfile in tqdm(cfiles):
         if not cfile.endswith('.json'): continue
@@ -489,7 +489,7 @@ def get_source_stats():
         cjson = json.loads(open(cpath+'/'+cfile).read())
         for contract in cjson: contracts.append(contract)
 
-    print "Checking for source..."
+    print("Checking for source...")
 
     from get_source import get_contract_code
 
@@ -498,7 +498,7 @@ def get_source_stats():
     for contract in tqdm(contracts):
         if(len(get_contract_code(contract)[1]) > 0): with_source+=1
 
-    print "%d contracts have source out of %d." % (with_source, len(contracts))
+    print("%d contracts have source out of %d." % (with_source, len(contracts)))
 
 # get_source_stats()
 
