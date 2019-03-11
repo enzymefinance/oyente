@@ -2057,6 +2057,16 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
         # TODO
         return
 
+    elif opcode == "SHR":
+        if len(stack) > 0:
+            global_state["pc"] = global_state["pc"] + 1
+            x = stack.pop(0)
+            y = stack.pop(0)
+            stack.insert(0, y>>x)
+
+        else:
+            raise ValueError('STACK underflow')
+
     else:
         log.debug("UNKNOWN INSTRUCTION: " + opcode)
         if global_params.UNIT_TEST == 2 or global_params.UNIT_TEST == 3:
