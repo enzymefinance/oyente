@@ -12,7 +12,7 @@ import subprocess
 import global_params
 from utils import run_command, cmp
 from input_helper import InputHelper
-
+#test
 def cmd_exists(cmd):
     return subprocess.call("type " + cmd, shell=True,
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE) == 0
