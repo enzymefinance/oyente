@@ -262,11 +262,7 @@ def mapping_push_instruction(current_line_content, current_ins_address, idx, pos
                     if int(value, 16) == int(instr_value, 16):
                         g_src_map.instr_positions[current_ins_address] = g_src_map.positions[idx]
                         idx += 1
-<<<<<<< HEAD
                         break
-=======
-                        break;
->>>>>>> db8e62779ab8cba5730ee05721f6b49ab432fd0e
                     else:
                         raise Exception("Source map error")
                 else:
@@ -538,54 +534,29 @@ def get_init_global_state(path_conditions_and_vars):
 
     return global_state
 '''
-<<<<<<< HEAD
 varCount = 0  #
 
 
 def getInitGlobalState(path_conditions_and_vars, staticGlobalState, userIndex):
     global varCount
     global g_userAddrs
-=======
-
-depCount = 0
-
-
-def getInitGlobalState(path_conditions_and_vars, staticGlobalState, userIndex):
-    global depCount
->>>>>>> db8e62779ab8cba5730ee05721f6b49ab432fd0e
 
     global_state = {"balance": {}, "pc": 0}
     init_is = init_ia = deposited_value = sender_address = receiver_address = gas_price = origin = currentCoinbase = currentNumber = currentDifficulty = currentGasLimit = callData = None
 
-<<<<<<< HEAD
     sender_address = g_userAddrs[userIndex]
     receiver_address = g_userAddrs[0]
 
     depVarName = "depVal" + str(varCount)
     varCount += 1
-=======
-    senderName = "user" + str(userIndex)
-    sender = staticGlobalState[senderName]
-    receiver = staticGlobalState["user0"]
-    sender_address = sender["address"]
-    receiver_address = ["address"]
-
-    depVarName = "depVal" + str(depCount)
-    depCount += 1
->>>>>>> db8e62779ab8cba5730ee05721f6b49ab432fd0e
     deposited_value = BitVec(depVarName, 256)
 
     path_conditions_and_vars["Is"] = sender_address
     path_conditions_and_vars["Ia"] = receiver_address
     path_conditions_and_vars["Iv"] = deposited_value
 
-<<<<<<< HEAD
     init_ia = staticGlobalState[receiver_address]["balance"]
     init_is = staticGlobalState[sender_address]["balance"]
-=======
-    init_ia = receiver["balance"]
-    init_is = sender["balance"]
->>>>>>> db8e62779ab8cba5730ee05721f6b49ab432fd0e
 
     constraint = (deposited_value >= BitVecVal(0, 256))
     path_conditions_and_vars["path_condition"].append(constraint)
@@ -877,7 +848,6 @@ def sym_exec_block(params, block, pre_block, depth, func_call, current_func_name
 def getInitStaticGlobalState(userNum, userAddrs):
     staticGlobalState = {}
 
-<<<<<<< HEAD
     staticGlobalState[userAddrs[0]] = {"userName": "user0",
                                        "balance": BitVecVal(0, 256),
                                        "deposit": [],
@@ -889,19 +859,6 @@ def getInitStaticGlobalState(userNum, userAddrs):
                                            "balance": BitVec(userName + "Balance", 256),
                                            "deposit": [],
                                            "withdraw": []}
-=======
-    staticGlobalState["user0"] = {"address": userAddrs[0],
-                                  "balance": BitVecVal(0, 256),
-                                  "deposit": [],
-                                  "withdraw": []}
-
-    for i in range(0, userNum):
-        userName = "user" + str(i)
-        staticGlobalState[userName] = {"address": userAddrs[i],
-                                       "balance": BitVec(userName + "Balance", 256),
-                                       "deposit": [],
-                                       "withdraw": []}
->>>>>>> db8e62779ab8cba5730ee05721f6b49ab432fd0e
 
     return staticGlobalState
 
@@ -935,11 +892,7 @@ def getRandUserIndex():
     return idx
 
 
-<<<<<<< HEAD
 def getUserAddr(userIndex):
-=======
-def getRandUserAddr(userIndex):
->>>>>>> db8e62779ab8cba5730ee05721f6b49ab432fd0e
     global g_userAddrs
     return g_userAddrs[userIndex]
 
@@ -969,17 +922,10 @@ def getInitTraceStateList():
     g_userAddrs = genUsers(g_userNum, addrs)  # z3constant
 
     traceStateList = []
-<<<<<<< HEAD
     staticGlobalState = getInitStaticGlobalState(g_userNum, g_userAddrs)
 
     for userIndex in range(1, g_userNum):
         path_conditions_and_vars = {"path_condition": []}
-=======
-
-    for userIndex in range(1, g_userNum):
-        path_conditions_and_vars = {"path_condition": []}
-        staticGlobalState = getInitStaticGlobalState(g_userNum, g_userAddrs)
->>>>>>> db8e62779ab8cba5730ee05721f6b49ab432fd0e
         global_state = getInitGlobalState(path_conditions_and_vars, staticGlobalState, userIndex)
         analysis = init_analysis()
         params = Parameter(path_conditions_and_vars=path_conditions_and_vars, global_state=global_state,
@@ -1025,7 +971,6 @@ def fullSymExec():
     time.sleep(1)
 
 
-<<<<<<< HEAD
 def selectTraceState(traceStateList, lastState):
     TSListLen = len(traceStateList)
 
@@ -1082,20 +1027,6 @@ def addPathConditions(solver, pathConditions):
     len = len(pathConditions)
     for i in range(0, len):
         solver.add(pathConditions[i])
-=======
-def selectTraceState(traceStateList):
-    return traceStateList.pop()
-
-
-def worklistExec(traceStateList):
-    while (len(traceStateList) != 0):
-        traceState = selectTraceState(traceStateList)
-        newTraceState = symExecBlocks(traceState, traceStateList)  # revert , stop,
-
-        traceStateList.append(newTraceState)
-
-        # at some time break
->>>>>>> db8e62779ab8cba5730ee05721f6b49ab432fd0e
 
 
 def symExecBlocks(traceState, traceStateList):
@@ -1108,10 +1039,6 @@ def symExecBlocks(traceState, traceStateList):
     global results
     global g_src_map
     global userNum
-<<<<<<< HEAD
-=======
-    print("traceState: ", traceState)
->>>>>>> db8e62779ab8cba5730ee05721f6b49ab432fd0e
 
     thisTraceState = deepcopy(traceState)
     paramsPack = thisTraceState[2]
@@ -1182,21 +1109,14 @@ def symExecBlocks(traceState, traceStateList):
         for instr in block_ins:
             print("     instr : ", instr)
             sym_exec_ins(params, block, instr, func_call, current_func_name)
-<<<<<<< HEAD
             print("     after stack :", stack)
-=======
-            # print("   r  after stack :", stack)
->>>>>>> db8e62779ab8cba5730ee05721f6b49ab432fd0e
             # print("     after solver : ", solver)
         print("---------------------------")
         # Mark that this basic block in the visited blocks
         visited.append(block)
         trace[1].append(block)
         depth += 1
-<<<<<<< HEAD
         lastIns = block_ins[-1]
-=======
->>>>>>> db8e62779ab8cba5730ee05721f6b49ab432fd0e
 
         reentrancy_all_paths.append(analysis["reentrancy_bug"])
         if analysis["money_flow"] not in money_flow_all_paths:
@@ -1231,53 +1151,17 @@ def symExecBlocks(traceState, traceStateList):
                 compare_storage_and_gas_unit_test(global_state, analysis)
 
             total_no_of_paths += 1
-<<<<<<< HEAD
 
             if (lastIns.startswith("REVERT")):
 
-=======
-            lastIns = block_ins[-1]
-
-            if (lastIns.startswith("REVERT")):
-                # newTraceState = deepcopy(traceState)
-                # newStaticGlobalState = newTraceState[0]
-                # newParams = newTraceState[2][0]
-                # userIndex = getRandUserIndex()
-                # userAddr = getRandUserAddr(userIndex)
-                # newTrace = getInitTrace(userAddr)
-                # pathConAndVars = newParams.path_conditions_and_vars
-                # newGlobalState = getInitGlobalState(pathConAndVars, newStaticGlobalState, userIndex)
-                # newAnalysis = init_analysis()
-                # sha3List = sha3_list
-                # newParams = Parameter(path_conditions_and_vars=pathConAndVars, global_state=newGlobalState,
-                #                       analysis=newAnalysis, sha3_list=sha3List)
-                # newParamsPack = getInitParamsPack(newParams)
-                # newTraceState = deepcopy(createTraceState(newStaticGlobalState, newTrace, newParamsPack))
-                newTraceState = traceState
->>>>>>> db8e62779ab8cba5730ee05721f6b49ab432fd0e
                 break
 
             elif (lastIns.startswith("STOP")):
 
-<<<<<<< HEAD
                 updateStaticGlobalState(thisTraceState)
                 # print("balance user : " ,thisTraceState[0][thisTraceState[1][0]]["balance"])
                 # print("balance contrace : ", thisTraceState[0][g_userAddrs[0]]["balance"])
                 addNextTraceStates(traceStateList, thisTraceState, params)
-=======
-                newStaticGlobalState = deepcopy(thisTraceState[0])
-                userIndex = getRandUserIndex()
-                userAddr = getRandUserAddr(userIndex)
-                newTrace = getInitTrace(userAddr)
-                pathConAndVars = deepcopy(params.path_conditions_and_vars)
-                newGlobalState = getInitGlobalState(pathConAndVars, newStaticGlobalState, userIndex)
-                newAnalysis = init_analysis()
-                sha3List = sha3_list
-                newParams = Parameter(path_conditions_and_vars=pathConAndVars, global_state=newGlobalState,
-                                      analysis=newAnalysis, sha3_list=sha3List)
-                newParamsPack = getInitParamsPack(newParams)
-                newTraceState = deepcopy(createTraceState(newStaticGlobalState, newTrace, newParamsPack))
->>>>>>> db8e62779ab8cba5730ee05721f6b49ab432fd0e
                 break
 
             else:
@@ -1313,11 +1197,8 @@ def symExecBlocks(traceState, traceStateList):
             log.debug("Branch expression: " + str(branch_expression))
             solver.push()  # SET A BOUNDARY FOR SOLVER
             solver.add(branch_expression)
-<<<<<<< HEAD
             # pathConditions = path_conditions_and_vars["path_condition"]
             # addPathConditions(solver, pathConditions)
-=======
->>>>>>> db8e62779ab8cba5730ee05721f6b49ab432fd0e
             try:
                 if solver.check() == unsat:
                     log.debug("INFEASIBLE PATH DETECTED")
@@ -1394,11 +1275,7 @@ def symExecBlocks(traceState, traceStateList):
 
         params = new_params
 
-<<<<<<< HEAD
     return lastIns
-=======
-    return newTraceState
->>>>>>> db8e62779ab8cba5730ee05721f6b49ab432fd0e
 
 
 # Symbolically executing an instruction
@@ -2061,11 +1938,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
                     param_idx = (position - 4) // 32
                     for param in params:
                         if param_idx == param['position']:
-<<<<<<< HEAD
                             new_var_name = param['name'] + str(varCount)
-=======
-                            new_var_name = param['name']
->>>>>>> db8e62779ab8cba5730ee05721f6b49ab432fd0e
                             g_src_map.var_names.append(new_var_name)
                 else:
                     new_var_name = gen.gen_data_var(position)
