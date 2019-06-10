@@ -579,8 +579,9 @@ def genUsers(userNum):
         addr = random.randrange(1, 2 ** 160 - 1)
         if addrs.count(addr) > 0:
             continue
-        userAddrs.append(BitVecVal(addr, 256))
+
         addrs.append(addr)
+        userAddrs.append(BitVecVal(addr, 256))
 
     return userAddrs
 
@@ -698,7 +699,7 @@ def worklistExec(traceStateList):
         traceState = selectTraceState(traceStateList, lastState)
         lastState = symExecBlocks(traceStateList, traceState)
 
-        if(not(isinstance(lastState, str))):
+        if (not (isinstance(lastState, str))):
             print("lastState is not in stop or revert : ", lastState)
         # traceStateList.append(newTraceState)
         # at some time break
@@ -756,7 +757,6 @@ def getNewTraceState(traceState, params, userIndex):
 
 
 def updateLastTraceState(returnStateParamsPack, lastStateParamsPack):
-
     rsParams = returnStateParamsPack[0]
     rsGlobalState = rsParams.global_state
     rsPathCon = rsParams.path_conditions_and_vars
@@ -774,7 +774,7 @@ def updateLastTraceState(returnStateParamsPack, lastStateParamsPack):
     newLsParams.global_state = newLsGlobalState
     newLsParams.path_conditions_and_var = newLsPathCon
 
-    lastStateParamsPack = newLastStateParamsPack
+    return newLastStateParamsPack
 
 
 def addNextTraceStates(traceStateList, traceState, params):
@@ -790,18 +790,22 @@ def addPathConditions(solver, pathConditions):
 
     solver.push()
 
-def getInstSize(instr):
 
+def getInstSize(instr):
     size = 1
 
     instr_parts = str.split(instr, ' ')
     opcode = instr_parts[0]
 
-    if(opcode.startswith("PUSH")):
+    if (opcode.startswith("PUSH")):
         position = int(opcode[4:], 10)
         size = 1 + position
 
     return size
+
+
+global g_calls
+g_calls = {}
 
 
 def symExecBlocks(traceStateList, traceState):
@@ -918,7 +922,6 @@ def symExecBlocks(traceStateList, traceState):
             log.info("This path results in an exception, possibly an invalid jump address")
             return ["ERROR"]
 
-
         print("Edge : ", current_edge)
         print("jumptype : ", jump_type[block])
         print("func_name : ", current_func_name)
@@ -930,21 +933,23 @@ def symExecBlocks(traceStateList, traceState):
         for instr in block_ins:
             print("       instr : ", instr)
 
-            if(global_state["pc"] != syncIndex):
-                # print("1 :", global_state["pc"], syncIndex)
+            if (global_state["pc"] != syncIndex):
                 syncIndex += getInstSize(instr)
+                print("1 :", global_state["pc"], syncIndex)
+                print("       after stack : ", stack)
+                # print("       after pathcon : ", path_conditions_and_vars["path_condition"][-1])
+                # print("       after solver : ", solver)
                 continue
 
             sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateList, traceState, solver)
             syncIndex = global_state["pc"]
 
-            # print("2 :", global_state["pc"], syncIndex)
-            # print("       after stack : ", stack)
+            print("2 :", global_state["pc"], syncIndex)
+            print("       after stack : ", stack)
             # print("       after pathcon : ", path_conditions_and_vars["path_condition"][-1])
             # print("       after solver : ", solver)
         print("---------------------------")
         # Mark that this basic block in the visited blocks
-
 
         visited.append(block)
         thisTrace[1].append(block)
@@ -1003,14 +1008,14 @@ def symExecBlocks(traceStateList, traceState):
                     # print("last State : ", traceState)
                     # print("return point state : ", callStack.pop() )
 
-                    callStack = traceState[3]
                     returnTraceState = callStack.pop()
                     rsParamsPack = returnTraceState[2]
                     lsParamsPack = traceState[2]
 
-                    updateLastTraceState(rsParamsPack, lsParamsPack)
+                    traceState[2] = updateLastTraceState(rsParamsPack, lsParamsPack)
                     traceStateList.append(traceState)
 
+                    return "cSTOP"
                 else:
                     addNextTraceStates(traceStateList, traceState, params)
 
@@ -1019,6 +1024,7 @@ def symExecBlocks(traceStateList, traceState):
                 break
 
             else:
+                time.sleep(1)
                 log.info("there is some problem")
 
         elif jump_type[block] == "unconditional":  # executing "JUMP"
@@ -1047,6 +1053,8 @@ def symExecBlocks(traceStateList, traceState):
             # print("conditional block process")
             # A choice point, we proceed with depth first search
 
+            checkRevert = False
+
             branch_expression = vertices[block].get_branch_expression()
             log.debug("Branch expression: " + str(branch_expression))
             solver.push()  # SET A BOUNDARY FOR SOLVER
@@ -1064,19 +1072,25 @@ def symExecBlocks(traceStateList, traceState):
                     last_idx = len(new_params.path_conditions_and_vars["path_condition"]) - 1
                     new_params.analysis["time_dependency_bug"][last_idx] = global_state["pc"]
 
-                    newParamsPack = (new_params, left_branch, block, depth, func_call, current_func_name)
-                    newTraceState = traceStateCopy(traceState)
-                    oldTrace = newTraceState[1][0]
-                    newTraceState[1] = (oldTrace, deepcopy(thisTrace))
-                    newTraceState[2] = newParamsPack
-                    traceStateList.append(traceStateCopy(newTraceState))
-                    print("done positive branch")
+                    checkRevert = any([True for instruction in vertices[left_branch].get_instructions() if
+                                        instruction.startswith('REVERT')])
+
+                    if(checkRevert == False):
+                        newParamsPack = (new_params, left_branch, block, depth, func_call, current_func_name)
+                        newTraceState = traceStateCopy(traceState)
+                        oldTrace = newTraceState[1][0]
+                        newTraceState[1] = (oldTrace, deepcopy(thisTrace))
+                        newTraceState[2] = newParamsPack
+                        traceStateList.append(traceStateCopy(newTraceState))
+                        print("done positive branch")
                     # sym_exec_block(new_params, left_branch, block, depth, func_call, current_func_name)
             except TimeoutError:
                 raise
             except Exception as e:
                 if global_params.DEBUG_MODE:
                     traceback.print_exc()
+
+            checkRevert = False
 
             solver.pop()  # POP SOLVER CONTEXT
             solver.push()  # SET A BOUNDARY FOR SOLVER
@@ -1102,13 +1116,17 @@ def symExecBlocks(traceStateList, traceState):
                     last_idx = len(new_params.path_conditions_and_vars["path_condition"]) - 1
                     new_params.analysis["time_dependency_bug"][last_idx] = global_state["pc"]
 
-                    newParamsPack = (new_params, right_branch, block, depth, func_call, current_func_name)
-                    newTraceState = traceStateCopy(traceState)
-                    oldTrace = newTraceState[1][0]
-                    newTraceState[1] = (oldTrace, deepcopy(thisTrace))
-                    newTraceState[2] = newParamsPack
-                    traceStateList.append(traceStateCopy(newTraceState))
-                    print("done negative branch")
+                    checkRevert = any([True for instruction in vertices[right_branch].get_instructions() if
+                                        instruction.startswith('REVERT')])
+
+                    if(checkRevert == False):
+                        newParamsPack = (new_params, right_branch, block, depth, func_call, current_func_name)
+                        newTraceState = traceStateCopy(traceState)
+                        oldTrace = newTraceState[1][0]
+                        newTraceState[1] = (oldTrace, deepcopy(thisTrace))
+                        newTraceState[2] = newParamsPack
+                        traceStateList.append(traceStateCopy(newTraceState))
+                        print("done negative branch")
                     # sym_exec_block(new_params, right_branch, block, depth, func_call, current_func_name)
             except TimeoutError:
                 raise
@@ -1203,10 +1221,11 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
     # collecting the analysis result by calling this skeletal function
     # this should be done before symbolically executing the instruction,
     # since SE will modify the stack and mem
-    # update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_and_vars, solver)
 
-    if opcode == "CALL" and analysis["reentrancy_bug"] and analysis["reentrancy_bug"][-1]:
-        global_problematic_pcs["reentrancy_bug"].append(global_state["pc"])
+    # 1 excluded check by Jo
+    # update_analysis(analysis, opcode, stack, mem, global_state, path_conditions_and_vars, solver)
+    # if opcode == "CALL" and analysis["reentrancy_bug"] and analysis["reentrancy_bug"][-1]:
+    #     global_problematic_pcs["reentrancy_bug"].append(global_state["pc"])
 
     log.debug("==============================")
     log.debug("EXECUTING: " + instr)
@@ -1235,6 +1254,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
                 # if both are symbolic z3 takes care of modulus automatically
                 computed = (first + second) % (2 ** 256)
             computed = simplify(computed) if is_expr(computed) else computed
+
             check_revert = False
             if jump_type[block] == 'conditional':
                 jump_target = vertices[block].get_jump_target()
@@ -1254,6 +1274,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
                             Overflow(global_state['pc'] - 1, solver.model()))
                         overflow_pcs.append(global_state['pc'] - 1)
                     solver.pop()
+
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
@@ -1284,7 +1305,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
                 computed = first - second
             else:
                 computed = (first - second) % (2 ** 256)
-            # computed = computed if is_expr(computed) else computed
+            computed = computed if is_expr(computed) else computed
 
             check_revert = False
             if jump_type[block] == 'conditional':
@@ -1308,6 +1329,8 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
+
+    # fixed by Jo : / -> //
     elif opcode == "DIV":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
@@ -1319,7 +1342,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
                 else:
                     first = to_unsigned(first)
                     second = to_unsigned(second)
-                    computed = first / second
+                    computed = first // second
             else:
                 first = to_symbolic(first)
                 second = to_symbolic(second)
@@ -1334,6 +1357,8 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
+
+    # fixed by Jo : / -> //
     elif opcode == "SDIV":
         if len(stack) > 1:
             global_state["pc"] = global_state["pc"] + 1
@@ -1347,8 +1372,8 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
                 elif first == -2 ** 255 and second == -1:
                     computed = -2 ** 255
                 else:
-                    sign = -1 if (first / second) < 0 else 1
-                    computed = sign * (abs(first) / abs(second))
+                    sign = -1 if (first // second) < 0 else 1
+                    computed = sign * (abs(first) // abs(second))
             else:
                 first = to_symbolic(first)
                 second = to_symbolic(second)
@@ -2319,6 +2344,11 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
             raise ValueError('STACK underflow')
     elif opcode == "CALL":
         # TODO: Need to handle miu_i
+
+        pc = global_state["pc"]
+        if pc not in g_calls:
+            g_calls[pc] = False
+
         if len(stack) > 6:
             calls.append(global_state["pc"])
             for call_pc in calls:
@@ -2385,8 +2415,11 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
                 unsatTraceState = traceStateCopy(traceState)
                 stack.pop(0)
 
+
                 if check_sat(solver) == unsat:
                     print("user == reciever")
+                    userIndex = thisTrace[0]
+
                     solver.pop()
                     new_balance_is = (global_state["balance"]["Is"] + transfer_amount)
                     global_state["balance"]["Is"] = new_balance_is
@@ -2395,6 +2428,9 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
 
                     updateStaticGlobalStateWithVal(staticGlobalState, userIndex, transfer_amount,
                                                    path_conditions_and_vars)
+
+                # 현재 user 가 reciever와 같을때만 구현 되어 있음.
+                # user 와 reciver 가 다를 경우의 새로운 유저 addr과 그와 관련된 잔액 변수등의 추가 구현 필요.
 
                 else:  # 컨트랙트 실행하는 사람과 돈을 받는 사람이 다를 경우..?? staticGlobalState 유저 추가부 추가 구현 필요
                     solver.pop()
@@ -2413,27 +2449,29 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
                     new_balance = (old_balance + transfer_amount)
                     global_state["balance"][new_address_name] = new_balance
 
+
                 new_balance_ia = (balance_ia - transfer_amount)
                 global_state["balance"]["Ia"] = new_balance_ia
 
                 stack.insert(0, 1)  # x = 1
                 satTraceState = traceStateCopy(traceState)
 
-                if (g_turnOnCheckReent == True):
-                    userIndex = thisTrace[0]
+                if (g_calls[pc] == False and g_turnOnCheckReent == True):
+
                     newTraceState = getNewTraceState(traceState, params, userIndex)
                     callStack = newTraceState[3]
 
                     if (len(callStack) > 0):
                         callStack = deepcopy(callStack)
+                        newTraceState[3] = callStack
 
                     stackFactor = deepcopy(satTraceState)
                     callStack.append(stackFactor)
 
                     traceStateList.append(newTraceState)
-                    traceStateList.append(unsatTraceState)
-                    traceStateList.append(satTraceState)
 
+                traceStateList.append(unsatTraceState)
+                traceStateList.append(satTraceState)
 
                 thisUserState = staticGlobalState[userIndex]
 
@@ -2444,13 +2482,15 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
                 constraint = thisUserState["depVals"] < thisUserState["withVals"]
                 solver.add(constraint)
 
-                if (solver.check() == sat):
+                if (g_calls[pc] == False and solver.check() == sat):
+                    g_calls[pc] = True
+
                     time.sleep(1)
 
                     log.info("there is ether flow problem")
-                    print(thisUserState["balance"])
-                    print(thisUserState["depVals"])
-                    print(thisUserState["withVals"])
+                    # print(thisUserState["balance"])
+                    # print(thisUserState["depVals"])
+                    # print(thisUserState["withVals"])
 
                     time.sleep(1)
                     log.info(solver.model())
@@ -3021,7 +3061,7 @@ def run(disasm_file=None, source_file=None, source_map=None):
 
         analyze()  # cfg 생성 및 symnolic execution
         log.info("\t============ Results ===========")
-        # ret = detect_vulnerabilities()
-        ret1 = None
+        ret = detect_vulnerabilities()
         closing_message()
-        return ret1
+        # return ret
+        return None
