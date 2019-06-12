@@ -56,7 +56,6 @@ class Parameter:
         _kwargs = custom_deepcopy(self.__dict__)
         return Parameter(**_kwargs)
 
-
 def initGlobalVars():
     global g_src_map
     global solver
@@ -415,7 +414,6 @@ def construct_bb():
 def construct_static_edges():
     add_falls_to()  # these edges are static
 
-
 def add_falls_to():
     global vertices
     global edges
@@ -427,9 +425,22 @@ def add_falls_to():
             edges[key].append(target)
             vertices[key].set_falls_to(target)
 
+def getNewUserAddr():
+    global g_addrs
+    global g_userAddrs
+
+    while(True):
+        addr = random.randrange(1, 2 ** 160 - 1)
+        if (g_addrs.count(addr) == 0):
+            break
+
+    g_addrs.append(addr)
+    userAddr = BitVecVal(addr, 256)
+    g_userAddrs.append(userAddr)
+
+    return addr, userAddr
 
 g_varCount = 0  #
-
 
 def getInitGlobalState(path_conditions_and_vars, staticGlobalState, userIndex):
     global g_varCount
@@ -583,7 +594,7 @@ def genUsers(userNum):
         addrs.append(addr)
         userAddrs.append(BitVecVal(addr, 256))
 
-    return userAddrs
+    return userAddrs, addrs
 
 
 def getRandUserIndex():
@@ -632,8 +643,9 @@ def getInitTrace(userIndex):
 def getInitTraceStateList():
     global g_userNum
     global g_userAddrs
+    global g_addrs
 
-    g_userAddrs = genUsers(g_userNum)  # z3constant
+    g_userAddrs, g_addrs = genUsers(g_userNum)  # z3constant
 
     traceStateList = []
 
@@ -738,10 +750,10 @@ def getNewTraceState(traceState, params, userIndex):
     globalState = params.global_state
 
     newStaticGlobalState = traceState[0]
-    trace = traceState[1]
+    oldTrace = traceState[1]
 
     newTrace = getInitTrace(userIndex)
-    newTrace = (trace, newTrace)
+    newTrace = (oldTrace, newTrace)
     pathConAndVars = deepcopy(params.path_conditions_and_vars)
     newGlobalState = getInitGlobalState(pathConAndVars, newStaticGlobalState, userIndex)
     newGlobalState["Ia"] = globalState["Ia"]
@@ -750,7 +762,7 @@ def getNewTraceState(traceState, params, userIndex):
     newParams = Parameter(path_conditions_and_vars=pathConAndVars, global_state=newGlobalState,
                           analysis=newAnalysis, sha3_list=sha3List)
     newParamsPack = getInitParamsPack(newParams)
-    newCallStack = traceState[3]
+    newCallStack = deepcopy(traceState[3])
     newTraceState = createTraceState(newStaticGlobalState, newTrace, newParamsPack, newCallStack)
 
     return traceStateCopy(newTraceState)
@@ -853,7 +865,7 @@ def symExecBlocks(traceStateList, traceState):
 
         constraint = global_state["balance"]["Ia"] >= depositValue
         path_conditions_and_vars["path_condition"].append(constraint)
-        constraint = global_state["balance"]["Is"] >= BitVec(0, 256)
+        constraint = global_state["balance"]["Is"] >= BitVecVal(0, 256)
         path_conditions_and_vars["path_condition"].append(constraint)
 
         updateStaticGlobalStateDepVal(staticGlobalState, userIndex, depositValue, path_conditions_and_vars)
@@ -941,6 +953,7 @@ def symExecBlocks(traceStateList, traceState):
                 # print("       after solver : ", solver)
                 continue
 
+            thisTrace[1].append(global_state["pc"])
             sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateList, traceState, solver)
             syncIndex = global_state["pc"]
 
@@ -952,7 +965,7 @@ def symExecBlocks(traceStateList, traceState):
         # Mark that this basic block in the visited blocks
 
         visited.append(block)
-        thisTrace[1].append(block)
+        # thisTrace[1].append(block)
         depth += 1
         lastIns = block_ins[-1]
         reentrancy_all_paths.append(analysis["reentrancy_bug"])
@@ -1056,10 +1069,10 @@ def symExecBlocks(traceStateList, traceState):
             checkRevert = False
 
             branch_expression = vertices[block].get_branch_expression()
-            log.debug("Branch expression: " + str(branch_expression))
+            log.info("Branch expression: " + str(branch_expression))
             solver.push()  # SET A BOUNDARY FOR SOLVER
             solver.add(branch_expression)
-            # print("<><><><><>positive :", branch_expression)
+            #
             try:
                 if solver.check() == unsat:
                     log.debug("INFEASIBLE PATH DETECTED")
@@ -1072,25 +1085,23 @@ def symExecBlocks(traceStateList, traceState):
                     last_idx = len(new_params.path_conditions_and_vars["path_condition"]) - 1
                     new_params.analysis["time_dependency_bug"][last_idx] = global_state["pc"]
 
-                    checkRevert = any([True for instruction in vertices[left_branch].get_instructions() if
-                                        instruction.startswith('REVERT')])
-
-                    if(checkRevert == False):
-                        newParamsPack = (new_params, left_branch, block, depth, func_call, current_func_name)
-                        newTraceState = traceStateCopy(traceState)
-                        oldTrace = newTraceState[1][0]
-                        newTraceState[1] = (oldTrace, deepcopy(thisTrace))
-                        newTraceState[2] = newParamsPack
-                        traceStateList.append(traceStateCopy(newTraceState))
-                        print("done positive branch")
+                    # checkRevert = any([True for instruction in vertices[left_branch].get_instructions() if
+                    #                     instruction.startswith('REVERT')])
+                    #
+                    # if(checkRevert == False):
+                    newParamsPack = (new_params, left_branch, block, depth, func_call, current_func_name)
+                    newTraceState = traceStateCopy(traceState)
+                    oldTrace = newTraceState[1][0]
+                    newTraceState[1] = (oldTrace, deepcopy(thisTrace))
+                    newTraceState[2] = newParamsPack
+                    traceStateList.append(traceStateCopy(newTraceState))
+                    print("done positive branch")
                     # sym_exec_block(new_params, left_branch, block, depth, func_call, current_func_name)
             except TimeoutError:
                 raise
             except Exception as e:
                 if global_params.DEBUG_MODE:
                     traceback.print_exc()
-
-            checkRevert = False
 
             solver.pop()  # POP SOLVER CONTEXT
             solver.push()  # SET A BOUNDARY FOR SOLVER
@@ -1116,17 +1127,17 @@ def symExecBlocks(traceStateList, traceState):
                     last_idx = len(new_params.path_conditions_and_vars["path_condition"]) - 1
                     new_params.analysis["time_dependency_bug"][last_idx] = global_state["pc"]
 
-                    checkRevert = any([True for instruction in vertices[right_branch].get_instructions() if
-                                        instruction.startswith('REVERT')])
-
-                    if(checkRevert == False):
-                        newParamsPack = (new_params, right_branch, block, depth, func_call, current_func_name)
-                        newTraceState = traceStateCopy(traceState)
-                        oldTrace = newTraceState[1][0]
-                        newTraceState[1] = (oldTrace, deepcopy(thisTrace))
-                        newTraceState[2] = newParamsPack
-                        traceStateList.append(traceStateCopy(newTraceState))
-                        print("done negative branch")
+                    # checkRevert = any([True for instruction in vertices[right_branch].get_instructions() if
+                    #                     instruction.startswith('REVERT')])
+                    #
+                    # if(checkRevert == False):
+                    newParamsPack = (new_params, right_branch, block, depth, func_call, current_func_name)
+                    newTraceState = traceStateCopy(traceState)
+                    oldTrace = newTraceState[1][0]
+                    newTraceState[1] = (oldTrace, deepcopy(thisTrace))
+                    newTraceState[2] = newParamsPack
+                    traceStateList.append(traceStateCopy(newTraceState))
+                    print("done negative branch")
                     # sym_exec_block(new_params, right_branch, block, depth, func_call, current_func_name)
             except TimeoutError:
                 raise
@@ -1235,7 +1246,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
     #
 
     if opcode == "STOP":
-        global_state["pc"] = global_state["pc"] + 1
+        # global_state["pc"] = global_state["pc"] + 1
         return
     elif opcode == "ADD":
         if len(stack) > 1:
@@ -1774,12 +1785,14 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
             s1 = stack.pop(0)
             if isAllReal(s0, s1):
                 # simulate the hashing of sha3
+
                 data = [str(x) for x in memory[s0: s0 + s1]]
                 position = ''.join(data)
                 position = re.sub('[\s+]', '', position)
                 position = zlib.compress(six.b(position), 9)
                 position = base64.b64encode(position)
                 position = position.decode('utf-8', 'strict')
+
                 if position in sha3_list:
                     stack.insert(0, sha3_list[position])
                 else:
@@ -1787,12 +1800,18 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
                     new_var = BitVec(new_var_name, 256)
                     sha3_list[position] = new_var
                     stack.insert(0, new_var)
+                    time.sleep(1)
+                    log.info("SHA3 LOG")
+                    log.info(position)
+                    log.info(new_var)
+                    time.sleep(1)
             else:
                 # push into the execution a fresh symbolic variable
                 new_var_name = gen.gen_arbitrary_var()
                 new_var = BitVec(new_var_name, 256)
                 path_conditions_and_vars[new_var_name] = new_var
                 stack.insert(0, new_var)
+
         else:
             raise ValueError('STACK underflow')
     #
@@ -2187,6 +2206,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
                         operators = '[-+*/%|&^!><=]'
                         new_var_name = re.compile(operators).split(new_var_name)[0].strip()
                         new_var_name = g_src_map.get_parameter_or_state_var(new_var_name)
+
                         if new_var_name:
                             new_var_name = gen.gen_owner_store_var(position, new_var_name)
                         else:
@@ -2248,7 +2268,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
                 except:
                     raise TypeError("Target address must be an integer")
             vertices[block].set_jump_target(target_address)
-            flag = stack.pop(0)  # 목적지 위치.
+            flag = stack.pop(0)
             branch_expression = (BitVecVal(0, 1) == BitVecVal(1, 1))  # 무조건 거짓인데 이걸 어디쓰는거지
 
             if isReal(flag):
@@ -2418,8 +2438,6 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
 
                 if check_sat(solver) == unsat:
                     print("user == reciever")
-                    userIndex = thisTrace[0]
-
                     solver.pop()
                     new_balance_is = (global_state["balance"]["Is"] + transfer_amount)
                     global_state["balance"]["Is"] = new_balance_is
@@ -2429,6 +2447,8 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
                     updateStaticGlobalStateWithVal(staticGlobalState, userIndex, transfer_amount,
                                                    path_conditions_and_vars)
 
+                    callUserIndex = userIndex
+
                 # 현재 user 가 reciever와 같을때만 구현 되어 있음.
                 # user 와 reciver 가 다를 경우의 새로운 유저 addr과 그와 관련된 잔액 변수등의 추가 구현 필요.
 
@@ -2436,11 +2456,18 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
                     solver.pop()
                     print("user != reciever")
                     if isReal(recipient):
-                        new_address_name = "concrete_address_" + str(recipient)
+                        # new_address_name = "concrete_address_" + str(recipient)
+                        new_address_name = str(recipient)
+                        userAddr = BitVec(new_address_name)
                     else:
-                        new_address_name = gen.gen_arbitrary_address_var()
+                        # new_address_name = gen.gen_arbitrary_address_var()
+                        new_address_name, userAddr = getNewUserAddr()
 
-                    old_balance_name = gen.gen_arbitrary_var()
+
+                    newUserIndex = len(staticGlobalState)
+                    userName = "user" + str(userIndex)
+
+                    old_balance_name = userName + "_balance"
                     old_balance = BitVec(old_balance_name, 256)
                     path_conditions_and_vars[old_balance_name] = old_balance
                     constraint = (old_balance >= 0)
@@ -2448,6 +2475,29 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
                     path_conditions_and_vars["path_condition"].append(constraint)
                     new_balance = (old_balance + transfer_amount)
                     global_state["balance"][new_address_name] = new_balance
+
+
+                    staticGlobalState[newUserIndex] = {}
+                    staticGlobalState[newUserIndex] = {"address": userAddr,
+                                                        "balance": new_balance,
+                                                        # "balance": BitVecVal(0, 256),
+                                                        "depVals": BitVecVal(0, 256),
+                                                        "withVals": transfer_amount}
+
+                    callUserIndex = newUserIndex
+
+                    # old_balance_name = gen.gen_arbitrary_var()
+                    # old_balance = BitVec(old_balance_name, 256)
+                    # path_conditions_and_vars[old_balance_name] = old_balance
+                    # constraint = (old_balance >= 0)
+                    # solver.add(constraint)
+                    # path_conditions_and_vars["path_condition"].append(constraint)
+                    # new_balance = (old_balance + transfer_amount)
+                    # global_state["balance"][new_address_name] = new_balance
+
+                    # print(recipient)
+                    # print(transfer_amount)
+                    # input()
 
 
                 new_balance_ia = (balance_ia - transfer_amount)
@@ -2458,21 +2508,15 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
 
                 if (g_calls[pc] == False and g_turnOnCheckReent == True):
 
-                    newTraceState = getNewTraceState(traceState, params, userIndex)
-                    callStack = newTraceState[3]
+                    newTraceState = getNewTraceState(traceState, params, callUserIndex)
 
-                    if (len(callStack) > 0):
-                        callStack = deepcopy(callStack)
-                        newTraceState[3] = callStack
-
-                    stackFactor = deepcopy(satTraceState)
-                    callStack.append(stackFactor)
+                    callStackFactor = deepcopy(satTraceState)
+                    callStack.append(callStackFactor)
 
                     traceStateList.append(newTraceState)
 
                 traceStateList.append(unsatTraceState)
                 traceStateList.append(satTraceState)
-
                 thisUserState = staticGlobalState[userIndex]
 
                 solver.push()
@@ -2627,7 +2671,12 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name, traceStateL
             global_state["pc"] = global_state["pc"] + 1
             x = stack.pop(0)
             y = stack.pop(0)
-            stack.insert(0, y >> x)
+
+            if isReal(y):
+                stack.insert(0, y >> x) # python에서 unsigned value 로 변환하는 방법 찾아서 변경필요.
+
+            else:
+                stack.insert(0, LShR(y, x))
 
         else:
             raise ValueError('STACK underflow')
