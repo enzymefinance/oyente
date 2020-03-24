@@ -127,7 +127,7 @@ And that's it! Run ```python oyente.py --help``` for a list of options.
 
 ## Paper
 
-The accompanying paper explaining the bugs detected by the tool can be found [here](http://www.comp.nus.edu.sg/~loiluu/papers/oyente.pdf).
+The accompanying paper explaining the bugs detected by the tool can be found [here](https://www.comp.nus.edu.sg/~prateeks/papers/Oyente.pdf).
 
 ## Miscellaneous Utilities
 
