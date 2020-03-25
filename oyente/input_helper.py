@@ -115,7 +115,8 @@ class InputHelper:
         else:
             out = run_command(cmd)
 
-        libs = re.findall(r"_+(.*?)_+", out)
+        noinfo_out = re.sub(r"\n======= (.*?) =======\nBinary of the runtime part: ", "", out)
+        libs = re.findall(r"_+(.*?)_+", noinfo_out)
         libs = set(libs)
         if libs:
             return self._link_libraries(self.source, libs)
