@@ -1,13 +1,13 @@
 Oyente
 ======
 
-*This repository is currently maintained by Xiao Liang Yu([@yxliang01](https://github.com/yxliang01). If you encounter any bugs or usage issues, please feel free to create an issue on [our issue tracker](https://github.com/melonproject/oyente/issues).*
-
 An Analysis Tool for Smart Contracts
 
 [![Gitter][gitter-badge]][gitter-url]
 [![License: GPL v3][license-badge]][license-badge-url]
 [![Build Status](https://travis-ci.org/melonproject/oyente.svg?branch=master)](https://travis-ci.org/melonproject/oyente)
+
+*This repository is currently maintained by Xiao Liang Yu([@yxliang01](https://github.com/yxliang01)). If you encounter any bugs or usage issues, please feel free to create an issue on [our issue tracker](https://github.com/melonproject/oyente/issues).*
 
 ## Quick Start
 
