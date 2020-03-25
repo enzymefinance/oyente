@@ -1,6 +1,8 @@
 Oyente
 ======
 
+*This repository is currently maintained by Xiao Liang Yu([@yxliang01](https://github.com/yxliang01). If you encounter any bugs or usage issues, please feel free to create an issue on [our issue tracker](https://github.com/melonproject/oyente/issues).*
+
 An Analysis Tool for Smart Contracts
 
 [![Gitter][gitter-badge]][gitter-url]
