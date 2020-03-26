@@ -1413,6 +1413,7 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
         else:
             raise ValueError('STACK underflow')
     elif opcode == "CODESIZE":
+        global_state["pc"] = global_state["pc"] + 1
         if g_disasm_file.endswith('.disasm'):
             evm_file_name = g_disasm_file[:-7]
         else:
