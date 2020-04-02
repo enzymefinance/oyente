@@ -35,7 +35,8 @@ def has_dependencies_installed():
         tested_z3_version = '4.5.1'
         if compare_versions(z3_version, tested_z3_version) > 0:
             logging.warning("You are using an untested version of z3. %s is the officially tested version" % tested_z3_version)
-    except:
+    except e:
+        logging.critical(e)
         logging.critical("Z3 is not available. Please install z3 from https://github.com/Z3Prover/z3.")
         return False
 
