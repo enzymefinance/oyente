@@ -11,7 +11,7 @@ An Analysis Tool for Smart Contracts
 
 ## Quick Start
 
-A container with the dependencies set up can be found [here](https://hub.docker.com/r/luongnguyen/oyente/).
+A container with required dependencies configured can be found [here](https://hub.docker.com/r/luongnguyen/oyente/). The image is however outdated. We are working on pushing the latest image to dockerhub for your convenience. If you experience any issue with this image, please try to build a new docker image by pulling this codebase before open an issue.
 
 To open the container, install docker and run:
 
