@@ -4,11 +4,11 @@ ARG SOLC_VERSION=0.4.19
 FROM ethereum/client-go:${ETHEREUM_VERSION} as geth
 FROM ethereum/solc:${SOLC_VERSION} as solc
 
-FROM ubuntu:bionic
+FROM ubuntu:bionic as CLI
 
 ARG NODEREPO=node_8.x
 
-LABEL maintainer "Luong Nguyen <luongnt.58@gmail.com>"
+LABEL maintainer "Xiao Liang <https://github.com/yxliang01>, Luong Nguyen <luongnt.58@gmail.com>"
 
 SHELL ["/bin/bash", "-c", "-l"]
 RUN apt-get update && apt-get -y upgrade
@@ -43,6 +43,12 @@ COPY --from=geth /usr/local/bin/evm /usr/local/bin/evm
 COPY --from=solc /usr/bin/solc /usr/bin/solc
 
 COPY . /oyente/
+
+WORKDIR /oyente/
+ENTRYPOINT ["python3", "/oyente/oyente.py"]
+
+FROM CLI as WEB
+
 RUN wget -O ruby-install-0.6.1.tar.gz https://github.com/postmodern/ruby-install/archive/v0.6.1.tar.gz
 RUN tar -xzvf ruby-install-0.6.1.tar.gz
 RUN cd ruby-install-0.6.1/ && make install
