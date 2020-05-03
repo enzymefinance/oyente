@@ -45,7 +45,7 @@ COPY --from=solc /usr/bin/solc /usr/bin/solc
 COPY . /oyente/
 
 WORKDIR /oyente/
-ENTRYPOINT ["python3", "/oyente/oyente.py"]
+ENTRYPOINT ["python3", "/oyente/oyente/oyente.py"]
 
 FROM CLI as WEB
 
