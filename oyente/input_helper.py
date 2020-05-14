@@ -161,6 +161,7 @@ class InputHelper:
                 if global_params.WEB:
                     six.print_({"error": "Solidity compilation failed."})
             else:
+                logging.critical("solc output:\n" + s)
                 logging.critical(err)
                 logging.critical("Solidity compilation failed.")
                 if global_params.WEB:
