@@ -87,7 +87,7 @@ class InputHelper:
                     'disasm_file': disasm_file
                 })
         if targetContracts is not None and not inputs:
-            raise ValueError("Targeted contract wasn't found in the input! No contract was processed!")
+            raise ValueError("Targeted contracts weren't found in the source code!")
         return inputs
 
     def rm_tmp_files(self):
