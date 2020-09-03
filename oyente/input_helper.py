@@ -8,6 +8,7 @@ import global_params
 import six
 from source_map import SourceMap
 from utils import run_command, run_command_with_err
+from crytic_compile import CryticCompile, InvalidCompilation
 
 class InputHelper:
     BYTECODE = 0
@@ -104,23 +105,39 @@ class InputHelper:
         return self.compiled_contracts
 
     def _compile_solidity(self):
-        if not self.allow_paths:
-            cmd = "solc --bin-runtime %s %s" % (self.remap, self.source)
-        else:
-            cmd = "solc --bin-runtime %s %s --allow-paths %s" % (self.remap, self.source, self.allow_paths)
-        err = ''
-        if self.compilation_err:
-            out, err = run_command_with_err(cmd)
-            err = re.sub(self.root_path, "", err)
-        else:
-            out = run_command(cmd)
+        try:
+            com = CryticCompile(self.source)
+            contracts = [(com.target + ':' + name, com.bytecode_runtime(name)) for name in com.contracts_names if com.bytecode_runtime(name)]
+            return contracts
+        except InvalidCompilation as err:
+            if not self.compilation_err:
+                logging.critical("Solidity compilation failed. Please use -ce flag to see the detail.")
+                if global_params.WEB:
+                    six.print_({"error": "Solidity compilation failed."})
+            else:
+                logging.critical("solc output:\n" + self.source)
+                logging.critical(err)
+                logging.critical("Solidity compilation failed.")
+                if global_params.WEB:
+                    six.print_({"error": err})
+            exit(1)
+        # if not self.allow_paths:
+        #     cmd = "solc --bin-runtime %s %s" % (self.remap, self.source)
+        # else:
+        #     cmd = "solc --bin-runtime %s %s --allow-paths %s" % (self.remap, self.source, self.allow_paths)
+        # err = ''
+        # if self.compilation_err:
+        #     out, err = run_command_with_err(cmd)
+        #     err = re.sub(self.root_path, "", err)
+        # else:
+        #     out = run_command(cmd)
 
-        libs = re.findall(r"_+(.*?)_+", out)
-        libs = set(libs)
-        if libs:
-            return self._link_libraries(self.source, libs)
-        else:
-            return self._extract_bin_str(out, err)
+        # libs = re.findall(r"_+(.*?)_+", out)
+        # libs = set(libs)
+        # if libs:
+        #     return self._link_libraries(self.source, libs)
+        # else:
+        #     return self._extract_bin_str(out, err)
 
     def _compile_standard_json(self):
         FNULL = open(os.devnull, 'w')
