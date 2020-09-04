@@ -24,7 +24,8 @@ from vulnerability import CallStack, TimeDependency, MoneyConcurrency, Reentranc
 import global_params
 
 log = logging.getLogger(__name__)
-
+log.setLevel(logging.INFO
+)
 UNSIGNED_BOUND_NUMBER = 2**256 - 1
 CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 

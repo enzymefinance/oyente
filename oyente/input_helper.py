@@ -113,8 +113,6 @@ class InputHelper:
             if libs:
                 libs = set(libs)
                 return self._link_libraries(self.source, libs)
-            else:
-                return contracts
             
             return contracts
         except InvalidCompilation as err:
@@ -130,12 +128,6 @@ class InputHelper:
                     six.print_({"error": err})
             exit(1)
 
-        # libs = re.findall(r"_+(.*?)_+", out)
-        # libs = set(libs)
-        # if libs:
-        #     return self._link_libraries(self.source, libs)
-        # else:
-        #     return self._extract_bin_str(out, err)
 
     def _compile_standard_json(self):
         FNULL = open(os.devnull, 'w')
