@@ -156,7 +156,7 @@ class InputHelper:
         return evm_without_hash
 
     def _extract_bin_str(self, s, err=''):
-        binary_regex = r"\n======= (.*?) =======\nBinary of the runtime part: \n(.*?)\n"
+        binary_regex = r"\n======= (.*?) =======\nBinary of the runtime part: ?\n(.*?)\n"
         contracts = re.findall(binary_regex, s)
         contracts = [contract for contract in contracts if contract[1]]
         if not contracts:

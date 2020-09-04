@@ -15,8 +15,8 @@ class Source:
         self.line_break_positions = self._load_line_break_positions()
 
     def _load_content(self):
-        with open(self.filename, 'r') as f:
-            content = f.read()
+        with open(self.filename, 'rb') as f:
+            content = f.read().decode('UTF-8')
         return content
 
     def _load_line_break_positions(self):
