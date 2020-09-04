@@ -108,6 +108,14 @@ class InputHelper:
         try:
             com = CryticCompile(self.source)
             contracts = [(com.target + ':' + name, com.bytecode_runtime(name)) for name in com.contracts_names if com.bytecode_runtime(name)]
+            
+            libs = [lib for _, bytecode in contracts for lib in re.findall(r"_+(.*?)_+", bytecode) if lib]
+            if libs:
+                libs = set(libs)
+                return self._link_libraries(self.source, libs)
+            else:
+                return contracts
+            
             return contracts
         except InvalidCompilation as err:
             if not self.compilation_err:
@@ -121,16 +129,6 @@ class InputHelper:
                 if global_params.WEB:
                     six.print_({"error": err})
             exit(1)
-        # if not self.allow_paths:
-        #     cmd = "solc --bin-runtime %s %s" % (self.remap, self.source)
-        # else:
-        #     cmd = "solc --bin-runtime %s %s --allow-paths %s" % (self.remap, self.source, self.allow_paths)
-        # err = ''
-        # if self.compilation_err:
-        #     out, err = run_command_with_err(cmd)
-        #     err = re.sub(self.root_path, "", err)
-        # else:
-        #     out = run_command(cmd)
 
         # libs = re.findall(r"_+(.*?)_+", out)
         # libs = set(libs)
