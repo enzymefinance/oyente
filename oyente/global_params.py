@@ -54,3 +54,6 @@ GENERATE_TEST_CASES = 0
 
 # Run Oyente in parallel
 PARALLEL = 0
+
+# Iterable of targeted smart contract names
+TARGET_CONTRACTS = None

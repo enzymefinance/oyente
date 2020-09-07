@@ -57,7 +57,7 @@ class InputHelper:
             else:
                 setattr(self, attr, val)
 
-    def get_inputs(self):
+    def get_inputs(self, targetContracts=None):
         inputs = []
         if self.input_type == InputHelper.BYTECODE:
             with open(self.source, 'r') as f:
@@ -71,6 +71,8 @@ class InputHelper:
             self._prepare_disasm_files_for_analysis(contracts)
             for contract, _ in contracts:
                 c_source, cname = contract.split(':')
+                if targetContracts is not None and cname not in targetContracts:
+                    continue
                 c_source = re.sub(self.root_path, "", c_source)
                 if self.input_type == InputHelper.SOLIDITY:
                     source_map = SourceMap(contract, self.source, 'solidity', self.root_path, self.remap, self.allow_paths)
@@ -85,6 +87,8 @@ class InputHelper:
                     'c_name': cname,
                     'disasm_file': disasm_file
                 })
+        if targetContracts is not None and not inputs:
+            raise ValueError("Targeted contracts weren't found in the source code!")
         return inputs
 
     def rm_tmp_files(self):

@@ -106,7 +106,7 @@ def analyze_solidity(input_type='solidity'):
         helper = InputHelper(InputHelper.STANDARD_JSON, source=args.source, evm=args.evm, allow_paths=args.allow_paths)
     elif input_type == 'standard_json_output':
         helper = InputHelper(InputHelper.STANDARD_JSON_OUTPUT, source=args.source, evm=args.evm)
-    inputs = helper.get_inputs()
+    inputs = helper.get_inputs(global_params.TARGET_CONTRACTS)
     results, exit_code = run_solidity_analysis(inputs)
     helper.rm_tmp_files()
 
@@ -125,6 +125,8 @@ def main():
     group.add_argument("-s",  "--source",    type=str, help="local source file name. Solidity by default. Use -b to process evm instead. Use stdin to read from stdin.")
     group.add_argument("-ru", "--remoteURL", type=str, help="Get contract from remote URL. Solidity by default. Use -b to process evm instead.", dest="remote_URL")
 
+    parser.add_argument("-cnames", "--target-contracts", type=str, nargs="+", help="The name of targeted contracts. If specified, only the specified contracts in the source code will be processed. By default, all contracts in Solidity code are processed.")
+    
     parser.add_argument("--version", action="version", version="oyente version 0.2.7 - Commonwealth")
 
     parser.add_argument("-rmp", "--remap",          help="Remap directory paths", action="store", type=str)
@@ -174,6 +176,7 @@ def main():
         rootLogger.setLevel(level=logging.DEBUG)
     else:
         rootLogger.setLevel(level=logging.INFO)
+
     global_params.PRINT_PATHS = 1 if args.paths else 0
     global_params.REPORT_MODE = 1 if args.report else 0
     global_params.USE_GLOBAL_BLOCKCHAIN = 1 if args.globalblockchain else 0
@@ -184,7 +187,11 @@ def main():
     global_params.DEBUG_MODE = 1 if args.debug else 0
     global_params.GENERATE_TEST_CASES = 1 if args.generate_test_cases else 0
     global_params.PARALLEL = 1 if args.parallel else 0
-
+    
+    if args.target_contracts and args.bytecode:
+        parser.error('Targeted contracts cannot be specifed when the bytecode is provided (Instead of Solidity source code).')
+    global_params.TARGET_CONTRACTS = args.target_contracts
+    
     if args.depth_limit:
         global_params.DEPTH_LIMIT = args.depth_limit
     if args.gas_limit:
