@@ -32,7 +32,7 @@ def init_analysis():
 # Money flow: (source, destination, amount)
 
 def display_analysis(analysis):
-    logging.debug("Money flow: " + str(analysis["money_flow"]))
+    log.debug("Money flow: " + str(analysis["money_flow"]))
 
 # Check if this call has the Reentrancy bug
 # Return true if it does, false otherwise
