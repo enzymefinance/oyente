@@ -278,7 +278,7 @@ def mapping_non_push_instruction(current_line_content, current_ins_address, idx,
                 idx += 1
                 break;
             else:
-                raise Exception("Source map error")
+                raise RuntimeError(F"Source map error, unknown name({name}) or instr_name({instr_name})")
     return idx
 
 # 1. Parse the disassembled file
