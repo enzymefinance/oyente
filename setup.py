@@ -35,6 +35,7 @@ setup(
     install_requires=[
         'requests',
         'web3',
-        'z3-solver'
+        'z3-solver',
+        'crytic-compile'
     ]
 )
