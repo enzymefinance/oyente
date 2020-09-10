@@ -24,6 +24,7 @@ from vulnerability import CallStack, TimeDependency, MoneyConcurrency, Reentranc
 import global_params
 
 log = logging.getLogger(__name__)
+
 UNSIGNED_BOUND_NUMBER = 2**256 - 1
 CONSTANT_ONES_159 = BitVecVal((1 << 160) - 1, 256)
 
@@ -277,7 +278,7 @@ def mapping_non_push_instruction(current_line_content, current_ins_address, idx,
                 idx += 1
                 break;
             else:
-                raise RuntimeError(F"Source map error, unknown name({name}) or instr_name({instr_name})")
+                raise Exception("Source map error")
     return idx
 
 # 1. Parse the disassembled file

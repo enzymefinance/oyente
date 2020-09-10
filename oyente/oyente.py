@@ -169,14 +169,10 @@ def main():
     if args.timeout:
         global_params.TIMEOUT = args.timeout
 
-    logging.basicConfig()
-    rootLogger = logging.getLogger(None)
-
     if args.verbose:
-        rootLogger.setLevel(level=logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG)
     else:
-        rootLogger.setLevel(level=logging.INFO)
-
+        logging.basicConfig(level=logging.INFO)
     global_params.PRINT_PATHS = 1 if args.paths else 0
     global_params.REPORT_MODE = 1 if args.report else 0
     global_params.USE_GLOBAL_BLOCKCHAIN = 1 if args.globalblockchain else 0
