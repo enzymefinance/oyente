@@ -113,9 +113,8 @@ class InputHelper:
             com = CryticCompile(self.source)
             contracts = [(com.target + ':' + name, com.bytecode_runtime(name)) for name in com.contracts_names if com.bytecode_runtime(name)]
             
-            libs = [lib for _, bytecode in contracts for lib in re.findall(r"_+(.*?)_+", bytecode) if lib]
+            libs = {lib for _, bytecode in contracts for lib in re.findall(r"_+(.*?)_+", bytecode) if lib}
             if libs:
-                libs = set(libs)
                 return self._link_libraries(self.source, libs)
             
             return contracts
