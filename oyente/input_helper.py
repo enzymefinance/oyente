@@ -161,41 +161,16 @@ class InputHelper:
         evm_without_hash = re.sub(r"a165627a7a72305820\S{64}0029$", "", evm)
         return evm_without_hash
 
-    def _extract_bin_str(self, s, err=''):
-        binary_regex = r"\n======= (.*?) =======\nBinary of the runtime part: ?\n(.*?)\n"
-        contracts = re.findall(binary_regex, s)
-        contracts = [contract for contract in contracts if contract[1]]
-        if not contracts:
-            if not self.compilation_err:
-                logging.critical("Solidity compilation failed. Please use -ce flag to see the detail.")
-                if global_params.WEB:
-                    six.print_({"error": "Solidity compilation failed."})
-            else:
-                logging.critical("solc output:\n" + s)
-                logging.critical(err)
-                logging.critical("Solidity compilation failed.")
-                if global_params.WEB:
-                    six.print_({"error": err})
-
-            exit(1)
-        return contracts
-
     def _link_libraries(self, filename, libs):
         option = ""
         for idx, lib in enumerate(libs):
             lib_address = "0x" + hex(idx+1)[2:].zfill(40)
             option += " --libraries %s:%s" % (lib, lib_address)
-        FNULL = open(os.devnull, 'w')
-        if not self.allow_paths:
-            cmd = "solc --bin-runtime %s %s" % (self.remap, self.source)
-        else:
-            cmd = "solc --bin-runtime %s %s --allow-paths %s" % (self.remap, self.source, self.allow_paths)
-        p1 = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)
-        cmd = "solc --link%s" %option
-        p2 = subprocess.Popen(shlex.split(cmd), stdin=p1.stdout, stdout=subprocess.PIPE, stderr=FNULL)
-        p1.stdout.close()
-        out = p2.communicate()[0].decode('utf-8', 'strict')
-        return self._extract_bin_str(out)
+
+        com = CryticCompile(target=self.source, solc_args=option[1:])
+        contracts = [(com.target + ':' + name, com.bytecode_runtime(name)) for name in com.contracts_names if com.bytecode_runtime(name)]
+        
+        return contracts
 
     def _prepare_disasm_files_for_analysis(self, contracts):
         for contract, bytecode in contracts:
