@@ -111,7 +111,7 @@ class InputHelper:
     def _compile_solidity(self):
         try:
             com = CryticCompile(self.source, solc_remaps=self.remap)
-            contracts = [(com.target + ':' + name, com.bytecode_runtime(name)) for name in com.contracts_names if com.bytecode_runtime(name)]
+            contracts = [(com.contracts_filenames[name].absolute + ':' + name, com.bytecode_runtime(name)) for name in com.contracts_names if com.bytecode_runtime(name)]
             
             libs = {lib for _, bytecode in contracts for lib in re.findall(r"_+(.*?)_+", bytecode) if lib}
             if libs:
@@ -168,7 +168,7 @@ class InputHelper:
             option += " --libraries %s:%s" % (lib, lib_address)
 
         com = CryticCompile(target=self.source, solc_args=option[1:], solc_remaps=self.remap)
-        contracts = [(com.target + ':' + name, com.bytecode_runtime(name)) for name in com.contracts_names if com.bytecode_runtime(name)]
+        contracts = [(com.contracts_filenames[name].absolute + ':' + name, com.bytecode_runtime(name)) for name in com.contracts_names if com.bytecode_runtime(name)]
         
         return contracts
 
