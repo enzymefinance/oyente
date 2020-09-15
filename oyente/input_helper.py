@@ -108,10 +108,13 @@ class InputHelper:
 
         return self.compiled_contracts
 
+    def _extract_bin_obj(self, com: CryticCompile):
+        return [(com.contracts_filenames[name].used + ':' + name, com.bytecode_runtime(name)) for name in com.contracts_names if com.bytecode_runtime(name)]
+
     def _compile_solidity(self):
         try:
             com = CryticCompile(self.source, solc_remaps=self.remap)
-            contracts = [(com.contracts_filenames[name].absolute + ':' + name, com.bytecode_runtime(name)) for name in com.contracts_names if com.bytecode_runtime(name)]
+            contracts = self._extract_bin_obj(com)
             
             libs = {lib for _, bytecode in contracts for lib in re.findall(r"_+(.*?)_+", bytecode) if lib}
             if libs:
@@ -168,9 +171,8 @@ class InputHelper:
             option += " --libraries %s:%s" % (lib, lib_address)
 
         com = CryticCompile(target=self.source, solc_args=option[1:], solc_remaps=self.remap)
-        contracts = [(com.contracts_filenames[name].absolute + ':' + name, com.bytecode_runtime(name)) for name in com.contracts_names if com.bytecode_runtime(name)]
-        
-        return contracts
+
+        return self._extract_bin_obj(com)
 
     def _prepare_disasm_files_for_analysis(self, contracts):
         for contract, bytecode in contracts:
