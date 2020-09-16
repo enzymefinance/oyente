@@ -113,7 +113,11 @@ class InputHelper:
 
     def _compile_solidity(self):
         try:
-            com = CryticCompile(self.source, solc_remaps=self.remap)
+            options = []
+            if self.allow_paths:
+                options.append(F"--allow-paths {self.allow_paths}")
+                
+            com = CryticCompile(self.source, solc_remaps=self.remap, solc_args=' '.join(options))
             contracts = self._extract_bin_obj(com)
             
             libs = {lib for _, bytecode in contracts for lib in re.findall(r"_+(.*?)_+", bytecode) if lib}
