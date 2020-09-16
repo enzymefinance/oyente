@@ -165,7 +165,7 @@ class InputHelper:
         return evm_without_hash
 
     def _link_libraries(self, filename, libs):
-        option = ""
+        options = []
         for idx, lib in enumerate(libs):
             lib_address = "0x" + hex(idx+1)[2:].zfill(40)
             option += " --libraries %s:%s" % (lib, lib_address)
@@ -226,4 +226,3 @@ class InputHelper:
     def _rm_file(self, path):
         if os.path.isfile(path):
             os.unlink(path)
-
