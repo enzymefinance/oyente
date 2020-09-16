@@ -169,7 +169,8 @@ class InputHelper:
         for idx, lib in enumerate(libs):
             lib_address = "0x" + hex(idx+1)[2:].zfill(40)
             options.append("--libraries %s:%s" % (lib, lib_address))
-
+        if self.allow_paths:
+            options.append(F"--allow-paths {self.allow_paths}")
         com = CryticCompile(target=self.source, solc_args=option[1:], solc_remaps=self.remap)
 
         return self._extract_bin_obj(com)
