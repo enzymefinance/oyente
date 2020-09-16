@@ -36,6 +36,6 @@ setup(
         'requests',
         'web3',
         'z3-solver',
-        'crytic-compile'
+        'crytic-compile',
     ]
 )
