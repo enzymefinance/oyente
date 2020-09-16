@@ -168,7 +168,7 @@ class InputHelper:
         options = []
         for idx, lib in enumerate(libs):
             lib_address = "0x" + hex(idx+1)[2:].zfill(40)
-            option += " --libraries %s:%s" % (lib, lib_address)
+            options.append("--libraries %s:%s" % (lib, lib_address))
 
         com = CryticCompile(target=self.source, solc_args=option[1:], solc_remaps=self.remap)
 
