@@ -1301,6 +1301,28 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
             stack.insert(0, computed)
         else:
             raise ValueError('STACK underflow')
+    elif opcode == "SHL":
+        if len(stack) > 1:
+            global_state["pc"] = global_state["pc"] + 1
+            first = stack.pop(0)
+            second = stack.pop(0)
+
+            computed = second << first
+            computed = simplify(computed) if is_expr(computed) else computed
+            stack.insert(0, computed)
+        else:
+            raise ValueError('STACK underflow')
+    elif opcode == "SHR":
+        if len(stack) > 1:
+            global_state["pc"] = global_state["pc"] + 1
+            first = stack.pop(0)
+            second = stack.pop(0)
+
+            computed = second >> first
+            computed = simplify(computed) if is_expr(computed) else computed
+            stack.insert(0, computed)
+        else:
+            raise ValueError('STACK underflow')
     #
     # 20s: SHA3
     #
