@@ -24,6 +24,9 @@ opcodes = {
     "XOR": [0x18, 2, 1],
     "NOT": [0x19, 1, 1],
     "BYTE": [0x1a, 2, 1],
+    "SHL": [0x1b, 2, 1],
+    "SHR": [0x1c, 2, 1],
+    "SAR": [0x1d, 2, 1],
     "SHA3": [0x20, 2, 1],
     "ADDRESS": [0x30, 0, 1],
     "BALANCE": [0x31, 1, 1],
@@ -134,8 +137,8 @@ Wbase = ("ADDRESS", "ORIGIN", "CALLER", "CALLVALUE", "CALLDATASIZE",
          "DIFFICULTY", "GASLIMIT", "POP", "PC", "MSIZE", "GAS")
 
 Wverylow = ("ADD", "SUB", "NOT", "LT", "GT", "SLT", "SGT", "EQ",
-            "ISZERO", "AND", "OR", "XOR", "BYTE", "CALLDATALOAD",
-            "MLOAD", "MSTORE", "MSTORE8", "PUSH", "DUP", "SWAP")
+            "ISZERO", "AND", "OR", "XOR", "BYTE", "SHL", "SHR", "SAR",
+            "CALLDATALOAD", "MLOAD", "MSTORE", "MSTORE8", "PUSH", "DUP", "SWAP")
 
 Wlow = ("MUL", "DIV", "SDIV", "MOD", "SMOD", "SIGNEXTEND")
 
