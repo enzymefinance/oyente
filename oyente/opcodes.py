@@ -150,7 +150,6 @@ Whigh = ("JUMPI")
 
 Wext = ("EXTCODESIZE")
 
-
 def get_opcode(opcode):
     if opcode in opcodes:
         return opcodes[opcode]
