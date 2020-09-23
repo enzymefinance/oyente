@@ -42,6 +42,7 @@ opcodes = {
     "EXTCODESIZE": [0x3b, 1, 1],
     "EXTCODECOPY": [0x3c, 4, 0],
     "MCOPY": [0x3d, 3, 0],
+    "EXTCODEHASH": [0x3f, 1, 1],
     "BLOCKHASH": [0x40, 1, 1],
     "COINBASE": [0x41, 0, 1],
     "TIMESTAMP": [0x42, 0, 1],
@@ -76,7 +77,7 @@ opcodes = {
     "REVERT": [0xfd, 2, 0],
     "ASSERTFAIL": [0xfe, 0, 0],
     "DELEGATECALL": [0xf4, 6, 1],
-    "BREAKPOINT": [0xf5, 0, 0],
+    "CREATE2": [0xf5, 4, 1],
     "RNGSEED": [0xf6, 1, 1],
     "SSIZEEXT": [0xf7, 2, 1],
     "SLOADBYTES": [0xf8, 3, 0],
@@ -100,6 +101,7 @@ GCOST = {
     "Gmid": 8,
     "Ghigh": 10,
     "Gextcode": 20,
+    "Gextcodehash": 400,
     "Gbalance": 400,
     "Gsload": 50,
     "Gjumpdest": 1,
@@ -148,6 +150,7 @@ Whigh = ("JUMPI")
 
 Wext = ("EXTCODESIZE")
 
+
 def get_opcode(opcode):
     if opcode in opcodes:
         return opcodes[opcode]
@@ -183,6 +186,8 @@ def get_ins_cost(opcode):
         return GCOST["Ghigh"]
     elif opcode in Wext:
         return GCOST["Gextcode"]
+    elif opcode == "EXTCODEHASH":
+        return GCOST["Gextcodehash"]
     elif opcode == "EXP":
         return GCOST["Gexp"]
     elif opcode == "SLOAD":
