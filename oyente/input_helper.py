@@ -119,8 +119,8 @@ class InputHelper:
                 
             com = CryticCompile(self.source, solc_remaps=self.remap, solc_args=' '.join(options))
             contracts = self._extract_bin_obj(com)
-            
-            libs = {lib for _, bytecode in contracts for lib in re.findall(r"_+(.*?)_+", bytecode) if lib}
+
+            libs = com.contracts_names.difference(com.contracts_names_without_libraries)
             if libs:
                 return self._link_libraries(self.source, libs)
             
