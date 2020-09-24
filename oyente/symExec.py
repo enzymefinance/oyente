@@ -1549,6 +1549,19 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
             global_state["miu_i"] = current_miu_i
         else:
             raise ValueError('STACK underflow')
+    elif opcode == "EXTCODEHASH":
+        if len(stack) > 0:
+            global_state["pc"] = global_state["pc"] + 1
+            stack.pop(0)
+            new_var_name = "IH_extcodehash"
+            if new_var_name in path_conditions_and_vars:
+                new_var = path_conditions_and_vars[new_var_name]
+            else:
+                new_var = BitVec(new_var_name, 256)
+                path_conditions_and_vars[new_var_name] = new_var
+            stack.insert(0, new_var)
+        else:
+            raise ValueError('STACK underflow')
     #
     #  40s: Block Information
     #
@@ -1990,6 +2003,18 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
                 path_conditions_and_vars["path_condition"].append(is_enough_fund)
                 last_idx = len(path_conditions_and_vars["path_condition"]) - 1
                 analysis["time_dependency_bug"][last_idx] = global_state["pc"] - 1
+        else:
+            raise ValueError('STACK underflow')
+    elif opcode == "CREATE2":
+        if len(stack) > 3:
+            global_state["pc"] += 1
+            stack.pop(0)
+            stack.pop(0)
+            stack.pop(0)
+            stack.pop(0)
+            new_var_name = gen.gen_arbitrary_var()
+            new_var = BitVec(new_var_name, 256)
+            stack.insert(0, new_var)
         else:
             raise ValueError('STACK underflow')
     elif opcode in ("DELEGATECALL", "STATICCALL"):
