@@ -151,9 +151,7 @@ def calculate_gas(opcode, stack, mem, global_state, analysis, solver):
                 gas_increment += GCOST["Gcallvalue"]
             solver.pop()
     elif opcode == "SHA3" and isReal(stack[1]):
-        gas_increment += GCOST["Gsha3word"] * math.ceil(stack[1] / 32)
-    elif opcode == "CREATE2" and isReal(stack[2]):
-        gas_increment += GCOST["Gsha3word"] * math.ceil(stack[2] / 32)
+        pass # Not handle
 
 
     #Calculate gas memory, add it to total gas used
