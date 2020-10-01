@@ -1318,7 +1318,10 @@ def sym_exec_ins(params, block, instr, func_call, current_func_name):
             first = stack.pop(0)
             second = stack.pop(0)
             #256 bit logical shift right
-            computed = (second % (1 << 256)) >> first
+            if isAllReal(first, second):
+                computed = (second % (1 << 256)) >> first
+            else:
+                computed = LShR(second, first)
             computed = simplify(computed) if is_expr(computed) else computed
             stack.insert(0, computed)
         else:
