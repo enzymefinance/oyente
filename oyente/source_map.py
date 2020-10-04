@@ -3,10 +3,10 @@ import six
 import ast
 import json
 
-import global_params
+from . import global_params
 
-from utils import run_command
-from ast_helper import AstHelper
+from .utils import run_command
+from .ast_helper import AstHelper
 
 class Source:
     def __init__(self, filename):
