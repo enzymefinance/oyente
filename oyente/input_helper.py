@@ -109,7 +109,7 @@ class InputHelper:
         return self.compiled_contracts
 
     def _extract_bin_obj(self, com: CryticCompile):
-        return [(com.contracts_filenames[name].used + ':' + name, com.bytecode_runtime(name)) for name in com.contracts_names if com.bytecode_runtime(name)]
+        return [(com.contracts_filenames[name].absolute + ':' + name, com.bytecode_runtime(name)) for name in com.contracts_names if com.bytecode_runtime(name)]
 
     def _compile_solidity(self):
         try:
