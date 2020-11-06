@@ -24,6 +24,9 @@ opcodes = {
     "XOR": [0x18, 2, 1],
     "NOT": [0x19, 1, 1],
     "BYTE": [0x1a, 2, 1],
+    "SHL": [0x1b, 2, 1],
+    "SHR": [0x1c, 2, 1],
+    "SAR": [0x1d, 2, 1],
     "SHA3": [0x20, 2, 1],
     "ADDRESS": [0x30, 0, 1],
     "BALANCE": [0x31, 1, 1],
@@ -39,6 +42,7 @@ opcodes = {
     "EXTCODESIZE": [0x3b, 1, 1],
     "EXTCODECOPY": [0x3c, 4, 0],
     "MCOPY": [0x3d, 3, 0],
+    "EXTCODEHASH": [0x3f, 1, 1],
     "BLOCKHASH": [0x40, 1, 1],
     "COINBASE": [0x41, 0, 1],
     "TIMESTAMP": [0x42, 0, 1],
@@ -73,7 +77,7 @@ opcodes = {
     "REVERT": [0xfd, 2, 0],
     "ASSERTFAIL": [0xfe, 0, 0],
     "DELEGATECALL": [0xf4, 6, 1],
-    "BREAKPOINT": [0xf5, 0, 0],
+    "CREATE2": [0xf5, 4, 1],
     "RNGSEED": [0xf6, 1, 1],
     "SSIZEEXT": [0xf7, 2, 1],
     "SLOADBYTES": [0xf8, 3, 0],
@@ -97,6 +101,7 @@ GCOST = {
     "Gmid": 8,
     "Ghigh": 10,
     "Gextcode": 20,
+    "Gextcodehash": 400,
     "Gbalance": 400,
     "Gsload": 50,
     "Gjumpdest": 1,
@@ -134,8 +139,8 @@ Wbase = ("ADDRESS", "ORIGIN", "CALLER", "CALLVALUE", "CALLDATASIZE",
          "DIFFICULTY", "GASLIMIT", "POP", "PC", "MSIZE", "GAS")
 
 Wverylow = ("ADD", "SUB", "NOT", "LT", "GT", "SLT", "SGT", "EQ",
-            "ISZERO", "AND", "OR", "XOR", "BYTE", "CALLDATALOAD",
-            "MLOAD", "MSTORE", "MSTORE8", "PUSH", "DUP", "SWAP")
+            "ISZERO", "AND", "OR", "XOR", "BYTE", "SHL", "SHR", "SAR",
+            "CALLDATALOAD", "MLOAD", "MSTORE", "MSTORE8", "PUSH", "DUP", "SWAP")
 
 Wlow = ("MUL", "DIV", "SDIV", "MOD", "SMOD", "SIGNEXTEND")
 
@@ -180,6 +185,8 @@ def get_ins_cost(opcode):
         return GCOST["Ghigh"]
     elif opcode in Wext:
         return GCOST["Gextcode"]
+    elif opcode == "EXTCODEHASH":
+        return GCOST["Gextcodehash"]
     elif opcode == "EXP":
         return GCOST["Gexp"]
     elif opcode == "SLOAD":
@@ -188,7 +195,7 @@ def get_ins_cost(opcode):
         return GCOST["Gjumpdest"]
     elif opcode == "SHA3":
         return GCOST["Gsha3"]
-    elif opcode == "CREATE":
+    elif opcode in ("CREATE", "CREATE2"):
         return GCOST["Gcreate"]
     elif opcode in ("CALL", "CALLCODE"):
         return GCOST["Gcall"]
