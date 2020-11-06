@@ -8,6 +8,7 @@ import global_params
 import six
 from source_map import SourceMap
 from utils import run_command, run_command_with_err
+from crytic_compile import CryticCompile, InvalidCompilation
 
 class InputHelper:
     BYTECODE = 0
@@ -107,24 +108,36 @@ class InputHelper:
 
         return self.compiled_contracts
 
-    def _compile_solidity(self):
-        if not self.allow_paths:
-            cmd = "solc --bin-runtime %s %s" % (self.remap, self.source)
-        else:
-            cmd = "solc --bin-runtime %s %s --allow-paths %s" % (self.remap, self.source, self.allow_paths)
-        err = ''
-        if self.compilation_err:
-            out, err = run_command_with_err(cmd)
-            err = re.sub(self.root_path, "", err)
-        else:
-            out = run_command(cmd)
+    def _extract_bin_obj(self, com: CryticCompile):
+        return [(com.contracts_filenames[name].absolute + ':' + name, com.bytecode_runtime(name)) for name in com.contracts_names if com.bytecode_runtime(name)]
 
-        libs = re.findall(r"_+(.*?)_+", out)
-        libs = set(libs)
-        if libs:
-            return self._link_libraries(self.source, libs)
-        else:
-            return self._extract_bin_str(out, err)
+    def _compile_solidity(self):
+        try:
+            options = []
+            if self.allow_paths:
+                options.append(F"--allow-paths {self.allow_paths}")
+                
+            com = CryticCompile(self.source, solc_remaps=self.remap, solc_args=' '.join(options))
+            contracts = self._extract_bin_obj(com)
+
+            libs = com.contracts_names.difference(com.contracts_names_without_libraries)
+            if libs:
+                return self._link_libraries(self.source, libs)
+            
+            return contracts
+        except InvalidCompilation as err:
+            if not self.compilation_err:
+                logging.critical("Solidity compilation failed. Please use -ce flag to see the detail.")
+                if global_params.WEB:
+                    six.print_({"error": "Solidity compilation failed."})
+            else:
+                logging.critical("solc output:\n" + self.source)
+                logging.critical(err)
+                logging.critical("Solidity compilation failed.")
+                if global_params.WEB:
+                    six.print_({"error": err})
+            exit(1)
+
 
     def _compile_standard_json(self):
         FNULL = open(os.devnull, 'w')
@@ -155,41 +168,16 @@ class InputHelper:
         evm_without_hash = re.sub(r"a165627a7a72305820\S{64}0029$", "", evm)
         return evm_without_hash
 
-    def _extract_bin_str(self, s, err=''):
-        binary_regex = r"\n======= (.*?) =======\nBinary of the runtime part: ?\n(.*?)\n"
-        contracts = re.findall(binary_regex, s)
-        contracts = [contract for contract in contracts if contract[1]]
-        if not contracts:
-            if not self.compilation_err:
-                logging.critical("Solidity compilation failed. Please use -ce flag to see the detail.")
-                if global_params.WEB:
-                    six.print_({"error": "Solidity compilation failed."})
-            else:
-                logging.critical("solc output:\n" + s)
-                logging.critical(err)
-                logging.critical("Solidity compilation failed.")
-                if global_params.WEB:
-                    six.print_({"error": err})
-
-            exit(1)
-        return contracts
-
     def _link_libraries(self, filename, libs):
-        option = ""
+        options = []
         for idx, lib in enumerate(libs):
             lib_address = "0x" + hex(idx+1)[2:].zfill(40)
-            option += " --libraries %s:%s" % (lib, lib_address)
-        FNULL = open(os.devnull, 'w')
-        if not self.allow_paths:
-            cmd = "solc --bin-runtime %s %s" % (self.remap, self.source)
-        else:
-            cmd = "solc --bin-runtime %s %s --allow-paths %s" % (self.remap, self.source, self.allow_paths)
-        p1 = subprocess.Popen(shlex.split(cmd), stdout=subprocess.PIPE, stderr=FNULL)
-        cmd = "solc --link%s" %option
-        p2 = subprocess.Popen(shlex.split(cmd), stdin=p1.stdout, stdout=subprocess.PIPE, stderr=FNULL)
-        p1.stdout.close()
-        out = p2.communicate()[0].decode('utf-8', 'strict')
-        return self._extract_bin_str(out)
+            options.append("--libraries %s:%s" % (lib, lib_address))
+        if self.allow_paths:
+            options.append(F"--allow-paths {self.allow_paths}")
+        com = CryticCompile(target=self.source, solc_args=' '.join(options), solc_remaps=self.remap)
+
+        return self._extract_bin_obj(com)
 
     def _prepare_disasm_files_for_analysis(self, contracts):
         for contract, bytecode in contracts:
@@ -243,4 +231,3 @@ class InputHelper:
     def _rm_file(self, path):
         if os.path.isfile(path):
             os.unlink(path)
-
