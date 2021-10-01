@@ -594,11 +594,15 @@ def sym_exec_block(params, block, pre_block, depth, func_call, current_func_name
 
     if visited_edges[current_edge] > global_params.LOOP_LIMIT:
         log.debug("Overcome a number of loop limit. Terminating this path ...")
+        updated_count_number = visited_edges[current_edge] - 1
+        visited_edges.update({current_edge: updated_count_number})
         return stack
 
     current_gas_used = analysis["gas"]
     if current_gas_used > global_params.GAS_LIMIT:
         log.debug("Run out of gas. Terminating this path ... ")
+        updated_count_number = visited_edges[current_edge] - 1
+        visited_edges.update({current_edge: updated_count_number})
         return stack
 
     # Execute every instruction, one at a time
@@ -606,6 +610,8 @@ def sym_exec_block(params, block, pre_block, depth, func_call, current_func_name
         block_ins = vertices[block].get_instructions()
     except KeyError:
         log.debug("This path results in an exception, possibly an invalid jump address")
+        updated_count_number = visited_edges[current_edge] - 1
+        visited_edges.update({current_edge: updated_count_number})
         return ["ERROR"]
 
     for instr in block_ins:
@@ -719,13 +725,13 @@ def sym_exec_block(params, block, pre_block, depth, func_call, current_func_name
             if global_params.DEBUG_MODE:
                 traceback.print_exc()
         solver.pop()  # POP SOLVER CONTEXT
-        updated_count_number = visited_edges[current_edge] - 1
-        visited_edges.update({current_edge: updated_count_number})
     else:
         updated_count_number = visited_edges[current_edge] - 1
         visited_edges.update({current_edge: updated_count_number})
         raise Exception('Unknown Jump-Type')
 
+    updated_count_number = visited_edges[current_edge] - 1
+    visited_edges.update({current_edge: updated_count_number})
 
 # Symbolically executing an instruction
 def sym_exec_ins(params, block, instr, func_call, current_func_name):
