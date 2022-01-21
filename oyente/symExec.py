@@ -337,7 +337,7 @@ def collect_vertices(tokens):
         elif is_new_line is True and tok_type == NUMBER:  # looking for a line number
             last_ins_address = current_ins_address
             try:
-                current_ins_address = int(tok_string)
+                current_ins_address = int(tok_string,16)
             except ValueError:
                 log.critical("ERROR when parsing row %d col %d", srow, scol)
                 quit()
