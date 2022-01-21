@@ -10,6 +10,7 @@ from source_map import SourceMap
 from utils import run_command, run_command_with_err
 from crytic_compile import CryticCompile, InvalidCompilation
 
+
 class InputHelper:
     BYTECODE = 0
     SOLIDITY = 1
@@ -75,7 +76,8 @@ class InputHelper:
                     continue
                 c_source = re.sub(self.root_path, "", c_source)
                 if self.input_type == InputHelper.SOLIDITY:
-                    source_map = SourceMap(contract, self.source, 'solidity', self.root_path, self.remap, self.allow_paths)
+                    source_map = SourceMap(contract, self.source, 'solidity', self.root_path, self.remap,
+                                           self.allow_paths)
                 else:
                     source_map = SourceMap(contract, self.source, 'standard json', self.root_path)
                 disasm_file = self._get_temporary_files(contract)['disasm']
@@ -109,21 +111,22 @@ class InputHelper:
         return self.compiled_contracts
 
     def _extract_bin_obj(self, com: CryticCompile):
-        return [(com.contracts_filenames[name].absolute + ':' + name, com.bytecode_runtime(name)) for name in com.contracts_names if com.bytecode_runtime(name)]
+        return [(com.contracts_filenames[name].absolute + ':' + name, com.bytecode_runtime(name)) for name in
+                com.contracts_names if com.bytecode_runtime(name)]
 
     def _compile_solidity(self):
         try:
             options = []
             if self.allow_paths:
                 options.append(F"--allow-paths {self.allow_paths}")
-                
+
             com = CryticCompile(self.source, solc_remaps=self.remap, solc_args=' '.join(options))
             contracts = self._extract_bin_obj(com)
 
             libs = com.contracts_names.difference(com.contracts_names_without_libraries)
             if libs:
                 return self._link_libraries(self.source, libs)
-            
+
             return contracts
         except InvalidCompilation as err:
             if not self.compilation_err:
@@ -137,7 +140,6 @@ class InputHelper:
                 if global_params.WEB:
                     six.print_({"error": err})
             exit(1)
-
 
     def _compile_standard_json(self):
         FNULL = open(os.devnull, 'w')
@@ -171,7 +173,7 @@ class InputHelper:
     def _link_libraries(self, filename, libs):
         options = []
         for idx, lib in enumerate(libs):
-            lib_address = "0x" + hex(idx+1)[2:].zfill(40)
+            lib_address = "0x" + hex(idx + 1)[2:].zfill(40)
             options.append("--libraries %s:%s" % (lib, lib_address))
         if self.allow_paths:
             options.append(F"--allow-paths {self.allow_paths}")

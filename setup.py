@@ -36,6 +36,8 @@ setup(
         'requests',
         'web3',
         'z3-solver',
-        'crytic-compile',
+        'crytic-compile==0.1.8',
+        'eth-utils==1.9.5',
+        'eth-rlp==0.2.1'
     ]
 )
