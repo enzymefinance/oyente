@@ -204,7 +204,7 @@ def change_format():
             line = line.replace(':', '')
             lineParts = line.split(' ')
             try:  # removing initial zeroes
-                lineParts[0] = str(int(lineParts[0]))
+                lineParts[0] = str(hex(int(lineParts[0], 16)))
 
             except:
                 lineParts[0] = lineParts[0]

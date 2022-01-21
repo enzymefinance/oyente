@@ -208,7 +208,7 @@ class InputHelper:
         disasm_out = ""
         try:
             disasm_p = subprocess.Popen(
-                ["/home/yagol/evm", "disasm", evm_file], stdout=subprocess.PIPE)
+                ["evm", "disasm", evm_file], stdout=subprocess.PIPE)
             disasm_out = disasm_p.communicate()[0].decode('utf-8', 'strict')
         except:
             logging.critical("Disassembly failed.")
